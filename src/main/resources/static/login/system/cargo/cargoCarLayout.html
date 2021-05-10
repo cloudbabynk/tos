@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+
+
+		<div th:id="CarCargoDocToolBar15081233020012+${radi}">
+			<div><span> 
+				 <a class="easyui-linkbutton" th:id='chooseShip+${radi}'  plain="false">选船</a> 
+				  船名：<input th:id="cShipNam+${radi}" name="cShipNam" placeholder="请输入船名" type="text" data-options="required:false" style="width:100px"/>
+				 航次：<input th:id="ivoyage+${radi}" name="ivoyage" placeholder="请输入航次"  type="text" data-options="required:false" style="width: 100px"/>
+				 <a	class="easyui-linkbutton" th:id='upload+${radi}' iconCls="icon-add" plain="false">上传excel</a> 
+				 <a class="easyui-linkbutton" th:id='syncYard+${radi}' iconCls="icon-add" plain="false">库场同步</a> 
+				  <a class="easyui-linkbutton" th:id='export+${radi}' iconCls="icon-add" plain="false">导出excle</a> 
+			</span></div>
+
+			
+				 
+			<!-- 工具栏 结束 -->		
+		</div>
+
+
+			<!-- Datagrid -->
+			<table th:id="CarCargoDocDatagrid1508123320012+${radi}" style="height: 100%;width:100%"></table>
+
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(
+            function() {
+	    	    // 上传。
+	    	    $("#upload[(${radi})]").on("click", function() {
+	    	    	HdUtils.fileCommonupload({
+							url:"webresources/login/cargo/FileUpload/?1=1",
+							callback:upLoadFileCallback,
+	    	       			mutiple : false,
+    	            		isReadOnly : false
+	    	        });
+	    	    });
+	    	    $("#export[(${radi})]").on("click", function() {
+
+    	    	    var exportFileName=selShip.cShipNam+"发车图-" + new Date().format("yyyyMMddhhmmss");
+    	    		var datas={};
+    	    		datas.gradeData=gradeData;
+    	    	    datas.exportFileName=exportFileName;
+    	    	    
+    	    	    var xhr = new XMLHttpRequest();
+    	            xhr.open('post', '/webresources/login/cargo/FileUpload/exportPortCatPic', true);
+    	            xhr.responseType = 'blob';
+    	            xhr.setRequestHeader('Content-Type', 'application/json;charset=utf-8');
+    	            xhr.onload = function () {
+    	                if (this.status == 200) {
+    	                    var blob = this.response;
+    	                    var a = document.createElement('a');
+    	                    var url = window.URL.createObjectURL(blob);
+    	                    a.href = url;
+    	                    //设置文件名称
+    	                    a.download = exportFileName+'.xls';
+    	                    a.click();
+    	                }
+    	            }
+    	            xhr.send( $.toJSON(datas));
+
+	    	    });
+	    	    
+	    	    
+	    	    
+	    	    //Excel 数据
+	    	    var gradeData;
+	    	    //选中船数据 
+	    	    var selShip;
+	    	    function upLoadFileCallback(data){
+
+	    	    	HdUtils.fileCommonupload.close();	
+	    	    	//缓存数据
+	    	    	gradeData=data.response.data;
+	    	    	//加载表格
+	    	    	loadGrad(gradeData);
+	    	    	
+	            }
+	    	    
+	    	    //选船
+	    	    $("#chooseShip[(${radi})]").on("click", function() {
+	    	    	HdUtils.selShip(callback);
+	    	    });
+	    	    
+	    	    function callback(data){
+	            	$("#cShipNam[(${radi})]").val(data.cShipNam);
+	            	$("#ivoyage[(${radi})]").val(data.ivoyage);
+	            	selShip = data;
+	            }
+	    	    
+	    	    $("#syncYard[(${radi})]").on("click", function() {
+	    	    	if(selShip&&gradeData){
+	    	    		var datas={};
+	    	    		datas.gradeData=gradeData;
+	    	    	    datas.shipNo=selShip.shipNo;
+	    	    	    
+	    	    	    $.ajax({   	
+	    	    	    	url: "/webresources/login/cargo/FileUpload/syncPortCatPic",
+	    	    	        contentType:"application/json",
+	    	    	        type: "POST",
+	    	    	        data: $.toJSON(datas),
+	    	    	        dataType: 'json',
+	    	    	        success: function (data) {
+	    	    	        	HdUtils.messager.bottomRight(data.message);
+	    	    	        	gradeData=data.data;
+	    	    	        	//加载表格
+	    		    	    	loadGrad(data.data);
+	    	    	        },
+	    	    	        error: function (data) {
+	    	    	        	console.log(data);
+	    	    	        }
+	    	    	    });
+	    	    	}else{
+	    	    		$.messager.alert("提示","请先选船，并导入excle！");
+	    	    	}
+	    	    });
+	    	    
+	    	    function loadGrad(data){
+	    	    	var colums=data.column;
+	    	    	var columntielts=data.columntielts;
+	    	    	
+	    	    	var columsData=[];
+	    	    	for(var i=0;i<colums.length;i++){
+	    	    		var col={};
+	    	    		col.field=colums[i];
+	    	    		col.title=columntielts[i];
+	    	    		col.align="left";
+	    	    		col.halign="center";
+	    	    		columsData.push(col);
+	    	    	}
+	    	    	var dataInfo=data.row;
+	    	    	var mergesLst=data.mergesLst;
+    	    		$("#CarCargoDocDatagrid1508123320012[(${radi})]").datagrid({
+    		                method : "post",
+    		                pagination : false,
+    		                singleSelect : true,
+    		                selectOnCheck : false,
+    		                checkOnSelect : false,
+    		                rownumbers : true,
+    		                toolbar : "#CarCargoDocToolBar15081233020012[(${radi})]",
+    		                fixed : true,
+    		                fitColumns : false,
+    		                columns : [columsData],
+    		                onLoadSuccess:function(data){
+    		                	for(var i=0; i<mergesLst.length; i++){
+    		                		$("#CarCargoDocDatagrid1508123320012[(${radi})]").datagrid('mergeCells',{
+    		        					index: mergesLst[i].index,
+    		        					field: "联系方式",
+    		        					rowspan: mergesLst[i].rowspan
+    		        				});
+    		        			}
+    		                }
+    		    	 });
+    	    		$("#CarCargoDocDatagrid1508123320012[(${radi})]").datagrid('loadData', data.row);
+    	    		$("#CarCargoDocDatagrid1508123320012[(${radi})]").datagrid('resize');
+    	    		
+	    	    }
+	    	    
+	    	    //查询
+	            function query() {
+	    		    var onlinquery = new HdQuery();
+	    		    onlinquery.add("type", type);
+	    		    return onlinquery.build();
+	    	    }
+	            $("#CarCargoDocDatagrid1508123320012[(${radi})]").datagrid({
+	                striped : true,
+	                queryParams : query(),
+	                method : "post",
+	                pagination : true,
+	                singleSelect : true,
+	                selectOnCheck : true,
+	                checkOnSelect : true,
+	                rownumbers : true,
+	                pageSize : 20,
+	                toolbar : "#CarCargoDocToolBar15081233020012" + /*[[${radi}]]*/'',
+	                fit : true,
+	                fitColumns : false
+
+	            });
+            });
+    /*]]>*/
+</script>
+</html>

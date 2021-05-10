@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="CAreaToolBar1508123301002+${radi}" style="float: left">
+	<div>
+		<!-- 查询 -->
+	</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="CAreaDatagrid1508123301002+${radi}" style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#CAreaDatagrid1508123301002[(${radi})]");
+	    HdUtils.dialog.setValue({
+		    'radiccyrow' : radi
+	    });
+	    var cyAreaNo = HdUtils.dialog.getValue('cyAreaNo');
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    if(cyAreaNo)
+		    onlinquery.add("cyAreaNo", cyAreaNo);
+		    return onlinquery.build();
+	    }
+
+	    $("#CAreaDatagrid1508123301002[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/base/CCyRow/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#CAreaToolBar1508123301002" + /*[[${radi}]]*/'',
+	        fit : true,
+	        onSelect(rowIndex,rowData){
+	           	HdUtils.dialog.setValue({ 'cyAreaNo' : rowData.cyAreaNo  });
+	           	HdUtils.dialog.setValue({ 'cyRowNo' : rowData.cyRowNo });
+	           	var cyRowNo = rowData.cyRowNo;
+	           	function queryCcybay(){
+
+                  	var builder = new HdQuery();
+                    builder.add("cyAreaNo", HdUtils.dialog.getValue('cyAreaNo'));
+                    builder.add("cyRowNo", cyRowNo);
+                    return builder.build();
+                };
+                var radiccybay = HdUtils.dialog.getValue('radiccybay');
+                $('#CAreaDatagrid1508123301002'+radiccybay).datagrid({
+                    	 queryParams : queryCcybay(),
+                   });
+		        },
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+
+	        }, {
+
+	            field : "cyRowNo",
+	            title : '车道号',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "maxBayNum",
+	            title : "最大车数",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+
+	        ] ]
+	    });
+	    $("#CAreaDatagrid1508123301002" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

@@ -1,0 +1,123 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+</head>
+<body>
+	<div>
+		<audio controls autoplay style="display: none"></audio>
+
+		<input type="button" value="录音" id="vocRecAndReg" /> <input
+			type="button" id="voRecCopy" value="复制" data-clipboard-text="--未录音--" />
+		<div id="vocRecResult"></div>
+	</div>
+	<script type="text/javascript" th:src="@{/js/jquery.min.js}"></script>
+	<script type="text/javascript" th:src="@{/login/com/js/HZRecorder.js}"></script>
+	<script type="text/javascript"
+		th:src="@{/login/com/js/clipboard.min.js}"></script>
+
+
+	<script>
+		var recorder;
+        var audio = document.querySelector('audio');
+        var recodeStatus = 1;//1是开始录音2是结束状态
+        var mytimeOut = null;//定时任务
+        var parentMethod = '[(${parentMethod})]';
+        $(function() {
+	        if (parentMethod) {
+		        $('#vocRecAndReg').click();
+	        }
+        });
+        $('#vocRecAndReg').click(function() {
+	        if (recodeStatus == 1) {
+		        recodeStatus = 2;
+		        $('#vocRecAndReg').val("停止录音");
+		        $('#vocRecResult').html("正在录音...");
+		        startRecording();
+
+	        } else {//结束录音
+		        $('#vocRecAndReg').val("录音");
+
+		        stopRecording();
+	        }
+        });
+
+        function startRecording() {
+	        HZRecorder.get(function(rec) {
+		        recorder = rec;
+		        recorder.start();
+		        mytimeOut = setTimeout(function() {
+			        uploadAudio(false, true)
+		        }, 1000);
+	        });
+        }
+
+        function stopRecording() {//停止录音
+	        recodeStatus = 1;
+	        if (mytimeOut) {
+		        clearTimeout(mytimeOut);
+		        mytimeOut = null;
+	        }
+	        if (recorder != null) {
+		        recorder.stop();
+		        recorder = null;
+	        }
+
+	        //uploadAudio(true, false);
+
+	        //recorder = null;
+
+        }
+
+        function playRecording() {
+	        recorder.play(audio);
+        }
+        function uploadAudio(doClose, repeate) {//doClose是否关闭录音,repeate是否同时上传
+	        recorder.upload("./upload", function(state, e) {
+		        if (doClose) {
+			        stopRecording();
+		        }
+		        switch (state) {
+		        case 'uploading':
+			        //var percentComplete = Math.round(e.loaded * 100 / e.total) + '%';
+			        break;
+		        case 'ok':
+			        var genJson = eval('(' + e.target.responseText + ')');
+			        if (genJson.message) {
+				        $("#voRecCopy").attr("data-clipboard-text", genJson.message + "");
+				        $('#vocRecResult').html(genJson.message);
+				        if (parentMethod) {
+					        eval('window.parent.' + parentMethod + '("' + genJson.message + '")');
+				        }
+			        }
+
+			        if (recodeStatus == 2) {
+				        mytimeOut = setTimeout(function() {
+					        uploadAudio(false, true)
+				        }, 100);
+			        }
+			        break;
+		        case 'error':
+
+			        break;
+		        case 'cancel':
+
+			        break;
+		        }
+	        });
+        }
+        var clipboard = new Clipboard('#voRecCopy');
+        clipboard.on('success', function(e) {
+	        e.clearSelection();
+	        //复制成功
+        });
+        clipboard.on('error', function(e) {
+	        //复制失败
+        });
+	</script>
+
+</body>
+</html>

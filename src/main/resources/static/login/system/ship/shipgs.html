@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- <div th:id="DayWorkClassToolBar1508123307299+${radi}" -->
+<!-- 	style="float: left"> -->
+<!-- 	<div> -->
+<!-- 		<span> -->
+<!-- 		 <a class="easyui-linkbutton" th:id='importGs+${radi}'>联合导入</a> -->
+<!-- 		</span> -->
+<!-- 	</div> -->
+<!-- </div> -->
+<!-- 工具栏 -->
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="DayWorkClassDatagrid1508123307299+${radi}"
+	style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var jtradi = HdUtils.dialog.getValue("radi");
+	    var dg = $("#DayWorkClassDatagrid1508123307299[(${radi})]");
+	    // buttons
+	    
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    onlinquery.add("shipStat","E")
+		    return onlinquery.build();
+	    }
+
+	    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/ship/Ship/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#DayWorkClassToolBar1508123307299" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        onSelect(rowIndex,rowData){
+	           	 HdUtils.dialog.setValue({
+	           		 'shipNo' : rowData.shipNo
+	        	    });
+	           	$('#shipdynamic299').layout('panel', 'center').panel('refresh');
+		    },
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+	        }, {
+	            field : "cShipNam",
+	            title : '中文船名',
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        }, {
+	            field : "eShipNam",
+	            title : '英文船名',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+	            field : "shipLongNum",
+	            title : '船长',
+	            multiSort : true,
+	            halign : "center",
+	            width : 80,
+	            sortable : false
+	        },{
+	            field : "shipGrossWgt",
+	            title : '总吨',
+	            multiSort : true,
+	            halign : "center",
+	            width : 80,
+	            sortable : false
+	        }, {
+	            field : "ivoyage",
+	            title : '进口航次',
+	            multiSort : true,
+	            width : 100,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+	            field : "evoyage",
+	            title : '出口航次',
+	            multiSort : true,
+	            width : 100,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "iCargoNam",
+	            title : '进口货类',
+	            multiSort : true,
+	            width : 100,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "eCargoNam",
+	            title : "出口货类",
+	            width : 100,
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "groupShipNo",
+	            title : "集团船舶编号",
+	            width : 120,
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+
+	        ] ]
+	    });
+	    $("#DayWorkClassDatagrid1508123307299" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

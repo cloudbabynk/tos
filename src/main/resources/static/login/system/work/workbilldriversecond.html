@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="ContractIeDocToolBar15081233020012+${radi}"
+	style="float: left;">
+	<!-- 查询 -->
+	<div th:id="sglh+${radi}" style="float: left;">
+<!-- 		<shiro:hasPermission -->
+<!-- 			name="webresources:login:WorkBillDriverSecond:save"> -->
+<!-- 			<a class="easyui-linkbutton" th:id='save+${radi}'>保存</a> -->
+<!-- 		</shiro:hasPermission> -->
+	</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="ContractIeDocDatagrid1508123320012+${radi}"
+	style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(
+            function() {
+	            var radi = /*[[${radi}]]*/'';
+	            var dg = $("#ContractIeDocDatagrid1508123320012[(${radi})]");
+	            var workbillNo = HdUtils.dialog.getValue('workbillNo');
+	            var classCod = HdUtils.dialog.getValue('classCod');
+	            HdUtils.dialog.setValue({
+		            'radiworkbilldriversecond' : radi
+	            });
+	            // 增加。
+	            $("#add[(${radi})]").on("click", function() {
+		            dg.datagrid("hdAdd");
+	            });
+	            // 编辑。
+	            $("#edit[(${radi})]").on("click", function() {
+		            var data = dg.datagrid("getSelected");
+		            if (data == null || data == undefined) {
+			            HdUtils.messager.info('请选择一条数据进行编辑！');
+			            return;
+		            }
+		            dg.datagrid("hdEdit");
+	            });
+	            // 删除。
+	            $("#delete[(${radi})]").on(
+	                    "click",
+	                    function() {
+		                    var selRow = dg.datagrid("getChecked");
+		                    if (selRow.length == 0) {
+			                    HdUtils.messager.info('请至少选择一条数据！');
+			                    return false;
+		                    }
+		                    if (!classCod) {
+			                    HdUtils.messager.info('请先选择班组！');
+			                    return false;
+		                    }
+		                    var ids = '';
+		                    $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+			                    if (r) {
+				                    for (var i = 0; i < selRow.length; i++) {
+					                    ids += selRow[i].driverCod + ",";
+				                    }
+				                    HdUtils.ajax.post({
+				                        url : "../webresources/login/work/WorkBillDriverClass/removeAll?driverCods=" + ids + "&workbillNo=" + workbillNo
+				                                + "&classCod=" + classCod,
+				                        success : function(data) {
+					                        if (data.code == '-1') {
+						                        HdUtils.messager.info(data.message);
+						                        return false;
+					                        }
+					                        HdUtils.messager.bottomRight(data.message);
+					                        $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("hdReload");
+				                        }
+				                    });
+			                    }
+		                    });
+	                    });
+	            function query() {
+		            var onlinquery = new HdQuery();
+		            onlinquery.add("workbillNo", workbillNo);
+		            onlinquery.add("classCod", classCod);
+		            return onlinquery.build();
+	            }
+	            // 保存。
+	            $("#save[(${radi})]").on("click", function() {
+		            if (!workbillNo) {
+			            return false;
+		            }
+		            if (!classCod) {
+			            return false;
+		            }
+		            dg.datagrid("hdSave", {
+		                url : "../webresources/login/work/WorkBillDriverSecond/save?workbillNo=" + workbillNo + "&classCod=" + classCod,
+		                callback : function() {
+			                dg.datagrid("hdReload");
+		                }
+		            });
+	            });
+	            // 刷新。
+	            $("#fresh[(${radi})]").on("click", function() {
+		            dg.datagrid("hdReload");
+	            });
+	            $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid({
+	                striped : true,
+	                url : "../webresources/login/work/WorkBillDriverSecond/findDriver",
+	                queryParams : query(),
+	                method : "post",
+	                pagination : true,
+	                singleSelect : false,
+	                selectOnCheck : false,
+	                checkOnSelect : true,
+	                rownumbers : true,
+	                pageSize : 20,
+	                toolbar : "#ContractIeDocToolBar15081233020012" + /*[[${radi}]]*/'',
+	                fit : true,
+	                fitColumns : false,
+	                onLoadSuccess : function(data) {
+		                //判断是否选中
+		                for (var i = 0; i < data.rows.length; i++) {
+			                var oneRow = (data.rows)[i];
+			                if (oneRow.checked) {
+			                	$(this).datagrid('checkRow', i);
+				                
+			                }
+		                }
+	                },
+	                onCheck : function(index, rowData) {
+	                	if(rowData.checked){
+	                		return;
+	                	}else{
+	                		if (!workbillNo) {
+					            return false;
+				            }
+				            if (!classCod) {
+					            return false;
+				            }
+				            var WorkBillDriverSecond = new Object();
+				            WorkBillDriverSecond.workbillNo = workbillNo;
+				            WorkBillDriverSecond.classCod = classCod;
+				            WorkBillDriverSecond.driverCod = rowData.empNo;
+				            HdUtils.ajax.post({
+		                        url : "../webresources/login/work/WorkBillDriverSecond/saveone",
+		                        data : WorkBillDriverSecond,
+		                        success : function(data) {
+			                        if (data.code == '-1') {
+				                        HdUtils.messager.info(data.message);
+				                        return false;
+			                        }
+		                        }
+		                    })
+	                	}
+	                	
+	    	        },
+	    	        onUncheck : function(index, rowData) {
+	    	        	if (!workbillNo) {
+				            return false;
+			            }
+			            if (!classCod) {
+				            return false;
+			            }
+			            var WorkBillDriverSecond = new Object();
+			            WorkBillDriverSecond.workbillNo = workbillNo;
+			            WorkBillDriverSecond.classCod = classCod;
+			            WorkBillDriverSecond.driverCod = rowData.empNo;
+			            HdUtils.ajax.post({
+	                        url : "../webresources/login/work/WorkBillDriverSecond/removeone",
+	                        data : WorkBillDriverSecond,
+	                        success : function(data) {
+		                        if (data.code == '-1') {
+			                        HdUtils.messager.info(data.message);
+			                        return false;
+		                        }
+	                        }
+	                    })
+	    	        },
+	                
+	                columns : [ [ {
+	                    field : "ck",
+	                    checkbox : true,
+	                    sortable : false,
+	                }, {
+	                    field : "empNam",
+	                    title : "机械司机",
+	                    multiSort : true,
+	                    align : "center",
+	                    width : 100,
+	                    editor : {
+	                        type : "validatebox",
+	                        options : {
+		                        required : false
+	                        }
+	                    },
+	                    sortable : false
+	                } ] ]
+	            });
+	            $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid("hdGetColumnNames");
+            });
+    /*]]>*/
+</script>
+</html>

@@ -1,0 +1,149 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#CShipLineForm1507959148901");
+	    var shipLineCod = HdUtils.dialog.getValue("shipLineCod");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    if (shipLineCod) {
+	    	$("#shipLineCod").attr("readonly",true);
+	    } else {
+	    	$("#shipLineCod").attr("readonly",false);
+	    }
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/base/CShipLine/findone?shipLineCod=" + shipLineCod,
+	        success : function(data) {
+		        $("#CShipLineForm1507959148901").form("loadData", data);
+	        }
+	    })
+	    $('#lineId').combobox(HdUtils.code.scode({
+		    fieldCod : 'LINE_ID'
+	    }, {
+		    required : false
+	    }));
+	    $('#tradeId').combobox(HdUtils.code.scode({
+		    fieldCod : 'TRADE_ID'
+	    }, {
+		    required : false
+	    }));
+	    $('#mainStem').combobox(HdUtils.code.scode({
+		    fieldCod : 'MAIN_STEM'
+	    }, {
+		    required : false
+	    }));
+	    $('#oceanId').combobox(HdUtils.code.scode({
+		    fieldCod : 'OCEAN_ID'
+	    }, {
+		    required : false
+	    }));
+
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+		    var isValss = $("#CShipLineForm1507959148901").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#CShipLineForm1507959148901").serializeObject();
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/base/CShipLine/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#CShipLineDatagrid1508123309001" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+    });
+    function findCod() {
+	    var shipLineCodValue = $("#shipLineCod").val();
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/base/CShipLine/findCShipLine?shipLineCod=" + shipLineCodValue,
+	        success : function(data) {
+		        if (data.code == "-1") {
+			        $('#shipLineCod').val("");
+			        HdUtils.messager.bottomRight(data.message);
+			        $('#shipLineCod').focus();
+			        return false;
+		        }
+	        }
+	    });
+    }
+</script>
+<form id="CShipLineForm1507959148901">
+	<table id="CShipLineTable1507959148901" style="height: 75%; width: 80%"
+		class="tableform">
+		<tr>
+			<th>航线代码：</th>
+			<td><input id="shipLineCod" name="shipLineCod"
+				onchange="findCod();" data-options="required:true"
+				class="easyui-validatebox" maxlength="10" /></td>
+			<th>航线名称：</th>
+			<td><input id="shipLineNam" name="shipLineNam"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="10" /></td>
+		</tr>
+		<tr>
+			<th>航线中文名称：</th>
+			<td><input id="cshipLineNam" name="cshipLineNam"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="35" /></td>
+			<th>航线英文名称：</th>
+			<td><input id="eshipLineNam" name="eshipLineNam"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="35" /></td>
+
+		</tr>
+		<tr>
+			<th>航线类别：</th>
+			<td><input id="lineId" name="lineId"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="35" /></td>
+			<th>内外贸：</th>
+			<td><input id="tradeId" name="tradeId"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="35" /></td>
+
+		</tr>
+		<tr>
+			<th>干支线标志：</th>
+			<td><input id="mainStem" name="mainStem"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="35" /></td>
+			<th>近远洋标志：</th>
+			<td><input id="oceanId" name="oceanId"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="35" /></td>
+
+		</tr>
+
+	</table>
+</form>

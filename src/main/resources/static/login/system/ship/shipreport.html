@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+		<!-- 工具栏 -->
+		<div th:id="DayWorkClassToolBar1508123307299+${radi}"
+			style="float: left; position: relative;">
+			<div>
+				<!-- 查询 -->
+				<a
+					class="easyui-linkbutton" th:id="query+${radi}">查询</a>
+				<shiro:hasPermission name="webresources:login:ShipReport:add">
+					<a class="easyui-linkbutton" th:id='add+${radi}' iconCls="icon-add"
+						plain="false">新增</a>
+				</shiro:hasPermission>
+				<shiro:hasPermission name="webresources:login:ShipReport:update">
+					<a class="easyui-linkbutton" th:id='edit+${radi}'>编辑</a>
+				</shiro:hasPermission>
+				<shiro:hasPermission name="webresources:login:ShipReport:delete">
+					<a class="easyui-linkbutton" th:id='delete+${radi}'>删除</a>
+				</shiro:hasPermission>
+				<shiro:hasPermission name="webresources:login:ShipReport:save">
+					<a class="easyui-linkbutton" th:id='save+${radi}'>保存</a>
+				</shiro:hasPermission>
+				<a class="easyui-linkbutton" th:id='fresh+${radi}'>刷新</a>
+				<shiro:hasPermission name="webresources:login:ShipReport:upload">
+					<a class="easyui-linkbutton" th:id='upload+${radi}'>上传excel</a>
+				</shiro:hasPermission>
+				<shiro:hasPermission name="webresources:login:ShipReport:uploadAll">
+					<a class="easyui-linkbutton" th:id="uploadAll+${radi}">上报集团</a>
+				</shiro:hasPermission>
+			</div>
+		</div>
+		<table th:id="DayWorkClassDatagrid1508123307299+${radi}"
+			style="height: 100%"></table>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	$(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#DayWorkClassDatagrid1508123307299[(${radi})]");
+
+	    // buttons
+	    // 增加。
+	    $("#add[(${radi})]").on("click", function() {
+		    dg.datagrid("hdAdd");
+	    });
+	    // 上传。
+	    $("#upload[(${radi})]").on("click", function() {
+	    	HdUtils.lyupload({
+	    		mutiple : false,
+	            isReadOnly : false
+	        });
+	    });
+	    // 编辑。
+	    $("#edit[(${radi})]").on("click", function() {
+		    var data = dg.datagrid("getSelected");
+		    if (data == null || data == undefined) {
+			    HdUtils.messager.info('请选择一条数据进行编辑！');
+			    return;
+		    }
+		    dg.datagrid("hdEdit");
+	    });
+	    // 上报集团
+	    $("#uploadAll[(${radi})]").on("click", function() {
+	    	var selRow = $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("getChecked");
+            if (selRow.length == 0) {
+	            HdUtils.messager.info('请至少选择一条数据！');
+	            return false;
+            }
+		    var ids = '';
+		    $.messager.confirm("发送", "确认上报集团吗?", function(r) {
+			    if (r) {
+			    	for (var i = 0; i < selRow.length; i++) {
+			            ids += selRow[i].shipRptId + ",";
+		            }
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/ship/ShipReport/uploadAll?shipRptIds=" + ids,
+				        success : function(data) {
+					        HdUtils.messager.bottomRight(data.message);
+					        $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+						        queryParams : query(),
+					        })
+				        }
+				    });
+			    }
+		    });
+	    });
+	    // 保存。
+	    $("#save[(${radi})]").on("click", function() {
+		    dg.datagrid("hdSave", {
+			    url : "../webresources/login/ship/ShipReport/save"
+		    });
+	    });
+	    // 删除。
+	    $("#delete[(${radi})]").on("click", function() {
+		    var selRow = $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("getChecked");
+		    if (selRow.length == 0) {
+			    HdUtils.messager.info('请至少选择一条数据！');
+			    return false;
+		    }
+		    var ids = '';
+		    $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+			    if (r) {
+				    for (var i = 0; i < selRow.length; i++) {
+					    ids += selRow[i].shipRptId + ",";
+				    }
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/ship/ShipReport/removeAll?shipRptIds=" + ids,
+				        success : function(data) {
+					        if (data.code == '-1') {
+						        HdUtils.messager.info(data.message);
+						        return false;
+					        }
+					        HdUtils.messager.bottomRight(data.message);
+					        $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("hdReload");
+				        }
+				    });
+			    }
+		    });
+	    });
+	    // 刷新。
+	    $("#fresh[(${radi})]").on("click", function() {
+		    dg.datagrid("hdReload");
+	    });
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+		    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    return onlinquery.build();
+	    }
+
+	    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/ship/ShipReport/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : false,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#DayWorkClassToolBar1508123307299" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+
+	        },{
+	            field : "tradeId",
+	            title : '内外贸',
+	            multiSort : true,
+	            width : 100,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+	            field : "iEId",
+	            title : '进出口',
+	            multiSort : true,
+	            width : 100,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "shipNam",
+	            title : '船名',
+	            multiSort : true,
+	            width : 100,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "shipLength",
+	            title : '船长',
+	            multiSort : true,
+	            width : 100,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+	            field : "cargoNam",
+	            title : '货名',
+	            multiSort : true,
+	            width : 100,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "cargoWgt",
+	            title : '装卸货重量',
+	            width : 100,
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+
+	            field : "etaTim",
+	            title : '预计到港时间',
+	            multiSort : true,
+	            width : 100,
+	            align : "center",
+	            formatter : $.hd.ezui.formatter.date,
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+	            field : "shAgentCod",
+	            title : '货主',
+	            width : 100,
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+	            field : "tenDays",
+	            title : '旬度',
+	            width : 100,
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },
+
+	        ] ]
+	    });
+	    $("#DayWorkClassDatagrid1508123307299" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+</script>
+</html>

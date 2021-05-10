@@ -1,0 +1,198 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+		var formObject = $("#ShipForm1507959148645");
+        var dataObject = HdUtils.dialog.getValue("data");
+        var refresh = HdUtils.dialog.getValue("refresh");
+        var queryPlan = HdUtils.dialog.getValue("queryPlan");
+        HdUtils.dialog.setValue({saveHandler: saveHandler});
+	    //停靠方式
+	    $('#planBerthingMode').combobox(HdUtils.code.scode({
+		    fieldCod : 'BERTH_WAY'
+	    }, {
+		    required : false
+	    }));
+	    //开始揽桩
+	    $('#planBeginBollardCode').combobox({
+	        url : '../webresources/login/ship/CShipData/getGsCCableDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        onSelect : function(rec) {
+	        	HdUtils.ajax.post({
+	    	        url : "../webresources/login/base/CCable/findberth?cableCod="+ rec.value,
+	    	        success : function(data) {
+	    		        if (!data) {
+	    			        return false;
+	    		        }
+	    		        //页面刷新有些值不变
+	    		        $('#planBerthCode').combobox('setValue', data.berthCod);
+	    	        }
+	    	    });
+		        return rec.value;
+	        }
+	    });
+	  //泊位
+	    $('#planBerthCode').combobox({
+	        url : '../webresources/login/ship/CShipData/getGsCBerthDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    //结束揽桩
+	    $('#planEndBollardCode').combobox({
+	        url : '../webresources/login/ship/CShipData/getGsCCableDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        onSelect : function(rec) {
+// 	        	HdUtils.ajax.post({
+// 	    	        url : "../webresources/login/base/CCable/findone?cableCod="+ rec.value,
+// 	    	        success : function(data) {
+// 	    		        if (!data) {
+// 	    			        return false;
+// 	    		        }
+// 	    		        //页面刷新有些值不变
+// 	    		        endCableDistance = data.distance;
+// 	    		        if(begCableDistance){
+// 	    		        	$('#cableLong').val(endCableDistance-begCableDistance);
+// 	    		        }
+// 	    	        }
+// 	    	    });
+		        return rec.value;
+	        }
+	    });
+	    
+	    
+	    function saveHandler() {
+// 		    var isValss = $("#ShipForm1507959148645").form('validate');
+// 		    if (!isValss) {
+// 			    return false;
+// 		    }
+// 		    var formdata = $("#ShipForm1507959148645").serializeObject();
+// 		    dataObject.etdArrvTim = formdata.etdArrvTim;
+// 		    dataObject.etdLeavTim = formdata.etdLeavTim;
+// 		    dataObject.begCableNo = formdata.begCableNo;
+// 		    dataObject.endCableNo = formdata.endCableNo;
+// 		    dataObject.berthWay = formdata.berthWay;
+// 		    dataObject.berthCod = formdata.berthCod;
+// 		    dataObject.remarks = formdata.remarks;
+// 		    HdUtils.ajax.post({
+// 		        url : "../webresources/login/ship/Ship/saveone",
+// 		        data : ship,
+// 		        success : function(data) {
+// 			        if (data.code == '-1') {
+// 				        HdUtils.messager.info(data.message);
+// 				        return false;
+// 			        }
+// 			        HdUtils.dialog.close();
+// 			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+// 			        showberths(startdate, enddate, width, height, daySum);
+
+// 		        }
+// 		    })
+
+	    	if (!formObject.form("validate")) {
+                return;
+            }
+            var formdata = formObject.serializeObject();
+            //将修改后的值data合并到原始data
+            dataObject.etb = formdata.etb;
+		    dataObject.etu = formdata.etu;
+		    dataObject.planBeginBollardCode = formdata.planBeginBollardCode;
+		    dataObject.planEndBollardCode = formdata.planEndBollardCode;
+		    dataObject.planBerthingMode = formdata.planBerthingMode;
+		    dataObject.planBerthCode = formdata.planBerthCode;
+		    dataObject.remarks = formdata.remarks;
+            HdUtils.ajax.post({
+                url: "../webresources/login/ship/Ship/saveBerth",
+                data: dataObject,
+                success: function (data) {
+                    if (data.code === '-1') {
+                        HdUtils.messager.info(data.message);
+                        return false;
+                    }
+                    HdUtils.dialog.close();
+                    HdUtils.messager.bottomRight('保存成功', '保存操作');
+                    refresh(dataObject);
+                    if (queryPlan) {
+                        queryPlan(1);
+                    }
+                }
+            });
+	    }
+
+	     //构建页面组件后,赋值form
+        formObject.form("loadData", dataObject);
+    });
+    function getCheck() {
+	    var toPortTim = $("#toPortTim").datebox('getValue');
+	    var leavPortTim = $("#leavPortTim").datebox('getValue');
+	    if (!toPortTim) {
+		    HdUtils.messager.info("请先完善靠泊时间！");
+		    $("#leavPortTim").datebox("setValue", '');
+		    return false;
+	    } else {
+		    if (toPortTim > leavPortTim) {
+			    HdUtils.messager.info("离港时间不得早于靠泊时间！");
+			    $("#leavPortTim").datebox("setValue", '');
+			    return false;
+		    }
+	    }
+
+    }
+</script>
+<form id="ShipForm1507959148645">
+	<table id="ShipTable1507959148645" style="height: 75%; width: 80%"
+		class="tableform">
+		<tr>
+			<th>预计抵港时间：</th>
+			<td><input id="etb" name="etb"
+				class="easyui-datetimebox" /></td>
+			<th>预计离港时间：</th>
+			<td><input id="etu" name="etu"
+				class="easyui-datetimebox" /></td>
+		</tr>
+		<tr>
+			<th>开始缆桩：</th>
+			<td><input id="planBeginBollardCode" name="planBeginBollardCode" /></td>
+			<th>结束缆桩：</th>
+			<td><input id="planEndBollardCode" name="planEndBollardCode" /></td>
+		</tr>
+		<tr>
+		    <th>泊位：</th>
+			<td><input id="planBerthCode" name="planBerthCode" /></td>
+			<th>停靠方式：</th>
+			<td><input id="planBerthingMode" name="planBerthingMode" /></td>
+		</tr>
+		<tr>
+		    <th>备注：</th>
+			<td colspan="7"><textarea id="remarks" name="remarks"
+					data-options="required:false" rows="2" style="width: 97%"
+					maxlength="255" ></textarea></td>
+		</tr>
+	</table>
+</form>

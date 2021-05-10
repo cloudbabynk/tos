@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+
+<head>
+    <style>
+        .application-button {
+            width: 35px;
+            margin: 0 auto;
+            display: block;
+        }
+
+        .shipNam {
+            text-align: center;
+            line-height: 40px;
+            font-size: 19px;
+            border: 1px solid rgba(162, 147, 147, 0.55);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="easyui-layout" data-options="fit:true">
+        <div class="easyui-layout" data-options="fit:true">
+            <div data-options="region:'west'" style="width:330px;border: 1px solid #000;">
+                <table id="cameraDatagrid20201121"></table>
+            </div>
+
+            <!--按钮-->
+            <div data-options="region:'center'" style="text-align:center">
+                <a class="easyui-linkbutton application-button" id="rightArrow1220" style="margin-top: 170px;"> → </a>
+                <a class="easyui-linkbutton application-button" id="leftArrow1220" style="margin-top: 20px;">
+                    X </a>
+            </div>
+
+            <div data-options="region:'east'" style="width:330px;border: 1px solid #000;">
+                <table id="cGWCameraDatagrid20201121"></table>
+                <div id="matchingShipDiv1220" style="display:none"></div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" inline="javascript">
+        $(document).ready(function () {
+
+            let wbId = HdUtils.dialog.getValue("data").wbId;
+            let onlinquery = new HdQuery();
+            onlinquery.add("wbId", wbId);
+
+            $("#cameraDatagrid20201121").datagrid({
+                striped: true,
+                url: "/webresources/login/base/CGisWbillCamera/cGWCameraDialogDatagrid",
+                queryParams: null,
+                method: "post",
+                pagination: false,
+                singleSelect: true,
+                selectOnCheck: true,
+                checkOnSelect: true,
+                rownumbers: true,
+                fit: true,
+                fitColumns: false,
+                columns: [[
+                    {
+                        field: "cameraNam",
+                        title: '名称',
+                        width: 240,
+                        align: "center",
+                        sortable: false
+                    }
+                ]]
+            })
+
+            $("#cGWCameraDatagrid20201121").datagrid({
+                striped: true,
+                url: "/webresources/login/base/CGisWbillCamera/cGWCameraDialogRightDatagrid",
+                queryParams: onlinquery.build(),
+                method: "post",
+                pagination: false,
+                singleSelect: true,
+                selectOnCheck: true,
+                checkOnSelect: true,
+                rownumbers: true,
+                fit: true,
+                fitColumns: false,
+                columns: [[
+
+                    {
+                        field: "CAMERANAM",
+                        title: '名称',
+                        width: 200,
+                        align: "center",
+                        sortable: false
+                    }, {
+                        field: "SORTNUM",
+                        title: '序号',
+                        width: 60,
+                        editor : {
+                            type : "validatebox",
+                            options : {
+                                required : false
+                            }
+                        },
+                        align: "center",
+                        sortable: false
+                    }
+                ]],
+                onDblClickRow:function(rowIndex, rowData){
+                    $("#cGWCameraDatagrid20201121").datagrid("hdEdit");
+                }
+            })
+            
+
+            //→
+            $("#rightArrow1220").on('click',() => {
+                let cdSelectRow = $("#cameraDatagrid20201121").datagrid("getSelected");
+                if(cdSelectRow){
+                    $("#cGWCameraDatagrid20201121").datagrid('appendRow',{
+                        CAMERANAM:cdSelectRow.cameraNam,
+                        CAMID:cdSelectRow.id,
+                        WBID:wbId
+                    });
+                }
+              
+            })
+
+            //←
+            $("#leftArrow1220").on('click',() => {
+                let cGWCamera = $("#cGWCameraDatagrid20201121").datagrid("getSelected");
+                let rowIndex = $("#cGWCameraDatagrid20201121").datagrid("getRowIndex",cGWCamera);
+                $("#cGWCameraDatagrid20201121").datagrid('deleteRow',rowIndex);
+            })
+
+            HdUtils.dialog.setValue({
+                saveHandler: () => {
+                    $("#cGWCameraDatagrid20201121").datagrid("hdSave", {url: "/webresources/login/base/CGisWbillCamera/saveRightDialog",callback:() => {
+                        HdUtils.dialog.close();
+                        $("#gdWorkBillCamera").datagrid("hdReload");
+                    }});
+                }
+            });
+
+        })
+    </script>
+</body>
+
+</html>

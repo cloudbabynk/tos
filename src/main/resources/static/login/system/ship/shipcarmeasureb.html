@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8" />
+<!-- 工具栏 -->
+<!-- 工具栏 -->
+<div th:id="ShipCarMeasureToolBar+${radi}">
+	<div style="float: left;margin-bottom:5px">
+		<!-- 查询 -->
+		<a class="easyui-linkbutton" th:id="query+${radi}" plain="false">查询</a>
+		<shiro:hasPermission name="webresources:login:ShipCarMeasure:export2">
+			<a class="easyui-linkbutton" iconCls="icon-export" plain="false"
+				th:id="export+${radi}">导出Excel</a>
+		</shiro:hasPermission>
+<!-- 		<shiro:hasPermission name="webresources:login:ShipCarMeasure:report"> -->
+<!-- 			<a class="easyui-linkbutton" iconCls="icon-export" plain="false" -->
+<!-- 				th:id="report+${radi}">报表</a> -->
+<!-- 		</shiro:hasPermission> -->
+		</span>
+	</div>
+</div>
+<!-- Datagrid -->
+<table th:id="ShipCarMeasureDatagrid +${radi}" style="height: 100%"></table>
+<!-- 脚本控制 -->
+<script type="text/javascript">
+	$(document).ready(function() {
+	    var dg = $("#ShipCarMeasureDatagrid[(${radi})]");
+	    var shipNo = HdUtils.dialog.getValue('shipNo');
+	    var iEId = HdUtils.dialog.getValue('iEId');
+	    // buttons
+	    $("#report[(${radi})]").on("click", function() {
+		    HdUtils.dialog.show({
+		        width : 1250,
+		        height : 550,
+		        title : '进出口货物丈量复尺单',
+		        href : "../login/system/ship/shipcarmeasurerep.html",
+		        isSaveHandler : false
+		    });
+	    });
+	    //导出excel
+	    $("#export[(${radi})]").on("click", function() {
+	    	 var rows = $("#ShipCarMeasureDatagrid[(${radi})]").datagrid("getSelections"); //获取选择的所有行 
+	    	 var id='';
+	    	 if (rows.length > 0) {
+	              for (var i = 0; i < rows.length; i++) {
+	            	  id += $("#ShipCarMeasureDatagrid[(${radi})]").datagrid('getRowIndex',rows[i])+1 +",";//获取某行的行号,传选中的行号到后台，根选中的行号进行导出
+		            }
+	          }
+	    	dg.datagrid("hdExportExcel", {
+		        url : "../webresources/login/ship/ShipCarMeasure/exportExcelJk?ids="+id,
+		        exportFileName : "进口复尺单-" + new Date().format("yyyyMMddhhmmss"),
+		    //columnTitles:"船名,航次,进出口,提单号,车名,原尺寸,体积,复尺寸,体积,备注",
+		    //columnNames:"shipNam,voyage,iEIdStr,billNo,carTypStr,oldSize,oldVol,newSize,newVol,remarkTxt"
+		    });
+	    });
+	    // 条件类。
+	    $("#query[(${radi})]").on("click", function() {
+		    $("#ShipCarMeasureDatagrid[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    onlinquery.add("shipNo", shipNo);
+		    //onlinquery.add("iEId", iEId);
+		    onlinquery.add("iEId", "I");//批量只显示进口的数据
+		    return onlinquery.build();
+	    }
+	    $("#ShipCarMeasureDatagrid[(${radi})]").hddatagrid({
+	        striped : true,
+	        url : "../webresources/login/ship/ShipCarMeasure/findFcd",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : false,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#ShipCarMeasureToolBar[(${radi})]",
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : 'ck',
+	            checkbox : true
+	        }, {
+
+	            field : "ID",
+	            title : '',
+	            multiSort : true,
+	            halign : "center",
+	            sortable : true,
+	            hidden : true
+	        }, {
+
+	            field : "SHIP_NO",
+	            title : "",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            hidden : true,
+	            sortable : true
+	        }, {
+
+	            field : "SHIP_NAM",
+	            title : "船名",
+	            width : 80,
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : true
+	        }, {
+
+	            field : "VOYAGE",
+	            title : "航次",
+	            width : 80,
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : true
+	        }, {
+	            field : "I_E_ID",
+	            title : "进出口",
+	            width : 80,
+	            hidden : true,
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            formatter : function(value, row, index) {
+		            return row.ieNam;
+	            },
+	            sortable : true
+	        }, {
+	            field : "BILL_NO",
+	            title : "提单号",
+	            width : 80,
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : true
+	        }, {
+	            field : "CAR_TYP_NAM",
+	            title : "车名",
+	            width : 80,
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : true
+	        },{
+	            field : "CAR_VIN",
+	            title : "车架号",
+	            width : 140,
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : true
+	        }, {
+	            field : "CAR_NUM",
+	            title : "数量",
+	            width : 80,
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : true
+	        },{
+	            field : "CAR_SIZE",
+	            title : "尺寸",
+	            width : 80,
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : true
+	        },{
+
+	            field : "CAR_VOL",
+	            title : "体积",
+	            width : 80,
+	            halign : "center",
+	            align : 'right',
+	            formatter : function(value) {
+		            return HdUtils.formatter.precisionCommon(value, 3);
+	            }
+	        },{
+
+	            field : "CAR_WEIGHT",
+	            title : "重量",
+	            width : 80,
+	            halign : "center",
+	            align : 'right',
+	            formatter : function(value) {
+		            return HdUtils.formatter.precisionCommon(value, 3);
+	            }
+	        }, {
+
+	            field : "REMARK_TXT",
+	            title : "备注",
+	            width : 80,
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : true
+	        } ] ]
+	    });
+	    //$("#ShipCarMeasureDatagrid[(${radi})]").datagrid("hdGetColumnNames");
+    });
+</script>
+</html>

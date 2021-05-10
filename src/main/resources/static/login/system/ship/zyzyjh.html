@@ -1,0 +1,174 @@
+
+<meta charset="UTF-8" />
+
+<div class="easyui-layout" style="height: 100%">
+	<div data-options="region:'north'" style="width: 400px; height: 30px;">
+		<div class="easyui-panel" data-options="fit:true"
+			id="zyzyjh111" style="float: left; position: relative;">
+			计划日期：<input id="days" name="days" class="easyui-datebox"
+				style="width: 100px" data-options="required:false" /> <a
+				class="easyui-linkbutton" id="query">查询</a> <a
+				class="easyui-linkbutton" id="querybefore">前一天</a> <a
+				class="easyui-linkbutton" id="queryafter">后一天</a>
+				<a class="easyui-linkbutton" id='report'>报表</a>
+		</div>
+	</div>
+	<div data-options="region:'center'" style="width: 100%; height: 100%;">
+		<div class="easyui-tabs" data-options="fit:true" id="daynightplantabs">
+			<div
+				data-options="title:'进出口计划',border:false,closable:false,fit:true,href:'../webresources/login/ship/DayNightTrend/daynighttrend.htm'">
+			</div>
+			<div
+				data-options="title:'昼夜计划',border:false,closable:false,fit:true,href:'../webresources/login/ship/DayNightPlan/daynightplan.htm'">
+			</div>
+			<div
+				data-options="title:'注意事项及安排',border:false,closable:false,fit:true,href:'../webresources/login/ship/DayNightAttention/daynightattention.htm'">
+			</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+	$(document).ready(function() {
+	    var recNam;
+	  	  $.get('/login/PrivilegeController/getLoginAccount?t=11&s='+Math.random(), function(data) {
+	  		recNam=data.name;  
+	  	  })
+	    var days = Date.prototype.dateAdd(0, "yyyy-MM-dd");
+	    $("#days").val(days);
+	    HdUtils.dialog.setValue({
+		    'days' : days
+	    });
+	    // 查询
+	    $("#query").on("click", function() {
+		    days = $("#days").datebox("getValue");
+		    HdUtils.dialog.setValue({
+			    'days' : days
+		    });
+		    var currentTab = $('#daynightplantabs').tabs('getSelected');
+		    currentTab.panel('refresh');
+	    });
+	    // 前一天
+	    $("#querybefore").on("click", function() {
+	    	days = $("#days").datebox("getValue");
+		    days = querybefore();
+		    $("#days").datebox("setValue", days);
+		    HdUtils.dialog.setValue({
+			    'days' : days,
+		    });
+		    var currentTab = $('#daynightplantabs').tabs('getSelected');
+		    currentTab.panel('refresh');
+	    });
+	    // 后一天
+	    $("#queryafter").on("click", function() {
+	    	days = $("#days").datebox("getValue");
+		    days = queryafter();
+		    $("#days").datebox("setValue", days);
+		    HdUtils.dialog.setValue({
+			    'days' : days,
+		    });
+		    var currentTab = $('#daynightplantabs').tabs('getSelected');
+		    currentTab.panel('refresh');
+	    });
+	    //报表
+	    $("#report").on("click", function() {
+	    	if(days==null||days==""||days==undefined){
+		          HdUtils.messager.info('请选择计划日期！');	
+		    	}else{
+		    	    var d = new Date(Date.parse(days));
+		    		var day = d.getDate();
+		 		    var year = d.getFullYear();
+		 		    var month = d.getMonth() + 1;
+		 		    var today=year+"年"+month+"月"+day+"日1600至";
+		 		    var nday = d.getDate()+1;
+		 		    var nyear = d.getFullYear();
+		 		    var nmonth = d.getMonth() + 1;
+		 		    var day2 = d.getDate().toString();
+				    var da = mGetDate(nyear, nmonth);
+				    var nextday;
+				    if (day2 == da && month == "12") {
+					    var dd = mGetDate(year + 1, 0);
+					    var mm = "1";
+					    var ds = "1";
+					    nextday = year + 1+"年"  + mm + "月" + ds+"日1600";
+				    } else if (day2 == da) {
+					    var mm = parseInt(month) + 1;
+					    var ds = "1";
+					    //if (mm < 10) mm = 0 + mm.toString();
+					    nextday = year +"年"  + mm + "月" + ds+"日1600";
+				    } else {
+					    var mm = parseInt(month);
+					    //if (mm < 10) mm = 0 + mm.toString();
+					    day2 = parseInt(day2) + 1;
+					    //if (day2 < 10) day2 = 0 + day2.toString();
+					    nextday = year +"年" + mm+ "月"   + day2+"日1600";
+				    }
+		    HdUtils.dialog.setValue({
+			     'days'  :  days,
+			     'recNam':recNam,
+			     'today':today,
+			     'nextday':nextday
+		    });
+		    HdUtils.dialog.show({
+		        width : 850,
+		        height : 650,
+		        title : '昼夜作业计划',
+		        href : "../login/system/ship/daynightplanrep.html",
+		        isSaveHandler : false
+		    });
+		    	}
+	    });
+	    function querybefore() {
+		    var d = new Date(Date.parse(days));
+		    var dte = d.getDate() - 1;
+		    var year = d.getFullYear();
+		    var month = d.getMonth() + 1;
+		    var day = (d.getDate() - 1).toString();
+		    if (day == '0' && month == '1') {
+			    var da = mGetDate(year, month);
+			    var plandate = year - 1 + "-" + 12 + "-" + da;
+		    } else if (day == '0') {
+			    var da = mGetDate(year, month - 1);
+			    var mm = parseInt(month) - 1;
+			    if (mm < 10) mm = 0 + mm.toString();
+			    var plandate = year + "-" + mm + "-" + da;
+		    } else {
+		    	var mm = parseInt(month);
+			    if (mm < 10) mm = 0 + mm.toString();
+			    day = parseInt(day);
+			    if (day < 10) day = 0 + day.toString();
+			    var plandate = year + "-" + mm + "-" + day;
+		    }
+		    return plandate;
+	    }
+	    function queryafter() {
+		    var d = new Date(Date.parse(days));
+		    var dte = d.getDate() + 1;
+		    var year = d.getFullYear();
+		    var month = d.getMonth() + 1;
+		    var day = d.getDate().toString();
+		    var da = mGetDate(year, month);
+		    if (day == da && month == "12") {
+			    var dd = mGetDate(year + 1, 0);
+			    var mm = "01";
+			    var ds = "01";
+			    var plandate = year + 1 + "-" + mm + "-" + ds;
+		    } else if (day == da) {
+			    var mm = parseInt(month) + 1;
+			    var ds = "01";
+			    if (mm < 10) mm = 0 + mm.toString();
+			    var plandate = year + "-" + mm + "-" + ds;
+		    } else {
+			    var mm = parseInt(month);
+			    if (mm < 10) mm = 0 + mm.toString();
+			    day = parseInt(day) + 1;
+			    if (day < 10) day = 0 + day.toString();
+			    var plandate = year + "-" + mm + "-" + day;
+		    }
+		    return plandate;
+	    }
+	    function mGetDate(year, month) {
+		    var d = new Date(year, month, 0);
+		    return d.getDate();
+	    }
+    });
+</script>

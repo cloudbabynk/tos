@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8" />
+<!-- 工具栏 -->
+<div th:id="SParamToolBar1508123307399+${radi}" style="float: left">
+	<div>
+		<!-- 查询 -->
+		<span> 参数代码：<input th:id="paramCod+${radi}" name="paramCod"
+			placeholder="请输入参数代码" type="text" data-options="required:false"
+			style="width: 120px">参数名称：<input th:id="paramNam+${radi}"
+			name="paramNam" placeholder="请输入参数名称" type="text"
+			data-options="required:false" style="width: 120px"> <a
+			class="easyui-linkbutton" th:id="query+${radi}">查询</a> 
+			<a class="easyui-linkbutton" th:id='clear+${radi}'>重置</a>
+			<shiro:hasPermission
+				name="webresources:login:SParam:add">
+				<a class="easyui-linkbutton" th:id='add+${radi}' iconCls="icon-add"
+					plain="false">新增</a>
+			</shiro:hasPermission> <shiro:hasPermission name="webresources:login:SParam:update">
+				<a class="easyui-linkbutton" th:id='edit+${radi}'>编辑</a>
+			</shiro:hasPermission> <shiro:hasPermission name="webresources:login:SParam:delete">
+				<a class="easyui-linkbutton" th:id='delete+${radi}'>删除</a>
+			</shiro:hasPermission> <a class="easyui-linkbutton" th:id='fresh+${radi}'>刷新</a>
+		
+		</span>
+	</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="SParamDatagrid1508123307399+${radi}" style="height: 100%"></table>
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#SParamDatagrid1508123307399[(${radi})]");
+	    // buttons
+	    // 增加。
+	    $("#add[(${radi})]").on("click", function() {
+		    addoredit("");
+	    });
+	    // 编辑。
+	    $("#edit[(${radi})]").on("click", function() {
+		    var data = dg.datagrid("getSelected");
+		    if (data == null || data == undefined) {
+			    HdUtils.messager.info('请选择一条数据进行编辑！');
+			    return;
+		    }
+		    var paramId = data.paramId;
+		    addoredit(paramId);
+	    });
+	    function addoredit(paramId) {
+		    HdUtils.dialog.setValue({
+			    'paramId' : paramId
+		    });
+		    HdUtils.dialog.setValue({
+			    'radi' : radi
+		    });
+		    HdUtils.dialog.show({
+		        width : 800,
+		        height : 180,
+		        title : '参数信息',
+		        href : "../login/system/base/sparamform.html",
+		        isSaveHandler : true
+		    });
+	    }
+	    // 删除。
+	    $("#delete[(${radi})]").on("click", function() {
+		    var selRow = $("#SParamDatagrid1508123307399[(${radi})]").datagrid("getChecked");
+		    if (selRow.length == 0) {
+			    HdUtils.messager.info('请至少选择一条数据！');
+			    return false;
+		    }
+		    var ids = '';
+		    $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+			    if (r) {
+				    for (var i = 0; i < selRow.length; i++) {
+					    ids += selRow[i].paramId;
+				    }
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/base/SParam/removeById?paramId=" + ids,
+				        success : function(data) {
+					        HdUtils.messager.bottomRight(data.message);
+					        $("#SParamDatagrid1508123307399[(${radi})]").datagrid("hdReload");
+				        }
+				    });
+			    }
+		    });
+	    });
+	    // 刷新。
+	    $("#fresh[(${radi})]").on("click", function() {
+		    dg.datagrid("hdReload");
+	    });
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+		    $("#SParamDatagrid1508123307399[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+	    // 清空。
+	    $("#clear[(${radi})]").on("click", function() {
+	    	$("#paramCod[(${radi})]").val("");
+	    	$("#paramNam[(${radi})]").val("");
+	        $("#SParamDatagrid1508123307399[(${radi})]").datagrid({
+				    queryParams : query(),
+			    })
+	    });
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    var paramCod = $("#paramCod[(${radi})]").val();
+		    var paramNam = $("#paramNam[(${radi})]").val();
+		    onlinquery.add("paramCod", paramCod);
+		    onlinquery.add("paramNam", paramNam);
+		    return onlinquery.build();
+	    }
+	    $("#SParamDatagrid1508123307399[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/base/SParam/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#SParamToolBar1508123307399" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+	        }, {
+	            field : "paramId",
+	            title : '参数ID',
+	            multiSort : true,
+	            halign : "center",
+	            hidden : true,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "paramCod",
+	            title : '参数代码',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "paramNam",
+	            title : "参数名称",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "paramVal",
+	            title : "参数值",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "remarks",
+	            title : "备注",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "recNam",
+	            title : '<font color="red">录入员</font>',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "recTim",
+	            title : '<font color="red">录入时间</font>',
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.date,
+	            width : 120,
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "updNam",
+	            title : '<font color="red">修改人</font>',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "updTim",
+	            title : '<font color="red">修改时间</font>',
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.date,
+	            width : 120,
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }
+	        ] ]
+	    });
+	    $("#SParamDatagrid1508123307399" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

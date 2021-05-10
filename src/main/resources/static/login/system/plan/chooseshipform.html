@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+		 var dg = $("#ShipDatagrid1507959149305");
+		 function getSelShipId() {
+			    var data = dg.datagrid("getSelected");
+			    if (!data) {
+				    HdUtils.messager.info('请先选船！');
+				    return;
+			    }
+			    HdUtils.dialog.getValue("selShipCallBack")(data);
+			    HdUtils.dialog.close();
+		    }
+		    HdUtils.dialog.setValue({
+			    saveHandler : getSelShipId
+		    });
+    });
+    // 查询
+    $("#query").on("click", function() {
+	    $("#ShipDatagrid1507959149305").datagrid({
+		    queryParams : query(),
+	    })
+    });
+    function query() {
+	    var onlinquery = new HdQuery();
+	    var cShipNam = $("#cShipNam").val();
+	    var shipCod = $("#shipCod").val();
+	    var ivoyage = $("#ivoyage").val();
+	    var evoyage = $("#evoyage").val();
+	    onlinquery.add("shipNam", shipNam);
+	    onlinquery.add("shipCod", shipCod);
+	    onlinquery.add("ivoyage", ivoyage);
+	    onlinquery.add("evoyage", evoyage);
+	    return onlinquery.build();
+    }
+    $("#ShipDatagrid1507959149305").datagrid({
+        url : "/webresources/login/ship/ShipLoadPlan/findShip",
+        queryParams : query(),
+        method : "post",
+        pagination : true,
+        singleSelect : true,
+        selectOnCheck : true,
+        checkOnSelect : true,
+        rownumbers : true,
+        pageSize : 20,
+        fit : false,
+        fitColumns : false,
+        columns : [ [ {
+            field : "ck",
+            checkbox : true,
+            sortable : false,
+
+        },
+        {
+            field : "cShipNam",
+            title : "船名",
+            width : fixWidth(0.1),
+            multiSort : true,
+            align : "center",
+            editor : {
+                type : "validatebox",
+                options : {
+	                required : false
+                }
+            },
+            sortable : false
+        },
+        {
+            field : "shipCod",
+            title : "船代码",
+            width : fixWidth(0.1),
+            multiSort : true,
+            align : "center",
+            editor : {
+                type : "validatebox",
+                options : {
+	                required : false
+                }
+            },
+            sortable : false
+        }, {
+
+            field : "ivoyage",
+            title : "进口航次",
+            multiSort : true,
+            align : "center",
+            editor : {
+                type : "validatebox",
+                options : {
+	                required : false
+                }
+            },
+            sortable : false
+        }, {
+
+            field : "evoyage",
+            title : "出口航次",
+            multiSort : true,
+            align : "center",
+            editor : {
+                type : "validatebox",
+                options : {
+	                required : false
+                }
+            },
+            sortable : false
+        } , {
+
+            field : "shipStat",
+            title : "状态",
+            multiSort : true,
+            align : "center",
+            editor : {
+                type : "validatebox",
+                options : {
+	                required : false
+                }
+            },
+            sortable : false
+        }, {
+
+            field : "berthCod",
+            title : "泊位",
+            multiSort : true,
+            align : "center",
+            editor : {
+                type : "validatebox",
+                options : {
+	                required : false
+                }
+            },
+            sortable : false
+        }
+        , {
+
+            field : "conArrvTim",
+            title : "到港时间",
+            multiSort : true,
+            align : "center",
+            editor : {
+                type : "validatebox",
+                options : {
+	                required : false
+                }
+            },
+            sortable : false
+        }, {
+
+            field : "etdLeavTim",
+            title : "计划离港时间",
+            multiSort : true,
+            align : "center",
+            editor : {
+                type : "validatebox",
+                options : {
+	                required : false
+                }
+            },
+            sortable : false
+        }
+        ] ]
+    });
+    function fixWidth(percent) {
+	    return document.documentElement.shipNam * percent; //这里你可以自己做调整
+    }
+    function fixWidth(percent) {
+	    return document.documentElement.evoyage * percent ; //这里你可以自己做调整
+    }
+    $("#ShipDatagrid1507959149305").datagrid("hdGetColumnNames");
+</script>
+<form th:id="ContractIeDocForm1507959149305">
+	<span>船名：<input th:id="cShipNam" name="cShipNam" placeholder="船名"
+		type="text" data-options="required:false" style="width: 80px">
+		船代码：<input th:id="shipCod" name="shipCod" placeholder="请输入船代码"
+		type="text" data-options="required:false" style="width: 80px">
+		进口航次：<input th:id="ivoyage" name="ivoyage" placeholder="请输入航次"
+		type="text" data-options="required:false" style="width: 80px">
+		出口航次：<input th:id="evoyage" name="evoyage" placeholder="请输入航次"
+		type="text" data-options="required:false" style="width: 80px">
+		<a class="easyui-linkbutton" id="query">查询</a>
+	</span>
+	<table id="ShipDatagrid1507959149305" style="height: 285px;"></table>
+</form>
+</html>

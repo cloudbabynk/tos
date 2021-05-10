@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="ShipBillToolBar1508123309099+${radi}" style="float: left; display: inline">
+		船名：<input name="shipNam" th:id="shipNam+${radi}" class="easyui-validatebox" readonly="readonly" /> 
+		航次：<input name="voyage" th:id="voyage+${radi}" class="easyui-validatebox"	readonly="readonly" /> 
+		<input th:id="iEId+${radi}" th:value='${iEId}'	type="hidden" /> 
+		<input th:id="tradeId+${radi}" th:value='${tradeId}' type="hidden" />
+	<shiro:hasPermission name="webresources:login:ShipBill:add">
+		<a class="easyui-linkbutton" th:id='add+${radi}' iconCls="icon-add"	plain="false">新增</a>
+	</shiro:hasPermission>
+	<shiro:hasPermission name="webresources:login:ShipBill:delete">
+		<a class="easyui-linkbutton" th:id='delete+${radi}'>删除</a>
+	</shiro:hasPermission>
+	<shiro:hasPermission name="webresources:login:ShipBill:edit">
+		<a class="easyui-linkbutton" th:id='edit+${radi}'>编辑</a>
+	</shiro:hasPermission>
+
+	<shiro:hasPermission name="webresources:login:ShipBill:refresh">
+		<a class="easyui-linkbutton" th:id='refresh+${radi}'>刷新</a>
+	</shiro:hasPermission>
+	<shiro:hasPermission name="webresources:login:ShipBill:copy">
+		<a class="easyui-linkbutton" th:id='copy+${radi}'>复制</a>
+	</shiro:hasPermission>
+	<shiro:hasPermission name="webresources:login:ShipBill:import">
+		<a class="easyui-linkbutton" type="file" th:id='import+${radi}'>导入[XML]</a>
+		<a class="easyui-linkbutton" type="file" th:id='txtimport+${radi}'>导入[TXT]</a>
+	</shiro:hasPermission>
+
+	<shiro:hasPermission name="webresources:login:ShipBill:upload">
+		<a class="easyui-linkbutton" th:id='upload+${radi}'>上传舱单</a>
+	</shiro:hasPermission>
+	<shiro:hasPermission name="webresources:login:ShipBill:passinfoback">
+		<a class="easyui-linkbutton" th:id='passinfoback+${radi}'>生成回执</a>
+	</shiro:hasPermission>
+	<br />
+	<shiro:hasPermission name="webresources:login:ShipBill:voyage11">
+		<a class="easyui-linkbutton" th:id='voyage11+${radi}'>航次接口</a>
+	</shiro:hasPermission>
+	<shiro:hasPermission name="webresources:login:ShipBill:berth">
+		<a class="easyui-linkbutton" th:id='berth+${radi}'>停泊接口</a>
+	</shiro:hasPermission>
+	 <span> 
+	      提单号：<input name="billNo" th:id="billNo+${radi}"	class="easyui-validatebox" />
+	  <a class="easyui-linkbutton"	th:id='query+${radi}'> 查询</a>
+	</span>
+	<shiro:hasPermission name="webresources:login:ShipBill:detail">
+		<a class="easyui-linkbutton" th:id='detail+${radi}'> 明细</a>
+	</shiro:hasPermission>
+	<shiro:hasPermission name="webresources:login:ShipBill:shipbillconfirm">
+		<a class="easyui-linkbutton" th:id='shipbillconfirm+${radi}'>提单确认</a>
+	</shiro:hasPermission>
+
+	<shiro:hasPermission name="webresources:login:ShipBill:async">
+		<a class="easyui-linkbutton" th:id='async+${radi}'>同步</a>
+	</shiro:hasPermission>
+	<shiro:hasPermission name="webresources:login:ShipBill:getcustom">
+		<a class="easyui-linkbutton" th:id='getcustom+${radi}'>海关放行</a>
+	</shiro:hasPermission>
+	<shiro:hasPermission name="webresources:login:ShipBill:exitCustom">
+		<a class="easyui-linkbutton" th:id='exitCustom+${radi}'>退关</a>
+	</shiro:hasPermission>
+	<shiro:hasPermission name="webresources:login:ShipBill:uploadshipbill">
+		<a class="easyui-linkbutton" th:id='uploadshipbill+${radi}'>上报货运单证</a>
+	</shiro:hasPermission>
+	<div th:id="nmcdsc+${radi}"	style="float: right;">
+	    <shiro:hasPermission name="webresources:login:ShipBill:createData">
+			<a class="easyui-linkbutton" th:id='createData+${radi}'>生成舱单</a>
+		</shiro:hasPermission>
+	</div>
+</div>
+
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="ShipBillDatagrid1508123309099+${radi}"  style="height:500px;"/>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+		
+	function setSubHeight(ctHeight,parentLay){
+		  var dg = $("#ShipBillDatagrid1508123309099[(${radi})]");
+		  dg.datagrid("resize",{height:parentLay.height()-ctHeight-30});    
+	}
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#ShipBillDatagrid1508123309099[(${radi})]");
+    	// buttons
+        HdUtils.dialog.setValue({
+		    'radibill' : radi
+	    });
+        var radibillsplit = HdUtils.dialog.getValue('radibillsplit');
+        var shipNo = HdUtils.dialog.getValue('shipNo');
+        var eShipNam = HdUtils.dialog.getValue('eShipNam');
+        var dockCod=HdUtils.dialog.getValue('dockCod');
+        var subHeight=HdUtils.dialog.getValue('subHeight');
+       
+        dg.height(dg.parent().height()-subHeight);
+        
+        var iEId = $("#iEId[(${radi})]").val();
+        var tradeId= $("#tradeId[(${radi})]").val();
+        if (tradeId == '2'){
+        	$("#nmcdsc[(${radi})]").hide();
+        }
+        $("#shipNam[(${radi})]").val(HdUtils.dialog.getValue('shipNam'));
+        $("#voyage[(${radi})]").val(HdUtils.dialog.getValue('voyage'));
+        var tradeId= $("#tradeId[(${radi})]").val();
+        
+	        // 增加。
+	        $("#add[(${radi})]").on("click", function() {
+	        	  addoredit("");
+	        });
+	        // 编辑。
+		    $("#edit[(${radi})]").on("click", function() {
+			    var data = dg.datagrid("getSelected");
+			    if (data == null || data == undefined) {
+				    HdUtils.messager.info('请选择一条数据进行编辑！');
+				    return;
+			    }
+			    var shipbillId = data.shipbillId;
+			    addoredit(shipbillId);
+		    });
+	        function addoredit(shipbillId) {
+		        if (shipNo == null || shipNo == '') {
+			        HdUtils.messager.info('请先选择船名航次！');
+		        } else {
+		        	 HdUtils.dialog.setValue({
+						    'radi' : radi
+					    });
+		        	 HdUtils.dialog.setValue({
+		 			    'shipbillId' : shipbillId
+		 		       });
+				        HdUtils.dialog.setValue({
+					        data : {
+						        shipNo : shipNo,
+						        iEId   : iEId,
+						        tradeId:tradeId
+					        }
+				        });
+			        HdUtils.dialog.show({
+			            width : 1000,
+			            height : 360,
+			            title : '提单信息',
+			            href : "../login/system/ship/shipbillform.html",
+
+			            isSaveHandler : true
+			        });
+		        };
+	        }
+	        // 查询
+		    $("#query[(${radi})]").on("click", function() {
+			    $("#ShipBillDatagrid1508123309099[(${radi})]").datagrid({
+				    queryParams : query(),
+			    })
+		    });
+		  //航次接口
+		     $("#voyage11[(${radi})]").on("click", function() {
+		    	 if (shipNo == null || shipNo == '') {
+				        HdUtils.messager.info('请先选择船名航次！');
+			        } else {
+					        HdUtils.dialog.setValue({
+						        data : {
+							        shipNo : shipNo,
+							        iEId   : iEId
+						        }
+					        });
+				        HdUtils.dialog.show({
+				            width : 1000,
+				            height : 600,
+				            title : '航次计费接口',
+				            href : "../login/system/ship/shipvoyageform.html",
+				            isSaveHandler : false
+				        });
+			        };
+		     });
+		  //停泊接口
+		     $("#berth[(${radi})]").on("click", function() {
+		    	 if (shipNo == null || shipNo == '') {
+				        HdUtils.messager.info('请先选择船名航次！');
+			        } else {
+					        HdUtils.dialog.setValue({
+						        data : {
+							        shipNo : shipNo,
+							        iEId   : iEId
+						        }
+					        });
+				        HdUtils.dialog.show({
+				            width : 1000,
+				            height : 600,
+				            title : '停泊计费接口',
+				            href : "../login/system/ship/shipBerthform.html",
+				            isSaveHandler : false
+				        });
+			        };
+		     });
+	        // 刷新。
+	        $("#refresh[(${radi})]").on("click", function() {
+		        dg.datagrid("hdReload");
+		        var radibillsplit = HdUtils.dialog.getValue('radibillsplit');
+                $('#BillSplitDatagrid1508123301002'+radibillsplit).datagrid({
+                   	queryParams : queryBillSplit(),
+                });
+	        });
+	        //上传舱单
+	        $("#upload[(${radi})]").on("click", function() {
+        	   if (shipNo == null || shipNo == '') {
+			        HdUtils.messager.info('请先选择船名航次！');
+		        } else{
+		        	var entityid=shipNo+$("#iEId[(${radi})]").val();
+			        HdUtils.fileupload({
+			            entityName : 'Ship',
+			            entityId : entityid,
+			            mutiple : false,
+			            isReadOnly : false
+			        });
+		    	}
+	        });
+	        
+	        // 上报货运单证
+		    $("#uploadshipbill[(${radi})]").on("click", function() {
+			    var dataRow = dg.datagrid("getChecked");
+			    if (dataRow.length == 0) {
+				    HdUtils.messager.info('请至少选择一条数据！');
+				    return false;
+			    }
+			    var shipbillId = "";
+			    for (var i = 0; i < dataRow.length; i++) {
+			    	  //审核的时候,不含退关的
+			    	if(dataRow[i].shipbillId=='1'){
+			    		i++;
+			    		}else{
+			    	shipbillId += dataRow[i].shipbillId + ",";
+			    	}
+			    }
+			    shipbillId = shipbillId.substring(0, shipbillId.length - 1);
+		        HdUtils.dialog.setValue({
+	   			    'radi':radi,
+		        	'shipNo' : shipNo,
+		        	'dockCod':dockCod,
+	   			    'shipbillId':shipbillId
+	   		    });
+	   		    HdUtils.dialog.show({
+	   		        width : 200,
+	   		        height :180,
+	   		        title : '选码头',
+	   		        href : "../login/system/ship/choosedock4.html",
+	   		        isSaveHandler : true
+	   		    });
+		    });
+	        
+	        // 导入
+	        $("#import[(${radi})]").on("click", function() {
+	        	 if (shipNo == null || shipNo == '') {
+				        HdUtils.messager.info('请先选择船名航次！');
+			        } else{
+		        xmlimport("");
+		        }
+	        });
+	        // 生成理货作业数据
+	        $("#createData[(${radi})]").on("click", function() {
+	        	if(!shipNo){
+	        		 HdUtils.messager.info('请先选择船名航次！');
+	        		 return false;
+	        	}
+	        	var iEId = $("#iEId[(${radi})]").val();
+	        	HdUtils.ajax.post({
+			        url : "../webresources/login/ship/ShipBill/createData?shipNo=" + shipNo + "&iEId=" + iEId + "&tradeId=" + tradeId,
+			        success : function(data) {
+				        if (data.key == '-1') {
+					        HdUtils.messager.info(data.message);
+					        return false;
+				        }
+				        HdUtils.messager.bottomRight(data.message);
+				        $("#ShipBillDatagrid1508123309099" + radi).datagrid("hdReload");
+				        $("#BillSplitDatagrid1508123301002" + radibillsplit).datagrid("hdReload");
+			        }
+			    })	
+	        });
+
+
+	        function xmlimport() {
+	        	 HdUtils.dialog.setValue({
+					    'radi' : radi
+				    });
+		        HdUtils.dialog.show({
+		            width : 700,
+		            height : 300,
+		            title : '导入舱单',
+		            href : "../login/system/ship/choosexmlform.html",
+		            isSaveHandler : true
+		        });
+		        HdUtils.dialog.setValue({
+			        data : {
+				        shipNo : shipNo,
+				        voyage : $("#voyage[(${radi})]").val(),
+				        iEId   : iEId,
+				        eShipNam : eShipNam
+			        }
+		        });
+	        }
+	        // 导入TXT
+	        $("#txtimport[(${radi})]").on("click", function() {
+	        	 if (shipNo == null || shipNo == '') {
+				        HdUtils.messager.info('请先选择船名航次！');
+			        } else{
+		        txtimport("");
+			        }
+	        });
+	        function txtimport() {
+	        	 HdUtils.dialog.setValue({
+					    'radi' : radi
+				    });
+		        HdUtils.dialog.show({
+		            width : 700,
+		            height : 300,
+		            title : '导入舱单',
+		            href : "../login/system/ship/choosetxtform.html",
+		            isSaveHandler : true
+		        });
+		        HdUtils.dialog.setValue({
+			        data : {
+				        shipNo : shipNo,
+				        voyage : $("#voyage[(${radi})]").val(),
+				        iEId   : iEId,
+				        eShipNam : eShipNam
+			        }
+		        });
+	        }
+	        // 明细
+	        $("#detail[(${radi})]").on("click", function() {
+	        	 if (shipNo == null || shipNo == '') {
+				        HdUtils.messager.info('请先选择船名航次！');
+			        } else{
+		        detail("");
+			        }
+	        });
+	        function detail() {
+		        var dataRow = $('#ShipBillDatagrid1508123309099[(${radi})]').datagrid("getSelected");
+		        var billNo = dataRow.billNo;
+		        var shipbillId = dataRow.shipbillId;
+		        var tradeId = dataRow.tradeId;
+		        var iEId = dataRow.iEId;
+		        if (billNo == null || billNo == '') {
+			        HdUtils.messager.info('请先选择提单！');
+		        } else {
+			        HdUtils.dialog.show({
+			            width : 900,
+			            height : 500,
+			            title : '提单信息',
+			            href : "../login/system/ship/detail.html",
+
+			            isSaveHandler : false
+			        });
+			        HdUtils.dialog.setValue({
+					    'radi' : radi
+				    });
+			        HdUtils.dialog.setValue({
+				        data : {
+				            billNo : billNo,
+				            shipNo : shipNo,
+				            shipbillId : shipbillId,
+				            tradeId : tradeId,
+				            iEId : iEId
+				        }
+			        });
+		        }
+		        ;
+	        }
+	        //批量 删除。
+	        $("#delete[(${radi})]").on("click", function() {
+		        var selRow = $("#ShipBillDatagrid1508123309099[(${radi})]").datagrid('getChecked');
+		        if (selRow.length == 0) {
+			        HdUtils.messager.info('请至少选择一条数据！');
+			        return false;
+		        }
+		        var shipbillId = '';
+		        $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+			        if (r) {
+				        for (var i = 0; i < selRow.length; i++) {
+					        shipbillId += selRow[i].shipbillId + ",";
+				        }
+				        shipbillId = shipbillId.substring(0, shipbillId.length - 1);
+
+				        HdUtils.ajax.post({
+				            url : "../webresources/login/ship/ShipBill/removeAll?shipbillId=" + shipbillId,
+				            success : function(data) {
+					            HdUtils.messager.bottomRight(data.message);
+					            $("#ShipBillDatagrid1508123309099[(${radi})]").datagrid("hdReload");
+						        $("#BillSplitDatagrid1508123301002" + radibillsplit).datagrid("hdReload");
+				            }
+				        });
+			        }
+		        });
+	        });
+
+	        function S4() {
+		        return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+	        }
+	        function guid() {
+		        return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
+	        } 
+	        // 复制
+		    $("#copy[(${radi})]").on("click", function() {
+			    var dataRow = $('#ShipBillDatagrid1508123309099[(${radi})]').datagrid("getSelected");
+			    var uuid = guid();
+		        dataRow.shipbillId = uuid;
+		        dataRow.billNo = dataRow.billNo + 'A';
+			    if (dataRow) {
+				    HdUtils.ajax.post({
+				        data : dataRow,
+				        url : "../webresources/login/ship/ShipBill/copy",
+				        success : function(data) {
+					        HdUtils.messager.bottomRight(data.message);
+					        $("#ShipBillDatagrid1508123309099[(${radi})]").datagrid("hdReload");
+				        }
+				    });
+			    } else {
+				    HdUtils.messager.info('请选择行！');
+			    }
+		    });
+	        //生成回执
+	         $("#passinfoback[(${radi})]").on("click", function() {
+	        	 var data = dg.datagrid("getSelected");
+				    if (data == null || data == undefined) {
+					    HdUtils.messager.info('请选择一条数据进行编辑！');
+					    return;
+				    }
+				    else{
+				    	if(data.checkTim==null||data.checkTim==undefined){
+				        HdUtils.messager.info('核放时间不能为空！');	
+				    	}else{
+				    		if(data.releaseTim==null||data.releaseTim==undefined){
+				    			HdUtils.messager.info('海关放行时间不能为空！');			
+				    		}else{
+	        	         		passinfoback("");
+				    		}
+				    	}
+				    }
+	        });
+	         function passinfoback() {
+	          var dataRow = $('#ShipBillDatagrid1508123309099[(${radi})]').datagrid("getSelected"); 
+			    HdUtils.ajax.post({
+			        url : "../webresources/login/ship/ShipBill/passinfoback",
+			        data : dataRow,
+			        success : function(data) {
+				        if (data.key == '-1') {
+					        HdUtils.messager.info(data.message);
+					        return false;
+				        }
+				        HdUtils.dialog.close();
+				        HdUtils.messager.info('发送成功！');
+				        $("#ShipBillDatagrid1508123309099" + radi).datagrid("hdReload");
+			        }
+			    })	 
+	         }
+	         //获取海关信息
+	         $("#getcustom[(${radi})]").on("click", function() { 
+				    var dataRow = dg.datagrid("getChecked");
+		 		    if (dataRow.length == 0) {
+		 			    HdUtils.messager.info('请至少选择一条数据！');
+		 			    return false;
+		 		    }else{
+		 		    	 var shipbillId = "";
+				 			for (var i = 0; i < dataRow.length; i++) {
+			 				    shipbillId += dataRow[i].shipbillId + ",";
+			 				}
+			 				shipbillId = shipbillId.substring(0, shipbillId.length - 1);
+			 				getcustominfo(shipbillId);
+		 		    }
+		 		   
+	        });
+	         function getcustominfo(shipbillId) { 
+				    HdUtils.ajax.post({
+			            url : "../webresources/login/ship/ShipBill/getcustominfo?shipNo=" + shipbillId+"&billNo="+shipbillId,
+			            success : function(data) {
+				            HdUtils.messager.bottomRight(data.message);
+				            $("#ShipBillDatagrid1508123309099[(${radi})]").datagrid("hdReload");
+			            }
+			        });
+		         }
+	 	    // 同步舱单数据
+	 	    $("#async[(${radi})]").on("click", function() {
+	 		    var dataRow = dg.datagrid("getChecked");
+	 		    if (dataRow.length == 0) {
+	 			    HdUtils.messager.info('请至少选择一条数据！');
+	 			    return false;
+	 		    }
+	 		    var shipbillId = "";
+			    for (var i = 0; i < dataRow.length; i++) {
+			    	//同步的时候,不含退关的
+			    	if(dataRow[i].exitCustomId=='1'){
+			    		i++;
+			    		}else{
+			    	shipbillId += dataRow[i].shipbillId + ",";
+			    	}
+			    }
+			   shipbillId = shipbillId.substring(0, shipbillId.length - 1);
+			   HdUtils.dialog.setValue({
+	   			    'radi':radi,
+		        	'shipNo' : shipNo,
+		        	'dockCod':dockCod,
+	   			    'shipbillId':shipbillId
+	   		    });
+	   		    HdUtils.dialog.show({
+	   		        width : 200,
+	   		        height :180,
+	   		        title : '选码头',
+	   		        href : "../login/system/ship/choosedock3.html",
+	   		        isSaveHandler : true
+	   		    });
+	 		});
+	 	   // 退关
+	 	    $("#exitCustom[(${radi})]").on("click", function() {
+		 		    var dataRow = dg.datagrid("getChecked");
+		 		    if (dataRow.length == 0) {
+		 			    HdUtils.messager.info('请至少选择一条数据！');
+		 			    return false;
+		 		    }
+		 		    var shipbillId = "";
+		 			for (var i = 0; i < dataRow.length; i++) {
+	 				    shipbillId += dataRow[i].shipbillId + ",";
+	 				}
+	 				shipbillId = shipbillId.substring(0, shipbillId.length - 1);
+	 				HdUtils.ajax.post({
+					      url : "../webresources/login/ship/ShipBill/exitCustom?shipbillId=" + shipbillId,
+					      success : function(data) {
+						   HdUtils.messager.bottomRight(data.message);
+						        $("#ShipBillDatagrid1508123309099[(${radi})]").datagrid("hdReload");
+					       }
+					 });
+	 		    });
+	         //提单确认，用于批量生成舱单明细空记录和场地车
+	         $("#shipbillconfirm[(${radi})]").on("click", function() {
+	        	 var dataRows = $('#ShipBillDatagrid1508123309099[(${radi})]').datagrid("getChecked");
+	             var billNos = '';
+			        $.messager.confirm("确定", "确定要确认这些提单?", function(r) {
+				        if (r) {
+					        for (var i = 0; i < dataRows.length; i++) {
+					        	billNos += dataRows[i].billNo + ",";
+					        }
+					        billNos = billNos.substring(0, billNos.length - 1);
+					        HdUtils.ajax.post({
+						        url : "../webresources/login/ship/ShipBill/generatebcpc?billNos="+billNos,
+						        success : function(data) {
+						        	 HdUtils.messager.bottomRight(data.message);
+								  $("#ShipBillDatagrid1508123309099[(${radi})]").datagrid("hdReload");
+						        }
+						    })
+				        }
+			        });
+		        });     
+	        // 舱单确认。
+	        $("#confirm[(${radi})]").on("click", function() {
+		        confirm("");
+	        });
+	        function confirm() {
+		        var dataRow = $('#ShipBillDatagrid1508123309099[(${radi})]').datagrid("getSelected");
+		        var billNo = dataRow.billNo;
+		        var recNam = dataRow.recNam;
+		        if (billNo == null || billNo == '') {
+			        HdUtils.messager.info('请先选择舱单！');
+		        } else {
+			        HdUtils.dialog.show({
+			            width : 500,
+			            height : 400,
+			            title : '舱单确认信息',
+			            href : "../login/system/ship/shipbillconfirm.html",
+			            isSaveHandler : true
+			        });
+			        HdUtils.dialog.setValue({
+					    'radi' : radi
+				    });
+			        HdUtils.dialog.setValue({
+				        data : {
+				            billNo : billNo,
+				            shipNo : shipNo,
+				            recNam : recNam
+				        }
+			        });
+		        }
+		        ;
+	        }
+	        function queryBillSplit(){
+            	var builder = new HdQuery();
+              builder.add("shipbillId", null);
+              builder.add("shipNo", shipNo);
+              builder.add("iEId",$("#iEId[(${radi})]").val());
+              return builder.build();
+          };
+	        function query() {
+		        var onlinquery = new HdQuery();
+		        onlinquery.add("shipNo", shipNo);
+		        onlinquery.add("iEId",iEId);
+		        var billNo=$("#billNo[(${radi})]").val();
+		        if(billNo)  onlinquery.add("billNo",billNo);
+		        return onlinquery.build();
+	        }
+	      
+      	   //指定列求和
+      	  function compute(colName) {
+      	      var rows = $('#ShipBillDatagrid1508123309099[(${radi})]').datagrid('getRows');
+      	      var total = 0;
+      	      for (var i = 0; i < rows.length; i++) {
+      		   if(rows[i][colName]!=undefined)
+      	        total += parseFloat(rows[i][colName]);
+      	      }
+      	      return total.toFixed(3);
+      	  }
+      	 function computew(colName) {
+       	      var rows = $('#ShipBillDatagrid1508123309099[(${radi})]').datagrid('getRows');
+       	      var total = 0;
+       	      for (var i = 0; i < rows.length; i++) {
+       		   if(rows[i][colName]!=undefined)
+       	        total += parseFloat(rows[i][colName]);
+       	      }
+       	      return total;
+       	 }
+      	 function computez(colName) {
+       	      var rows = $('#ShipBillDatagrid1508123309099[(${radi})]').datagrid('getRows');
+       	      var total = 0;
+       	      for (var i = 0; i < rows.length; i++) {
+       		    if(rows[i][colName]!=undefined)
+       	        total += parseFloat(rows[i][colName]);
+       	      }
+       	      return total;
+       	 }
+	        
+        $('#ShipBillDatagrid1508123309099[(${radi})]').datagrid({
+	            striped : true,
+	            url : "../webresources/login/ship/ShipBill/find",
+	            queryParams : query(),
+	            method : "post",
+	            pagination : false,
+	            singleSelect : true,
+		        selectOnCheck : false,
+		        checkOnSelect : true,
+	            rownumbers : true,
+	            showFooter:true,
+	            toolbar : "#ShipBillToolBar1508123309099[(${radi})]",
+	            pageSize : 20,
+	            fit : false,
+	            onLoadSuccess() {
+		        	      //添加“合计”列
+		        	$('#ShipBillDatagrid1508123309099[(${radi})]').datagrid('reloadFooter',[
+		        			{
+			        	       billNo: '<span class="subtotal">合计</span>',
+			        	       pieces: '<span class="subtotal">' + computez("pieces") + '</span>',
+			        	       weights: '<span class="subtotal">' + computew("weights") + '</span>',
+			        	       valumes: '<span class="subtotal">' + compute("valumes") + '</span>'
+				        	}
+		        	]);
+		        },
+				rowStyler: function (index, row) {
+					var rows = $('#ShipBillDatagrid1508123309099[(${radi})]').datagrid('getRows');
+					for (var i = 0; i < rows.length; i++) {
+						for(var j = i+1; j < rows.length; j++) {
+							if(rows[i].billNo === rows[j].billNo) {
+								$("[datagrid-row-index='" + i + "']").css({ "background-color": "#F08080" });
+								$("[datagrid-row-index='" + j + "']").css({ "background-color": "#F08080" });
+								return '';
+							}
+						}
+					}
+						if(row.releaseTim == null){
+							//return  'background-color:#ee80b0;';
+						}else {
+							return 'background-color:#ACD6FF;';
+						}
+                },
+	            onSelect(rowIndex,rowData){
+	            	var rows = $('#ShipBillDatagrid1508123309099[(${radi})]').datagrid('getRows');
+	              	 HdUtils.dialog.setValue({
+	              		 'shipbillId' : rowData.shipbillId
+	           	    });
+	   	           	var shipbillId = rowData.shipbillId;
+	   	           	var iEId=rowData.iEId;
+	   	           	function queryBillSplit(){
+	                      var builder = new HdQuery();
+	                      builder.add("shipbillId", shipbillId);
+	                      builder.add("shipNo", shipNo);
+	                      builder.add("iEId", iEId);
+	                      return builder.build();
+                    };
+                  	var radibillsplit = HdUtils.dialog.getValue('radibillsplit');
+                    $('#BillSplitDatagrid1508123301002'+radibillsplit).datagrid({
+                      	 queryParams : queryBillSplit(),
+                    });
+                   
+	   		    },
+	            fitColumns : false,
+	            columns : [ [{
+		            field : "ck",
+		            checkbox : true,
+		            sortable : false,
+
+		        }, {
+	                field : "shipbillId",
+	                title : '主键',
+	                multiSort : true,
+	                hidden:true,
+	                halign : "center",
+	                editor : {
+	                    type : "validatebox",
+	                    options : {  required : false  }
+	                },
+	                sortable : false
+		          },{
+
+	                field : "billNo",
+	                title : '提单号',
+	                multiSort : true,
+	                halign : "center",
+	                editor : {
+	                    type : "validatebox",
+	                    options : {    required : false }
+	                },
+	                sortable : true
+	            }, {
+
+	                field : "tradeId",
+	                title : '内外贸',
+	                multiSort : true,
+	                halign : "center",
+	                editor : {
+	                    type : "combobox",
+	                    options : HdUtils.code.scode({
+		                    fieldCod : 'TRADE_ID'
+	                    }, {
+		                    required : true
+	                    })
+	                },
+	                formatter : function(value) {
+		                return HdUtils.code.name('TRADE_ID', value);
+	                },
+	                sortable : false
+	            }, {
+	                field : "brandNam",
+	                title : '品牌',
+	                multiSort : true,
+	                halign : "center",
+	                editor : {
+	                    type : "combobox",
+	                    options : {
+	                        url : '../webresources/login/base/CCarTyp/getCBrandDrop',
+	              	        valueField : 'value',
+	              	        textField : 'label',
+	              	        panelHeight:120,
+	              	        panelWidth:80,
+	              	        onSelect : function(rec) {
+	              	        	return rec.value;
+	              	        }
+	                    }
+	                },
+	                sortable : false
+	            }, {
+
+	                field : "carTypNam",
+	                title : '货名',
+	                multiSort : true,
+	                hidden :true,
+	                halign : "center",
+	                editor : {
+	                    type : "combobox",
+	                    options : {
+	                        url : '../webresources/login/ship/BillCar/getCCarTypDrop',
+	              	        valueField : 'value',
+	              	        textField : 'label',
+	              	        panelHeight:120,
+	              	        panelWidth:120,
+	              	        onSelect : function(rec) {
+	              	        	return rec.value;
+	              	        }
+	                    }
+	                },
+	                sortable : false
+	            }, {
+
+	                field : "pieces",
+	                title : '件数',
+	                multiSort : true,
+	                halign : "center",
+	                editor : {
+	                    type : "validatebox",
+	                    options : {    required : false }
+	                },
+	                sortable : false
+	            }, {
+
+	                field : "weights",
+	                title : '重量',
+	                multiSort : true,
+	                halign : "center",
+	                editor : {
+	                    type : "validatebox",
+	                    options : {    required : false }
+	                },
+	                sortable : false
+	            }, {
+
+	                field : "valumes",
+	                title : '体积',
+	                multiSort : true,
+	                halign : "center",
+	                editor : {
+	                    type : "validatebox",
+	                    options : {    required : false }
+	                },
+	                sortable : false
+	            }, {
+	                field : "loadPortNam",
+	                title : "装货港",
+	                multiSort : true,
+	                halign : "center",
+	                editor : {
+	                    type : "validatebox",
+	                    options : {    required : false }
+	                },
+	                sortable : false
+	            }, {
+
+	                field : "tranPortNam",
+	                title : "卸货港",
+	                multiSort : true,
+	                halign : "center",
+	                editor : {
+	                    type : "validatebox",
+	                    options : {    required : false }
+	                },
+	                sortable : false
+	            },
+	            {
+
+	                field : "receiveNam",
+	                title : "收货人",
+	                multiSort : true,
+	                halign : "center",
+	                editor : {
+	                    type : "validatebox",
+	                    options : {    required : false }
+	                },
+	                sortable : false
+	            },
+	            {
+
+	                field : "consignNam",
+	                title : "发货人",
+	                multiSort : true,
+	                halign : "center",
+	                editor : {
+	                    type : "validatebox",
+	                    options : {    required : false }
+	                },
+	                sortable : false
+	            },
+	            {
+
+	                field : "sendFlag",
+	                title : "回执",
+	                multiSort : true,
+	                halign : "center",
+	                formatter : $.hd.ezui.formatter.checkbox2,
+	                sortable : false
+	            }, {
+
+	                field : "releaseTim",
+	                title : "放行时间",
+	                multiSort : true,
+	                halign : "center",
+	                sortable : false
+	            }, 
+	            {
+	            	field : "checkTim",
+	                title : "核碰时间",
+	                multiSort : true,
+	                halign : "center",
+	                sortable : false
+	            }, {
+					field : "exitCustomId",
+	                title : "退关标志",
+	                multiSort : true,
+	                halign : "center",
+	                formatter : $.hd.ezui.formatter.checkbox2,
+	                sortable : false
+	            }, {
+	                field : "confirmId",
+	                title : "确认标志",
+	                multiSort : true,
+	                halign : "center",
+	                formatter : $.hd.ezui.formatter.checkbox2,
+	                sortable : false
+	            },{
+	                field : "ydId",
+	                title : "运抵标志",
+	                multiSort : true,
+	                halign : "center",
+	                formatter : $.hd.ezui.formatter.checkbox2,
+	                sortable : false
+	            },{
+	            	field : "ydTim",
+	                title : "运抵时间",
+	                multiSort : true,
+	                halign : "center",
+	                sortable : false
+	            },{     
+		        	field : "dockNam",
+		            title : "作业公司",
+		            multiSort : true,
+		            align : "center",
+		            sortable : false
+		        }, {    
+		        	field : "dockCod",
+		            title : "作业公司",
+		            hidden:true,
+		            multiSort : true,
+		            align : "center",
+		            sortable : false
+		        },{
+		            field : "updTim",
+		            title : '<font color="red">修改时间</font>',
+		            multiSort : true,
+		            halign : "center",
+		            formatter : $.hd.ezui.formatter.datetime,
+		            width : 120,
+		            sortable : false
+		        },
+	            {
+	                field : "remarks",
+	                title : "备注",
+	                multiSort : true,
+	                width  :'150',
+	                halign : "center",
+	                editor : {
+	                    type : "validatebox",
+	                    options : {    required : false }
+	                },
+	                sortable : false
+	            } ] ],
+	            onBeforeLoad:function(data){
+	                //外进屏蔽发货人
+	                if(tradeId == "2") {
+	                	if(iEId == "I") {
+	                		$("#ShipBillDatagrid1508123309099[(${radi})]").datagrid("hideColumn", "consignNam");
+	                	}else if(iEId == "E") {
+	                		$("#ShipBillDatagrid1508123309099[(${radi})]").datagrid("hideColumn", "receiveNam");
+	                	}
+	                }
+	            }
+	        });
+	        $("#ShipBillDatagrid1508123309099"+ /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

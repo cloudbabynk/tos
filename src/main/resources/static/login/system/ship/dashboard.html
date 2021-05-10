@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<meta charset="UTF-8">
+<script src="../js/echarts/echarts.min.js"></script>
+<script type="text/javascript" src="../js/echarts/dist/echarts.js"></script>
+<script src="../js/marquee/jquery.marquee.min.js"></script>
+
+<style>
+.index2_bottom1_table {
+    color: #ffffff;
+    font-size:12px;
+    padding-top:10px;
+}
+tr{
+    text-align:center;
+}
+</style>
+<!-- <title>首页</title> -->
+<div class="body">
+	<link rel="stylesheet" type="text/css" href="../../../css/wer.css">
+	<div class="div-left">
+		<div class="div-num-100">
+			<div class="div-num-title">船期预报</div>
+			<div class="div-num-con" style="width: 100%; height: 250px;"
+				id="hcyb">
+				<div class="index2_bottom1_table" style="width:100%;border-width:0px;">
+				 	  <table style="width:100%;border-width:0px;color:#57f5f8"  >
+					    <thead>
+					            <tr>
+					                <th style="border-color:#213566;width: 10%">
+					                    序号
+					                </th>
+					                <th style="border-color:#213566;width: 20%">
+					                  船名
+					                </th>
+					                <th style="border-color:#213566;width: 15%">
+					                  内外贸
+					                </th>
+					                <th style="border-color:#213566;width: 15%">
+					                  数量
+					                </th>
+					                <th style="border-color:#213566;width: 40%">
+					                    计划到港时间
+					                </th>
+					            </tr>
+					        </thead>
+		                               
+		              </table>
+					 <table style="width: 100%;border-width:0px;">
+			            <tr style="width: 100%">
+			                <td align="center">
+			                    <div id=rolllinkk_1 style="overflow: hidden; width: 100%; height: 200px">
+			                        <div id=rolllinkk1_1>
+			    
+			                            <!-- 下面是你要显示的内容 -->
+			                            <table id="report_dashship_table" width="100%" cellpadding="2" style="border-width:0;color: #ffffff">
+			    
+			                               
+			                            </table>
+			                            <!-- 显示的内容结束！ -->
+			    
+			                        </div>
+			                        <div id=rolllinkk2_1>
+			                            <div align=center> </div>
+			                        </div>
+			                    </div>
+		                	</td>
+			            </tr>
+			        </table>
+		        </div>
+			</div>
+		</div>
+		<div class="div-num-100">
+			<div class="div-num-title">年度作业数</div>
+			<div class="div-num-con" style="width: 400px; height: 250px;"
+				id="ndzys"></div>
+		</div>
+		<div class="div-num-100">
+			<div class="div-num-title">环球滚装场地占用率</div>
+			<div class="div-num-con" id="hqcdzyl"
+				style="width: 100%; height: 250px;"></div>
+		</div>
+		<!-- 		<div class="div-num-48 right"> -->
+		<!-- 			<div class="div-num-title">滚装场地占用率</div> -->
+		<!-- 			<div class="div-num-con" id="gzcdzyl" -->
+		<!-- 				style="width: 150px; height: 100px;"></div> -->
+		<!-- 		</div> -->
+	</div>
+	<div class="div-center">
+		<div class="div-num-100">
+			<div class="div-num-title"><a href="javascript:void(0)" onclick="changeSource()" style="colour:red;"></a>内贸进口</div>
+			<div class="div-num-con" style="width: 100%; height: 250px;"
+				id="nmjks"></div>
+		</div>
+		<div class="div-num-100">
+			<div class="div-num-title">外贸进口</div>
+			<div class="div-num-con" style="width: 100%; height: 250px;"
+				id="wmjks"></div>
+		</div>
+		<div class="div-num-100">
+			<div class="div-num-title">内贸船公司作业数</div>
+			<div class="div-num-con" style="width: 100%; height: 250px;"
+				id="nmcgszys"></div>
+		</div>
+	</div>
+	<div class="div-right">
+		<div class="div-num-100">
+			<div class="div-num-title">内贸出口</div>
+			<div class="div-num-con" style="width: 100%; height: 250px;"
+				id="nmcks"></div>
+		</div>
+		<div class="div-num-100">
+			<div class="div-num-title">外贸出口</div>
+			<div class="div-num-con" style="width: 100%; height: 250px;"
+				id="wmcks"></div>
+		</div>
+		<div class="div-num-100">
+			<div class="div-num-title">外贸船公司作业数</div>
+			<div class="div-num-con" style="width: 100%; height: 250px;"
+				id="wmcgszys"></div>
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript">
+    var MyMar2 = setInterval(Marquee2, 100) //
+    rolllinkk_1.onmouseover = function () {
+        clearInterval(MyMar2)
+    }
+    rolllinkk_1.onmouseout = function () {
+        MyMar2 = setInterval(Marquee2, 100)
+    }
+    //定义全部变量数据来源
+    var type = 'FD';
+    //内外贸、进口车作业数
+    $.ajax({
+        url : "../webresources/login/ship/BillSplit/findDashboard?type=" + type,
+        success : function(data) {
+	        if (data){
+	        	init(data);
+	        }
+        }
+    });
+    function changeSource(){
+    	if (type == 'FD'){
+    		type = 'HY';
+    	} else if (type == 'HY'){
+    		type = 'FD';
+    	}
+    	$.ajax({
+            url : "../webresources/login/ship/BillSplit/findDashboard?type=" + type,
+            success : function(data) {
+    	        if (data){
+    	        	init(data);
+    	        }
+            }
+        });
+    }
+    function init(data){
+    	//内贸进口
+        var nmjkName = new Array();
+        var nmjkNum = new Array();
+        var i = 0;
+        for ( var key in data[0]) {
+	        nmjkName[i] = key;
+	        nmjkNum[i] = data[0][key];
+	        i++;
+        }
+        //内贸出口
+        var nmckName = new Array();
+        var nmckNum = new Array();
+        var j = 0;
+        for ( var key in data[1]) {
+	        nmckName[j] = key;
+	        nmckNum[j] = data[1][key];
+	        j++;
+        }
+        //外贸进口
+        var wmjkName = new Array();
+        var wmjkNum = new Array();
+        var k = 0;
+        for ( var key in data[2]) {
+	        wmjkName[k] = key;
+	        wmjkNum[k] = data[2][key];
+	        k++;
+        }
+        //外贸出口
+        var wmckName = new Array();
+        var wmckNum = new Array();
+        var g = 0;
+        for ( var key in data[3]) {
+	        wmckName[g] = key;
+	        wmckNum[g] = data[3][key];
+	        g++;
+        }
+
+        //外贸船公司
+        var wmcgsName = new Array();
+        var wmcgsNum = new Array();
+        var m = 0;
+        for ( var key in data[5]) {
+	        wmcgsName[m] = key;
+	        wmcgsNum[m] = data[5][key];
+	        m++;
+        }
+
+        //内贸船公司
+        var nmcgsName = new Array();
+        var nmcgsNum = new Array();
+        var n = 0;
+        for ( var key in data[4]) {
+	        nmcgsName[n] = key;
+	        nmcgsNum[n] = data[4][key];
+	        n++;
+        }
+
+        //环球利用率
+        var hqzylName = new Array();
+        var hqzylNum = new Array();
+        var f = 0;
+        for ( var key in data[6]) {
+	        hqzylName[f] = key;
+	        hqzylNum[f] = data[6][key];
+	        f++;
+        }
+
+        //滚装利用率
+        var gzzylName = new Array();
+        var gzzylNum = new Array();
+        var v = 0;
+        for ( var key in data[7]) {
+	        gzzylName[v] = key;
+	        gzzylNum[v] = data[7][key];
+	        v++;
+        }
+        //内贸进口数
+        var nmjks = echarts.init(document.getElementById('nmjks'));
+        nmjks.setOption({
+            tooltip : {
+                trigger : 'axis',
+                axisPointer : { // 坐标轴指示器，坐标轴触发有效
+	                type : 'shadow' // 默认为直线，可选为：'line' | 'shadow'
+                }
+            },
+            grid : {
+                borderWidth : 0,
+                height : '85%',
+                width : '70%',
+                x : '60',
+                y : '10'
+            },
+            calculable : true,
+            xAxis : [ {
+                type : 'value',
+                axisLabel : {
+	                textStyle : {
+		                color : '#6495ED',//坐标值得具体的颜色
+	                }
+                },
+                splitLine : { // 分隔线
+                    show : false, // 默认显示，属性show控制显示与否
+                    lineStyle : { // 属性lineStyle（详见lineStyle）控制线条样式
+                        color : [ '#ccc' ],
+                        width : 1,
+                        type : 'solid'
+                    }
+                },
+            } ],
+            yAxis : [ {
+                type : 'category',
+                axisLabel : {
+	                textStyle : {
+		                color : '#6495ED',//坐标值得具体的颜色
+	                }
+                },
+                splitLine : { // 分隔线
+                    show : false, // 默认显示，属性show控制显示与否
+                    lineStyle : { // 属性lineStyle（详见lineStyle）控制线条样式
+                        color : [ '#ccc' ],
+                        width : 1,
+                        type : 'solid'
+                    }
+                },
+                textStyle : {
+	                color : '#333' // 图例文字颜色
+                },
+                lineStyle : {
+	                color : '#333'
+                },
+                axisTick : {
+                    show : true,
+                    length : 15
+                },
+                data : nmjkName
+            } ],
+            series : [ {
+                name : '数量',
+                type : 'bar',
+                stack : '总量',
+                barWidth : 10,
+                itemStyle : {
+	                normal : {
+	                    color : '#CD6839',
+	                    barBorderColor : '#6495ED',
+	                    label : {
+		                    show : true
+	                    }
+	                }
+                },
+                data : nmjkNum
+            } ]
+        })
+        //外贸进口数
+        var wmjks = echarts.init(document.getElementById('wmjks'));
+        wmjks.setOption({
+            tooltip : {
+                trigger : 'axis',
+                axisPointer : { // 坐标轴指示器，坐标轴触发有效
+	                type : 'shadow' // 默认为直线，可选为：'line' | 'shadow'
+                }
+            },
+            grid : {
+                borderWidth : 0,
+                height : '85%',
+                width : '70%',
+                x : '60',
+                y : '10'
+            },
+            calculable : true,
+            xAxis : [ {
+                type : 'value',
+                splitLine : { // 分隔线
+                    show : false, // 默认显示，属性show控制显示与否
+                    lineStyle : { // 属性lineStyle（详见lineStyle）控制线条样式
+                        color : [ '#ccc' ],
+                        width : 1,
+                        type : 'solid'
+                    }
+                },
+                axisLabel : {
+	                textStyle : {
+		                color : '#6495ED',//坐标值得具体的颜色
+	                }
+                }
+            }
+
+            ],
+            yAxis : [ {
+                type : 'category',
+                axisLabel : {
+	                textStyle : {
+		                color : '#6495ED',//坐标值得具体的颜色
+	                }
+                },
+                splitLine : { // 分隔线
+                    show : false, // 默认显示，属性show控制显示与否
+                    lineStyle : { // 属性lineStyle（详见lineStyle）控制线条样式
+                        color : [ '#ccc' ],
+                        width : 1,
+                        type : 'solid'
+                    }
+                },
+                textStyle : {
+	                color : '#333' // 图例文字颜色
+                },
+                lineStyle : {
+	                color : '#333'
+                },
+                axisTick : {
+                    show : true,
+                    length : 15
+                },
+                data : wmjkName
+            } ],
+            series : [ {
+                name : '数量',
+                type : 'bar',
+                stack : '总量',
+                barWidth : 10,
+                itemStyle : {
+	                normal : {
+	                    color : '#836FFF',
+	                    barBorderColor : '#6495ED',
+	                    label : {
+		                    show : true
+	                    }
+	                }
+                },
+                data : wmjkNum
+            } ]
+        })
+        //内贸出口数
+        var nmcks = echarts.init(document.getElementById('nmcks'));
+        nmcks.setOption({
+            tooltip : {
+                trigger : 'axis',
+                axisPointer : { // 坐标轴指示器，坐标轴触发有效
+	                type : 'shadow' // 默认为直线，可选为：'line' | 'shadow'
+                }
+            },
+            grid : {
+                borderWidth : 0,
+                height : '85%',
+                width : '70%',
+                x : '60',
+                y : '10'
+            },
+            calculable : true,
+            xAxis : [ {
+                type : 'value',
+                splitLine : { // 分隔线
+                    show : false, // 默认显示，属性show控制显示与否
+                    lineStyle : { // 属性lineStyle（详见lineStyle）控制线条样式
+                        color : [ '#ccc' ],
+                        width : 1,
+                        type : 'solid'
+                    }
+                },
+                axisLabel : {
+	                textStyle : {
+		                color : '#6495ED',//坐标值得具体的颜色
+	                }
+                }
+            }
+
+            ],
+            yAxis : [ {
+                type : 'category',
+                axisLabel : {
+	                textStyle : {
+		                color : '#6495ED',//坐标值得具体的颜色
+	                }
+                },
+                splitLine : { // 分隔线
+                    show : false, // 默认显示，属性show控制显示与否
+                    lineStyle : { // 属性lineStyle（详见lineStyle）控制线条样式
+                        color : [ '#ccc' ],
+                        width : 1,
+                        type : 'solid'
+                    }
+                },
+                textStyle : {
+	                color : '#333' // 图例文字颜色
+                },
+                lineStyle : {
+	                color : '#333'
+                },
+                axisTick : {
+                    show : true,
+                    length : 15
+                },
+                data : nmckName
+            } ],
+            series : [ {
+                name : '数量',
+                type : 'bar',
+                stack : '总量',
+                barWidth : 10,
+                itemStyle : {
+	                normal : {
+	                    color : '#EEAD0E',
+	                    barBorderColor : '#6495ED',
+	                    label : {
+		                    show : true
+	                    }
+	                }
+                },
+                data : nmckNum
+            } ]
+        })
+        //外贸出口数
+        var wmcks = echarts.init(document.getElementById('wmcks'));
+        wmcks.setOption({
+            tooltip : {
+                trigger : 'axis',
+                axisPointer : { // 坐标轴指示器，坐标轴触发有效
+	                type : 'shadow' // 默认为直线，可选为：'line' | 'shadow'
+                }
+            },
+            grid : {
+                borderWidth : 0,
+                height : '85%',
+                width : '70%',
+                x : '60',
+                y : '10'
+            },
+            calculable : true,
+            xAxis : [ {
+                type : 'value',
+                splitLine : { // 分隔线
+                    show : false, // 默认显示，属性show控制显示与否
+                    lineStyle : { // 属性lineStyle（详见lineStyle）控制线条样式
+                        color : [ '#ccc' ],
+                        width : 1,
+                        type : 'solid'
+                    }
+                },
+                axisLabel : {
+	                textStyle : {
+		                color : '#6495ED',//坐标值得具体的颜色
+	                }
+                }
+            }
+
+            ],
+            yAxis : [ {
+                type : 'category',
+                axisLabel : {
+	                textStyle : {
+		                color : '#6495ED',//坐标值得具体的颜色
+	                }
+                },
+                splitLine : { // 分隔线
+                    show : false, // 默认显示，属性show控制显示与否
+                    lineStyle : { // 属性lineStyle（详见lineStyle）控制线条样式
+                        color : [ '#ccc' ],
+                        width : 1,
+                        type : 'solid'
+                    }
+                },
+                textStyle : {
+	                color : '#333' // 图例文字颜色
+                },
+                lineStyle : {
+	                color : '#333'
+                },
+                axisTick : {
+                    show : true,
+                    length : 15
+                },
+                data : wmckName
+            } ],
+            series : [ {
+                name : '数量',
+                type : 'bar',
+                stack : '总量',
+                barWidth : 10,
+                itemStyle : {
+	                normal : {
+	                    color : '#00CED1',
+	                    barBorderColor : '#6495ED',
+	                    label : {
+		                    show : true
+	                    }
+	                }
+                },
+                data : wmckNum
+            } ]
+        })
+
+        //内贸船公司作业数
+        var nmcgszys = echarts.init(document.getElementById('nmcgszys'));
+        nmcgszys.setOption({
+            calculable : true,
+            series : [ {
+                name : '访问来源',
+                type : 'pie',
+                radius : [ '0', '60%' ],
+                selectedOffset : '10',
+                center : [ '50%', '60%' ],
+                itemStyle : {
+                    normal : {
+                        label : {
+                            show : true,
+                            formatter : "{b}\n{c}({d}%)"
+                        },
+                        labelLine : {
+                            show : true
+                        }
+                    },
+                },
+                data : [ {
+                    value : nmcgsNum[0],
+                    name : nmcgsName[0]
+                }, {
+                    value : nmcgsNum[1],
+                    name : nmcgsName[1]
+                }, {
+                    value : nmcgsNum[2],
+                    name : nmcgsName[2]
+                }, {
+                    value : nmcgsNum[3],
+                    name : nmcgsName[3]
+                } ]
+            } ]
+        })
+        //外贸船公司作业数
+        var wmcgszys = echarts.init(document.getElementById('wmcgszys'));
+        wmcgszys.setOption({
+            calculable : true,
+            series : [ {
+                name : '访问来源',
+                type : 'pie',
+                radius : [ '0', '60%' ],
+                center : [ '50%', '60%' ],
+                itemStyle : {
+                    normal : {
+                        label : {
+                            show : true,
+                            formatter : "{b}\n{c}({d}%)"
+                        },
+                        labelLine : {
+                            show : true
+                        }
+                    },
+                },
+                data : [ {
+                    value : wmcgsNum[0],
+                    name : wmcgsName[0]
+                }, {
+                    value : wmcgsNum[1],
+                    name : wmcgsName[1]
+                }, {
+                    value : wmcgsNum[2],
+                    name : wmcgsName[2]
+                }, {
+                    value : wmcgsNum[3],
+                    name : wmcgsName[3]
+                }, {
+                    value : wmcgsNum[4],
+                    name : wmcgsName[4]
+                } ]
+            } ]
+        })
+
+        var labelTop = {
+	        normal : {
+	            label : {
+	                show : true,
+	                position : 'center',
+	                formatter : '{b}',
+	                textStyle : {
+		                baseline : 'bottom'
+	                }
+	            },
+	            labelLine : {
+		            show : false
+	            }
+	        }
+        };
+        var labelFromatterHq = {
+	        normal : {
+		        label : {
+		            formatter : function(params) {
+			            var hqPer = hqzylNum[1] / (hqzylNum[1] + hqzylNum[0]) * 100;
+			            return hqPer.toFixed(2) + '%'
+		            },
+		            textStyle : {
+			            baseline : 'top'
+		            }
+		        }
+	        },
+        };
+        var labelFromatterGz = {
+	        normal : {
+		        label : {
+		            formatter : function(params) {
+			            var gzPer = gzzylNum[1] / (gzzylNum[1] + gzzylNum[0]) * 100;
+			            return gzPer.toFixed(2) + '%'
+		            },
+		            textStyle : {
+			            baseline : 'top'
+		            }
+		        }
+	        },
+        };
+        var labelBottom = {
+            normal : {
+                color : '#ccc',
+                label : {
+                    show : true,
+                    position : 'center'
+                },
+                labelLine : {
+	                show : false
+                }
+            },
+            emphasis : {
+	            color : 'rgba(0,0,0,0)'
+            }
+        };
+        //环球产地占用率
+        var hqcdzyl = echarts.init(document.getElementById('hqcdzyl'));
+        hqcdzyl.setOption({
+            legend : {
+                x : 'center',
+                y : '80%',
+                textStyle : {
+	                color : '#6495ED',
+                },
+                data : [ hqzylName[1], gzzylName[1] ]
+            },
+            series : [ {
+                type : 'pie',
+                center : [ '25%', '50%' ],
+                radius : [ 55, 70 ],
+                x : '0%', // for funnel
+                itemStyle : labelFromatterHq,
+                data : [ {
+                    name : hqzylName[0],
+                    value : hqzylNum[0],
+                    itemStyle : labelBottom
+                }, {
+                    name : hqzylName[1],
+                    value : hqzylNum[1],
+                    itemStyle : labelTop
+                } ]
+            }, {
+                type : 'pie',
+                center : [ '75%', '50%' ],
+                radius : [ 55, 70 ],
+                x : '20%', // for funnel
+                itemStyle : labelFromatterGz,
+                data : [ {
+                    name : gzzylName[0],
+                    value : gzzylNum[0],
+                    itemStyle : labelBottom
+                }, {
+                    name : gzzylName[1],
+                    value : gzzylNum[1],
+                    itemStyle : labelTop
+                } ]
+            } ]
+        });
+    }
+	
+
+  //船期预报
+   // function findDashShip(){
+   	$.ajax({
+   		url : "../webresources/login/ship/Ship/findDashShipTable",
+   		type:"POST",
+   		dataType: "json",
+   		success:function(data){
+   			var div = document.getElementById("report_dashship_table");  
+   			div.innerHTML ="";
+   			 data.forEach(function(currentValue, index, arr){
+   			     var tr = document.createElement("tr");
+   			     var tdbegCableNo = document.createElement("td");   
+   			     tdbegCableNo.style.width='10%';
+   			     tdbegCableNo.innerText=currentValue.begCableNo;
+   			     tr.appendChild(tdbegCableNo);
+   			     var tdcShipNam = document.createElement("td");   
+   			     tdcShipNam.style.width='20%';
+   			     tdcShipNam.innerText=currentValue.cShipNam;
+   			     tr.appendChild(tdcShipNam);
+   			     var tdtradeId = document.createElement("td");   
+   			     tdtradeId.style.width='15%';
+   			     tdtradeId.innerText=currentValue.tradeId;
+   			     tr.appendChild(tdtradeId);
+   			     var tdwgt = document.createElement("td");   
+   			     tdwgt.style.width='15%';
+   			     tdwgt.innerText=currentValue.berthCod;
+   			     tr.appendChild(tdwgt);
+   			     var tdetdArrvTim = document.createElement("td");   
+   			     tdetdArrvTim.style.width='40%';
+   			     tdetdArrvTim.innerText=currentValue.etdArrvTim==null?"":currentValue.etdArrvTim;
+   			     tr.appendChild(tdetdArrvTim);
+   			     div.appendChild(tr);  
+   			});
+   			if(data.length>5)
+   			rolllinkk2_1.innerHTML = rolllinkk1_1.innerHTML+rolllinkk1_1.innerHTML; 
+   		} 
+          });
+    //  }
+    
+    $.ajax({
+        url : "../webresources/login/ship/BillSplit/findNdzys",
+        success : function(data) {
+	        //年度完成量
+	        var monthWorkNum = new Array();
+	        var monthWorkName = new Array();
+	        var v = 0;
+	        for ( var key in data[0]) {
+		        monthWorkName[v] = key;
+		        monthWorkNum[v] = data[0][key];
+		        v++;
+	        }
+
+	        //年度完成量
+	        var monthPlanNum = new Array();
+	        var monthPlanName = new Array();
+	        var z = 0;
+	        for ( var key in data[1]) {
+		        monthPlanName[z] = key;
+		        monthPlanNum[z] = data[1][key];
+		        z++;
+	        }
+
+	        var ndzys = echarts.init(document.getElementById('ndzys'));
+	        option = {
+	            tooltip : {
+	                trigger : 'axis',
+	                showDelay : '20',
+	                axisPointer : { // 坐标轴指示器，坐标轴触发有效
+		                type : 'shadow' // 默认为直线，可选为：'line' | 'shadow'
+	                }
+	            },
+	            grid : {
+	                borderWidth : 0,
+	                height : '60%',
+	                width : '80%',
+	                x : '50',
+	                y : '60'
+	            },
+	            legend : {
+	                textStyle : {
+		                color : '#6495ED',
+	                },
+	                data : [ '计划数', '实际作业数' ]
+	            },
+	            xAxis : [ {
+	                type : 'category',
+	                splitLine : { // 分隔线
+		                show : false, // 默认显示，属性show控制显示与否
+	                },
+	                axisLabel : {
+		                textStyle : {
+			                color : '#6495ED',//坐标值得具体的颜色
+		                }
+	                },
+	                data : [ '1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月' ]
+	            } ],
+	            yAxis : [ {
+	                type : 'value',
+	                // 	                     name : '实际作业数',
+	                splitLine : { // 分隔线
+	                    show : false, // 默认显示，属性show控制显示与否
+	                    lineStyle : { // 属性lineStyle（详见lineStyle）控制线条样式
+	                        color : [ '#ccc' ],
+	                        width : 1,
+	                        type : 'solid'
+	                    }
+	                },
+	                axisLabel : {
+		                textStyle : {
+			                color : '#6495ED',//坐标值得具体的颜色
+		                }
+	                },
+	            //	                     axisLabel : {
+	            //	                         formatter: '{value} ml'
+	            //	                     }
+	            }, {
+	                type : 'value',
+	                name : '计划数',
+	                show : true,
+	                splitLine : { // 分隔线
+	                    show : false, // 默认显示，属性show控制显示与否
+	                    lineStyle : { // 属性lineStyle（详见lineStyle）控制线条样式
+	                        color : [ '#ccc' ],
+	                        width : 1,
+	                        type : 'solid'
+	                    }
+	                },
+	                axisLabel : {
+		                textStyle : {
+			                color : '#6495ED',//坐标值得具体的颜色
+		                }
+	                },
+	                axisLabel : {
+		                formatter : '{value} °C'
+	                }
+	            } ],
+	            series : [ {
+	                name : '实际作业数',
+	                type : 'bar',
+	                itemStyle : {
+		                normal : {
+		                    color : '#CD6839',
+		                    barBorderColor : '#6495ED',
+		                    label : {
+			                    show : false
+		                    }
+		                }
+	                },
+	                data : monthWorkNum
+	            }, {
+	                name : '计划数',
+	                type : 'line',
+	                itemStyle : {
+		                normal : {
+		                    color : '#6495ED',
+		                    barBorderColor : '#6495ED',
+		                    label : {
+			                    show : false
+		                    }
+		                }
+	                },
+	                data : monthPlanNum
+	            } ]
+	        }
+	        
+	        ndzys.setOption(option);
+
+        }
+    })
+    function Marquee2() {
+        if (rolllinkk2_1.offsetTop - rolllinkk_1.scrollTop <= 0)
+            rolllinkk_1.scrollTop -= rolllinkk1_1.offsetHeight;
+        else {
+            rolllinkk_1.scrollTop++;
+        }
+    }
+</script>
+</html>

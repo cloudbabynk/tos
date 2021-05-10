@@ -1,0 +1,73 @@
+package net.huadong.tech.privilege.controller;
+
+import java.util.Date;
+import java.util.UUID;
+
+import net.huadong.idev.hdmessagecode.HdMessageCode;
+import net.huadong.tech.privilege.entity.${entity};
+import net.huadong.tech.base.bean.HdQuery;
+import net.huadong.tech.privilege.service.${servicename};
+import net.huadong.tech.privilege.controller.PrivilegeController;
+import net.huadong.tech.privilege.entity.AuthUser;
+import net.huadong.tech.springboot.core.HdEzuiDatagridData;
+import net.huadong.tech.springboot.core.HdEzuiQueryParams;
+import net.huadong.tech.springboot.core.HdEzuiSaveDatagridData;
+import org.apache.shiro.SecurityUtils;
+import org.springframework.stereotype.Controller;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import com.alibaba.dubbo.config.annotation.Reference;
+import net.huadong.tech.util.CommonUtil;
+/**
+ * @author 
+ */
+@Controller
+@RequestMapping("webresources/login/xxxx/${entity}")
+public class ${controllerename}  {
+	
+	
+	@Autowired
+	private ${servicename} ${servicenamevariable}; 
+	
+	
+
+	/**
+     * 通用列表查询
+     *
+     * @param params
+     * @return
+     */
+	@RequestMapping(value = "/find")
+	@ResponseBody
+	public HdEzuiDatagridData find(@RequestBody HdQuery hdQuery) {
+	    return ${servicenamevariable}.find(hdEzuiQueryParams);
+	}
+
+	/**
+     * 保存资源信息
+     *
+     * @param hdEzuiSaveDatagridData
+     * @return
+     */
+	@RequestMapping("/saveone")
+	@ResponseBody	
+	public HdMessageCode saveone(@RequestBody ${entity} entity) {
+	 	 //CommonUtil.initEntity(gridData);
+		return ${servicenamevariable}.save(entity);
+	}
+		/**
+     * 保存资源信息
+     *
+     * @param hdEzuiSaveDatagridData
+     * @return
+     */
+	@RequestMapping("/save")
+	@ResponseBody	
+	public HdMessageCode save(@RequestBody HdEzuiSaveDatagridData<${entity}> gridData) {
+	 	// CommonUtil.initEntity(gridData);
+		return ${servicenamevariable}.save(gridData);
+	}
+}

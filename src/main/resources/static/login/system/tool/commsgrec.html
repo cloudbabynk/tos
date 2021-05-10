@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="DayWorkClassToolBar1508123307299+${radi}"
+	style="float: left">
+	<div>
+		<!-- 查询 -->
+		<span> <a class="easyui-linkbutton" th:id="query+${radi}">刷新</a> 
+			<shiro:hasPermission name="webresources:login:ComMsgRec:delete">
+			<a class="easyui-linkbutton" th:id='delete+${radi}'>删除</a>
+			</shiro:hasPermission> 
+		</span>
+	</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="DayWorkClassDatagrid1508123307299+${radi}"
+	style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#DayWorkClassDatagrid1508123307299[(${radi})]");
+	    // 删除。
+	    $("#delete[(${radi})]").on("click", function() {
+	    	 var selRow = $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("getChecked");
+	            if (selRow.length == 0) {
+		            HdUtils.messager.info('请至少选择一条数据！');
+		            return false;
+	            }
+	            var ids = '';
+	            $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+		            if (r) {
+			            for (var i = 0; i < selRow.length; i++) {
+				            ids += selRow[i].recId + ",";
+			            }
+			            HdUtils.ajax.post({
+			                url : "../webresources/login/tool/ComMsgRec/removeAll?recIds=" + ids,
+			                success : function(data) {
+				                HdUtils.messager.bottomRight(data.message);
+				                $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("hdReload");
+			                }
+			            });
+		            }
+	            });
+	    });
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+		    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    return onlinquery.build();
+	    }
+
+	    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/tool/ComMsgRec/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : false,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#DayWorkClassToolBar1508123307299" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        onLoadSuccess() {
+	        	 HdUtils.ajax.post({
+	        		 url : "../webresources/login/tool/ComMsgRec/update",
+	        		 success : function() {
+	        			 
+	        		 },
+	        		 error : function() {
+	        			 
+	        		 },
+	        	 });
+	        },
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+	        }, {
+	            field : "sendNam",
+	            title : '消息人',
+	            multiSort : true,
+	            width : 100,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "sendContent",
+	            title : "消息内容",
+	            multiSort : true,
+	            width : 500,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	        	field : "sendTim",
+	            title : "消息时间",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+	        ] ]
+	    });
+	    $("#DayWorkClassDatagrid1508123307299" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

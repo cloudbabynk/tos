@@ -1,0 +1,36 @@
+<meta charset="UTF-8" />
+<form id="assignorgForm">
+	<table style="width: 95%" class="tableform">
+		<tr>
+			<th>接收单位：</th>
+			<td><input id="assignOrgId" name="assignOrgIds"
+				required="required" class="easyui-combotree" /></td>
+		</tr>
+	</table>
+</form>
+
+<!-- 脚本控制 -->
+<script type="text/javascript">
+	$(document).ready(function() {
+	    $('#assignOrgId').combotree(HdUtils.ezui.orgTree(2, {
+	        multiple : true,
+	        cascadeCheck : false
+	    }));
+    });
+    HdUtils.dialog.setValue({
+	    saveHandler : assignorgContent
+    });//设置弹窗确定时的回调
+    function assignorgContent() {
+	    var isVal = $("#assignorgForm").form('validate');
+	    if (!isVal) {
+		    return false;
+	    }
+	    // 	    var selOrgIds=$('#assignorgForm').serializeObject();//在窗口关闭前
+	    // 	   for(var i=0;i<result.assignOrgIds.length;i++){
+
+	    // 	   }
+	    var result = $('#assignOrgId').combotree('getValues');
+	    HdUtils.dialog.handler.dialog("close");
+	    return result;
+    }
+</script>

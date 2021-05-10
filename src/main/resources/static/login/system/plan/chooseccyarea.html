@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var dg = $("#CCyAreaDatagrid1507959149305");
+	    var planGroupNo = HdUtils.dialog.getValue("data").planGroupNo;
+	    var totalNum = HdUtils.dialog.getValue("data").totalNum;
+	    $("#totalNum").val(HdUtils.dialog.getValue("data").totalNum)
+	    var radi = HdUtils.dialog.getValue("radi");
+	    $("input[name='planGroupNo']").val(planGroupNo);
+	    $("input[name='seqNo']").val('1');
+	    $("input[name='activeId']").val("");
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+			    var cyAreaArr = dg.datagrid('getSelections');
+			    var formdata = $("#PlanRangeForm1507959149305").serializeObject();
+		    	var dataPam={};
+		    	dataPam.yards=cyAreaArr;
+		    	dataPam.formdata=formdata;
+			    HdUtils.ajax.post({
+			        url : "../webresources/login/plan/PlanRange/saveRangLst",
+			        data : dataPam,
+			        success : function(data) {
+				        if (data.key == '-1') {
+					        HdUtils.messager.info(data.message);
+					        return false;
+				        }
+				        loadPlain();
+				         HdUtils.dialog.close();
+				        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        }
+			    })
+		    
+
+		    
+
+	    }
+    });
+    // 查询
+    $("#query").on("click", function() {
+	    $("#CCyAreaDatagrid1507959149305").datagrid({
+		    queryParams : query(),
+	    })
+    });
+    function query() {
+	    var onlinquery = new HdQuery();
+	    var cyAreaNo = $("#cyAreaNo").val();
+	    var rowNum = $("#rowNum").val();
+	    var bayNum = $("#bayNum").val();
+	    onlinquery.add("cyAreaNo", cyAreaNo);
+	    onlinquery.add("rowNum", rowNum);
+	    onlinquery.add("bayNum", bayNum);
+	    return onlinquery.build();
+    }
+    $("#CCyAreaDatagrid1507959149305").datagrid({
+        url : "../webresources/login/plan/PlanGroup/findCCyArea",
+        queryParams : query(),
+        method : "post",
+        pagination : true,
+        singleSelect : false,
+        selectOnCheck : true,
+        checkOnSelect : true,
+        rownumbers : true,
+        pageSize : 20,
+        fit : false,
+        fitColumns : false,
+        onSelect : function(rowIndex, rowData) {
+	        // getUnlockedBay(rowData.cyAreaNo);
+	       // if(rowData.unlockNum<$("#totalNum").val()){
+	       //  HdUtils.messager.info("堆场车位不足！");
+	        //$("input[name='planNum']").val( rowData.unlockNum);
+	       // } else{
+	       $("input[name='planNum']").val($("#totalNum").val());	
+	      //  }
+        },
+        columns : [ [ {
+            field : "ck",
+            checkbox : true,
+            sortable : false,
+
+        }, {
+
+            field : "cyAreaNo",
+            title : '场号',
+            multiSort : true,
+            halign : "center",
+            sortable : false
+        }, {
+            field : "rowNum",
+            title : "行数",
+            multiSort : true,
+            halign : "center",
+            hidden : true,
+            sortable : false
+        }, {
+
+            field : "bayNum",
+            title : "每行车数",
+            multiSort : true,
+            hidden : true,
+            halign : "center",
+            sortable : false
+        }, {
+
+            field : "cyTyp",
+            title : '堆场类型',
+            multiSort : true,
+            halign : "center",
+            sortable : false
+        }, {
+            field : "unlockNum",
+            title : "空车位",
+            multiSort : true,
+            halign : "center",
+            editor : {
+                type : "validatebox",
+                options : {
+	                required : false
+                }
+            },
+            sortable : false
+        }, {
+
+            field : "dockNam",
+            title : '所属码头',
+            multiSort : true,
+            halign : "center",
+            width : 120,
+            sortable : false
+        } ] ]
+    });
+    function fixWidth(percent) {
+	    return document.documentElement.cyAreaNo * percent; //这里你可以自己做调整
+    }
+    function fixWidth(percent) {
+	    return document.documentElement.rowNum * percent; //这里你可以自己做调整
+    }
+    $("#CCyAreaDatagrid1507959149305").datagrid("hdGetColumnNames");
+
+    function getUnlockedBay(cyAreaNo) {
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/plan/PlanGroup/getUnlockedBay?cyAreaNo=" + cyAreaNo,
+	        success : function(data) {
+		        $("#Num").val(data[0]);
+		        if ($("#totalNum").val() > $("#Num").val()) {
+			        HdUtils.messager.info("剩余车位不够!");
+		        }
+	        }
+	    })
+    }
+</script>
+<div th:id="ContractIeDocForm1507959149305">
+	<span>场号：<input id="cyAreaNo" name="cyAreaNo" placeholder="场号"
+		type="text" data-options="required:false" style="width: 80px">
+		行数：<input id="rowNum" name="rowNum" placeholder="行数" type="text"
+		data-options="required:false" style="width: 80px"> <a
+		class="easyui-linkbutton" id="query">查询</a> <input id="Num" name="Num"
+		type="text" data-options="required:false" hidden="true"> <input
+		id="totalNum" name="totalNum" type="text"
+		data-options="required:false" hidden="true">
+	</span>
+	<table id="CCyAreaDatagrid1507959149305"></table>
+</div>
+<form id="PlanRangeForm1507959149305" hidden="true">
+	 计划号：<input th:id="planGroupNo"
+		name="planGroupNo" placeholder="计划号" class='easyui-validatebox'
+		data-options="required:false" style="width: 80px"> 
+		场号：<input th:id="cyAreaNo" name="cyAreaNo" placeholder="场号" class='easyui-validatebox' data-options="required:false" style="width: 80px"> 
+		车数：<input th:id="planNum" name="planNum"
+		placeholder="车数" class='easyui-validatebox'
+		data-options="required:false" style="width: 80px"> 序号：<input
+		th:id="seqNo" name="seqNo" placeholder="序号" class='easyui-validatebox'
+		data-options="required:false" style="width: 80px"> 激活标志：<input
+		th:id="activeId" name="activeId" placeholder="激活标志"
+		class='easyui-validatebox' data-options="required:false"
+		style="width: 80px">
+</form>
+</html>

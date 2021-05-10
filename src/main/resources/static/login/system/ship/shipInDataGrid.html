@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- <script language="javascript" type="text/javascript" src="../js/LodopFuncs.js"></script> -->
+<style type="text/css">
+.subtotal {
+	font-weight: bold;
+} /*合计单元格样式*/
+</style>
+
+<table th:id="ShipoutDatagrid1551334266000+${radi}" style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+    	var recNam;
+    	  $.get('/login/PrivilegeController/getLoginAccount?t=11&s='+Math.random(), function(data) {
+    		recNam=data.name;  
+    	  })
+	    var radi = /*[[${radi}]]*/'';
+	    // buttons
+	    HdUtils.dialog.setValue({
+		    'radibillsplit' : radi
+	    });
+	    var workTyp = HdUtils.dialog.getValue('workTyp');
+	    
+	    $("#ShipoutDatagrid1551334266000[(${radi})]").datagrid({
+	    	striped : true,
+	        url : "../webresources/login/cargo/ShipInOutCheck/findShipOut",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : false,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ 
+			{
+	            field : "outId",
+	            title : '主键',
+	            hidden:true,
+	            multiSort : true,
+	            width : 160,
+	            align : "center",
+	            sortable : false
+	        }
+	        , 
+	        {
+	            field : "vcVinNo",
+	            title : '车架号',
+	            multiSort : true,
+	            width : 160,
+	            align : "center",
+	            sortable : false
+	        }
+	        , 
+	        {
+	            field : "vcPort",
+	            title : '卸船港',
+	            multiSort : true,
+	            width : 120,
+	            align : "center",
+	            sortable : false
+	        }, 
+	        {
+	            field : "vcStartSite",
+	            title : '装船船港',
+	            multiSort : true,
+	            width : 120,
+	            align : "center",
+	            sortable : false
+	        }, 
+            {
+                field : "vcCreateDate",
+                title : "扫描时间",
+                multiSort : true,
+                halign : "center",
+                sortable : false
+            } 
+	        ] ]
+	    });
+    });
+    /*]]>*/
+</script>
+</html>

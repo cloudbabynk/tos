@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<div class="easyui-layout" data-options="fit:true"
+	style="height: 100%; width: 100%">
+	<div data-options="region:'center'" style="height: 100%; width: 100%">
+		<div th:id="ShipWorkManToolBar1508123301002+${radi}" style="float: left">
+			<shiro:hasPermission name="webresources:login:ShipWorkman:add">
+				<a class="easyui-linkbutton" th:id='add+${radi}' iconCls="icon-add" plain="false">新增</a>
+			</shiro:hasPermission>
+			<shiro:hasPermission name="webresources:login:ShipWorkman:update">
+				<a class="easyui-linkbutton" th:id='edit+${radi}'>编辑</a>
+			</shiro:hasPermission>
+			<shiro:hasPermission name="webresources:login:ShipWorkman:delete">
+				<a class="easyui-linkbutton" th:id='delete+${radi}'>删除</a>
+			</shiro:hasPermission>
+			<a class="easyui-linkbutton" th:id='genExecution+${radi}'>作业引入</a>
+			<shiro:hasPermission name="webresources:login:ShipClassAct:save">
+				<a class="easyui-linkbutton" th:id='save+${radi}'>保存</a>
+			</shiro:hasPermission>
+			<a class="easyui-linkbutton" th:id='fresh+${radi}'>刷新</a>
+		</div>
+		<!-- Datagrid -->
+		<table th:id="ShipWorkManDatagrid1508123301002+${radi}"
+			style="height: 100%"></table>
+	</div>
+
+</div>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var shipNo=HdUtils.dialog.getValue('shipNo');
+	    $('#ShipWorkManDatagrid1508123301002'+radi).datagrid({
+	            queryParams : query(),
+	        });
+	    HdUtils.dialog.setValue({
+		    'radiShipWorkMan' : radi
+	    });
+	    var dg = $("#ShipWorkManDatagrid1508123301002[(${radi})]");
+	    // 增加。
+	    $("#add[(${radi})]").on("click", function() {
+	    	if(shipNo==null||shipNo==""||shipNo==undefined){
+		          HdUtils.messager.info('请选择一条船！');	
+		    	}else{
+		    addoredit("");
+		    	}
+	    });
+	    // 编辑。
+	    $("#edit[(${radi})]").on("click", function() {
+		    var data = dg.datagrid("getSelected");
+		    if (data == null || data == undefined) {
+			    HdUtils.messager.info('请选择一条数据进行编辑！');
+			    return;
+		    }
+		    var shipWorkmanId = data.shipWorkmanId;
+		    addoredit(shipWorkmanId);
+	    });
+	    
+	    //导入数据
+	    $("#genExecution[(${radi})]").on("click", function() {	
+		    var pam={};
+		    pam.shipNo=shipNo;
+	        $.ajax({
+	        	url: "/webresources/login/ship/ShipWorkman/genExecutionByship",
+	            contentType:"application/json",
+	            type: "POST",
+	            data: $.toJSON(pam),
+	            dataType: 'json',
+	            success: function (data) {
+	            	var datas=data.rows;
+	            	for(var i=0;i<datas.length;i++){
+	            		dg.datagrid('insertRow',{
+	            			index: 0,	// index start with 0
+	            			row:datas[i]
+	            		});
+	            	}
+	            	
+	            },
+	            error: function (data) {
+	                console.log("保存失败！");
+	            }
+	    	});
+	    });
+	    
+	    // 保存。
+	    $("#save[(${radi})]").on("click", function() {
+		    dg.datagrid("hdSave", {
+			    url : "/webresources/login/ship/ShipWorkman/save"
+			   
+		    });
+	    });
+	    
+	    
+	    
+	    function addoredit(shipWorkmanId) {
+		    HdUtils.dialog.setValue({
+			    'shipWorkmanId' : shipWorkmanId
+		    });
+		    HdUtils.dialog.setValue({
+		        'radi' : radi,
+		        'shipNo' : shipNo
+		    });
+		    HdUtils.dialog.show({
+		        width : 800,
+		        height : 260,
+		        title : '配工信息',
+		        href : "../login/system/ship/shipworkmanform.html",
+		        isSaveHandler : true
+		    });
+	    }
+
+	    // 删除。
+	    $("#delete[(${radi})]").on("click", function() {
+		    var selRow = $("#ShipWorkManDatagrid1508123301002[(${radi})]").datagrid("getChecked");
+		    if (selRow.length == 0) {
+			    HdUtils.messager.info('请至少选择一条数据！');
+			    return false;
+		    }
+		    var ids = '';
+		    $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+			    if (r) {
+				    for (var i = 0; i < selRow.length; i++) {
+					    ids += selRow[i].shipWorkmanId + ",";
+				    }
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/ship/ShipWorkman/removeAll?shipWorkmanIds=" + ids,
+				        success : function(data) {
+					        HdUtils.messager.bottomRight(data.message);
+					        $("#ShipWorkManDatagrid1508123301002[(${radi})]").datagrid("hdReload");
+				        }
+				    });
+			    }
+		    });
+	    });
+	    // 刷新。
+	    $("#fresh[(${radi})]").on("click", function() {
+		    dg.datagrid("hdReload");
+	    });
+	
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    onlinquery.add("shipNo", shipNo);
+		    return onlinquery.build();
+	    }
+	    $("#ShipWorkManDatagrid1508123301002[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/ship/ShipWorkman/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : false,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        autoLoad : false,
+	        pageSize : 20,
+	        toolbar : "#ShipWorkManToolBar1508123301002" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+	            rowspan : '2',
+	        }, {
+	            field : "workDay",
+	            title : '作业日期',
+	            multiSort : true,
+	            halign : "center",
+	            width : "80",
+	            rowspan : '2',
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "workRunNam",
+	            title : "班次",
+	            multiSort : true,
+	            rowspan : '2',
+	            halign : "center",
+	            width : "80",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "workTyp",
+	            title : "作业种类",
+	            multiSort : true,
+	            halign : "center",
+	            rowspan : '2',
+	            width : "80",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "workContent",
+	            title : "作业人员",
+	            multiSort : true,
+	            halign : "center",
+	            rowspan : '2',
+	            width : "80",
+	            width : "50",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "wokrNum",
+	            title : "作业完成量",
+	            multiSort : true,
+	            halign : "center",
+	            hidden:true,
+	            rowspan : '2',
+	            width : "80",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "remarks",
+	            title : "备注",
+	            multiSort : true,
+	            halign : "center",
+	            rowspan : '2',
+	            width : "80",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        } ] ]
+	    });
+	    $("#ShipWorkManDatagrid1508123301002" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

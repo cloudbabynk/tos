@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8" />
+<div class="easyui-layout" data-options="fit:true"
+	style="height: 100%; width: 100%">
+	<div data-options="region:'center'" style="height: 100%; width: 100%">
+		<!-- 工具栏 -->
+		<div th:id="ShipCarMeasureToolBar+${radi}" style="float: left; position: relative;">
+			<div>
+				<!-- 查询 -->
+				码头公司：<input th:id="unit+${radi}"	name="unit" type="text" data-options="required:false"	style="width:80px"/>
+				道闸编号：<input th:id="lane+${radi}"	name="lane" type="text" data-options="required:false"	style="width:80px"/>
+				车辆牌照号：<input th:id="brandCod+${radi}" name="brandCod" style="width: 100px" data-options="required:false" />
+				起始时间：<input th:id="inCyTim+${radi}" name="inCyTim" class="easyui-datebox"style="width: 120px" data-options="required:false" />
+				结束时间：<input th:id="outCyTim+${radi}" name="outCyTim" class="easyui-datebox"style="width: 120px" data-options="required:false" />
+				<br/>
+				进闸次数：<input th:id="inFre+${radi}" name="inFre" style="width: 50px" data-options="required:false" />-
+					  <input th:id="inFre1+${radi}" name="inFre1" style="width: 50px" data-options="required:false" />
+				出闸次数：<input th:id="outFre+${radi}" name="outFre" style="width: 50px" data-options="required:false" />-
+					  <input th:id="outFre1+${radi}" name="outFre1" style="width: 50px" data-options="required:false" />
+				进出总次数：<input th:id="ioFre+${radi}" name="ioFre" style="width: 50px" data-options="required:false" />-
+				        <input th:id="ioFre1+${radi}" name="ioFre1" style="width: 50px" data-options="required:false" />
+				<a class="easyui-linkbutton" th:id="query+${radi}" plain="false">查询</a>
+				
+				
+				 
+			</div>
+		</div>
+		<table th:id="ShipCarMeasureDatagrid +${radi}" style="height: 100%"></table>
+	</div>
+</div>
+<!-- 脚本控制 -->
+<script type="text/javascript">
+/*<![CDATA[*/
+	var reload5436 = [ {
+        iconCls : 'icon-reload',
+        handler : function() {
+	        $('#ShipStatusTree123[(${radi})]').tree('reload');
+        }
+    } ];
+	$('#unit[(${radi})]').combobox({
+        url : '../webresources/login/ship/ShipThruputRecord/getCDock',
+        valueField : 'value',
+        textField : 'label',
+        panelHeight : 120
+    });
+	$('#lane[(${radi})]').combobox({
+        url : '../webresources/login/ship/ShipThruputRecord/getLane',
+        valueField : 'LANE_NO',
+        textField : 'LANE_NAM',
+        panelHeight : 120
+    });
+
+    function expandParent(node) {
+	    var parent = node;
+	    var t = true;
+	    do {
+		    parent = $('#ShipStatusTree123[(${radi})]').tree('getParent', parent.target); //获取此节点父节点   
+		    if (parent) { //如果存在   
+			    t = true;
+			    $('#ShipStatusTree123[(${radi})]').tree('expand', parent.target);
+		    } else {
+			    t = false;
+		    }
+	    } while (t);
+    };
+    function detail(index){  
+    	$('#ShipCarMeasureDatagrid[(${radi})]').datagrid('selectRow',index);// 关键在这里  
+        var row = $('#ShipCarMeasureDatagrid[(${radi})]').datagrid('getSelected'); 
+        HdUtils.dialog.setValue({
+        	data : {
+        		billNo : row.billNo
+	        }
+    	});
+    	HdUtils.dialog.show({
+    	    width : 750,
+    	    height : 380,
+    	    title : '进出门明细',
+    	    href : "../login/system/ship/accessdetails.html",
+    	    isSaveHandler : false
+    	});
+    }  
+    function photo(index){  
+    	$('#ShipCarMeasureDatagrid[(${radi})]').datagrid('selectRow',index);// 关键在这里  
+        var row = $('#ShipCarMeasureDatagrid[(${radi})]').datagrid('getSelected'); 
+    	if(row.FULL_FILE_NAME!=null){
+    		var url=row.FULL_FILE_NAME.substr(14).replace(/\\/g,"/");
+    		HdUtils.dialog.show({
+        	    width : 750,
+        	    height : 380,
+        	    title : '照片',
+        	    href : "http://10.130.9.62:8080/image/"+url,
+        	    isSaveHandler : false
+        	});
+    	}
+    }  
+    function detail(index){  
+    	$('#ShipCarMeasureDatagrid[(${radi})]').datagrid('selectRow',index);// 关键在这里  
+        var row = $('#ShipCarMeasureDatagrid[(${radi})]').datagrid('getSelected'); 
+        HdUtils.dialog.setValue({
+        	data : {
+        		platNo : row.PLAT_NO
+	        }
+    	});
+    	HdUtils.dialog.show({
+    	    width : 750,
+    	    height : 380,
+    	    title : '注册信息',
+    	    href : "../login/system/ship/register.html",
+    	    isSaveHandler : false
+    	});
+    }
+    $(document).ready(function() {
+	    var shipNo = "";
+	    $.parser.parse($('#ShipCarMeasureToolBar[(${radi})]'));
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#ShipCarMeasureDatagrid[(${radi})]");
+	    $('#ShipStatusTree123[(${radi})]').tree({
+	        method : "get",
+	        url : "../webresources/login/ship/Ship/gentree",
+	        onClick : treeclick
+	    });
+	    function treeclick(node) {
+		    shipNo = node.id;
+		    $("#ShipCarMeasureDatagrid[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    }
+	    $('#tradeId[(${radi})]').combobox(HdUtils.code.scode({
+		    fieldCod : 'TRADE_ID'
+	    }, {
+		    required : false
+	    }));
+	    $('#iEId[(${radi})]').combobox(HdUtils.code.scode({
+		    fieldCod : 'I_E_ID'
+	    }, {
+		    required : false
+	    }));
+	
+	    function query() {
+		    var unit = $("#unit[(${radi})]").combobox('getText');
+		    var lane = $("#lane[(${radi})]").combobox('getValue');
+		    var brandCod = $("#brandCod[(${radi})]").val();
+		    var inCyTim = $("#inCyTim[(${radi})]").datebox("getValue");
+		    var outCyTim = $("#outCyTim[(${radi})]").datebox("getValue");
+		    var inFre = $("#inFre[(${radi})]").val();
+		    var inFre1 = $("#inFre1[(${radi})]").val();
+		    var outFre = $("#outFre[(${radi})]").val();
+		    var outFre1 = $("#outFre1[(${radi})]").val();
+		    var ioFre = $("#ioFre[(${radi})]").val();
+		    var ioFre1 = $("#ioFre1[(${radi})]").val();
+		    var onlinquery = new HdQuery();
+		    onlinquery.add("unit", unit);
+		    onlinquery.add("lane", lane);
+		    onlinquery.add("brandCod", brandCod);
+		    onlinquery.add("inCyTim", inCyTim);
+		    onlinquery.add("outCyTim", outCyTim);
+		    onlinquery.add("inFre", inFre);
+		    onlinquery.add("inFre1", inFre1);
+		    onlinquery.add("outFre", outFre);
+		    onlinquery.add("outFre1", outFre1);
+		    onlinquery.add("ioFre", ioFre);
+		    onlinquery.add("ioFre1", ioFre1);
+		    return onlinquery.build();
+	    }
+	    $("#query[(${radi})]").on("click", function() {
+	    	$("#ShipCarMeasureDatagrid[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+	    
+	    $("#ShipCarMeasureDatagrid[(${radi})]").hddatagrid({
+	        striped : true,
+	        url : "../webresources/login/ship/BillSplit/findFrequency",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : false,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        autoLoad : false,
+	        pageSize : 20,
+	        toolbar : "#ShipCarMeasureToolBar[(${radi})]",
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "PLAT_NO",
+	            title : "车辆牌照号",
+	            multiSort : true,
+	            halign : "center",
+	            formatter: function(value,row,index){
+	                  return "<a class='easyui-linkbutton' href='#' plain='false' onclick='detail("+index+")'>"+row.PLAT_NO+"</a>";
+	            },
+	            sortable : true
+	        }, {
+
+                field : "IN_NUM",
+                title : '进闸次数',
+                multiSort : true,
+                halign : "center",
+                sortable : false
+            }, {
+
+                field : "OUT_NUM",
+                title : '出闸次数',
+                multiSort : true,
+                halign : "center",
+                sortable : false
+            }, {
+	            field : "ALL_NUM",
+	            title : '进出闸总次数',
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        }] ]
+	    });
+    });
+    /*]]>*/
+</script>
+</html>

@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="DayWorkClassToolBar1508123307299+${radi}"
+	style="float: left">
+	<div>
+		<!-- 查询 -->
+		<span> 客户中文名称：<input th:id="cClientNam+${radi}" name="cClientNam"
+			placeholder="请输入客户名称" type="text" data-options="required:false"
+			style="width: 100px">客户中文简称：<input th:id="cClientShort+${radi}" name="cClientShort"
+			placeholder="请输入客户代码" type="text" data-options="required:false"
+			style="width: 100px"> <input
+			id="shipCorpId" name="shipCorpId" type="checkbox" 
+			style="width: 20px" data-options="required:false"
+			class="easyui-validatebox" maxlength="1" />船公司
+			<input
+			id="shipOwnerId" name="shipOwnerId" type="checkbox" 
+			style="width: 20px" data-options="required:false"
+			class="easyui-validatebox" maxlength="1" />船东
+			<input
+			id="shipAgentId" name="shipAgentId" type="checkbox" 
+			style="width: 20px" data-options="required:false"
+			class="easyui-validatebox" maxlength="1" />船代理
+			<input
+			id="crgAgentId" name="crgAgentId" type="checkbox" checked="checked"
+			style="width: 20px" data-options="required:false"
+			class="easyui-validatebox" maxlength="1" />货代理
+			<input
+			id="consignId" name="consignId" type="checkbox" 
+			style="width: 20px" data-options="required:false"
+			class="easyui-validatebox" maxlength="1" />货主
+			<input
+			id="shipConsignId" name="shipConsignId" type="checkbox" 
+			style="width: 20px" data-options="required:false"
+			class="easyui-validatebox" maxlength="1" />油公司
+			<input
+			id="truckUnitId" name="truckUnitId" type="checkbox" 
+			style="width: 20px" data-options="required:false"
+			class="easyui-validatebox" maxlength="1" />车队
+			<input
+			id="payUnitId" name="payUnitId" type="checkbox" 
+			style="width: 20px" data-options="required:false"
+			class="easyui-validatebox" maxlength="1" />付费单位
+			<input
+			id="constructionId" name="constructionId" type="checkbox" 
+			style="width: 20px" data-options="required:false"
+			class="easyui-validatebox" maxlength="1" />相关方单位
+			<a
+			class="easyui-linkbutton" th:id="query+${radi}">查询</a> 
+			<a class="easyui-linkbutton" th:id='clear+${radi}'>重置</a>
+			<shiro:hasPermission name="webresources:login:CClientCod:add">
+			<a	class="easyui-linkbutton" th:id='add+${radi}' iconCls="icon-add" plain="false">新增</a> 
+			</shiro:hasPermission>
+			<shiro:hasPermission name="webresources:login:CClientCod:update">
+			<a
+			class="easyui-linkbutton" th:id='edit+${radi}'>编辑</a> 
+			</shiro:hasPermission>
+			<shiro:hasPermission name="webresources:login:CClientCod:delete">
+			<a
+			class="easyui-linkbutton" th:id='delete+${radi}'>删除</a>
+			</shiro:hasPermission> <a
+			class="easyui-linkbutton" th:id='fresh+${radi}'>刷新</a>
+			
+		</span>
+	</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="DayWorkClassDatagrid1508123307299+${radi}"
+	style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#DayWorkClassDatagrid1508123307299[(${radi})]");
+	    // buttons
+	    // 增加。
+	    $("#add[(${radi})]").on("click", function() {
+	    	addoredit("");
+	    });
+	    // 编辑。
+	    $("#edit[(${radi})]").on("click", function() {
+	    	var data = dg.datagrid("getSelected");
+		    if (data == null || data == undefined) {
+			    HdUtils.messager.info('请选择一条数据进行编辑！');
+			    return;
+		    }
+		    var clientCod = data.clientCod;
+		    addoredit(clientCod);
+	    });
+	    function addoredit(clientCod) {
+		    HdUtils.dialog.setValue({
+			    'clientCod' : clientCod
+		    });
+		    HdUtils.dialog.setValue({
+			    'radi' : radi
+		    });
+		    HdUtils.dialog.show({
+		        width : 900,
+		        height : 430,
+		        title : '客户资料',
+		        href : "../login/system/base/cclientcodform.html",
+		        isSaveHandler : true
+		    });
+	    }
+	    // 删除。
+	    $("#delete[(${radi})]").on("click", function() {
+	    	 var selRow = $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("getChecked");
+	            if (selRow.length == 0) {
+		            HdUtils.messager.info('请至少选择一条数据！');
+		            return false;
+	            }
+	            var ids = '';
+	            $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+		            if (r) {
+			            for (var i = 0; i < selRow.length; i++) {
+				            ids += selRow[i].clientCod + ",";
+			            }
+			            HdUtils.ajax.post({
+			                url : "../webresources/login/base/CClientCod/removeAll?clientCods=" + ids,
+			                success : function(data) {
+				                HdUtils.messager.bottomRight(data.message);
+				                $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("hdReload");
+			                }
+			            });
+		            }
+	            });
+	    });
+	    // 刷新。
+	    $("#fresh[(${radi})]").on("click", function() {
+		    dg.datagrid("hdReload");
+	    });
+	    //回车键触发操作
+	    $(document).keydown(function(event) {
+		    if (event.keyCode == 13) {
+			    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+				    queryParams : query(),
+			    })
+		    }
+	    })
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+		    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+	    // 清空。
+	    $("#clear[(${radi})]").on("click", function() {
+	    	$("#clientCod[(${radi})]").val("");
+	    	$("#cClientShort[(${radi})]").val("");
+	    	$.each($("input[type=checkbox]"), function() {
+                $(this).prop("checked",false);
+            });
+	    	$("#crgAgentId").prop("checked",true)
+	    	 $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+				    queryParams : query(),
+			    })
+	    });
+	    
+	  //货主货代下拉
+	    function findVCClientCod(clientCode) {
+	    	var scode;
+	    	if(clientCode) {
+	    		$.ajax({
+		    	    method : "POST",
+		    	    url : "../webresources/login/base/CBrandDetail/findVCClientCod?clientCode=" + clientCode,
+		    	    dataType : "text",
+		    	    async : false,
+		    	    contentType : "application/json",
+		    	    success : function(data) {
+		    		    scode = data;
+		    	    }
+		    	});
+	    	}
+	    	return scode;
+	    }
+
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    var cClientShort = $("#cClientShort[(${radi})]").val();
+		    var cClientNam = $("#cClientNam[(${radi})]").val();
+		    $.each($("input[type=checkbox]:checked"), function() {
+                $(this).val("1");
+            });
+		    $.each($("input[type=checkbox]:not(:checked)"), function() {
+                $(this).val("");
+            });
+		    var shipCorpId = $("#shipCorpId").val();
+		    var shipOwnerId = $("#shipOwnerId").val();
+		    var shipAgentId = $("#shipAgentId").val();
+		    var crgAgentId = $("#crgAgentId").val();
+		    var consignId = $("#consignId").val();
+		    var shipConsignId = $("#shipConsignId").val();
+		    var truckUnitId = $("#truckUnitId").val();
+		    var payUnitId = $("#payUnitId").val();
+		    var constructionId = $("#constructionId").val();
+		    onlinquery.add("cClientShort", cClientShort);
+		    onlinquery.add("cClientNam", cClientNam);
+		    onlinquery.add("shipCorpId", shipCorpId);
+		    onlinquery.add("shipOwnerId", shipOwnerId);
+		    onlinquery.add("shipAgentId", shipAgentId);
+		    onlinquery.add("crgAgentId", crgAgentId);
+		    onlinquery.add("consignId", consignId);
+		    onlinquery.add("shipConsignId", shipConsignId);
+		    onlinquery.add("truckUnitId", truckUnitId);
+		    onlinquery.add("payUnitId", payUnitId);
+		    onlinquery.add("constructionId", constructionId);
+		    return onlinquery.build();
+	    }
+
+	    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/base/CClientCod/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#DayWorkClassToolBar1508123307299" + /*[[${radi}]]*/'',
+	        fit : true,
+	        onDblClickRow : function(rowIndex, rowData) {
+	        	var clientCod = rowData.clientCod;
+			    addoredit(clientCod);
+	        },
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+
+	        }, {
+
+	            field : "clientCod",
+	            title : '客户代码',
+	            multiSort : true,
+	            halign : "center",
+	            hidden : "true",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "cClientNam",
+	            title : "客户中文名称",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "eClientNam",
+	            title : "客户英文名称",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "cClientShort",
+	            title : "客户中文简称",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+
+	            field : "eClientShort",
+	            title : "客户英文简称",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+
+	            field : "groupClientCod",
+	            title : "总调客户信息",
+	            multiSort : true,
+	            halign : "center",
+	            formatter: function(value,row,index){
+					var name = findVCClientCod(value);
+	            	return name;
+				},
+	            sortable : false
+	        },{
+	            field : "addresTxt",
+	            title : "地址内容",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+
+	            field : "telephon",
+	            title : "电话",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+
+	            field : "zip",
+	            title : "邮编",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+
+	            field : "email",
+	            title : "E-MAIL",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+
+	            field : "fax",
+	            title : "传真",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+
+	            field : "telex",
+	            title : "电传",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+
+	            field : "shipCorpId",
+	            title : "船公司标志",
+	            multiSort : true,
+	            align : "center",
+	            formatter : function(value) {
+					if (value != null && value != undefined) {
+						if (value == 0) {
+							value = "×";
+							return value;
+						} else {
+							value = "√";
+							return value;
+							 }
+					} else {
+							return value;
+						}
+				},
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+
+	            field : "shipAgentId",
+	            title : "船代理标志",
+	            multiSort : true,
+	            align : "center",
+	            formatter : function(value) {
+					if (value != null && value != undefined) {
+						if (value == 0) {
+							value = "×";
+							return value;
+						} else {
+							value = "√";
+							return value;
+							 }
+					} else {
+							return value;
+						}
+				},
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+
+	            field : "shipOwnerId",
+	            title : "船东标志",
+	            multiSort : true,
+	            align : "center",
+	            formatter : function(value) {
+					if (value != null && value != undefined) {
+						if (value == 0) {
+							value = "×";
+							return value;
+						} else {
+							value = "√";
+							return value;
+							 }
+					} else {
+							return value;
+						}
+				},
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+
+	            field : "crgAgentId",
+	            title : "货代理标志",
+	            multiSort : true,
+	            align : "center",
+	            formatter : function(value) {
+					if (value != null && value != undefined) {
+						if (value == 0) {
+							value = "×";
+							return value;
+						} else {
+							value = "√";
+							return value;
+							 }
+					} else {
+							return value;
+						}
+				},
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+
+	            field : "consignId",
+	            title : "货主标志",
+	            multiSort : true,
+	            align : "center",
+	            formatter : function(value) {
+					if (value != null && value != undefined) {
+						if (value == 0) {
+							value = "×";
+							return value;
+						} else {
+							value = "√";
+							return value;
+							 }
+					} else {
+							return value;
+						}
+				},
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+
+	            field : "shipConsignId",
+	            title : "油公司标志",
+	            multiSort : true,
+	            align : "center",
+	            formatter : function(value) {
+					if (value != null && value != undefined) {
+						if (value == 0) {
+							value = "×";
+							return value;
+						} else {
+							value = "√";
+							return value;
+							 }
+					} else {
+							return value;
+						}
+				},
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+
+	            field : "truckUnitId",
+	            title : "车队标志",
+	            multiSort : true,
+	            align : "center",
+	            formatter : function(value) {
+					if (value != null && value != undefined) {
+						if (value == 0) {
+							value = "×";
+							return value;
+						} else {
+							value = "√";
+							return value;
+							 }
+					} else {
+							return value;
+						}
+				},
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+
+	            field : "payUnitId",
+	            title : "付费单位标志",
+	            multiSort : true,
+	            align : "center",
+	            formatter : function(value) {
+					if (value != null && value != undefined) {
+						if (value == 0) {
+							value = "×";
+							return value;
+						} else {
+							value = "√";
+							return value;
+							 }
+					} else {
+							return value;
+						}
+				},
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+
+	            field : "constructionId",
+	            title : "相关方单位标志",
+	            multiSort : true,
+	            align : "center",
+	            formatter : function(value) {
+					if (value != null && value != undefined) {
+						if (value == 0) {
+							value = "×";
+							return value;
+						} else {
+							value = "√";
+							return value;
+							 }
+					} else {
+							return value;
+						}
+				},
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+
+	            field : "acoWay",
+	            title : "付款方式",
+	            multiSort : true,
+	            halign : "center",
+	            formatter : function(value){
+	            	return HdUtils.code.name('ACO_WAY',value);
+	            },
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+
+	            field : "feeWay",
+	            title : "结算方式",
+	            multiSort : true,
+	            halign : "center",
+	            formatter : function(value){
+	            	return HdUtils.code.name('FEE_WAY',value);
+	            },
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+
+	            field : "credit",
+	            title : "信誉",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+
+	            field : "validDte",
+	            title : "有效期",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+
+	            field : "freeDays",
+	            title : "免堆期",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+
+	            field : "remarks",
+	            title : "备注",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+
+	        ] ]
+	    });
+	    $("#DayWorkClassDatagrid1508123307299" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

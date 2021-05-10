@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="DayWorkClassToolBar1508123307299+${radi}"
+	style="float: left">
+	<div>
+		<!-- 查询 -->
+		<span> 车牌号：<input th:id="platNo+${radi}"
+			name="platNo" placeholder="请输入牌号" type="text"
+			data-options="required:false" style="width: 120px"> <a
+			class="easyui-linkbutton" th:id="query+${radi}">查询</a>
+			<!-- <a class="easyui-linkbutton" th:id='clear+${radi}'>重置</a>  -->
+			<a
+			class="easyui-linkbutton" th:id='fresh+${radi}'>刷新</a>
+		
+		</span>
+	</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="DayWorkClassDatagrid1508123307299+${radi}"
+	style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#DayWorkClassDatagrid1508123307299[(${radi})]");
+	    // 刷新。
+	    $("#fresh[(${radi})]").on("click", function() {
+		    dg.datagrid("hdReload");
+	    });
+	   /* // 清空。
+	    $("#clear[(${radi})]").on("click", function() {
+	       $("#platNo[(${radi})]").val("");
+	       $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	      });
+ */
+	    //回车键触发操作
+	    $(document).keydown(function(event) {
+		    if (event.keyCode == 13) {
+			    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+				    queryParams : query(),
+			    })
+		    }
+	    })
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+		    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    var platNo = $("#platNo[(${radi})]").val();
+		    onlinquery.add("platNo", platNo);
+		    return onlinquery.build();
+	    }
+
+	    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/base/CTruck/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#DayWorkClassToolBar1508123307299" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+	        },  {
+	            field : "platNo",
+	            title : "牌号",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        }, {
+	            field : "trayNo",
+	            title : "托盘号",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        },{
+
+	            field : "truckWgt",
+	            title : "重量",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        }, {
+	            field : "truckUnit",
+	            title : "单位",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        }, {
+	            field : "truckerNam",
+	            title : "司机名",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        },{
+	            field : "truckerNo",
+	            title : "司机号",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        },{
+	            field : "relationNam",
+	            title : "联系人",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        },{
+	            field : "telephon",
+	            title : "电话",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        },{
+	            field : "mobileTele",
+	            title : "手机",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        },{
+	            field : "forbidId",
+	            title : "放行",
+	            multiSort : true,
+	            halign : "center",
+	            formatter : function(value) {
+					if (value != null && value != undefined) {
+						if (value == 0) {
+							value = "×";
+							return value;
+						} else {
+							value = "√";
+							return value;
+						}
+					} else {
+						return value;
+					}
+				},
+	            sortable : false
+	        },{
+	            field : "forbidTxt",
+	            title : "禁提内容",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        },{
+	            field : "capability",
+	            title : "载重吨",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        },{
+	            field : "inDate",
+	            title : "制造日期",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        },{
+	            field : "factroy",
+	            title : "制造厂家",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        },{
+	            field : "remarks",
+	            title : "备注",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        }/* ,{
+
+	            field : "recNam",
+	            title : '<font color="red">录入员</font>',
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        }, {
+
+	            field : "recTim",
+	            title : '<font color="red">录入时间</font>',
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.datetime,
+	            width : 120,
+	            sortable : false
+	        }, {
+
+	            field : "updNam",
+	            title : '<font color="red">修改人</font>',
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        }, {
+
+	            field : "updTim",
+	            title : '<font color="red">修改时间</font>',
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.datetime,
+	            width : 120,
+	            sortable : false
+	        } */
+
+	        ] ]
+	    });
+	    $("#DayWorkClassDatagrid1508123307299" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

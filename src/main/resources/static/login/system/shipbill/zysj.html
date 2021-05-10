@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- Datagrid -->
+<div class="easyui-layout" style="width: 100%; height: 100%;">
+    <div data-options="region:'north'" style="height: 40px;">
+        <!-- 工具栏 -->
+        <div th:id="ContractIeDocToolBar15081233020012+${radi}" style="float: left;margin: 5px 5px;">
+            <!-- 查询 -->
+            <div th:id="zclh+${radi}" style="float: left;">
+                <input type="radio" name="workTyp" value="SO" class='easyui-radio' checked="checked">装船</input>
+                <input type="radio" name="workTyp" value="SI" class='easyui-radio'>卸船</input>
+                <!-- <input type="radio"  name="workTyp" value="TI"  class='easyui-radio'>集港</input> 
+                <input type="radio"  name="workTyp" value="TO"  class='easyui-radio'>疏港</input>  -->
+                <!-- <input type="radio"  name="workTyp" value="TZ"  class='easyui-radio'>转栈</input>
+                <input type="radio"  name="workTyp" value="MV"  class='easyui-radio'>捣场</input>  -->
+                &nbsp; &nbsp;船名：<input th:id="cShipNam+${radi}" name="cShipNam" type="text"
+                    data-options="required:false" readonly='readonly' style="width: 120px">
+                &nbsp;进/出口航次：<input th:id="voyage+${radi}" type="text" data-options="required:false" style="width: 80px"
+                    readonly='readonly' />
+                &nbsp;<a class="easyui-linkbutton" th:id="queryShip+${radi}">选船</a>
+                &nbsp;日期：<input th:id="workDteStart+${radi}" data-options="required:false" class="easyui-datebox"
+                    style="width: 87px" />
+                -
+                <input th:id="workDteEnd+${radi}" data-options="required:false" class="easyui-datebox"
+                    style="width: 87px" />
+                &nbsp;&nbsp;
+                <!--  委托号： --><input th:id="contractNo+${radi}" name="contractNo" placeholder="请输入委托号" type="hidden"
+                    data-options="required:false" style="width: 120px">
+
+                &nbsp;&nbsp; 提单号：<input th:id="billNo+${radi}" placeholder="请选择提单号" type="text"
+                    data-options="required:false" style="width: 120px" />
+                &nbsp;&nbsp; 品牌：<input th:id="brandCod+${radi}" width="70px" />
+
+
+                <a class="easyui-linkbutton" th:id="query+${radi}">查询</a>
+            </div>
+
+        </div>
+        <!-- 工具栏 结束 -->
+    </div>
+    <div data-options="region:'center',split:true,title:'舱单'" >
+        <table th:id="ShipBillDatagrid1508123309099+${radi}" style="height: 100%"></table>
+    </div>
+    <div data-options="region:'east',split:true,title:'理货数据'" style="width:750px">
+        <table th:id="ContractIeDocDatagrid1508123320012+${radi}" style="height: 100%"></table>
+    </div>
+</div>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+	           
+      function findCDData() {
+    	  var CDdata = $('#ShipBillDatagrid1508123309099[(${radi})]').datagrid("getSelections");
+          console.log(CDdata);
+          return CDdata;
+		   
+	  }
+    $(document).ready(function() {
+            //品牌下拉
+            $('#brandCod[(${radi})]').combobox({
+                url: '../webresources/login/base/CCarTyp/getCBrandDrop',
+                valueField: 'value',
+                textField: 'label',
+                panelHeight: 500,
+                onSelect: function (rec) {
+                    return rec.value;
+                }
+            });
+
+            //提单号
+            $('#billNo[(${radi})]').combobox({
+                url: '../webresources/login/work/WorkCommand/getBillNoByShipNo?shipNo=123456#&workTyp=SO',
+                valueField: 'value',
+                textField: 'label',
+                panelHeight: 200,
+                onSelect: function (rec) {
+                    return rec.value;
+                },
+                filter: function(q, row){
+                    var opts = $(this).combobox('options');
+                    return row[opts.textField].includes(q);
+                }
+            });
+
+            $("#workDteStart[(${radi})]").datebox({
+                value:''
+            });
+            
+            $("#workDteEnd[(${radi})]").datebox({
+                value:''
+            });
+            
+            var radi = /*[[${radi}]]*/'';
+            var dg = $("#ContractIeDocDatagrid1508123320012[(${radi})]");
+            
+            //var shipNo = HdUtils.dialog.getValue("shipNo");
+            let shipNo = '';
+
+            //localStorage.removeItem("workTyp");//刚进入界面时删除数据
+            $("#zclh[(${radi})] input[name='workTyp']:checked").val("SO");//进入页面后默认是装船
+            HdUtils.dialog.setValue({'iEId':'SO'})//进入页面后默认是装船
+            $('#iEId[(${radi})]').combobox(HdUtils.code.scode({
+                fieldCod : 'I_E_ID'
+            }, {
+                required : false
+            })); 
+            
+            //选择复选框触发
+            $("#zclh[(${radi})] input[name='workTyp']").on("click", function() {
+                if(!shipNo){
+                    HdUtils.messager.info('请先选船！');
+                    $("#zclh[(${radi})] input[value='SO']").attr({checked : "checked"});
+                    $("#zclh[(${radi})] input[value='SI]'").removeAttr('checked');
+                    $("#zclh[(${radi})] input[name='workTyp']:checked").val("SO");
+                    return;
+                }
+                    var workTyp=$("#zclh[(${radi})] input[name='workTyp']:checked").val();
+                    HdUtils.dialog.setValue({'iEId':workTyp})
+                    $("#query[(${radi})]").click();
+                    $('#billNo[(${radi})]').combobox('reload',`../webresources/login/work/WorkCommand/getBillNoByShipNo?shipNo=${shipNo}&workTyp=${workTyp}`);
+                
+                    /*  if(window.localStorage){
+                    localStorage.setItem("workTyp",workTyp);//复选框的值
+                    } */
+            });
+            
+            // 查询
+            $("#query[(${radi})]").on("click", function() {
+                var workTyp=$("#zclh[(${radi})] input[name='workTyp']:checked").val();
+                var contractNo = $("#contractNo[(${radi})]").val();
+                if(workTyp=="TI"||workTyp=="TO"){
+                        if(contractNo==""||contractNo==null){
+                        HdUtils.messager.info('请输入委托号');
+                        return;
+                        }
+                }
+                var queryParams = query();
+                $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid({
+                    queryParams :queryParams.build(),
+                })
+                $('#ShipBillDatagrid1508123309099[(${radi})]').datagrid({
+                    queryParams :queryParams.build(),
+                })
+                queryTallySplithy(queryParams);
+            });
+            
+            //选船回调
+            let callback = (data) => {
+            	console.log(data);
+                shipNo = data.shipNo;
+                $("#cShipNam[[${radi}]]").val(data.cShipNam);
+                $("#voyage[[${radi}]]").val(`${data.ivoyage}/${data.evoyage}`);
+                HdUtils.dialog.setValue({
+                    'shipNo' : shipNo,
+                    'shipNam' : data.cShipNam,
+                    'voyage' : data.ivoyage + "/" + data.evoyage,
+                    'dockCod' :  data.dockCod,
+                    'eShipNam' : data.eShipNam,
+                    'tradeId':data.tradeId
+                   
+                });
+                refreshTallySpitDiv();
+                $("#query[(${radi})]").click();
+                let workTyp=$("#zclh[(${radi})] input[name='workTyp']:checked").val();
+                $('#billNo[(${radi})]').combobox('reload',`../webresources/login/work/WorkCommand/getBillNoByShipNo?shipNo=${shipNo}&workTyp=${workTyp}`);
+            }
+
+            //选船按钮
+            $("#queryShip[(${radi})]").on("click", function () {
+                HdUtils.selTypShip(callback, null);
+            });
+
+            //查询条件
+            function query() {
+                var onlinquery = new HdQuery();
+                if(shipNo){
+                    onlinquery.add("shipNo", shipNo);
+                }else{
+                    onlinquery.add("shipNo", '123456789###');
+                }
+                var contractNo = $("#contractNo[(${radi})]").val();
+                var workTyp=$("#zclh[(${radi})] input[name='workTyp']:checked").val();
+                onlinquery.add("workTyp", workTyp);
+                onlinquery.add("Type","HY");
+                onlinquery.add("contractNo",contractNo);
+                
+                //提单单号
+                let billNo = $('#billNo[(${radi})]').combobox('getValue');
+                onlinquery.add("billNo",billNo);
+                //品牌
+                onlinquery.add("brandCod",$('#brandCod[(${radi})]').combobox('getValue'));
+                //日期
+                let workDteStart = $("#workDteStart[[${radi}]]").combobox('getValue');
+                let workDteEnd =  $("#workDteEnd[(${radi})]").combobox('getValue');
+                onlinquery.add("workDteStart",workDteStart);
+                onlinquery.add("workDteEnd",workDteEnd);
+
+                let ieid = '';
+                //仅供 舱单的iEId 使用
+                if('SO'==workTyp){
+                    ieid = 'E'
+                }else if('SI'==workTyp){
+                    ieid = 'I'
+                }
+                onlinquery.add("iEId", ieid);
+
+                return onlinquery;
+            }
+
+            //指定列求和
+            function compute(colName) {
+                var rows = $('#ShipBillDatagrid1508123309099[(${radi})]').datagrid('getRows');
+                var total = 0;
+                for (var i = 0; i < rows.length; i++) {
+                    if (rows[i][colName] != undefined)
+                        total += parseFloat(rows[i][colName]);
+                }
+                return total.toFixed(3);
+            }
+            
+            function computew(colName) {
+                var rows = $('#ShipBillDatagrid1508123309099[(${radi})]').datagrid('getRows');
+                var total = 0;
+                for (var i = 0; i < rows.length; i++) {
+                    if (rows[i][colName] != undefined)
+                        total += parseFloat(rows[i][colName]);
+                }
+                return total;
+            }
+            
+            function computez(colName) {
+                var rows = $('#ShipBillDatagrid1508123309099[(${radi})]').datagrid('getRows');
+                var total = 0;
+                for (var i = 0; i < rows.length; i++) {
+                    if (rows[i][colName] != undefined)
+                        total += parseFloat(rows[i][colName]);
+                }
+                return total;
+            }
+
+            //理货数据
+            $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid({
+                striped : true,
+                url : "../webresources/login/work/WorkCommand/findZxzy",
+                queryParams : query().build(),
+                method : "post",
+                pagination : true,
+                singleSelect : true,
+                selectOnCheck : true,
+                checkOnSelect : true,
+                rownumbers : true,
+                showFooter:true,
+                pageSize : 20,
+                fit : true,
+                fitColumns : false,
+                columns : [ [ {
+                    field : "ck",
+                    checkbox : true,
+                    sortable : false,
+                }, {
+                    field : "shipNam",
+                    title : '船名',
+                    multiSort : true,
+                    width : 100,
+                    align : "center",
+                    sortable : false
+                },{
+                    field : "voyage",
+                    title : '航次',
+                    multiSort : true,
+                    width : 80,
+                    align : "center",
+                    sortable : false
+                },{
+                    field : "workTypNam",
+                    title : '作业项目',
+                    multiSort : true,
+                    width : 80,
+                    align : "center",
+                    sortable : false
+                },{
+                    field : "billNo",
+                    title : '提单号',
+                    multiSort : true,
+                    width : 120,
+                    align : "center",
+                    sortable : false
+                },{
+                    field : "brandNam",
+                    title : "品牌",
+                    multiSort : true,
+                    width : 80,
+                    align : "center",
+                    sortable : false
+                },{
+                    field : "carKindNam",
+                    title : "车类",
+                    multiSort : true,
+                    width : 60,
+                    align : "center",
+                    sortable : false
+                }, {
+                    field : "carTypNam",
+                    title : "型号",
+                    multiSort : true,
+                    width : 60,
+                    align : "center",
+                    sortable : false
+                },{
+                    field : "rksl",
+                    title : "数量",
+                    multiSort : true,
+                    width : 70,
+                    align : "right",
+                    sortable : false
+                }, {
+                    field : "inCyTim",
+                    title : "装卸日期",
+                    multiSort : true,
+                    width : 100,
+                    align : "center",
+                    formatter : $.hd.ezui.formatter.date,
+                    sortable : false
+                },{
+                    field : "useMachId",
+                    title : "使用港方动力",
+                    multiSort : true,
+                    align : "center",
+                    formatter : function(value) {
+                        if (value != null && value != undefined) {
+                            if (value == 0) {
+                                value = "×";
+                                return value;
+                            } else {
+                                value = "√";
+                                return value;
+                                    }
+                        } else {
+                                return value;
+                            }
+                    },
+                    sortable : false
+                },{
+                    field : "useWorkerId",
+                    title : "使用港方人力",
+                    multiSort : true,
+                    align : "center",
+                    formatter : function(value) {
+                        if (value != null && value != undefined) {
+                            if (value == 0) {
+                                value = "×";
+                                return value;
+                            } else {
+                                value = "√";
+                                return value;
+                                    }
+                        } else {
+                                return value;
+                            }
+                    },
+                    sortable : false
+                },{
+
+                    field : "nightId",
+                    title : "夜班作业",
+                    multiSort : true,
+                    align : "center",
+                    formatter : function(value) {
+                        if (value != null && value != undefined) {
+                            if (value == 0) {
+                                value = "×";
+                                return value;
+                            } else {
+                                value = "√";
+                                return value;
+                                    }
+                        } else {
+                                return value;
+                            }
+                    },
+                    sortable : false
+                },{
+
+                    field : "holidayId",
+                    title : "节假日作业",
+                    multiSort : true,
+                    align : "center",
+                    formatter : function(value) {
+                        if (value != null && value != undefined) {
+                            if (value == 0) {
+                                value = "×";
+                                return value;
+                            } else {
+                                value = "√";
+                                return value;
+                                    }
+                        } else {
+                                return value;
+                            }
+                    },
+                    sortable : false
+                }, {
+                    field : "remarks",
+                    title : "备注",
+                    multiSort : true,
+                    width : 100,
+                    align : "center",
+                    sortable : false
+                }] ],
+                onLoadSuccess:function(){
+                    //$("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid('getPager').pagination({displayMsg:''})
+                    const selectRows = $('#ContractIeDocDatagrid1508123320012[(${radi})]').datagrid('getRows');
+                    let rkslTotal = 0;
+                    for (row of selectRows) {
+                        rkslTotal += Number.parseInt(!row.rksl ? '0' : row.rksl)
+                    }
+                    $('#ContractIeDocDatagrid1508123320012[(${radi})]').datagrid('reloadFooter', [
+                        {
+                            rksl: `<span class="subtotal">${rkslTotal}</span>`
+                        }
+                    ]);
+                    }, 
+            });
+            
+            //舱单列表
+            $('#ShipBillDatagrid1508123309099[(${radi})]').datagrid({
+                striped: true,
+                url: "../webresources/login/ship/ShipBill/find",
+                queryParams: query().build(),
+                method: "post",
+                pagination: false,
+                singleSelect: false,
+                selectOnCheck: false,
+                checkOnSelect: true,
+                rownumbers: true,
+                showFooter: true,
+                pageSize: 20,
+                fit: true,
+                onLoadSuccess() {
+                    //添加“合计”列
+                    $('#ShipBillDatagrid1508123309099[(${radi})]').datagrid('reloadFooter', [
+                        {
+                            billNo: '<span class="subtotal">合计</span>',
+                            pieces: '<span class="subtotal">' + computez("pieces") + '</span>',
+                            weights: '<span class="subtotal">' + computew("weights") + '</span>',
+                            valumes: '<span class="subtotal">' + compute("valumes") + '</span>'
+                        }
+                    ]);
+                },
+                rowStyler: function (index, row) {
+                    var rows = $('#ShipBillDatagrid1508123309099[(${radi})]').datagrid('getRows');
+                    for (var i = 0; i < rows.length; i++) {
+                        for (var j = i + 1; j < rows.length; j++) {
+                            if (rows[i].billNo === rows[j].billNo) {
+                                $("[datagrid-row-index='" + i + "']").css({ "background-color": "#F08080" });
+                                $("[datagrid-row-index='" + j + "']").css({ "background-color": "#F08080" });
+                                return '';
+                            }
+                        }
+                    }
+                },
+                fitColumns: false,
+                columns: [ [
+                    {
+                        field: "ck",
+                        checkbox: true,
+                        sortable: false,
+
+                    }, {
+                        field: "shipbillId",
+                        title: '主键',
+                        multiSort: true,
+                        hidden: true,
+                        halign: "center",
+                        editor: {
+                            type: "validatebox",
+                            options: { required: false }
+                        },
+                        sortable: false
+                    }, {
+
+                        field: "billNo",
+                        title: '提单号',
+                        multiSort: true,
+                        halign: "center",
+                        editor: {
+                            type: "validatebox",
+                            options: { required: false }
+                        },
+                        sortable: true
+                    }, {
+
+                        field: "tradeId",
+                        title: '内外贸',
+                        multiSort: true,
+                        halign: "center",
+                        editor: {
+                            type: "combobox",
+                            options: HdUtils.code.scode({
+                                fieldCod: 'TRADE_ID'
+                            }, {
+                                required: true
+                            })
+                        },
+                        formatter: function (value) {
+                            return HdUtils.code.name('TRADE_ID', value);
+                        },
+                        sortable: false
+                    }, {
+                        field: "brandNam",
+                        title: '品牌',
+                        multiSort: true,
+                        halign: "center",
+                        editor: {
+                            type: "combobox",
+                            options: {
+                                url: '../webresources/login/base/CCarTyp/getCBrandDrop',
+                                valueField: 'value',
+                                textField: 'label',
+                                panelHeight: 120,
+                                panelWidth: 80,
+                                onSelect: function (rec) {
+                                    return rec.value;
+                                }
+                            }
+                        },
+                        sortable: false
+                    }, {
+
+                        field: "carTypNam",
+                        title: '货名',
+                        multiSort: true,
+                        hidden: true,
+                        halign: "center",
+                        editor: {
+                            type: "combobox",
+                            options: {
+                                url: '../webresources/login/ship/BillCar/getCCarTypDrop',
+                                valueField: 'value',
+                                textField: 'label',
+                                panelHeight: 120,
+                                panelWidth: 120,
+                                onSelect: function (rec) {
+                                    return rec.value;
+                                }
+                            }
+                        },
+                        sortable: false
+                    }, {
+
+                        field: "pieces",
+                        title: '件数',
+                        multiSort: true,
+                        halign: "center",
+                        editor: {
+                            type: "validatebox",
+                            options: { required: false }
+                        },
+                        sortable: false
+                    }, {
+
+                        field: "weights",
+                        title: '重量',
+                        multiSort: true,
+                        halign: "center",
+                        editor: {
+                            type: "validatebox",
+                            options: { required: false }
+                        },
+                        sortable: false
+                    }, {
+
+                        field: "valumes",
+                        title: '体积',
+                        multiSort: true,
+                        halign: "center",
+                        editor: {
+                            type: "validatebox",
+                            options: { required: false }
+                        },
+                        sortable: false
+                    }, {
+                        field: "loadPortNam",
+                        title: "装货港",
+                        multiSort: true,
+                        halign: "center",
+                        editor: {
+                            type: "validatebox",
+                            options: { required: false }
+                        },
+                        sortable: false
+                    }, {
+
+                        field: "tranPortNam",
+                        title: "卸货港",
+                        multiSort: true,
+                        halign: "center",
+                        editor: {
+                            type: "validatebox",
+                            options: { required: false }
+                        },
+                        sortable: false
+                    },
+                    {
+
+                        field: "receiveNam",
+                        title: "收货人",
+                        multiSort: true,
+                        halign: "center",
+                        editor: {
+                            type: "validatebox",
+                            options: { required: false }
+                        },
+                        sortable: false
+                    },
+                    {
+
+                        field: "consignNam",
+                        title: "发货人",
+                        multiSort: true,
+                        halign: "center",
+                        editor: {
+                            type: "validatebox",
+                            options: { required: false }
+                        },
+                        sortable: false
+                    },
+                    {
+
+                        field: "sendFlag",
+                        title: "回执",
+                        multiSort: true,
+                        halign: "center",
+                        formatter: $.hd.ezui.formatter.checkbox2,
+                        sortable: false
+                    }, {
+
+                        field: "releaseTim",
+                        title: "放行时间",
+                        multiSort: true,
+                        halign: "center",
+                        sortable: false
+                    },
+                    {
+                        field: "checkTim",
+                        title: "核碰时间",
+                        multiSort: true,
+                        halign: "center",
+                        sortable: false
+                    }, {
+                        field: "exitCustomId",
+                        title: "退关标志",
+                        multiSort: true,
+                        halign: "center",
+                        formatter: $.hd.ezui.formatter.checkbox2,
+                        sortable: false
+                    }, {
+                        field: "confirmId",
+                        title: "确认标志",
+                        multiSort: true,
+                        halign: "center",
+                        formatter: $.hd.ezui.formatter.checkbox2,
+                        sortable: false
+                    }, {
+                        field: "ydId",
+                        title: "运抵标志",
+                        multiSort: true,
+                        halign: "center",
+                        formatter: $.hd.ezui.formatter.checkbox2,
+                        sortable: false
+                    }, {
+                        field: "ydTim",
+                        title: "运抵时间",
+                        multiSort: true,
+                        halign: "center",
+                        sortable: false
+                    }, {
+                        field: "dockNam",
+                        title: "作业公司",
+                        multiSort: true,
+                        align: "center",
+                        sortable: false
+                    }, {
+                        field: "dockCod",
+                        title: "作业公司",
+                        hidden: true,
+                        multiSort: true,
+                        align: "center",
+                        sortable: false
+                    }, {
+                        field: "updTim",
+                        title: '<font color="red">修改时间</font>',
+                        multiSort: true,
+                        halign: "center",
+                        formatter: $.hd.ezui.formatter.datetime,
+                        width: 120,
+                        sortable: false
+                    },
+                    {
+                        field: "remarks",
+                        title: "备注",
+                        multiSort: true,
+                        width: '150',
+                        halign: "center",
+                        editor: {
+                            type: "validatebox",
+                            options: { required: false }
+                        },
+                        sortable: false
+                    }
+                ]]
+            });
+            
+            
+            $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid("hdGetColumnNames");
+        });
+    /*]]>*/
+</script>
+</html>

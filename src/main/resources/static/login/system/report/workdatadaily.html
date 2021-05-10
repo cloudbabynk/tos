@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<body>
+<div style="float: left">
+		进出场日期：<input th:id="inoutTim+${radi}" name="inoutTim" class="easyui-datebox"
+			style="width: 120px" /><a class="easyui-linkbutton"
+			th:id="report+${radi}">报表</a>
+</div>
+<iframe th:id="workdatadaily+${radi}" style="width:100%;height:100%;"> </iframe>	
+<script>
+	$(document).ready(function() {
+		   $("#report[(${radi})]").on("click", function() {
+		    	var inoutTim = $("#inoutTim[(${radi})]").datebox('getValue');
+		    	
+		    	var src='http://10.163.204.56:8090/show/?fileid=b3b6cf45c6c044d6ace1e71e043b3a5f&rpttoken=333&inoutTim='+inoutTim;
+			    $("#workdatadaily[(${radi})]").attr('src',src);  	
+		   });
+    });
+</script>
+</body>
+</html>

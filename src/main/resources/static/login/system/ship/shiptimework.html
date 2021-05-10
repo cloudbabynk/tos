@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+</head>
+<body>
+<div >
+<iframe id="zzy" style="width:100%;height:800px;"> </iframe>	
+</div>
+<script>
+	$(document).ready(function() {
+		var shipTimworkId=HdUtils.dialog.getValue("shipTimworkId");
+		var shipNo=HdUtils.dialog.getValue("shipNo");
+		var recNam=HdUtils.dialog.getValue("recNam");
+		var date = new Date().getHours();
+		var beg;
+		var end;
+		if (date > 7 && date <20){
+			beg = 10800;
+			end = 12000;
+		} else {
+			beg = 12000;
+			end = 10800;
+		}
+	    if(shipTimworkId!==""){
+		var sql=" and a.ship_timwork_id in ("+shipTimworkId+")";
+		var src='http://10.163.204.56:8090/show/?fileid=d91abc0333f5471493315bda8a1b324c&rpttoken=333&shipNo='+shipNo+'&sql='+sql+'&recNam='+recNam+'&beg='+beg+'&end='+end;
+		    $("#zzy").attr('src',src); 
+		}
+    });
+</script>
+</body>
+</html>

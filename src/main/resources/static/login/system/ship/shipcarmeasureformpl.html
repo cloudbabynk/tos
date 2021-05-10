@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8" />
+<script>
+
+   $(document).ready(function() {
+        HdUtils.i18n();
+        HdUtils.dialog.setValue({saveHandler: saveHandler});
+        function saveHandler() {
+            var formdata = new Object();
+            formdata.oldCarLength = $('#oldCarLength[(${radi})]').val();//新增加的原长
+            formdata.oldCarWidth = $('#oldCarWidth[(${radi})]').val();//新增加的原宽
+            formdata.oldCarHighth = $('#oldCarHighth[(${radi})]').val();//新增加的原高
+            formdata.newCarLength = $('#newCarLength[(${radi})]').val();
+            formdata.newCarWidth = $('#newCarWidth[(${radi})]').val();
+            formdata.newCarHighth = $('#newCarHighth[(${radi})]').val();
+            formdata.carWeight = $('#carWeight[(${radi})]').val();
+        	HdUtils.ajax.post({
+                url: "../webresources/login/ship/ShipCarMeasure/savepl?ids=[(${ids})]",
+                data:formdata, 
+                success: function (data) {               
+                	if (data.key == '-1') {
+                	    HdUtils.messager.info(i18n(data.message));
+    					return false;
+    				}
+                	HdUtils.dialog.close();
+                	HdUtils.messager.bottomRight(data.message);
+                	var aplradi = HdUtils.dialog.getValue("aplradi");
+                	$("#ShipCarMeasureDatagrid"+aplradi).datagrid("hdReload");
+                }
+            });
+        }
+   });
+  
+</script>
+<form th:id="ShipCarMeasureForm+${radi}">
+    <table th:id="ShipCarMeasureTable+${radi}" style="height: 75%; width: 80%" class="tableform">
+         <tr>
+             <td  hidden="true"><input th:id="ids+${radi}" name="ids"/></td>
+          <tr>            
+             <th> 原长： </th>
+             <td><input th:id="oldCarLength+${radi}" name="oldCarLength"    class="easyui-numberbox"  /></td>
+             <th> 原宽： </th>
+             <td><input th:id="oldCarWidth+${radi}" name="oldCarWidth"    class="easyui-numberbox"  /></td>
+             <th> 原高： </th>
+             <td><input th:id="oldCarHighth+${radi}" name="oldCarHighth"    class="easyui-numberbox"  /></td>     
+         </tr>
+         <tr>            
+             <th> 新长： </th>
+             <td><input th:id="newCarLength+${radi}" name="newCarLength"    class="easyui-numberbox"  /></td>
+             <th> 新宽： </th>
+             <td><input th:id="newCarWidth+${radi}" name="newCarWidth"    class="easyui-numberbox"  /></td>
+             <th> 新高： </th>
+             <td><input th:id="newCarHighth+${radi}" name="newCarHighth"    class="easyui-numberbox"  /></td>     
+         </tr>
+         <tr>            
+             <th> 重量： </th>
+             <td><input th:id="carWeight+${radi}" name="carWeight"   class="easyui-numberbox"  /></td>     
+         </tr>
+    </table>
+</form>
+</html>

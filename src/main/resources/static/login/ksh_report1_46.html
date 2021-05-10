@@ -1,0 +1,608 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="Generator" content="EditPlus®">
+<meta name="Author" content="">
+<meta name="Keywords" content="">
+<meta name="Description" content="">
+<title>滚装码头生产数据</title>
+<link rel="stylesheet" href="../css/largeScreen.css">
+<script type="text/javascript" src="../js/jquery.min.js"></script>
+<script type="text/javascript" src="../js/echarts/dist/echarts.js"></script>
+
+</head>
+<body>
+	<div class="container">
+		<header>
+			<div class="header-con" >
+				<div class="header-left">
+					<img src="images/clock.png" width="20" height="20" alt="" />
+					<span id="saftDate" style="font-size: 16px;"> </span>
+					<span id="saftTime" style="letter-spacing:8px;"></span>
+				</div>
+				
+				<div class="header-center">
+					<img src="images/sysName.png" width="507" height="52" alt="" />
+				</div>
+			
+				<div class="header-right">
+					连续安全生产<span id="saveDays">365天</span>
+				</div>
+
+			</div>
+		</header>
+		<div class="screen-main">
+			<div class="first-line">
+				<div class="first-column">
+					<div class="column-name name-color">
+						<img src="images/data.png" width="28" height="32" alt="" /> <span
+							id="teuSimDay">6日（当日）</span>
+					</div>
+					<div class="number-con">
+						<ul class="number-green" id="teuDay">
+							<li>1</li><li>2</li>
+							<li>3</li><li>4</li>
+							<li>5</li><li>6</li>
+						</ul>
+						辆
+					</div>
+				</div>
+				<div class="two-column">
+					<div class="column-name">
+						<img src="images/moth.png" width="32" height="32" alt="" /> <span
+							id="teuSimMonth">4月（月度）</span>
+					</div>
+					<div class="number-con">
+						<ul class="number-blue" id="teuMonth">
+							<li>1</li><li>2</li>
+							<li>3</li><li>4</li>
+							<li>5</li><li>6</li>
+						</ul>
+						辆
+					</div>
+				</div>
+				<div class="three-column">
+					<div class="column-name">
+						<img src="images/year.png" width="35" height="32" alt="" /> <span
+							id="tueSimYear"> 2021年（年度）</span>
+					</div>
+					<div class="number-con">
+						<ul class="number-orange" id="tueYear">
+							<li>1</li><li>2</li>
+							<li>3</li><li>4</li>
+							<li>5</li><li>6</li>
+						</ul>
+						辆
+					</div>
+				</div>
+			</div>
+
+			<div class="two-line">
+
+				<div class="task-box box-bg1" style="width: 24%; margin-right: 1%;">
+				
+					<div class="task-box-title">
+						N14泊位<span class="subtitle" id="shipName4">菲莱迪丝领袖轮</span>
+					</div>
+					<div class="task-box-con">
+						<div class="shipment">
+							<span style="float: left;">装船：</span>
+							<ul class="number-orange" id="ship4_zc">
+								<li>1</li><li>2</li><li>3</li>
+							</ul>
+							辆
+						</div>
+						<div class="shipment">
+							<span style="float: left;">卸船：</span>
+							<ul class="number-blue" id="ship4_xc">
+								<li>1</li><li>2</li><li>3</li>
+							</ul>
+							辆
+						</div>
+
+						<img src="images/ship2.png" width="350" height="113" alt="" />
+						<div class="div-shiptxt">
+							船长：<span id="ship4_txt1"> 141米（右靠）0930/12进N1</span></br>
+					 		<span  class="number-green">内贸进口：</span>
+							<span id="ship4_txt2">644（大众直发382荣威入库6）</span></br>
+							<span  class="number-blue">外贸进口：</span>
+							<span id="ship4_txt3">上海向数量待定，中远海奔驰200，长城100</span>
+						</div>
+					</div>
+
+				</div>
+				<div class="task-box box-bg1" style="width: 24%; margin-right: 1%;">
+				
+					<div class="task-box-title">
+						N13泊位<span class="subtitle" id="shipName3">唐鸿轮</span>
+					</div>
+					<div class="task-box-con">
+						<div class="shipment">
+							<span style="float: left;">装船：</span>
+							<ul class="number-orange" id="ship3_zc">
+								<li>1</li><li>2</li><li>3</li>
+							</ul>
+							辆
+						</div>
+						<div class="shipment">
+							<span style="float: left;">卸船：</span>
+							<ul class="number-blue" id="ship3_xc">
+								<li>1</li><li>2</li><li>3</li>
+							</ul>
+							辆
+						</div>
+
+						<img src="images/ship1.png" width="350" height="113" alt=""  />
+						<div class="div-shiptxt">
+							船长：<span id="ship3_txt1"> 141米（右靠）0930/12进N1</span></br>
+					 		<span  class="number-green">内贸进口：</span>
+							<span id="ship3_txt2">644（大众直发382荣威入库6）</span></br>
+							<span  class="number-blue">外贸进口：</span>
+							<span id="ship3_txt3">上海向数量待定，中远海奔驰200，长城100</span>
+						</div>
+					</div>
+					
+				</div>
+				<div class="task-box box-bg1" style="width: 24%; margin-right: 1%;">
+					<div class="task-box-title">
+						N2泊位<span class="subtitle" id="shipName2">超级福特轮</span>
+					</div>
+					<div class="task-box-con">
+						<div class="shipment">
+							<span style="float: left;">装船：</span>
+							<ul class="number-orange" id="ship2_zc">
+								<li>1</li><li>2</li><li>3</li>
+							</ul>
+							辆
+						</div>
+						<div class="shipment">
+							<span style="float: left;">卸船：</span>
+							<ul class="number-blue" id="ship2_xc">
+								<li>1</li><li>2</li><li>3</li>
+							</ul>
+							辆
+						</div>
+
+						<img src="images/ship2.png" width="350" height="113" alt="" />
+						<div class="div-shiptxt">
+							船长：<span id="ship2_txt1"> 141米（右靠）0930/12进N1</span></br>
+					 		<span  class="number-green">内贸进口：</span>
+							<span id="ship2_txt2">644（大众直发382荣威入库6）</span></br>
+							<span  class="number-blue">外贸进口：</span>
+							<span id="ship2_txt3">上海向数量待定，中远海奔驰200，长城100</span>
+						</div>
+					</div>
+				</div>
+				<div class="task-box box-bg1" style="width: 24%">
+					<div class="task-box-title">
+						N1泊位<span class="subtitle" id="shipName1">安吉11轮</span>
+					</div>
+					<div class="task-box-con">
+						<div class="shipment">
+							<span style="float: left;">装船：</span>
+							<ul class="number-orange" id="ship1_zc">
+								<li>1</li><li>2</li><li>3</li>
+							</ul>
+							辆
+						</div>
+						<div class="shipment">
+							<span style="float: left;">卸船：</span>
+							<ul class="number-blue" id="ship1_xc">
+								<li>1</li><li>2</li><li>3</li>
+							</ul>
+							辆
+						</div>
+
+						<img src="images/ship1.png" width="350" height="113" alt="" />
+						<div class="div-shiptxt">
+							船长：<span id="ship1_txt1"> 141米（右靠）0930/12进N1</span></br>
+					 		<span  class="number-green">内贸进口：</span>
+							<span id="ship1_txt2">644（大众直发382荣威入库6）</span></br>
+							<span  class="number-blue">外贸进口：</span>
+							<span id="ship1_txt3">上海向数量待定，中远海奔驰200，长城100</span>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="three-line">
+				<div class="first-column">
+					<div class="task-box box-bg1" >
+						<div class="task-box-title">
+							<img src="images/icon1.png" width="25" height="18" alt="" />集疏港计划
+						</div>
+						<div class="task-box-con" >
+							<table width="100%" border="0" cellspacing="0" cellpadding="0" id="report_jsg_tableth" style="position: relative;top: 10px;">
+								<tbody>
+									<tr>
+										<th>类型</th><th>码头</th><th>船名</th>
+										<th>品牌</th><th>数量</th><th>内外贸</th>
+									</tr>
+								</tbody>
+							</table>
+							<marquee width="98%" height="320px" vspace='-100' behavior="alternate" direction="up" scrollamount='1' style="margin: 1%">
+								<table width="100%" border="0" cellspacing="0" cellpadding="0"	id="report_jsg_table"></table>
+							</marquee>
+
+						</div>
+					</div>
+				</div>
+				<div class="two-column">
+					<div class="task-box box-bg1">
+						<div class="task-box-title">
+							<img src="images/icon2.png" width="25" height="18" alt="" />年度作业数
+						</div>
+						<div class="task-box-con">
+							<div class="index2_bottom1_table"
+								style="min-width: 600px; min-height: 370px; border-width: 0px;"
+								id="echarts_l"></div>
+						</div>
+					</div>
+				</div>
+				<div class="three-column">
+					<div class="task-box box-bg1">
+						<div class="task-box-title">
+							<img src="images/icon3.png" width="25" height="18" alt="" />船舶预报
+						</div>
+						<div class="task-box-con">
+							<table width="100%" border="0" cellspacing="0" cellpadding="0" id="report_dashship_table_newth" style="position: relative;top: 10px;">
+								<tbody>
+									<tr>
+										<th>序号</th> <th>船名</th>
+										<th>内外贸</th> <th>数量(吨)</th><th>计划到港时间</th>
+									</tr>
+								</tbody>
+							</table>
+							<marquee width="98%" height="320px" vspace='-100'
+								behavior="alternate" direction="up" scrollamount='1'
+								style="margin: 1%">
+								<table width="100%" border="0" cellspacing="0" cellpadding="0"
+									id="report_dashship_table_new"></table>
+							</marquee>
+						</div>
+					</div>
+				</div>
+	
+			</div>
+		</div>
+
+	</div>
+	<script type="text/javascript">
+		$(document).ready(function () {
+			 setInterval("getDate()",1000);
+			 
+			 doDateNum()
+	       	 var  timer = setInterval( function (){
+	       		doDateNum()
+	        }, 3000); 
+	       	 
+
+	        //集疏港
+	        getJsgData();
+	        //船舶预报
+	        findDashShip();
+	        //
+	        getZYS();
+	        
+	        function doDateNum(){
+		        $.ajax({
+		            url: "../webresources/login/ship/BillSplit/getSaveProduceDays",
+		            type: "POST",
+		            dataType: "json",
+		            success: function (data) {
+						if(data){
+						   $("#saveDays").text( "    "+data.SAFE_DAYS+"  天");
+						   var teuDate=new Date(data.TEU_TIM);
+						   $("#tueSimYear").text(teuDate.getFullYear()+"年（年度）");
+						   $("#teuSimMonth").text((teuDate.getMonth()+1)+"月（月度）");
+						   $("#teuSimDay").text( teuDate.getDate()+"日（当日）");
+						  
+						   $("#teuDay").html(orgnTenNum(data.TEU_DNUM.toString(),10));
+						   $("#teuMonth").html(orgnTenNum(data.TEU_MNUM.toString(),10));
+						   $("#tueYear").html(orgnTenNum(data.TEU_YNUM.toString(),10));
+						   
+						   $("#shipName1").html(data.N1_SHIP_NAM);
+						   $("#shipName2").html(data.N2_SHIP_NAM);
+						   $("#shipName3").html(data.N13_SHIP_NAM);	   
+						   $("#shipName4").html(data.N14_SHIP_NAM);
+						   
+						   
+						   $("#ship1_zc").html(orgnTenNum(data.N1_SHIP_LOAD_NUM.toString(),5));
+						   $("#ship2_zc").html(orgnTenNum(data.N2_SHIP_LOAD_NUM.toString(),5));
+						   $("#ship3_zc").html(orgnTenNum(data.N13_SHIP_LOAD_NUM.toString(),5));
+						   $("#ship4_zc").html(orgnTenNum(data.N14_SHIP_LOAD_NUM.toString(),5));
+						   
+						   $("#ship1_xc").html(orgnTenNum(data.N1_SHIP_UNLOAD_NUM.toString(),5));
+						   $("#ship2_xc").html(orgnTenNum(data.N2_SHIP_UNLOAD_NUM.toString(),5));
+						   $("#ship3_xc").html(orgnTenNum(data.N13_SHIP_UNLOAD_NUM.toString(),5));
+						   $("#ship4_xc").html(orgnTenNum(data.N14_SHIP_UNLOAD_NUM.toString(),5));
+						   
+						   $("#ship1_txt1").html(data.N1_SHIP_LENGTH+" "+data.N1_KB);
+						   $("#ship2_txt1").html(data.N2_SHIP_LENGTH+" "+data.N2_KB);
+						   $("#ship3_txt1").html(data.N13_SHIP_LENGTH+" "+data.N13_KB);
+						   $("#ship4_txt1").html(data.N14_SHIP_LENGTH+" "+data.N14_KB);
+						   
+						   $("#ship1_txt2").html(data.N1_I_TXT);
+						   $("#ship2_txt2").html(data.N2_I_TXT);
+						   $("#ship3_txt2").html(data.N13_I_TXT);
+						   $("#ship4_txt2").html(data.N14_I_TXT);
+						   
+						   
+						   
+						   $("#ship1_txt3").html(data.N1_E_TXT);
+						   $("#ship2_txt3").html(data.N2_E_TXT);
+						   $("#ship3_txt3").html(data.N13_E_TXT);
+						   $("#ship4_txt3").html(data.N14_E_TXT);
+						  
+						}
+		            }, error: function (data) {
+		            }
+		        })
+	        }
+	        function orgnTenNum(numStr,maxLiLen){
+				   var liArrayStr="";
+				   if(numStr.length<maxLiLen){
+					   for(var i=0;i<maxLiLen-numStr.length;i++){
+						   liArrayStr+="<li></li>";
+					   }
+				   }
+				   for(var i=0;i<numStr.length;i++){
+					   liArrayStr+="<li>"+numStr[i]+"</li>";
+				   }
+				   return liArrayStr;
+	        }
+	        
+	        
+	        function getJsgData() {
+	            $.ajax({
+	                url: "../webresources/login/contract/ContractIeDoc/findContract",
+	                type: "POST",
+	                dataType: "json",
+	                success: function (data) {
+	                    var div = document.getElementById("report_jsg_table");
+	                    div.innerHTML = "";
+
+	                    data.forEach(function (currentValue, index, arr) {
+	                        var tr = document.createElement("tr");
+	                        var tdworknam = document.createElement("td");
+	                        tdworknam.innerText = currentValue.workNam;
+	                        tdworknam.width="15%"
+	                        tr.appendChild(tdworknam);
+	                        
+	                        var tddocknam = document.createElement("td");
+	                        tddocknam.innerText = currentValue.dockNam;
+	                        tddocknam.width="16.67%"
+	                        tr.appendChild(tddocknam);
+	                        
+	                        var tdienam = document.createElement("td");
+	                        tdienam.innerText = currentValue.shipNam == null ? "" : currentValue.shipNam;
+	                        tdienam.align="left";
+	                        tdienam.width="18%"
+	                        tr.appendChild(tdienam);
+	                        
+	                        var tdbrandnam = document.createElement("td");
+	                        tdbrandnam.innerText = currentValue.brandNam;
+	                        tdbrandnam.align="left";
+	                        tdbrandnam.width="18%"
+	                        tr.appendChild(tdbrandnam);
+	                        
+	                        var tdcarnum = document.createElement("td");
+	                        tdcarnum.innerText = currentValue.carNum;
+	                        tdcarnum.align="left";
+	                        tdcarnum.width="15%"
+	                        tr.appendChild(tdcarnum);
+	                        
+	                        var tdtradenam = document.createElement("td");
+	                        tdtradenam.innerText = currentValue.tradeNam;
+	                        tdtradenam.width="16.67%"
+	                        tr.appendChild(tdtradenam);
+	                        
+	                        div.appendChild(tr);
+	                    });
+	                }
+	            });
+	        }
+	        
+	        //船期预报
+	        function findDashShip() {
+	            $.ajax({
+	                url: "../webresources/login/ship/Ship/findDashShipTable",
+	                type: "POST",
+	                dataType: "json",
+	                success: function (data) {
+	                    var div = document.getElementById("report_dashship_table_new");
+	                    div.innerHTML = "";
+	                    data.forEach(function (currentValue, index, arr) {
+	                        var tr = document.createElement("tr");
+	                        var tdbegCableNo = document.createElement("td");
+	                        tdbegCableNo.innerText = currentValue.begCableNo;
+	                        tr.appendChild(tdbegCableNo);
+	                        var tdcShipNam = document.createElement("td");
+	                        tdcShipNam.innerText = currentValue.cShipNam;
+	                        tr.appendChild(tdcShipNam);
+	                        var tdtradeId = document.createElement("td");
+	                        tdtradeId.innerText = currentValue.tradeId;
+	                        tr.appendChild(tdtradeId);
+	                        var tdwgt = document.createElement("td");
+	                        tdwgt.innerText = currentValue.berthCod;
+	                        tr.appendChild(tdwgt);
+	                        var tdetdArrvTim = document.createElement("td");
+	                        tdetdArrvTim.innerText = currentValue.etdArrvTim == null ? "" : currentValue.etdArrvTim;
+	                        tr.appendChild(tdetdArrvTim);
+	                        div.appendChild(tr);
+	                    });
+	                   /*  if (data.length > 5)
+	                        rolllinkk2_1.innerHTML = rolllinkk1_1.innerHTML + rolllinkk1_1.innerHTML; */
+	                }
+	            });
+	        }
+	        
+	        function getZYS() {
+	            $.ajax({
+	                url: "../webresources/login/ship/BillSplit/findNdzys",
+	                success: function (data) {
+	                    //年度完成量
+	                    var monthWorkNum = new Array();
+	                    var monthWorkName = new Array();
+	                    var v = 0;
+	                    for (var key in data[0]) {
+	                        monthWorkName[v] = key;
+	                        monthWorkNum[v] = data[0][key];
+	                        v++;
+	                    }
+
+	                    //年度完成量
+	                    var monthPlanNum = new Array();
+	                    var monthPlanName = new Array();
+	                    var z = 0;
+	                    for (var key in data[1]) {
+	                        monthPlanName[z] = key;
+	                        monthPlanNum[z] = data[1][key];
+	                        z++;
+	                    }
+	                    var ndzys = echarts.init(document.getElementById('echarts_l'));
+	                    option = {
+	                        tooltip: {
+	                            trigger: 'axis',
+	                            showDelay: '20',
+	                            axisPointer: { // 坐标轴指示器，坐标轴触发有效
+	                                type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
+	                            }
+	                        },
+	                        grid: {
+	                            borderWidth: 0,
+	                            height: '60%',
+	                            width: '80%',
+	                            x: '80',
+	                            y: '60'
+	                        },
+	                        legend: {
+	                            textStyle: {
+	                                color: '#6495ED',
+	                            },
+	                            data: ['计划数', '实际作业数']
+	                        },
+	                        xAxis: [{
+	                            type: 'category',
+	                            splitLine: { // 分隔线
+	                                show: false, // 默认显示，属性show控制显示与否
+	                            },
+	                            axisLabel: {
+	                                textStyle: {
+	                                    color: '#6495ED',//坐标值得具体的颜色
+	                                    fontSize: 18
+	                                },
+	                            },
+	                            data: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
+	                        }],
+	                        yAxis: [{
+	                            type: 'value',
+	                            // 	                     name : '实际作业数',
+	                            splitLine: { // 分隔线
+	                                show: false, // 默认显示，属性show控制显示与否
+	                                lineStyle: { // 属性lineStyle（详见lineStyle）控制线条样式
+	                                    color: ['#ccc'],
+	                                    width: 1,
+	                                    type: 'solid'
+	                                }
+	                            },
+	                            axisLabel: {
+	                                textStyle: {
+	                                    color: '#6495ED',//坐标值得具体的颜色
+	                                    fontSize: 18
+	                                }
+	                            },
+	                            //	                     axisLabel : {
+	                            //	                         formatter: '{value} ml'
+	                            //	                     }
+	                        }, {
+	                            type: 'value',
+	                            show: true,
+	                            splitLine: { // 分隔线
+	                                show: false, // 默认显示，属性show控制显示与否
+	                                lineStyle: { // 属性lineStyle（详见lineStyle）控制线条样式
+	                                    color: ['#ccc'],
+	                                    width: 1,
+	                                    type: 'solid'
+	                                }
+	                            },
+	                            axisLabel: {
+	                                textStyle: {
+	                                    color: '#6495ED',//坐标值得具体的颜色
+	                                    fontSize: 18
+	                                }
+	                            },
+	                            axisLabel: {
+	                                formatter: '{value} °C'
+	                            }
+	                        }],
+	                        series: [{
+	                            name: '实际作业数',
+	                            type: 'bar',
+	                            itemStyle: {
+	                            	 normal: {
+	                                     barBorderRadius: 20,
+	                                     color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+	                                         offset: 0,
+	                                         color: '#55eeff'
+	                                     }, {
+	                                         offset: 1,
+	                                         color: '#faff6a'
+	                                     }]),
+	                                     shadowColor: 'rgba(0, 0, 0, 0.4)',
+	                                     shadowBlur: 20
+	                                 }
+	                            },
+	                            barWidth: 8,//固定柱子宽度
+	                            data: monthWorkNum
+	                        }, {
+	                            name: '计划数',
+	                            type: 'line',
+	                            itemStyle: {
+	                                normal: {
+	                                    color: '#6495ED',
+	                                    barBorderColor: '#6495ED',
+	                                    label: {
+	                                        show: false
+	                                    }
+	                                }
+	                            },
+	                            data: monthPlanNum
+	                        }]
+	                    }
+	                    ndzys.setOption(option);
+	                }
+	            })
+	        }
+
+		});
+		Date.prototype.format = function (fmt) {
+		    var o = {
+	    		 "M+" : this.getMonth()+1,                 //月份   
+	    		 "d+" : this.getDate(),                    //日   
+	    		 "h+" : this.getHours(),                   //小时   
+	    		 "m+" : this.getMinutes(),                 //分   
+	    		 "s+" : this.getSeconds(),                 //秒   
+	    		 "q+" : Math.floor((this.getMonth()+3)/3), //季度   
+	    		 "S"  : this.getMilliseconds()             //毫秒   
+		    };
+		    if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+		    for (var k in o)
+		        if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+		    return fmt;
+		}
+		
+	   function getDate(){
+			//格式化为本地时间格式
+			var date1=new Date().format("yyyy年MM月dd日 hh:mm:ss");
+			
+			 var weekDays=new Date().getDay();//获取存储当前日期
+			 var weekday=["星期日","星期一","星期二","星期三","星期四","星期五","星期六"];
+			  
+			 $("#saftDate").html(date1.substr(0,11));
+			 $("#saftTime").html(date1.substr(12));
+	   }
+	</script>
+</body>
+</html>

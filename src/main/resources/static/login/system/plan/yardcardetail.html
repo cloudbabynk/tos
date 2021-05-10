@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<div id="cyAreaNoCanvasLayout" title='绘制区域'
+	style='height: auto; overflow: auto'>
+	<div id="cyAreaNoCanvasDiv" style="position: relative;"></div>
+</div>
+<script>
+	$(document).ready(function() {
+	    var x0 = 40, y0 = 40;
+	    var baywidth11 = 110;
+	    var rowheight11 = 110;
+	    var canvasWidth11 = 950; //整个画布的宽度
+	    var canvasHeight11 = 450;//整个画布的高度
+	    var area11 = HdUtils.dialog.getValue("area");
+	    var cyAreaNo11 = area11.cyAreaNo;
+	    canvasWidth11 = canvasWidth11 > (baywidth11 * area11.bayNum + 60) ? canvasWidth11 : (baywidth11 * area11.bayNum + 60);
+	    canvasHeight11 = canvasHeight11 > (rowheight11 * area11.rowNum + 60) ? canvasHeight11 : (rowheight11 * area11.rowNum + 60);
+	    var canvas11 = new Canvas("cyAreaNoCanvasDiv", canvasWidth11, canvasHeight11);//定义画布
+	    var areaNoCanvasLayer11 = new CanvasLayer("cyAreaNoCanvasDiv1", 1);//场图层:
+	    var gridCanvasLayer11 = new CanvasLayer("cyAreaNoCanvasDiv2", 2);//网格层:
+	    var cntrCanvasLayer11 = new CanvasLayer("cyAreaNoCanvasDiv3", 3);//在场层:
+	    var placLockCanvasLayer11 = new CanvasLayer("cyAreaNoCanvasDiv4", 4);//锁车位图层:
+	    var operCanvasLayer11 = new CanvasLayer("cyAreaNoCanvasDiv99", 99);//操作层:
+	    canvas11.push(areaNoCanvasLayer11);
+	    canvas11.push(gridCanvasLayer11);
+	    canvas11.push(cntrCanvasLayer11);
+	    canvas11.push(placLockCanvasLayer11);
+	    canvas11.push(operCanvasLayer11);
+
+	    var carByAreaNoList = null;
+	    var lockPlacByAreaList = null;
+
+	    drawCyAreaNo(area11);/*绘制场*/
+	    findAreaCar();
+	    findPlacLockByArea();
+
+	    function drawCyAreaNo(area11) {
+		    /*绘制场*/
+		    areaNoCanvasLayer11.clearRect();
+		    if (area11 != null) {
+			    var areaYardArr = [];
+			    var area = new Area(area11.cyAreaNo, area11.cyAreaNo, x0, y0, area11.bayNum, area11.rowNum, null, null, null, null, baywidth11, rowheight11);
+			    areaYardArr.push(area);
+			    areaNoCanvasLayer11.draw(areaYardArr);//画普通场
+		    }
+
+		    /* 清空网格画布 */
+		    gridCanvasLayer11.clearRect();
+		    if (area11 != null) {
+			    var gridArr = [];
+			    //绘制
+			    var lineArr = [];
+			    for (var j = 1; j < area11.bayNum; j++) {//竖线
+				    var x1 = x0 + j * baywidth11;
+				    var y1 = y0;
+				    var x2 = x1;
+				    var y2 = y1 + rowheight11 * area11.rowNum;
+				    lineArr.push(new Line(new XY(x1 - 0.5, y1), new XY(x2 - 0.5, y2), 1, "#000000"));
+			    }
+			    for (var k = 1; k < area11.rowNum; k++) {//横线
+				    var x1 = x0;
+				    var y1 = y0 + k * rowheight11;
+				    var x2 = x1 + baywidth11 * area11.bayNum;
+				    var y2 = y1;
+				    lineArr.push(new Line(new XY(x1, y1 - 0.5), new XY(x2, y2 - 0.5), 1, "#000000"));
+			    }
+			    var grid = new Grid(lineArr);
+			    gridArr.push(grid);
+
+			    gridCanvasLayer11.draw(gridArr);
+		    }
+	    }
+
+	    /*根据场查询车位 */
+	    function findAreaCar() {
+		    var builder1507620296653 = new HdEzuiQueryParamsBuilder();
+		    builder1507620296653.setAndClause("cyAreaNo", area11.cyAreaNo, "=", "and");
+		    builder1507620296653.setOrderByClause("cyPlac", "asc");
+		    $.ajax({
+		        type : "POST",
+		        url : "../webresources/login/cargo/PortCar/find",
+		        contentType : "application/json",
+		        dataType : "json",
+		        data : $.toJSON(builder1507620296653.build()),
+		        success : function(data) {
+			        carByAreaNoList = data.rows;
+			        drawAreaCar();
+		        },
+		        error : function(data) {
+			        HdUtils.messager.info(data);
+		        }
+		    });
+	    }
+	    /*绘制车位*/
+	    function drawAreaCar() {
+		    cntrCanvasLayer11.clearRect();
+		    if (carByAreaNoList != null && carByAreaNoList.length > 0) {
+			    var fillRecArr = [];
+			    var textArr = [];
+			    var cyPlac = null;
+			    var color = "#1AE61A";
+			    var j = 1;
+			    for (var i = 0; i < carByAreaNoList.length; i++) {
+				    var cntrYard2D = carByAreaNoList[i];
+				    var cntrLoc = getPointByArea11(Number(cntrYard2D.cyBayNo), Number(cntrYard2D.cyRowNo));
+// 				    if (cyPlac == carByAreaNoList[i].cyPlac) {
+// 					    color = "#ffc0cb";//密集
+// 					    if (j == 2) {
+// 						    textArr.splice(textArr.length - 2, 2);
+// 					    }
+// 					    var text = new Text(new XY(cntrLoc.x, cntrLoc.y + 15 * (j++)), cntrYard2D.vinNo, "#000000");
+// 					    textArr.push(text);
+// 				    } else {
+// 					    cyPlac = carByAreaNoList[i].cyPlac;
+// 					    j = 1;
+// 					    color = "#1AE61A";//正常
+// 					    var text = new Text(new XY(cntrLoc.x, cntrLoc.y + 15), cntrYard2D.vinNo, "#000000");
+// 					    textArr.push(text);
+// 					    var text = new Text(new XY(cntrLoc.x, cntrLoc.y + 15 * 2), cntrYard2D.billNo, "#000000");
+// 					    textArr.push(text);
+// 					    var text = new Text(new XY(cntrLoc.x, cntrLoc.y + 15 * 3), cntrYard2D.brandCod, "#000000");
+// 					    textArr.push(text);
+// 					    j++;
+// 				    }
+				    fillRecArr.push(new FillRec(new XY(cntrLoc.x, cntrLoc.y), baywidth11 - 1, rowheight11 - 1, "#ffc0cb", "1"));
+
+			    }
+			    cntrCanvasLayer11.draw(fillRecArr);
+			    cntrCanvasLayer11.draw(textArr);
+		    }
+	    }
+
+	    function getPointByArea11(bayNo, rowNo) {
+		    X = x0 + (baywidth11 * (bayNo - 1));
+		    Y = y0 + (rowheight11 * (rowNo - 1));
+		    return {
+		        x : X,
+		        y : Y
+		    };
+	    }
+
+	    /*查询所有的锁车位*/
+	    function findPlacLockByArea() {
+// 		    var builder = new HdEzuiQueryParamsBuilder();
+// 		    builder.setAndClause("cyAreaNo", area11.cyAreaNo, "=", "and");
+// 		    builder.setAndClause("lockId", "1", "=", "and");
+// 		    builder.setOrderByClause("cyPlac", "asc");
+// 		    $.ajax({
+// 		        type : "POST",
+// 		        url : "../webresources/login/base/CCyBay/find",
+// 		        contentType : "application/json",
+// 		        dataType : "json",
+// 		        data : $.toJSON(builder.build()),
+// 		        success : function(data) {
+// 			        lockPlacByAreaList = data.rows;
+// 			        drawLockPlacsByArea();
+// 		        },
+// 		        error : function(data) {
+// 			        HdUtils.messager.info(data);
+// 		        }
+// 		    });
+	    	HdUtils.ajax.post({
+            	url : "../webresources/login/base/CCyBay/findLocked?cyAreaNo=" + area11.cyAreaNo,
+                success : function(data) {
+                	lockPlacByAreaList = data.list;
+                	drawLockPlacsByArea();
+                 }
+            });
+	    }
+
+	    /*绘制锁车位*/
+	    function drawLockPlacsByArea() {
+		    placLockCanvasLayer11.clearRect();
+		    if (lockPlacByAreaList != null && lockPlacByAreaList.length > 0) {
+			    var fillRecArr = [];
+			    var cyPlac = null;
+			    var color = "#000000";
+			    for (var i = 0; i < lockPlacByAreaList.length; i++) {
+				    var lockPlac = lockPlacByAreaList[i];
+				    var cntrLoc = getPointByArea11(Number(lockPlac.cyBayNo), Number(lockPlac.cyRowNo));
+				    fillRecArr.push(new FillRec(new XY(cntrLoc.x, cntrLoc.y), baywidth11 - 1, rowheight11 - 1, color, "1"));
+			    }
+			    placLockCanvasLayer11.draw(fillRecArr);
+		    }
+	    }
+    })
+</script>
+</html>

@@ -1,0 +1,213 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#ConstructionPlanForm1507959148710");
+	    var planId = HdUtils.dialog.getValue("planId");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    if (planId) {
+		    $("#planId").attr("readonly", true);
+	    } else {
+		    $("#planId").attr("readonly", false);
+	    }
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/plan/ConstructionPlan/findone?planId=" + planId,
+	        success : function(data) {
+		        var commulti = data.danWorkItems;
+		        if (data.danWorkItems == null) {
+			        data.danWorkItems = "";
+		        } 
+		        $("#ConstructionPlanForm1507959148710").form("loadData", data);
+		        $("#com_multi").val(commulti);
+		        $("#danWorkItems").combobox('setValues', data.danWorkItems.split(","));
+	        }
+	    })
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    $('#consCorpCod').combobox({
+	        url : '../webresources/login/plan/ConstructionPlan/getCClientCodDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 100,
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $('#danWorkItems').combobox({
+	        url : '../webresources/login/plan/ConstructionPlan/getDanWorkItems',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 100,
+	        multiple : true,
+	        onHidePanel : function() {
+	        },
+	        onSelect : function(rec) {
+		        var val = rec.value; //得到其code值
+		        $('#com_multi').val($('#com_multi').val() + val + ",");
+	        }
+	        ,
+	        onUnselect : function(rec) {
+		        var val = rec.value; //得到其code值
+		        var arr = $('#com_multi').val().split(",");
+		        arr.splice(jQuery.inArray(val, arr), 1);
+		        $('#com_multi').val(arr.join(","));
+	        }
+	    });
+	    //点击显示 时分（hh:mm）格式
+	    $.jeDate("#startTim", {
+		    format : "hh"
+	    });
+	    $.jeDate("#endTim", {
+		    format : "hh"
+	    });
+
+	    function saveHandler() {
+		    var isValss = $("#ConstructionPlanForm1507959148710").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#ConstructionPlanForm1507959148710").serializeObject();
+		     var danWorkItems = $("#danWorkItems").combobox('getText');
+		    if (danWorkItems) {
+			    if (danWorkItems.charAt(0) == ',') {
+				    danWorkItems = danWorkItems.substring(1, danWorkItems.length);
+			    }
+			    formdata.danWorkItems = danWorkItems;
+		    } 
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/plan/ConstructionPlan/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#ConstructionPlanDatagrid1508123301002" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+    });
+    function findCod() {
+	    var planIdValue = $("#planId").val();
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/plan/ConstructionPlan/findConstructionPlan?planId=" + planIdValue,
+	        success : function(data) {
+		        if (data.code == "-1") {
+			        $('#planId').val("");
+			        HdUtils.messager.bottomRight(data.message);
+			        $('#planId').focus();
+			        return false;
+		        }
+	        }
+	    });
+    }
+</script>
+<form id="ConstructionPlanForm1507959148710">
+	<input id="planId" name="planId" hidden="true">
+	<table id="ConstructionPlanTable1507959148710"
+		style="height: 75%; width: 80%" class="tableform">
+		<tr>
+			<th>施工日期：</th>
+			<td><input id="days" name="days" data-options="required:true"
+				class="easyui-datebox" maxlength="10" /></td>
+			<th>作业项目：</th>
+			<td><input id="workItem" name="workItem"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="25" /></td>
+			<th>作业区域：</th>
+			<td><input id="workArea" name="workArea"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="25" /></td>
+		</tr>
+		<tr>
+			<th>开工时间：</th>
+			<td><input class="workinput wicon mr25" id="startTim"
+				name="startTim" type="text"></td>
+			<th>完工时间：</th>
+			<td><input class="workinput wicon mr25" id="endTim"
+				name="endTim" type="text"></td>
+			<th>影响作业：</th>
+			<td><input type="radio" name="isAffect" value="0"
+				checked="checked" class='easyui-radio'>否</input> <input type="radio"
+				name="isAffect" value="1" class='easyui-radio'>是</input></td>
+		</tr>
+		<tr>
+			<th>相关方单位代码：</th>
+			<td><input id="consCorpCod" name="consCorpCod"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="25" /></td>
+		
+			<th>联系人电话：</th>
+			<td><input id="relationTele" name="relationTele"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="25" /></td>
+			<th>负责人：</th>
+			<td><input id="responseMan" name="responseMan"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="25" /></td>
+		</tr>
+		<tr>
+			<th>主管工程师：</th>
+			<td><input id="relationNam" name="relationNam"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="25" /></td>
+			<th>外来人员数量：</th>
+			<td><input id="outPerson" name="outPerson"
+				data-options="required:false" class="easyui-numberbox"
+				maxlength="25" /></td>
+			<th>外来机械情况：</th>
+			<td colspan='2'><input id="outMach" name="outMach" style="width: 100%;"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="25" /></td>
+
+		</tr>
+		<tr>
+			<th>外来机械数量：</th>
+			<td><input id="outMachNum" name="outMachNum"
+				data-options="required:false" class="easyui-numberbox"
+				maxlength="25" /></td>
+			<th>危险作业项目：</th>
+			<td><input id="danWorkItems" name="danWorkItems" /> 
+			<!-- <input type="hidden" id="com_multi" /> -->
+			</td>
+
+			<th>录入人联系方式：</th>
+			<td><input id="recTele" name="recTele"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="25" /></td>
+
+		</tr>
+		<tr>
+			<th>备注：</th>
+			<td colspan='5'><input id="remarks" name="remarks"
+				data-options="required:false" class="easyui-validatebox"
+				style="width: 100%;" maxlength="25" />
+		</tr>
+
+	</table>
+</form>

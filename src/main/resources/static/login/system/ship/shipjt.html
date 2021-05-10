@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<div th:id="DayWorkClassToolBar1508123307299+${radi}"
+	style="float: left">
+	<div>
+		<span>
+		 <a class="easyui-linkbutton" th:id='importJt+${radi}'>直接导入</a>
+		 <a class="easyui-linkbutton" th:id='importGs+${radi}'>联合导入</a>
+		</span>
+	</div>
+</div>
+<!-- 工具栏 -->
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="DayWorkClassDatagrid1508123307299+${radi}"
+	style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var jtradi = HdUtils.dialog.getValue("radi");
+	    var shipNo = HdUtils.dialog.getValue("shipNo");
+	    var dg = $("#DayWorkClassDatagrid1508123307299[(${radi})]");
+	    // buttons
+	    // 查询
+	    $("#importJt[(${radi})]").on("click", function() {
+	    	var selRow = dg.datagrid("getChecked");
+		    if (selRow.length == 0) {
+			    HdUtils.messager.info('请至少选择一条数据！');
+			    return false;
+		    }
+		    //直接导入
+		    dg.datagrid("lySave", {
+		        url : "../webresources/login/ship/Ship/save",
+		        callback : function() {
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#DayWorkClassDatagrid1508123307299" + jtradi).datagrid("hdReload");
+		        }
+		    });
+	    });
+	    //联合导入
+	    $("#importGs[(${radi})]").on("click", function() {
+	    	if(!shipNo){
+	    		HdUtils.messager.info('请先选择一条公司数据！');
+			    return;
+	    	}
+	    	var selRow = dg.datagrid("getChecked");
+	    	if (selRow.length == 0) {
+			    HdUtils.messager.info('请至少选择一条数据！');
+			    return false;
+		    }
+	    	dg.datagrid("lySave", {
+			    url : "../webresources/login/ship/Ship/savezong?shipNo="+shipNo,
+			    callback : function(){
+			    	HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#DayWorkClassDatagrid1508123307299" + jtradi).datagrid("hdReload");
+			    }
+		    });
+	    });
+
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    return onlinquery.build();
+	    }
+
+	    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/ship/Ship/findShipJt",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#DayWorkClassToolBar1508123307299" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+	        }, {
+	            field : "cShipNam",
+	            title : '中文船名',
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        }, {
+	            field : "eShipNam",
+	            title : '英文船名',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "dkrq",
+	            title : '抵口日期',
+	            multiSort : true,
+	            halign : "center",
+	            width : 120,
+	            sortable : false
+	        },{
+	            field : "dksj",
+	            title : '抵口时间',
+	            multiSort : true,
+	            halign : "center",
+	            width : 120,
+	            sortable : false
+	        },{
+	            field : "shipLongNum",
+	            title : '船长',
+	            multiSort : true,
+	            halign : "center",
+	            width : 80,
+	            sortable : false
+	        },{
+	            field : "shipGrossWgt",
+	            title : '总吨',
+	            multiSort : true,
+	            halign : "center",
+	            width : 80,
+	            sortable : false
+	        },{
+	            field : "ivoyage",
+	            title : '进口航次',
+	            multiSort : true,
+	            width : 100,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "evoyage",
+	            title : '出口航次',
+	            multiSort : true,
+	            width : 100,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "iCargoNam",
+	            title : '进口货类',
+	            multiSort : true,
+	            width : 100,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "eCargoNam",
+	            title : "出口货类",
+	            width : 100,
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+	        ] ]
+	    });
+	    $("#DayWorkClassDatagrid1508123307299" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

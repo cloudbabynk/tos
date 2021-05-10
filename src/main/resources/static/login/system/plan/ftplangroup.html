@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="PlanGroupToolBar1508123301002+${radi}" style="float: left">
+	<div>
+		<!-- 查询 -->
+	    委托号：<input
+			th:id="contractNo+${radi}" name="contractNo"
+			data-options="required:false" style="width: 80px">提单号： <input
+			th:id="billNo+${radi}" name="billNo"
+			data-options="required:false" style="width: 120px"> <a
+			class="easyui-linkbutton" th:id="query+${radi}">查询</a>
+		    <shiro:hasPermission name="webresources:login:PlanGroup:add">
+				<a class="easyui-linkbutton" th:id='add+${radi}' iconCls="icon-add" style="margin-left:5px;"
+					plain="false">增加</a>
+			</shiro:hasPermission> <shiro:hasPermission name="webresources:login:PlanGroup:delete">
+				<a class="easyui-linkbutton" th:id='delete+${radi}' style="margin-left:5px;">删除</a>
+			</shiro:hasPermission> 
+	</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="PlanGroupDatagrid1508123301002+${radi}" style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    console.log("radi:"+radi);
+	    var dg = $("#PlanGroupDatagrid1508123301002[(${radi})]");
+	    function query() {
+	    	var contractNo=$("#contractNo").val();
+	    	var billNo=$("#billNo").val();
+		     var onlinquery = new HdQuery();
+		     onlinquery.add("contractNo",contractNo);
+		     onlinquery.add("billNo", billNo);
+		    return onlinquery.build(); 
+	    }
+	    // 增加。
+	    $("#add[(${radi})]").on("click", function() {
+		    add();
+	    });
+	    function add() {
+	    	var radivin=HdUtils.dialog.getValue('radivin');
+	    	 HdUtils.dialog.setValue({
+	 	  		    'radi' : radi,
+	 	  		    'radivin':radivin
+	 	  	    });
+	    	
+	    	  HdUtils.dialog.setValue({
+				    data : {
+						    shipNam:$("#shipNam[(${radi})]").val(),
+						    shipNo:$("#shipNo[(${radi})]").val(),
+						    voyage:$("#voyage[(${radi})]").val(),
+						    tradeId:$("#tradeId[(${radi})]").val(),
+				    }
+			    });
+		    HdUtils.dialog.show({
+		        width : 800,
+		        height : 220,
+		        title : '丰田堆场策划',
+		        href : "../login/system/plan/ftplangroupform.html",
+		        isSaveHandler : true
+		    });
+	    }
+	     //批量 删除。
+        $("#delete[(${radi})]").on("click", function() {
+	        var selRow = $("#PlanGroupDatagrid1508123301002[(${radi})]").datagrid('getSelections');
+	        if (selRow.length == 0) {
+		        HdUtils.messager.info('请至少选择一条数据！');
+		        return false;
+	        }
+	        var planGroupNo = '';
+	        $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+		        if (r) {
+			        for (var i = 0; i < selRow.length; i++) {
+			        	planGroupNo += selRow[i].planGroupNo + ",";
+			        }
+			        planGroupNo = planGroupNo.substring(0, planGroupNo.length - 1);
+			        HdUtils.ajax.post({
+			            url : "../webresources/login/plan/PlanGroup/removeAll?planGroupNo=" + planGroupNo,
+			            success : function(data) {
+				            HdUtils.messager.bottomRight(data.message);
+				            $("#PlanGroupDatagrid1508123301002[(${radi})]").datagrid("hdReload");
+			            }
+			        });
+		        }
+	        });
+        });
+	    $("#chooseShip").bind("click", function() {
+            HdUtils.selShip(callback);
+        });
+	    function callback(data){
+        	$("#shipNam[(${radi})]").val(data.cShipNam);
+        	$("#voyage[(${radi})]").val(data.ivoyage+'/'+data.evoyage);
+        	$("#tradeId[(${radi})]").val(data.tradeId);
+        	$("#shipNo[(${radi})]").val(data.shipNo);
+        	
+        }
+	    $("#PlanGroupDatagrid1508123301002[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/plan/PlanGroup/findft",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#PlanGroupToolBar1508123301002" + /*[[${radi}]]*/'',
+	        fit : true,
+	        onSelect(rowIndex,rowData){
+	           	 HdUtils.dialog.setValue({
+	           		 'planGroupNo' : planGroupNo
+	        	    });
+	           	var planGroupNo = rowData.planGroupNo;
+	           	function queryPlanRange(){
+                  	var builder = new HdQuery();
+                    builder.add("planGroupNo", planGroupNo);
+                    return builder.build();
+                };
+                var radiplanrange = HdUtils.dialog.getValue('radiplanrange');
+                $('#PlanGroupDatagrid1508123301002'+radiplanrange).datagrid({
+                    	 queryParams : queryPlanRange(),
+                   });
+		        },
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+
+	        }, {
+
+	            field : "planGroupNo",
+	            title : '计划号',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "planTyp",
+	            title : "计划类型",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+                    type : "combobox",
+                    options : HdUtils.code.scode({
+	                    fieldCod : 'PLAN_TYP'
+                    }, {
+	                    required : true
+                    })
+                },
+                formatter : function(value) {
+	                return HdUtils.code.name('PLAN_TYP', value);
+                },
+	            sortable : false
+	        }
+	        , {
+	            field : "shipNo",
+	            title : "船编号",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+	        , {
+	            field : "shipNam",
+	            title : "船名",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+	        , {
+	            field : "voyage",
+	            title : "航次",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+	        , {
+	            field : "iEId",
+	            title : "进出口",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+                    type : "combobox",
+                    options : HdUtils.code.scode({
+	                    fieldCod : 'I_E_ID'
+                    }, {
+	                    required : true
+                    })
+                },
+                formatter : function(value) {
+	                return HdUtils.code.name('I_E_ID', value);
+                },
+	            sortable : false
+	        }
+	        , {
+	            field : "billNo",
+	            title : "提单号",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+	        , {
+	            field : "contractNo",
+	            title : "委托号",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+	        , {
+	            field : "totalNum",
+	            title : "计划车数",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+	        , {
+	            field : "validatDte",
+	            title : "有效期",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+	        , {
+	            field : "toyotoId",
+	            title : "丰田策划",
+	            multiSort : true,
+	            halign : "center",
+	            formatter : function(value) {
+		            if (value != null && value != undefined) {
+			            if (value == 0) {
+				            value = "×";
+				            return value;
+			            } else {
+				            value = "√";
+				            return value;
+			            }
+		            } else {
+			            return value;
+		            }
+	            },
+	            sortable : false
+	        }
+	        ] ]
+	    });
+	    $("#PlanGroupDatagrid1508123301002" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

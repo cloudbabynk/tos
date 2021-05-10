@@ -1,0 +1,119 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#CShipDataFtForm1551855248645");
+	    var typ = HdUtils.dialog.getValue("typ");
+	    var shipDataFtId = HdUtils.dialog.getValue("shipDataFtId");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    if(typ == "add"){
+	    	
+	    }
+	    if(typ =="edit") {
+	    	
+		    var vcShipId = HdUtils.dialog.getValue("vcShipId");
+		    var vcShipName = HdUtils.dialog.getValue("vcShipName");
+		    var shipCodId = HdUtils.dialog.getValue("shipCodId");
+		    
+		    if(shipDataFtId) {
+		    	$("#shipDataFtId").val(shipDataFtId);
+		    }
+		    if (vcShipId) {
+		    	$("#vcShipId").val(vcShipId);
+		    } 
+		    if(vcShipName){
+		    	$("#vcShipName").val(vcShipName);
+		    }
+	    }
+	    
+
+// 	    HdUtils.ajax.post({
+// 	        url : "../webresources/login/base/CCarKind/findone?carKind=" + carKind,
+// 	        success : function(data) {
+// 		        $("#CShipDataFtForm1551855248645").form("loadData", data);
+// 	        }
+// 	    })
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });	    
+	    function saveHandler() {
+		    var isValss = $("#CShipDataFtForm1551855248645").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#CShipDataFtForm1551855248645").serializeObject();
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/cargo/CShipDataFt/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#DayWorkClassDatagrid1551851699299" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+	    
+	    $('#shipCodId').combobox({
+	        url : '../webresources/login/cargo/CShipDataFt/findCShipData',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 100,
+	        width: 160,
+	        required : 'true',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    
+	    if(shipCodId){
+	    	$("#shipCodId").combobox('setValue', shipCodId);
+	    }
+	    
+    });
+</script>
+<form id="CShipDataFtForm1551855248645">
+	<input id="shipDataFtId" name="shipDataFtId" hidden="true">
+	<table id="CCarKindTable1507959148645" style="height: 75%; width: 80%"
+		class="tableform">
+		<tr>
+			<th>丰田船舶ID：</th>
+			<td><input id="vcShipId" name="vcShipId"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="10" /></td>
+			<th>船舶名称：</th>
+			<td><input id="vcShipName" name="vcShipName"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="255" /></td>
+			<th>系统船舶：</th>
+			<td><input id="shipCodId" name="shipCodId"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		</tr>
+	</table>
+</form>

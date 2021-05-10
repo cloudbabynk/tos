@@ -1,0 +1,1388 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+    /*<![CDATA[*/
+	$(document).ready(function() {
+	    var dg = $("#ShipDatagrid15079591493050815[(${radi})]");
+	    var radi = /*[[${radi}]]*/'';
+	    var shipNo = HdUtils.dialog.getValue('shipNo');
+	    var iEId = HdUtils.dialog.getValue('iEId');
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+		    $("#ShipDatagrid15079591493050815[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+	    $('#unit[(${radi})]').combobox({
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 120,
+	        data: [{
+				label: '滚装库场使用',
+				value: '滚装库场使用'
+			},{
+				label: '滚装陆运包干',
+				value: '滚装陆运包干'
+			},{
+				label: '滚装航运包干',
+				value: '滚装航运包干'
+			}]
+	    });
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    var vesselname = $("#vesselname").val();
+		    onlinquery.add("vesselname", vesselname);
+		    onlinquery.add("shipNo", shipNo);
+		    return onlinquery.build();
+	    }
+	    //删除。
+	    $("#delete[(${radi})]").on("click", function() {
+		    var selRow = $("#ShipDatagrid15079591493050815[(${radi})]").datagrid('getChecked');
+		    if (selRow.length == 0) {
+			    HdUtils.messager.info('请至少选择一条数据！');
+			    return false;
+		    }
+		    var ids = '';
+		    $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+			    if (r) {
+				    for (var i = 0; i < selRow.length; i++) {
+				    	ids += selRow[i].id + ",";
+				    }
+
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/shipbill/MFeeInterfaceTally/removeAll?ids=" + ids,
+				        success : function(data) {
+					        HdUtils.messager.bottomRight(data.message);
+					        $("#ShipDatagrid15079591493050815[(${radi})]").datagrid("hdReload");
+				        }
+				    });
+			    }
+		    });
+	    });
+	    // 发送
+	    $("#upload[(${radi})]").on("click", function() {
+	    	var selRow = $("#ShipDatagrid15079591493050815[(${radi})]").datagrid('getChecked');
+		    if (selRow.length == 0) {
+			    HdUtils.messager.info('请至少选择一条数据！');
+			    return false;
+		    }
+		    var ids = '';
+		    for (var i = 0; i < selRow.length; i++) {
+		    	ids += selRow[i].id + ",";
+		    }
+	    	HdUtils.ajax.post({
+		        url : "../webresources/login/shipbill/MFeeInterfaceTally/uploadData?ids=" + ids,
+		        success : function(data) {
+			        HdUtils.messager.info(data.message);
+			        $("#ShipDatagrid15079591493050815[(${radi})]").datagrid("hdReload");
+		        }
+		    });
+	    });
+	    // 编辑。
+	    $("#edit[(${radi})]").on("click", function() {
+		    var data = dg.datagrid("getSelected");
+		    if (data == null || data == undefined) {
+			    HdUtils.messager.info('请选择一条数据进行编辑！');
+			    return;
+		    }
+/* 		    if(data.sendFlag=='1'||data.hySendFlag =='1'){
+		    	 HdUtils.messager.info('已审核不能修改!');
+				    return;	
+		    } */
+		    dg.datagrid("hdEdit");
+	    });
+	    // 保存。
+	    $("#save[(${radi})]").on("click", function() {
+	    	var  rows=$('#ShipDatagrid15079591493050815[(${radi})]').datagrid("getRows");
+	    	for(var i=0;i<rows.length;i++){
+	    		$('#ShipDatagrid15079591493050815[(${radi})]').datagrid("endEdit", i); 
+	    	}
+ 		    dg.datagrid("hdSave", {
+			    url : "../webresources/login/shipbill/MFeeInterfaceTally/saveAll",
+			    callback:function(){
+			    	$("#ShipDatagrid15079591493050815[(${radi})]").datagrid("reload");
+			    }
+		    }); 
+	    });
+	    // 复制
+	    $("#copy[(${radi})]").on("click", function() {
+		    var dataRow = $('#ShipDatagrid15079591493050815[(${radi})]').datagrid("getSelected");
+		    if(dataRow){
+			    var copyRow={};
+			    $.extend(true,copyRow,dataRow );
+			    var uuid = guid();
+			    copyRow.id = uuid;
+		    	//$('#BillSplitDatagrid1508123301002[(${radi})]').datagrid('endEdit',0);
+			    
+		    	$('#ShipDatagrid15079591493050815[(${radi})]').datagrid('insertRow',{
+		    		index: 0,	// index start with 0
+		    		row: copyRow
+		    	});
+		    	$('#ShipDatagrid15079591493050815[(${radi})]').datagrid('beginEdit',0);
+		    	$('#ShipDatagrid15079591493050815[(${radi})]').datagrid('selectRow',0);
+		    	
+		    	
+		    } else {
+			    HdUtils.messager.info('请选择行！');
+		    }
+	    });
+	    function S4() {
+		    return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+	    };
+	    // Generate a pseudo-GUID by concatenating random hexadecimal.  
+	    function guid() {
+		    return (S4() + S4() + S4() + S4() + S4() + S4() + S4() + S4());
+	    };
+	    //航运处理。
+	    $("#shiphandle[(${radi})]").on("click", function() {
+	    	$.ajax({
+			    url : '/webresources/login/shipbill/MFeeInterfaceTally/updateData?shipNo=' + shipNo+ "&iEId="+iEId+ "&transPortTypeId=2&moveTyp=0",
+			    method : 'POST',
+			    dataType : 'json',
+			    contentType : "application/json",
+			    success : function(data) {
+			        HdUtils.messager.bottomRight(data.message);
+			        $("#ShipDatagrid15079591493050815[(${radi})]").datagrid("hdReload");
+		        }
+			});
+	    });
+	    //陆运处理。
+	    $("#landhandle[(${radi})]").on("click", function() {
+	    	/* var moveTyp=$("#unit[(${radi})]").combobox('getValue');
+	    	if (moveTyp == null || moveTyp == "") {
+			    HdUtils.messager.info('请先选择计费类型！');
+			    return;
+		    } */
+	    	$.ajax({
+			    url : '/webresources/login/shipbill/MFeeInterfaceTally/updateData?shipNo=' + shipNo+ "&iEId="+iEId+ "&transPortTypeId=1&moveTyp=0",//+moveTyp,
+			    method : 'POST',
+			    dataType : 'json',
+			    contentType : "application/json",
+			    success : function(data) {
+			        HdUtils.messager.bottomRight(data.message);
+			        $("#ShipDatagrid15079591493050815[(${radi})]").datagrid("hdReload");
+		        }
+			});
+	    });
+	    // 报文删除。
+	    $("#cancle[(${radi})]").on("click", function() {
+		    var data = dg.datagrid("getSelected");
+		    if (data == null || data == undefined) {
+			    HdUtils.messager.info('请选择一条数据进行操作！');
+			    return;
+		    }
+		    if (!data.manifestno) {
+			    HdUtils.messager.info('数据提单号不存在！');
+			    return;
+		    }
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/shipbill/MFeeInterfaceTally/deleteData?billNo=" + data.manifestno,
+		        success : function(data) {
+			        HdUtils.messager.info(data.message);
+			        $("#ShipDatagrid15079591493050815[(${radi})]").datagrid("hdReload");
+		        }
+		    });
+	    });
+	    $("#ShipDatagrid15079591493050815[(${radi})]").datagrid({
+	        url : "/webresources/login/shipbill/MFeeInterfaceTally/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : false,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        fit : false,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : 'ck',
+	            checkbox : true
+	        }, {
+	            field : "manifesttradeid",
+	            title : "内外贸",
+	            halign : "center",
+	            align : 'left',
+	            width : '80',
+	            editor : {
+                    type : "combobox",
+                    options : HdUtils.code.scode({
+	                    fieldCod : 'TRADE_ID_XIN'
+                    }, {
+	                    required : true
+                    })
+                },
+                formatter : function(value) {
+	                return HdUtils.code.name('TRADE_ID_XIN', value);
+                },
+	            sortable : false
+	        }, {
+	            field : "manifestno",
+	            title : "舱单号",
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            align : 'left',
+	            width : '140',
+	            sortable : false
+	        }, {
+	            field : "chargecargoname",
+	            title : "货名",
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        }, {
+	            field : "chargecargotypeid",
+	            title : "货类",
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        }, {
+	            field : "cargolength",
+	            title : "货物长度/单车长度",
+	            halign : "center",
+	            align : 'right',
+	            width : '120',
+	            //要限制输入的最大数，请修改max
+	            editor : {
+	                type : "numberbox",
+	                options : {
+	                    required : false,
+	                    precision : 0,
+	                    max : "9999999999.999",
+	                    groupSeparator : ','
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "overlengthid",
+	            title : "超长",
+	            halign : "center",
+	            align : 'center',
+	            width : '60',
+	            sortable : false,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            formatter : function(value) {
+					if (value == 1) {
+						value = "√";
+						return value;
+					} else {
+						value = "×";
+						return value;
+						 }
+			    }
+	        }, {
+	            field : "complexid",
+	            title : "码头类型",
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        }, {
+	            field : "vesselname",
+	            title : "船名",
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        }, {
+	            field : "manifestvolumn",
+	            title : "舱单体积",
+	            halign : "center",
+	            align : 'right',
+	            width : '80',
+	            //要限制输入的最大数，请修改max
+	            editor : {
+	                type : "numberbox",
+	                options : {
+	                    required : false,
+	                    precision : 0,
+	                    max : "9999999999.999",
+	                    groupSeparator : ','
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "username",
+	            title : "用户名",
+	            halign : "center",
+	            hidden : true,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        }, /* {
+	            field : "workcargovolumn",
+	            title : "单件体积",
+	            halign : "center",
+	            align : 'right',
+	            width : '80',
+	            //要限制输入的最大数，请修改max
+	            editor : {
+	                type : "numberbox",
+	                options : {
+	                    required : false,
+	                    precision : 0,
+	                    max : "9999999999.999",
+	                    groupSeparator : ','
+	                }
+	            },
+	            sortable : false
+	        },  */{
+	            field : "cargoownerid",
+	            title : "货主",
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        }, {
+	            field : "storagequantity",
+	            title : "存储时长",
+	            halign : "center",
+	            align : 'right',
+	            width : '80',
+	            //要限制输入的最大数，请修改max
+	            editor : {
+	                type : "numberbox",
+	                options : {
+	                    required : false,
+	                    precision : 0,
+	                    max : "9999999999.999",
+	                    groupSeparator : ','
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "vesselvisitid",
+	            title : "生产系统船期ID",
+	            halign : "center",
+	            hidden : true,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        }, {
+	            field : "id",
+	            title : "主键",
+	            halign : "center",
+	            hidden : true,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            align : 'left',
+	            width : '80',
+	            hidden : true,
+	            sortable : false
+	        }, {
+	            field : "voyage",
+	            title : "航次",
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        }, {
+	            field : "movetypeid",
+	            title : "停泊类型",
+	            halign : "center",
+	            editor : {
+	                type : "combobox",
+	                options : HdUtils.code.scode({
+	                    fieldCod : 'MOVE_TYP'
+	                }, {
+	                    required : true
+	                })
+	            },
+	            formatter : function(value) {
+	                return HdUtils.code.name('MOVE_TYP', value);
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        }, {
+	            field : "chargebegintime",
+	            title : "计费开始时间",
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.datetime,
+	            width : 180,
+	            align : 'center',
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "chargeendtime",
+	            title : "计费结束时间",
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.datetime,
+	            width : 180,
+	            align : 'center',
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "voyagefacilityinterfaceid",
+	            title : "生成系统该船期对应的表主键",
+	            halign : "center",
+	            hidden : true,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        }, {
+	            field : "cargomechanicalid",
+	            title : "货方使用港方机械",
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        }, /* {
+	            field : "mafinumber",
+	            title : "MAFI拖头数量",
+	            halign : "center",
+	            formatter : function(value) {
+		            return HdUtils.formatter.precisionCommon(value, 0);
+	            },
+	            align : 'right',
+	            width : '80',
+	            //要限制输入的最大数，请修改max
+	            editor : {
+	                type : "numberbox",
+	                options : {
+	                    required : false,
+	                    precision : 0,
+	                    max : "9999999999.999",
+	                    groupSeparator : ','
+	                }
+	            },
+	            sortable : false
+	        }, */ {
+	            field : "vesselagentid",
+	            title : "船代",
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        }, {
+	            field : "workcargoweight",
+	            title : "实际作业重量",
+	            halign : "center",
+	            formatter : function(value) {
+		            return HdUtils.formatter.precisionCommon(value, 0);
+	            },
+	            align : 'right',
+	            width : '80',
+	            //要限制输入的最大数，请修改max
+	            editor : {
+	                type : "numberbox",
+	                options : {
+	                    required : false,
+	                    precision : 0,
+	                    max : "9999999999.999",
+	                    groupSeparator : ','
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "manifestweight",
+	            title : "舱单重量",
+	            halign : "center",
+	            formatter : function(value) {
+		            return HdUtils.formatter.precisionCommon(value, 0);
+	            },
+	            align : 'right',
+	            width : '80',
+	            //要限制输入的最大数，请修改max
+	            editor : {
+	                type : "numberbox",
+	                options : {
+	                    required : false,
+	                    precision : 0,
+	                    max : "9999999999.999",
+	                    groupSeparator : ','
+	                }
+	            },
+	            sortable : false
+	        }, /* {
+	            field : "invshiftid",
+	            title : "入库工班班次",
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        }, *//*  {
+	            field : "storagetypeId",
+	            title : "库场类型",
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        }, */ /* {
+	            field : "manifestpkgs",
+	            title : "舱单件数",
+	            halign : "center",
+	            formatter : function(value) {
+		            return HdUtils.formatter.precisionCommon(value, 0);
+	            },
+	            align : 'right',
+	            width : '80',
+	            //要限制输入的最大数，请修改max
+	            editor : {
+	                type : "numberbox",
+	                options : {
+	                    required : false,
+	                    precision : 0,
+	                    max : "9999999999.999",
+	                    groupSeparator : ','
+	                }
+	            },
+	            sortable : false
+	        },  *//* {
+	            field : "workdate",
+	            title : "工班作业日期",
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.datetime,
+	            width : 180,
+	            align : 'center',
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "workernumber",
+	            title : "工班作业人数",
+	            halign : "center",
+	            formatter : function(value) {
+		            return HdUtils.formatter.precisionCommon(value, 0);
+	            },
+	            align : 'right',
+	            width : '80',
+	            //要限制输入的最大数，请修改max
+	            editor : {
+	                type : "numberbox",
+	                options : {
+	                    required : false,
+	                    precision : 0,
+	                    max : "9999999999.999",
+	                    groupSeparator : ','
+	                }
+	            },
+	            sortable : false
+	        },  */{
+	            field : "impexpid",
+	            title : "进出口",
+	            halign : "center",
+	            align : 'left',
+	            width : '80',
+	            editor : {
+                    type : "combobox",
+                    options : HdUtils.code.scode({
+	                    fieldCod : 'I_E_ID'
+                    }, {
+	                    required : true
+                    })
+                },
+                formatter : function(value) {
+	                return HdUtils.code.name('I_E_ID', value);
+                },
+	            sortable : false
+	        }, /* {
+	            field : "outshiftid",
+	            title : "出库工班班次",
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        }, {
+	            field : "jpid",
+	            title : "军品标记",
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        }, {
+	            field : "toolboxid",
+	            title : "随车标记",
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        }, */ {
+	            field : "transporttypeid",
+	            title : " 航陆运",
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        }, {
+	            field : "chargeterm",
+	            title : "贸易条款",
+	            halign : "center",
+	            editor : {
+	                type : "combobox",
+	                options : HdUtils.code.scode({
+	                    fieldCod : 'CHARGE_TERM'
+	                }, {
+	                    required : true
+	                })
+	            },
+	            formatter : function(value) {
+	                return HdUtils.code.name('CHARGE_TERM', value);
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        }, {
+	            field : "movetoolid",
+	            title : "运输工具",
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        }, {
+	            field : "facilityid",
+	            title : "码头公司代码",
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        },/*  {
+	            field : "invwarhousedate",
+	            title : "入库工班日期",
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.datetime,
+	            width : 180,
+	            align : 'center',
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },  */{
+	            field : "workcargopkg",
+	            title : "实际作业件数",
+	            halign : "center",
+	            formatter : function(value) {
+		            return HdUtils.formatter.precisionCommon(value, 0);
+	            },
+	            align : 'right',
+	            width : '80',
+	            //要限制输入的最大数，请修改max
+	            editor : {
+	                type : "numberbox",
+	                options : {
+	                    required : false,
+	                    precision : 0,
+	                    max : "9999999999.999",
+	                    groupSeparator : ','
+	                }
+	            },
+	            sortable : false
+	        }, /* {
+	            field : "orgmanifestno",
+	            title : "原舱单号",
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        }, {
+	            field : "yardtypeid",
+	            title : "场地名称",
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        },  */{
+	            field : "portwokerid",
+	            title : "是否使用港方工人",
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            formatter : function(value) {
+					if (value == 1) {
+						value = "√";
+						return value;
+					} else {
+						value = "×";
+						return value;
+						 }
+			    },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        }, {
+	            field : "oceanoilid",
+	            title : "海洋油标记",
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            formatter : function(value) {
+					if (value == 1) {
+						value = "√";
+						return value;
+					} else {
+						value = "×";
+						return value;
+						 }
+			    },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        }, {
+	            field : "invoicecargoname",
+	            title : "发票货名",
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        }, {
+	            field : "cargomoveworkid",
+	            title : "作业字体主键 ",
+	            halign : "center",
+	            hidden : true,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        }, {
+	            field : "userId",
+	            title : "",
+	            halign : "center",
+	            hidden : true,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        }, {
+	            field : "cargoagentid",
+	            title : "货代",
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        },/*  {
+	            field : "gjid",
+	            title : "过境标记",
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            formatter : function(value) {
+					if (value == 1) {
+						value = "√";
+						return value;
+					} else {
+						value = "×";
+						return value;
+						 }
+			    },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        }, */ {
+	            field : "voyageinterfaceid",
+	            title : "生产系统该船期对应的表主键（集团表）",
+	            halign : "center",
+	            hidden : true,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        }, /* {
+	            field : "workshiftid",
+	            title : "工班作业班次",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        },  */{
+	            field : "cargochargeunitid",
+	            title : "计费单位",
+	            halign : "center",
+	            editor : {
+	                type : "combobox",
+	                options : HdUtils.code.scode({
+	                    fieldCod : 'CARGO_CHARGE_UNIT_ID'
+	                }, {
+	                    required : true
+	                })
+	            },
+	            formatter : function(value) {
+	                return HdUtils.code.name('CARGO_CHARGE_UNIT_ID', value);
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        }, {
+	            field : "directid",
+	            title : "直提标志",
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            formatter : function(value) {
+					if (value == 1) {
+						value = "√";
+						return value;
+					} else {
+						value = "×";
+						return value;
+						 }
+			    },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        }, /* {
+	            field : "workerid",
+	            title : "人力机力",
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            formatter : function(value) {
+					if (value == 1) {
+						value = "√";
+						return value;
+					} else {
+						value = "×";
+						return value;
+						 }
+			    },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        }, */ {
+	            field : "portmechanicalid",
+	            title : "是否使用港方机械",
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            formatter : function(value) {
+					if (value == 1) {
+						value = "√";
+						return value;
+					} else {
+						value = "×";
+						return value;
+						 }
+			    },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        },/*  {
+	            field : "shipmechanicalid",
+	            title : "船方机械",
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            formatter : function(value) {
+					if (value == 1) {
+						value = "√";
+						return value;
+					} else {
+						value = "×";
+						return value;
+						 }
+			    },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        },  */{
+	            field : "carrierid",
+	            title : "船公司",
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        }, {
+	            field : "vesselnameen",
+	            title : "英文船名",
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        }, {
+	            field : "deliveryterm",
+	            title : "交货条款",
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        }, {
+	            field : "hazardid",
+	            title : "危品标志",
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            formatter : function(value) {
+					if (value == 1) {
+						value = "√";
+						return value;
+					} else {
+						value = "×";
+						return value;
+						 }
+			    },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        },/*  {
+	            field : "outwarhousedate",
+	            title : "出库工班日期",
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.datetime,
+	            width : 180,
+	            align : 'center',
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },  */{
+	            field : "userip",
+	            title : "生产系统用户IP",
+	            halign : "center",
+	            hidden : true,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        }, {
+	            field : "SendName",
+	            title : "发送人",
+	            halign : "center",
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        }, {
+	            field : "SendTime",
+	            title : "发送时间",
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.datetime,
+	            width : 180,
+	            align : 'center',
+	            sortable : false
+	        },{
+	            field : "nightid",
+	            title : '夜班标记',
+	            width : 100,
+	            multiSort : true,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            formatter : function(value) {
+					if (value == 1) {
+						value = "√";
+						return value;
+					} else {
+						value = "×";
+						return value;
+						 }
+			},
+	            align : "center",
+	            sortable : false
+	        },{
+	            field : "holidayid",
+	            title : '节假日标记',
+	            width : 100,
+	            multiSort : true,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            formatter : function(value) {
+					if (value == 1) {
+						value = "√";
+						return value;
+					} else {
+						value = "×";
+						return value;
+						 }
+			},
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "bwSendId",
+	            title : "报文发送标记",
+	            halign : "center",
+	            formatter : function(value) {
+					if (value == 1) {
+						value = "√";
+						return value;
+					} else {
+						value = "×";
+						return value;
+						 }
+			    },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        }, {
+	            field : "jfOkId",
+	            title : "计费系统接收报文成功",
+	            halign : "center",
+	            formatter : function(value) {
+					if (value == 1) {
+						value = "√";
+						return value;
+					} else {
+						value = "×";
+						return value;
+						 }
+			    },
+	            align : 'left',
+	            width : '140',
+	            sortable : false
+	        },{
+	            field : "delId",
+	            title : "删除标记",
+	            halign : "center",
+	            formatter : function(value) {
+					if (value == 1) {
+						value = "√";
+						return value;
+					} else {
+						value = "×";
+						return value;
+						 }
+			    },
+	            align : 'left',
+	            width : '80',
+	            sortable : false
+	        }, {
+	            field : "delSendId",
+	            title : "删除报文 发送完毕",
+	            halign : "center",
+	            formatter : function(value) {
+					if (value == 1) {
+						value = "√";
+						return value;
+					} else {
+						value = "×";
+						return value;
+						 }
+			    },
+	            align : 'left',
+	            width : '120',
+	            sortable : false
+	        }, {
+	            field : "jfDelOkId",
+	            title : "计费系统接收删除报文成功",
+	            halign : "center",
+	            formatter : function(value) {
+					if (value == 1) {
+						value = "√";
+						return value;
+					} else {
+						value = "×";
+						return value;
+						 }
+			    },
+	            align : 'left',
+	            width : '160',
+	            sortable : false
+	        },{
+	            field : "usefreightmac",
+	            title : "陆运机力",
+	            halign : "center",
+	            formatter : function(value) {
+					if (value == 1) {
+						value = "√";
+						return value;
+					} else {
+						value = "×";
+						return value;
+						 }
+			    },
+	            align : 'left',
+	            width : '160',
+	            sortable : false
+	        } ] ]
+	    });
+	    $("#ShipDatagrid15079591493050815"+ /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+	/*]]>*/
+</script>
+<form th:id="ContractIeDocForm15079591493050815+${radi}">
+	<span>
+	    <a class="easyui-linkbutton" th:id='query+${radi}'>刷新</a>
+		<!-- <a class="easyui-linkbutton" th:id='delete+${radi}'>删除</a>
+		<a class="easyui-linkbutton" th:id='edit+${radi}'>编辑</a>
+		<a class="easyui-linkbutton" th:id='save+${radi}'>保存</a>
+		<a class="easyui-linkbutton" th:id='copy+${radi}'>复制</a> -->
+		<a class="easyui-linkbutton" th:id='shiphandle+${radi}'>航运处理</a>
+		<a class="easyui-linkbutton" th:id='landhandle+${radi}'>陆运处理</a>
+		<a class="easyui-linkbutton" th:id='upload+${radi}'>报文发送</a>
+		<a class="easyui-linkbutton" th:id='cancle+${radi}'>报文删除</a>
+		<!-- 计费类型：<input th:id="unit+${radi}"	name="unit" type="text" data-options="required:false"	style="width:100px"/> <br/>
+		 -->				
+	</span>
+	<table th:id="ShipDatagrid15079591493050815+${radi}" style="height: 500px;"></table>
+</form>
+</html>

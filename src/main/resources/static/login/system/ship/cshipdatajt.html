@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="DayWorkClassToolBar1508123307299+${radi}"
+	style="float: left">
+	<div>
+		<!-- 查询 -->
+		<span> IMO号：<input th:id="shipImo+${radi}" name="shipImo"
+			placeholder="请输入IMO" type="text" data-options="required:false"
+			style="width: 120px">
+			中文船名：<input th:id="cShipNam+${radi}" name="cShipNam"
+			placeholder="请输入中文船名" type="text" data-options="required:false"
+			style="width: 120px">
+			英文船名：<input th:id="eShipNam+${radi}" name="eShipNam"
+			placeholder="请输入英文船名" type="text" data-options="required:false"
+			style="width: 120px"> <a class="easyui-linkbutton"
+			th:id="query+${radi}">查询</a> 
+			<a class="easyui-linkbutton" th:id='clear+${radi}'>清空</a>
+			<a class="easyui-linkbutton" th:id='import+${radi}'>导入</a>
+			<a class="easyui-linkbutton" th:id='change+${radi}'>更新</a>
+		</span>
+	</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="DayWorkClassDatagrid1508123307299+${radi}"
+	style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var jtradi = HdUtils.dialog.getValue("radi");
+	    var shipCodId = HdUtils.dialog.getValue("shipCodId");
+	    var dg = $("#DayWorkClassDatagrid1508123307299[(${radi})]");
+	    // buttons
+	 // 查询
+	    $("#query[(${radi})]").on("click", function() {
+		    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+	    //清空
+	    $("#clear[(${radi})]").on("click", function() {
+		    $("#cShipNam[(${radi})]").val("");
+	    });
+
+	    $("#import[(${radi})]").on("click", function() {
+	    	var selRow = dg.datagrid("getChecked");
+		    if (selRow.length == 0) {
+			    HdUtils.messager.info('请至少选择一条数据！');
+			    return false;
+		    }
+		 // 保存。
+		    dg.datagrid("lySave", {
+			    url : "../webresources/login/ship/CShipData/save",
+			    callback : function(){
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#DayWorkClassDatagrid1508123307299" + jtradi).datagrid("hdReload");
+			    }
+		    });
+	    });
+	    $("#change[(${radi})]").on("click", function() {
+	    	if(!shipCodId){
+	    		HdUtils.messager.info('请先选择一条公司数据！');
+			    return;
+	    	}
+	    	var selRow = dg.datagrid("getChecked");
+		    if (selRow.length == 0) {
+			    HdUtils.messager.info('请至少选择一条数据！');
+			    return false;
+		    }
+		 // 保存。
+		    dg.datagrid("lySave", {
+			    url : "../webresources/login/ship/CShipData/saveData?shipCodId=" + shipCodId,
+			    callback : function(){
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#DayWorkClassDatagrid1508123307299" + jtradi).datagrid("hdReload");
+			    }
+		    });
+	    });
+	    
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    var shipImo = $("#shipImo[(${radi})]").val();
+		    var cShipNam = $("#cShipNam[(${radi})]").val();
+		    var eShipNam = $("#eShipNam[(${radi})]").val();
+		    onlinquery.add("shipImo", shipImo);
+		    onlinquery.add("cShipNam", cShipNam);
+		    onlinquery.add("eShipNam", eShipNam);
+		    return onlinquery.build();
+	    }
+
+	    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/ship/CShipData/findNewJt",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#DayWorkClassToolBar1508123307299" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        onSelect(rowIndex,rowData){
+	        	var eShipNam = rowData.eShipNam;
+	        	var shipImo = rowData.shipImo;
+	        	var cShipNam = rowData.cShipNam;
+	        	HdUtils.ajax.post({
+                    url : "../webresources/login/ship/CShipData/findData?eShipNam=" + eShipNam + "&shipImo=" + shipImo + "&cShipNam=" + cShipNam,
+                    success : function(data) {
+                        if (data.code == '-1') {
+	                        HdUtils.messager.info(data.message);
+	                        return false;
+                        }
+                        if(data.shipCodId){
+                        	var cShipNam = data.cShipNam;
+                        	var messager = "该船已存在于船舶档案，中文船名为：" + cShipNam + " ,请考虑选择更新操作！";
+                        	HdUtils.messager.info(messager);
+	                        return false;
+                        }
+                    }
+                })
+		    },
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+
+	        }, {
+
+	            field : "shipCodId",
+	            title : '主键',
+	            multiSort : true,
+	            hidden : "true",
+	            sortable : false
+	        }, {
+	            field : "shipCod",
+	            title : '船代码',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "shipShort",
+	            title : '船舶简称',
+	            multiSort : true,
+	            width : 100,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "cShipNam",
+	            title : '中文船名',
+	            multiSort : true,
+	            width : 100,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "eShipNam",
+	            title : "英文船名",
+	            width : 100,
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "shipCall",
+	            title : "船舶呼号",
+	            multiSort : true,
+	            width : 100,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "countryCodNam",
+	            title : "国籍",
+	            multiSort : true,
+	            width : 100,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "shipCorpCodNam",
+	            title : "船公司",
+	            multiSort : true,
+	            halign : "center",
+	            width : 150,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+
+	        ] ]
+	    });
+	    $("#DayWorkClassDatagrid1508123307299" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

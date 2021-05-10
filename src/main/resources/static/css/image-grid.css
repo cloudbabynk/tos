@@ -1,0 +1,11 @@
+/* 
+    Created on : 2015-6-7, 21:04:23
+    Author     : 傅新奇 <fuxq@huadong.net>
+*/
+
+.image-grid{margin:-20px 0 0 -40px;padding-left:45px;width:840px}
+.image-grid:after{content:"";display:block;height:0;overflow:hidden;clear:both}
+.image-grid li{width:128px;margin:20px 0 0 35px;float:left;text-align:center;font-family:"Helvetica Neue",sans-serif;line-height:17px;color:#686f74;height:177px;overflow:hidden}
+.image-grid li img,
+.image-grid li strong{display:block}
+.image-grid li strong{color:black}  

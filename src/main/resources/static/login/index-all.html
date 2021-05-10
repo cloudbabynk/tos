@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>天津港环球滚装码头可视化</title>
+<link rel="stylesheet" href="../css/jquery.fullPage.css">
+<style>
+.section { text-align: center; font: 50px "宋体"; color: #fff;}
+#fp-nav ul li a.active span,.fp-slidesNav ul li a.active span {    background: #ff0000; /*这里设置的是活动导航的颜色*/}
+#fp-nav ul li a span,.fp-slidesNav ul li a span {    border: 1px solid #FF8913;/*这里设置的是非活动导航的颜色*/}
+
+</style>
+<script src="../js/jquery.min.js"></script>
+<script src="../js/jquery.fullPage.js"></script>
+<script>
+$(function(){
+	document.getElementById('index_ksh1').src="http://"+location.host+"/login/ksh_report1.html";
+	document.getElementById('index_ksh2').src="http://"+location.host+"/login/ksh_report2.html";
+	document.getElementById('index_ksh3').src="http://"+location.host+"/login/ksh_report3.html";
+	$('#dowebok').fullpage({
+		sectionsColor: ['#1bbc9b', '#071A3F', '#7BAABE', '#f90'],
+		navigation: true,
+		navigationColor:'#ff0000',
+		controlArrowColor:'#ff0000'
+	});
+});
+</script>
+</head>
+
+<body>
+
+<div id="dowebok">
+	<div class="section">
+		<iframe id="index_ksh1" height="100%" width="100%"></iframe>
+	</div>
+	<div class="section">
+		<iframe id="index_ksh2" height="100%" width="100%"></iframe>
+	</div>
+	<div class="section">
+		<iframe id="index_ksh3" height="100%" width="100%"></iframe>
+	</div>
+</div>
+
+</body>
+</html>

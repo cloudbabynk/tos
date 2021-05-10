@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+  <style type="text/css">
+    .subtotal {
+        font-weight: bold;
+    } /*合计单元格样式*/
+</style>  
+<body  >    
+<div th:id="cc+${radi}" class="easyui-layout" style="width: 100%; height: 100%;">    
+    <div data-options="region:'east',split:true" style="width:450px;">
+     	<div th:id="cc5+${radi}" class="easyui-layout" data-options="fit:true"> 
+			      <div data-options="region:'north'" style="height:76px">
+			      		   船舶名：<input	th:id="cShipNam+${radi}" name="cShipNam" placeholder="船名" type="text"	readonly="readonly" data-options="required:false" style="width: 80px">
+						 航次：<input th:id="voyage+${radi}" readonly="readonly" name="voyage" placeholder="航次" type="text" data-options="required:false" style="width: 80px">
+						<a class="easyui-linkbutton" th:id="chooseShip+${radi}">选船</a>
+						堆场：<input	th:id="cyAreaNo+${radi}" name="cyAreaNo" type="text" data-options="required:false" style="width: 80px">
+						</br>
+						提单号：<input th:id="billNo+${radi}" name="billNo" type="text"   class="easyui-validatebox" data-options="required:true" style="width:140px">&nbsp;&nbsp;
+						车架号： <input th:id="vinNo+${radi}" name="vinNo" type="text" data-options="required:false" style="width: 150px"> 
+						</br>
+						
+						品牌名：<input 	th:id="brandCod+${radi}" name="brandCod" type="text" data-options="required:false" style="width: 150px">
+		                 <input th:id="shipNo+${radi}"	name="shipNo" type="text" hidden="true" data-options="required:false">
+				
+						  <a class="easyui-linkbutton" th:id="portQuery+${radi}">查询</a>
+						  <a class="easyui-linkbutton" th:id='portClear+${radi}'>重置</a>
+			      </div> 
+			      <div data-options="region:'center'" style="background:#eee;">
+			     	 <table th:id="PortCarDatagrid+${radi}" style="height: 100%"></table>  
+			      </div>  
+		     </div>  
+        </div>
+    <div data-options="region:'west',title:'船舶信息',tools:reload5439,split:true" style="width:240px;">
+	    <div id="ShipStatusTreeTools">
+	    	<input class="easyui-searchbox"	data-options="searcher:searchShip,prompt:'搜索船舶'"	th:id="searchText+${radi}" style="width: 200px; height: 20px;"name="search"/>
+	        <input class="easyui-searchbox" 	data-options="searcher:searchShipBill,prompt:'搜索提单'" th:id="searchShipBill+${radi}" style="width: 200px; height: 20px;" 	name="searchShipBill"/>
+	        <input th:id="iEId+${radi}" th:value='${iEId}' type="hidden" /> 
+	        <input th:id="tradeId+${radi}" th:value='${tradeId}' type="hidden" />
+	    </div>
+    	
+        <ul th:id="ShipStatusTree123+${radi}" style="height:90%;"></ul>
+    </div>   
+    <div data-options="region:'center',split:true" style="background:#eee;">
+	    <div th:id="cc3+${radi}" class="easyui-layout" data-options="fit:true"> 
+	    <div data-options="region:'south',split:true" style="height:300px;">
+	     	<table th:id="selShipBillDatagrid+${radi}"/>
+	    </div>     
+	    <div data-options="region:'center'" style="background:#eee;">
+		     <div th:id="cc4+${radi}" class="easyui-layout" data-options="fit:true"> 
+			      <div data-options="region:'north'" style="height:30px">
+			      		   <a class="easyui-linkbutton" th:id='confirm+${radi}'>下货纸确认</a>
+			               <a class="easyui-linkbutton" th:id='bind+${radi}'>集齐校验</a> 
+			               <a class="easyui-linkbutton" th:id='delete+${radi}'>删除</a>
+			               <a class="easyui-linkbutton" th:id='edit+${radi}'>编辑</a>
+						   <a class="easyui-linkbutton" th:id='save+${radi}'>保存</a>
+			               <a class="easyui-linkbutton" th:id='bandShipLoad+${radi}'>下货纸绑定</a>
+			               <a class="easyui-linkbutton" th:id='cancleShipLoad+${radi}'>取消绑定</a>
+			      </div> 
+			      <div data-options="region:'center'" style="background:#eee;">
+			     	 <table th:id="shipLoadBillDatagrid+${radi}" style="height: 100%"/> 
+			      </div>  
+		     </div>
+	    	    
+	    		  
+	    </div>   
+ 	 </div>
+    
+    </div>   
+ </div>
+ 
+<script type="text/javascript" th:inline="javascript">
+var reload5439 = [ {
+    iconCls : 'icon-reload',
+    handler : function() {
+        $('#ShipStatusTree123[(${radi})]').tree('reload');
+    }
+} ];
+var searchShip = function(){
+    var parentNode=$('#ShipStatusTree123[(${radi})]').tree('getRoots'); //得到tree顶级node
+    var searchCon = $("input[name='search']").val();
+    var children;
+    for(var i=0;i<parentNode.length;i++){ //循环顶级 node
+        children = $('#ShipStatusTree123[(${radi})]').tree('getChildren',parentNode[i].target);//获取顶级node下所有子节点
+        if(children){ //如果有子节点
+            for(var j=0;j<children.length;j++){ //循环所有子节点
+                if(children[j].text.indexOf(searchCon)>=0||children[j].id.indexOf(searchCon)>=0){ //判断节点text是否包含搜索文本
+                    selectNode(children[j]); //设置此节点为选择状态
+                    expandParent(children[j]); //设置此节点所有父级展开
+                    return;
+                }
+            }
+        }else{
+            if(parentNode[i].text.indexOf(searchCon)||children[j].id.indexOf(searchCon)>=0>=0){
+                selectNode(parentNode[i]);
+                expandParent(parentNode[i]);
+                return;
+            }
+        }
+    }
+}
+
+
+
+
+
+var searchShipBill = function(){
+    var parentNode=$('#ShipStatusTree123[(${radi})]').tree('getRoots'); //得到tree顶级node
+    var billNo = $("input[name='searchShipBill']").val();
+    var searchCon="";
+    HdUtils.ajax.get({
+        url : "../webresources/login/ship/ShipBill/searchShipBill?billNo=" + billNo,
+        success : function(data) {
+            searchCon = data.shipNo;
+            var children;
+            for(var i=0;i<parentNode.length;i++){ //循环顶级 node
+                children = $('#ShipStatusTree123[(${radi})]').tree('getChildren',parentNode[i].target);//获取顶级node下所有子节点
+                if(children){ //如果有子节点
+                    for(var j=0;j<children.length;j++){ //循环所有子节点
+                        if(children[j].text.indexOf(searchCon)>=0||children[j].id.indexOf(searchCon)>=0){ //判断节点text是否包含搜索文本
+                            selectNode(children[j]); //设置此节点为选择状态
+                            expandParent(children[j]); //设置此节点所有父级展开
+                            return;
+                        }
+                    }
+                }else{
+                    if(parentNode[i].text.indexOf(searchCon)||children[j].id.indexOf(searchCon)>=0>=0){
+                        selectNode(parentNode[i]);
+                        expandParent(parentNode[i]);
+                        return;
+                    }
+                }
+            }
+        }
+    });
+
+}
+function selectNode(node){
+    $('#ShipStatusTree123[(${radi})]').tree('select',node.target);
+    $('#ShipStatusTree123[(${radi})]').tree('scrollTo',node.target);
+};
+function expandParent(node){
+    var parent = node;
+    var t = true;
+    do {
+        parent = $('#ShipStatusTree123[(${radi})]').tree('getParent',parent.target); //获取此节点父节点
+        if(parent){ //如果存在
+            t=true;
+            $('#ShipStatusTree123[(${radi})]').tree('expand',parent.target);
+        }else{
+            t=false;
+        }
+    }while (t);
+};
+function resizeLayoutCenter (ctWidth,ctHeight){
+    if(typeof setSubHeight==="function"){
+        if(ctHeight){
+            setSubHeight(ctHeight,$('#sbillhtml[(${radi})]'));
+        }
+
+    }
+
+};
+$(document).ready(function() {
+    var iEId = $("#iEId[(${radi})]").val();
+    var tradeId= $("#tradeId[(${radi})]").val();
+    $('#ShipStatusTree123[(${radi})]').tree({
+        method : "get",
+        url : "../webresources/login/ship/ShipBill/gentree?iEId="+iEId+'&tradeId='+tradeId,
+        toolbar:"ShipStatusTreeTools",
+        onClick : treeclick
+    });
+    var dg = $("#shipLoadBillDatagrid[(${radi})]"); 
+    dg.datagrid({
+        striped : true,
+        url : "../webresources/login/ship/ShipLoadBill/find",
+        queryParams : query(),
+        method : "post",
+        pagination : false,
+        singleSelect : true,
+        selectOnCheck : false,
+        checkOnSelect : true,
+        rownumbers : true,
+        showFooter:true,
+        pageSize : 20,
+        autoLoad:false,
+        //toolbar : "#shiploadbillnewXia" + /*[[${radi}]]*/'',
+        fit:true,
+        fitColumns: false,
+        onSelect:function(rowIndex, rowData){
+            if(rowData.billNo){
+                var onlinquery = new HdQuery();
+                onlinquery.add("billNo", rowData.billNo);
+                onlinquery.add("shipNo", rowData.shipNo);
+                choosePortCar.datagrid({
+                    url : "/webresources/login/cargo/PortCar/findAll",
+                    queryParams : onlinquery.build()
+                })
+            }
+
+        },
+        columns : [ [{
+            field : "ck",
+            checkbox : true,
+            sortable : false,
+
+        },  {
+
+            field : "billNo",
+            title : '提单号',
+            multiSort : true,
+            halign : "center", 
+            sortable : true
+        },  
+            {
+
+                field : "jqId",
+                title : '集齐标志',
+                multiSort : true,
+                halign : "center", 
+                sortable : true,
+
+                formatter:function(value){
+                    if("1"===value)
+                    {
+                        return "√"
+                    }else {
+                        return "×"
+                    }
+                },
+            },
+            {
+
+                field : "forceId",
+                title : '强制理货',
+                multiSort : true,
+                halign : "center", 
+                sortable : true,
+                hidden:true,
+                formatter:function(value){
+                    if("1"===value)
+                    {
+                        return "√"
+                    }else {
+                        return "×"
+                    }
+                },
+            },  {
+
+            field : "billNum",
+            title : '数量',
+            multiSort : true,
+            halign : "center",
+            editor : {
+                type : "validatebox",
+                options : {    required : false }
+            },
+            sortable : true
+        } ] ],
+    });
+
+
+    function query() {
+        var onlinquery = new HdQuery();
+        onlinquery.add("shipNo", shipNo); 
+        onlinquery.add("iEId","2");
+        return onlinquery.build();
+    }
+
+    var shipNo; 
+    function treeclick(node) {
+        shipNo = node.id;
+        dg.datagrid({
+            queryParams:query(),
+        });
+    }
+
+    //下货纸绑定
+    $("#bandShipLoad[(${radi})]").on("click", function() {
+
+        var selBilldata=dg.datagrid("getSelected");
+        if(!selBilldata){
+            HdUtils.messager.bottomRight("中上窗口请选择要绑定的提单！");
+            return;
+        }
+        var selRows=dgPortCar.datagrid("getSelections");
+        if(selRows.length>0){
+            var dataPam={
+                lstPortCar:selRows,
+                billNo:selBilldata.billNo,
+                shipNo:shipNo
+            };
+            $.ajax({
+                url: "/webresources/login/ship/ShipLoadBill/savePortCarBillNo",
+                contentType:"application/json",
+                type: "POST",
+                data: $.toJSON(dataPam),
+                dataType: 'json',
+                success: function (data) {
+                    HdUtils.messager.bottomRight(data.message);
+                    dgPortCar.datagrid("hdReload");
+                    choosePortCar.datagrid("hdReload");
+                },
+                error: function (data) {
+                    console.log(data);
+                }
+            });
+
+
+        }else{
+            HdUtils.messager.bottomRight("右侧请选择要绑定的数据！");
+        }
+    });
+    //取消下货纸绑定
+    $("#cancleShipLoad[(${radi})]").on("click", function() {
+        //
+        var selBilldata2=dg.datagrid("getSelected");
+        if(!selBilldata2){
+            alert("中上窗口请选择要绑定的提单！");
+            return;
+        }
+        if (selBilldata2.jqId == '1'){
+            alert("该提单已集齐，禁止取消绑定！");
+            return ;
+        }
+        //
+        var choosedata=choosePortCar.datagrid("getSelected");
+        if(!choosedata){
+            alert("中下窗口请选择要取消绑定的数据！");
+            return;
+        }
+        //
+        if (choosedata.currentStatNam !== '在场'){
+            alert("选定车辆已离港，禁止取消绑定！");
+            return ;
+        }
+        //
+        var selRows=choosePortCar.datagrid("getSelections");
+        if(selRows.length>0){
+            var dataPam={
+                lstPortCar:selRows,
+                billNo:"--",
+                shipNo:shipNo,
+                oldbillNo:selBilldata2.billNo
+            };
+            $.ajax({
+                url: "/webresources/login/ship/ShipLoadBill/savePortCarBillNo",
+                contentType:"application/json",
+                type: "POST",
+                data: $.toJSON(dataPam),
+                dataType: 'json',
+                success: function (data) {
+                    HdUtils.messager.bottomRight(data.message);
+                    dgPortCar.datagrid("hdReload");
+                    choosePortCar.datagrid("hdReload");
+                },
+                error: function (data) {
+                    console.log(data);
+                }
+            });
+        }else{
+            //HdUtils.messager.bottomRight("中下窗口请选择要取消绑定的数据！");
+            alert("中下窗口请选择要取消绑定的数据！");
+        }
+    });
+
+    //确认收到下货纸
+    $("#confirm[(${radi})]").on("click", function(){
+    	
+        HdUtils.ajax.post({
+            dataType: "text",
+            url :"../webresources/login/ship/ShipBill/genPaper?shipNos=" + shipNo+"&billNos="+shipNo+"&carNums="+shipNo,
+            success : function(data) {
+                let Jdata=JSON.parse(data)
+                if(Jdata.code==="200"){
+                    HdUtils.messager.info(Jdata.message);
+                    dg.datagrid("hdReload");
+                }else{
+                    HdUtils.messager.info(Jdata.message);
+                }
+            }
+        });
+
+    });
+    // 编辑。
+    $("#edit[(${radi})]").on("click", function() {
+        var data = dg.datagrid("getSelected");
+        if (data == null || data == undefined) {
+	        HdUtils.messager.info('请选择一条数据进行编辑！');
+	        return;
+        }
+        dg.datagrid("hdEdit");
+    });
+    //批量 删除。
+    $("#delete[(${radi})]").on("click", function() {
+        var selRow =dg.datagrid('getChecked');
+        if (selRow.length == 0) {
+	        HdUtils.messager.info('请至少选择一条数据！');
+	        return false;
+        }
+        var shipbillId = '';
+        $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+	        if (r) {
+		        for (var i = 0; i < selRow.length; i++) {
+			        shipbillId += selRow[i].id + ",";
+		        }
+		        shipbillId = shipbillId.substring(0, shipbillId.length - 1);
+
+		        HdUtils.ajax.post({
+		            url : "../webresources/login/ship/ShipLoadBill/removeAll?shipbillId=" + shipbillId,
+		            success : function(data) {
+			            HdUtils.messager.bottomRight(data.message);
+			            dg.datagrid("hdReload");
+		            }
+		        });
+	        }
+        });
+    });
+	//集齐校验
+    $("#bind[(${radi})]").on("click", function() {  
+        HdUtils.ajax.post({
+            dataType: "text",
+            url :"../webresources/login/ship/ShipBill/paperBind?shipNos=" + shipNo+"&billNos="+shipNo+"&carNums="+shipNo,
+            success : function(data) {
+               let Jdata =JSON.parse(data)
+                if(Jdata.code==="200"){
+                    HdUtils.messager.info(Jdata.message);
+                   dg.datagrid("hdReload");
+                }else{
+                    HdUtils.messager.info(Jdata.message);
+                }
+
+            }
+        });
+    })
+
+    // 保存。
+    $("#save[(${radi})]").on("click", function() {
+        dg.datagrid("hdSave", {
+            url : "../webresources/login/ship/ShipLoadBill/save"
+        });
+    });
+    // 刷新。
+    $("#refresh[(${radi})]").on("click", function() {
+        dg.datagrid("hdReload");
+    });
+
+    //右侧工具栏
+    var dgPortCar = $("#PortCarDatagrid[(${radi})]");
+    $("#chooseShip[(${radi})]").bind("click", function() {
+        HdUtils.dialog.setValue({
+            'tradeId':'2',
+            'iEId':'E',
+            'type':''
+        });
+        HdUtils.selShip(callback);
+    });
+    $('#cyAreaNo[(${radi})]').combobox({
+        url : '../webresources/login/base/CCyArea/getCCyAreaDrop',
+        valueField : 'value',
+        textField : 'label',
+        panelHeight : '200',
+        onSelect : function(rec) {
+            return rec.value;
+        }
+    });
+    function callback(data) {
+        $("#cShipNam[(${radi})]").val(data.cShipNam);
+        $("#voyage[(${radi})]").val(data.ivoyage + '/' + data.evoyage);
+        $("#tradeId[(${radi})]").val(data.tradeId);
+        $("#shipNo[(${radi})]").val(data.shipNo);
+        $("#dockCod[(${radi})]").val(data.dockCod);
+
+    }
+    $('#brandCod[(${radi})]').combobox({
+        url : '../webresources/login/cargo/PortCar/getCBrandDrop',
+        valueField : 'value',
+        textField : 'label',
+        panelHeight : 150,
+        //required : 'true',
+        onSelect : function(rec) {
+            return rec.value;
+        }
+    });  
+
+    dgPortCar.datagrid({
+        striped : true,
+        url : "/webresources/login/cargo/PortCar/findAll",
+
+        queryParams : queryPortCar(),
+        method : "post",
+        autoLoad:false,
+     //   pagination : true,
+        singleSelect : false,
+        selectOnCheck : true,
+        checkOnSelect : true,
+        rownumbers : true,
+        pageSize : 100,
+        showFooter:true,
+        //toolbar : "#PortCarToolBar" + /*[[${radi}]]*/'',
+        fit : true,
+        fitColumns : false,
+        onLoadSuccess:function(){
+            let selectRows = dgPortCar.datagrid('getRows');
+            let piecesTotal = selectRows.length;
+            dgPortCar.datagrid('reloadFooter', [
+                { vinNo:`<span class="subtotal">合计</span>`,
+                    voyage: `<span class="subtotal">${piecesTotal} 辆</span>`
+                }
+            ]);
+        },
+        columns : [ [ {
+            field : "ck",
+            checkbox : true,
+            sortable : false
+        }, {
+            field : "vinNo",
+            title : '车架号',
+            multiSort : true,
+            halign : "center",
+            align : "left",
+            sortable : true
+        },   {
+            field : "cShipNam",
+            title : "船名",
+            multiSort : true,
+            halign : "center",
+            align : "left",
+            sortable : true
+        }, {
+            field : "voyage",
+            title : "航次",
+            multiSort : true,
+            halign : "center",
+            align : "left",
+            sortable : true
+        }, {
+            field : "billNo",
+            title : "提单号",
+            multiSort : true,
+            halign : "center",
+            align : "left",
+            sortable : true
+        }, {
+            field : "brandNam",
+            title : "品牌",
+            multiSort : true,
+            halign : "center",
+            align : "left",
+            sortable : true
+        }, {
+            field : "carTypNam",
+            title : "车型",
+            multiSort : true,
+            halign : "center",
+            sortable : true,
+            align : "left"
+        },{
+            field : "cyAreaNo",
+            title : "场号",
+            multiSort : true,
+            halign : "center",
+            align : "left",
+            sortable : true
+        }, {
+            field : "cyRowNo",
+            title : "行号",
+            multiSort : true,
+            halign : "center",
+            align : "left",
+            sortable : true
+        }, {
+            field : "cyBayNo",
+            title : "车位号",
+            multiSort : true,
+            halign : "center",
+            align : "left",
+            sortable : true
+        }, {
+            field : "exitCustomId",
+            title : "退关",
+            multiSort : true,
+            halign : "center",
+            align : "left",
+            formatter : function(value) {
+                if (value == '1') {
+                    value = "是";
+                } else{
+                    value = "否";
+                }
+                return value;
+            },
+            sortable : true
+        }, {
+            field : "currentStatNam",
+            title : "状态",
+            multiSort : true,
+            halign : "center",
+            align : "left",
+            sortable : false
+        }
+        ]]
+    });
+    function queryPortCar() {
+        var onlinquery = new HdQuery();
+        var vinNo = $("#vinNo[(${radi})]").val();
+        var billNo = $("#billNo[(${radi})]").val();
+        var brandCod = $("#brandCod[(${radi})]").combobox("getValue");
+        var iEId = "E";
+        var tradeId="2" 
+        var shipNo = $("#shipNo[(${radi})]").val();
+        var cyAreaNo = $("#cyAreaNo[(${radi})]").combobox("getValue"); 
+        onlinquery.add("cyAreaNo", cyAreaNo);
+        onlinquery.add("vinNo", vinNo);
+        onlinquery.add("billNo", billNo);
+        onlinquery.add("brandCod", brandCod);
+        onlinquery.add("shipNo", shipNo);
+        onlinquery.add("iEId", iEId);
+        onlinquery.add("tradeId", tradeId);
+        onlinquery.add("currentStat", "2");
+        onlinquery.add("rfidNo", "");
+        return onlinquery.build();
+
+    }
+    // 查询
+    $("#portQuery[(${radi})]").on("click", function() {
+        let bill= $("#billNo[(${radi})]").val();
+        let shipNam =$("#cShipNam[(${radi})]").val();
+        if(bill||shipNam)
+        {
+            dgPortCar.datagrid({
+            queryParams : queryPortCar(),
+
+        })
+        }else {
+            HdUtils.messager.info("先填提单号或选船！")
+            return;
+        }
+
+    });
+    // 清空。
+    $("#portClear[(${radi})]").on("click", function() {
+        $("#vinNo[(${radi})]").val("");
+        $("#billNo[(${radi})]").val("");
+        $("#brandCod[(${radi})]").combobox("setValue", "");
+        $("#cyAreaNo[(${radi})]").combobox("setValue", "");
+
+        $("#cShipNam[(${radi})]").val("");
+        $("#voyage[(${radi})]").val("");
+        $("#tradeId[(${radi})]").val("");
+        $("#shipNo[(${radi})]").val("");
+        $("#dockCod[(${radi})]").val("");
+    });
+
+
+    var choosePortCar = $("#selShipBillDatagrid[(${radi})]");
+    choosePortCar.datagrid({
+        striped : true,
+        url : "",
+        queryParams : queryPortCar(),
+        method : "post",
+        pagination : true,
+        singleSelect : true,
+        selectOnCheck : false,
+        checkOnSelect : true,
+        rownumbers : true,
+        pageSize : 20,
+        fit : true,
+        fitColumns : false,
+        autoload:true,
+         
+        columns : [ [ {
+            field : "ck",
+            checkbox : true,
+            sortable : false
+        },  {
+            field : "vinNo",
+            title : '车架号',
+            multiSort : true,
+            halign : "center",
+            align : "left",
+            sortable : true
+        },   {
+            field : "cShipNam",
+            title : "船名",
+            multiSort : true,
+            halign : "center",
+            align : "left",
+            sortable : true
+        }, {
+            field : "voyage",
+            title : "航次",
+            multiSort : true,
+            halign : "center",
+            align : "left",
+            sortable : true
+        }, {
+            field : "billNo",
+            title : "提单号",
+            multiSort : true,
+            halign : "center",
+            align : "left",
+            sortable : true
+        },  {
+            field : "brandNam",
+            title : "品牌",
+            multiSort : true,
+            halign : "center",
+            align : "left",
+            sortable : true
+        }, {
+            field : "carTypNam",
+            title : "车型",
+            multiSort : true,
+            halign : "center",
+            sortable : true,
+            align : "left"
+        },{
+            field : "cyAreaNo",
+            title : "场号",
+            multiSort : true,
+            halign : "center",
+            align : "left",
+            sortable : true
+        }, {
+            field : "cyRowNo",
+            title : "行号",
+            multiSort : true,
+            halign : "center",
+            align : "left",
+            sortable : true
+        }, {
+            field : "cyBayNo",
+            title : "车位号",
+            multiSort : true,
+            halign : "center",
+            align : "left",
+            sortable : true
+        }, {
+            field : "exitCustomId",
+            title : "退关",
+            multiSort : true,
+            halign : "center",
+            align : "left",
+            formatter : function(value) {
+                if (value == '1') {
+                    value = "是";
+                } else{
+                    value = "否";
+                }
+                return value;
+            },
+            sortable : true
+        }, {
+            field : "currentStatNam",
+            title : "状态",
+            multiSort : true,
+            halign : "center",
+            align : "left",
+            sortable : true
+        }
+        ]]
+    });
+
+});
+</script>
+
+</body>
+</html>

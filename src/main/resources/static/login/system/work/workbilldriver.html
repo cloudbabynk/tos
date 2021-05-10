@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="WorkBillDriverClassToolBar15081233020012+${radi}"
+	style="float: left;">
+	<!-- 查询 -->
+	<div th:id="sglh+${radi}" style="float: left;">
+		<shiro:hasPermission name="webresources:login:WorkBillDriver:add">
+			<a class="easyui-linkbutton" th:id='add+${radi}' iconCls="icon-add"
+				plain="false">新增</a>
+		</shiro:hasPermission>
+		<shiro:hasPermission name="webresources:login:WorkBillDriver:edit">
+			<a class="easyui-linkbutton" th:id='edit+${radi}' iconCls="icon-add"
+				plain="false">编辑</a>
+		</shiro:hasPermission>
+		<shiro:hasPermission name="webresources:login:WorkBillDriver:save">
+			<a class="easyui-linkbutton" th:id='save+${radi}'>保存</a>
+		</shiro:hasPermission>
+		<shiro:hasPermission name="webresources:login:WorkBillDriver:delete">
+			<a class="easyui-linkbutton" th:id='delete+${radi}'>删除</a>
+		</shiro:hasPermission>
+		<a class="easyui-linkbutton" th:id='fresh+${radi}'>刷新</a>
+	</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="WorkBillDriverClassDatagrid1508123320012+${radi}"
+	style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#WorkBillDriverClassDatagrid1508123320012[(${radi})]");
+	    var workbillNo = HdUtils.dialog.getValue('workbillNo');
+	    HdUtils.dialog.setValue({
+		    'radiworkbilldriverclass' : radi
+	    });
+	    // 增加。
+	    $("#add[(${radi})]").on("click", function() {
+	    	if(!workbillNo){
+	    		HdUtils.messager.info('请至少在调度配工里选择一条数据！');
+			    return false;
+	    	}
+	    	dg.datagrid("hdAdd");
+	    });
+	    // 编辑。
+	    $("#edit[(${radi})]").on("click", function() {
+		    var data = dg.datagrid("getSelected");
+		    if (data == null || data == undefined) {
+			    HdUtils.messager.info('请选择一条数据进行编辑！');
+			    return;
+		    }
+		    dg.datagrid("hdEdit");
+	    });
+	    // 删除。
+	    $("#delete[(${radi})]").on("click", function() {
+		    var selRow = dg.datagrid("getChecked");
+		    if (selRow.length == 0) {
+			    HdUtils.messager.info('请至少选择一条数据！');
+			    return false;
+		    }
+		    if (!workbillNo){
+		    	HdUtils.messager.info('请先选择调度配工信息！');
+		    	return false;
+		    }
+		    var ids = '';
+		    $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+			    if (r) {
+				    for (var i = 0; i < selRow.length; i++) {
+					    ids += selRow[i].classCod + ",";
+				    }
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/work/WorkBillDriverClass/removeAll?classCods=" + ids + "&workbillNo=" + workbillNo,
+				        success : function(data) {
+					        if (data.code == '-1') {
+						        HdUtils.messager.info(data.message);
+						        return false;
+					        }
+					        HdUtils.messager.bottomRight(data.message);
+					        $("#WorkBillDriverClassDatagrid1508123320012[(${radi})]").datagrid("hdReload");
+				        }
+				    });
+			    }
+		    });
+	    });
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    onlinquery.add("workbillNo",workbillNo);
+		    return onlinquery.build();
+	    }
+	    // 保存。
+	    $("#save[(${radi})]").on("click", function() {
+	    	if(!workbillNo){
+			    return false;
+	    	}
+		    dg.datagrid("hdSave", {
+			    url : "../webresources/login/work/WorkBillDriverClass/save?workbillNo="+workbillNo
+		    });
+	    });
+	    // 刷新。
+	    $("#fresh[(${radi})]").on("click", function() {
+		    dg.datagrid("hdReload");
+	    });
+	    $("#WorkBillDriverClassDatagrid1508123320012[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/work/WorkBillDriver/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#WorkBillDriverClassToolBar15081233020012" + /*[[${radi}]]*/'',
+	        fit : true,
+	        onSelect(rowIndex,rowData){
+	           	 HdUtils.dialog.setValue({
+	           		 'workbillNo' : rowData.workbillNo
+	        	    });
+	           	HdUtils.dialog.setValue({
+	           		 'classCod' : rowData.classCod
+	        	    }); 	
+	           	$('#shipdynamic259').layout('panel', 'east').panel('refresh');
+		    },
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+	        }, {
+	            field : "classCodNam",
+	            title : "司机班组",
+	            multiSort : true,
+	            align : "center",
+	            width : 80,
+	            editor : {
+	                type : "combogrid",
+	                options : HdUtils.code.workClass({
+	                    parentId : "#WorkBillDriverClassDatagrid1508123320012[(${radi})]",
+	                    fieldMapping : {
+	                    	classCod : 'classCod',
+	                    	classNam : 'classNam',
+	            	    },
+	                    required : false,
+	                })
+	            },
+	            sortable : false
+	        },{
+	            field : "driverCodNam",
+	            title : "司机",
+	            multiSort : true,
+	            width : 80,
+	            align : "center",
+	            editor : {
+	                type : "combogrid",
+	                options : HdUtils.code.driver({
+	                    parentId : "#ContractIeDocDatagrid1508123320012[(${radi})]",
+	                    fieldMapping : {
+	                    	empNo : 'empNo',
+	            	    	empNam : 'empNam',
+	                    },
+	                    required : true,
+	                })
+	            },
+	            sortable : false
+	        }, {
+                field : "workNum",
+                title : "作业量",
+                multiSort : true,
+                align : "center",
+                width : 60,
+                editor : {
+                    type : "validatebox",
+                    options : {
+                        required : false
+                    }
+                },
+                sortable : false
+            }, {
+	            field : "recNam",
+	            title : '录入员',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "recTim",
+	            title : '录入时间',
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.datetime,
+	            width : 120,
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        } ] ]
+	    });
+	    $("#WorkBillDriverClassDatagrid1508123320012[(${radi})]").datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

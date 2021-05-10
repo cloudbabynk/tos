@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<!-- 工具栏 -->
+<div id="MChangeshipToolBar1508123307299" style="float: left;">
+	<table id="CAreaTable1507959148710" style="height: 75%; width: 80%"
+		class="tableform">
+		<tr>
+			
+			<th>船名：</th>
+			<td><input id="cShipNam" name="cShipNam" type="text"
+				data-options="required:false" class="easyui-validatebox"></td>
+			<th>出口航次：</th>
+			<td><input id="evoyage" name="evoyage" type="text"
+				data-options="required:false" class="easyui-validatebox"></td>
+			<td><a class="easyui-linkbutton" id="chooseShip">选船</a></td>
+		</tr>
+		<tr>
+			<th>新提单号：</th>
+			<td><input id="newBillNo" name="newBillNo" type="text"
+				data-options="required:false" class="easyui-validatebox"></td>
+			<th>新卸货港：</th>
+			<td><input id="newTranPortCod" name="newTranPortCod" type="text"
+				data-options="required:false" class="easyui-validatebox"></td>
+			<th>新目的港：</th>
+			<td><input id="newDiscPortCod" name="newDiscPortCod" type="text"
+				data-options="required:false" class="easyui-validatebox"></td>
+			</div>
+			<!-- 工具栏 结束 -->
+			<!-- Datagrid -->
+			<script>
+				$(document).ready(
+                        function() {
+	                        var radi = HdUtils.dialog.getValue("radi");
+	                        var shipNo;
+	                        var selRow = HdUtils.dialog.getValue("dataRow");
+	                        $("#chooseShip").on("click", function() {
+	                  	    	HdUtils.selShip(callback);
+	                  	    	
+	                  	    });
+	                        function callback(data){
+	                        	$("#cShipNam").val(data.cShipNam);
+	                        	$("#evoyage").val(data.evoyage);
+	                        	shipNo = data.shipNo;
+	                        	$('#newBillNo').combobox({
+		                            url : '../webresources/login/cargo/MChangeShip/getShipBillkDrop?shipNo=' + shipNo,
+		                            valueField : 'value',
+		                            textField : 'label',
+		                            panelWidth:130,
+		                            onSelect : function(rec) {
+			                            return rec.value;
+		                            }
+		                        });
+	                        }
+	                        
+	                        $('#brandCod').combobox({
+	                            url : '../webresources/login/cargo/MChangeShip/getCBrandkDrop',
+	                            valueField : 'value',
+	                            textField : 'label',
+	                            onSelect : function(rec) {
+		                            return rec.value;
+	                            }
+	                        });
+	                        $('#newTranPortCod').combobox({
+	                            url : '../webresources/login/ship/CShipData/getCPortDrop',
+	                            valueField : 'value',
+	                            textField : 'label',
+	                            panelWidth:130,
+	                            onSelect : function(rec) {
+		                            return rec.value;
+	                            }
+	                        });
+	                        $('#newDiscPortCod').combobox({
+	                            url : '../webresources/login/ship/CShipData/getCPortDrop',
+	                            valueField : 'value',
+	                            textField : 'label',
+	                            panelWidth:130,
+	                            onSelect : function(rec) {
+		                            return rec.value;
+	                            }
+	                        });
+	                        function saveHandler() {
+		                        if (selRow.length == 0) {
+			                        HdUtils.messager.info('请至少选择一条数据！');
+			                        return false;
+		                        }
+		                        var shipbillId = $("#newBillNo").combobox('getValue');
+		                        if (!shipbillId) {
+			                        HdUtils.messager.info('请输入新提单号！');
+			                        return false;
+		                        }
+		                        var newTranPortCod = $("#newTranPortCod").combobox('getValue');
+// 		                        if (!newTranPortCod) {
+// 			                        HdUtils.messager.info('请输入新卸货港！');
+// 			                        return false;
+// 		                        }
+		                        var newDiscPortCod = $("#newDiscPortCod").combobox('getValue');
+// 		                        if (!newDiscPortCod) {
+// 			                        HdUtils.messager.info('请输入新目的港！');
+// 			                        return false;
+// 		                        }
+		                        var ids = '';
+		                        $.messager.confirm(Resources.WB_CONFIRM, "请确认是否转配？", function(r) {
+			                        if (r) {
+				                        for (var i = 0; i < selRow.length; i++) {
+					                        ids += selRow[i].portCarNo + ",";
+				                        }
+				                        HdUtils.ajax.post({
+				                            url : "../webresources/login/cargo/MChangeShip/saveAll?portCarNos=" + ids + "&shipbillId=" + shipbillId
+				                                    + "&newTranPortCod=" + newTranPortCod + "&newDiscPortCod=" + newDiscPortCod,
+				                            success : function(data) {
+					                            HdUtils.dialog.close();
+					                            HdUtils.messager.bottomRight(data.message);
+					                            $('#mchangeship256').layout('panel', 'center').panel('refresh');
+				                            }
+				                        });
+			                        }
+		                        });
+	                        }
+	                        HdUtils.dialog.setValue({
+		                        saveHandler : saveHandler
+	                        });
+                        });
+			</script>
+			</html>

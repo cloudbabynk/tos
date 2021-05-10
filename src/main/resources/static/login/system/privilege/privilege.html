@@ -1,0 +1,583 @@
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<!-- 权限管理 ws -->
+<!-- 工具栏 -->
+<div class="easyui-layout" style="width: 100%; height: 100%;" fit="true">
+	<div
+		data-options="region:'west',split:true,tools:[
+                {
+                    iconCls:'icon-reload',
+                    handler:function(){$('#privilege_tree').tree('reload');}
+                }],"
+		title="权限树" style="width: 260px;">
+		<ul id="privilege_tree"></ul>
+	</div>
+
+	<div data-options="region:'center',split:true" title="权限列表">
+		<div id="AuthPrivilegeToolBar1426567235258"
+			style="float: left; height: 25px">
+			<div>
+				<shiro:hasPermission name="webresources:login:Privilege:add">
+					<a class="easyui-linkbutton" iconCls="icon-add" plain="false"><label
+						name="add">增加</label></a>
+				</shiro:hasPermission>
+				<shiro:hasPermission name="webresources:login:Privilege:update">
+					<a class="easyui-linkbutton" iconCls="icon-edit" plain="false"><label
+						name="edit">编辑</label></a>
+				</shiro:hasPermission>
+				<shiro:hasPermission name="webresources:login:Privilege:delete">
+					<a class="easyui-linkbutton" iconCls="icon-remove" plain="false"><label
+						name="delete">删除</label></a>
+				</shiro:hasPermission>
+				<shiro:hasPermission name="webresources:login:Privilege:save">
+					<a class="easyui-linkbutton" iconCls="icon-save" plain="false"><label
+						name="save">保存</label></a>
+				</shiro:hasPermission>
+				<shiro:hasPermission name="webresources:login:Privilege:refresh">
+					<a class="easyui-linkbutton" iconCls="icon-reload" plain="false"><label
+						name="reload">刷新</label></a>
+				</shiro:hasPermission>
+			</div>
+			<!--             <shiro:hasPermission name="webresources:login:AuthPrivilege:find"> -->
+			<!--                         <input class="easyui-searchbox" id="AuthPrivilegeSearchbox1426567235258"/> -->
+			<!--             </shiro:hasPermission> -->
+		</div>
+		<!-- Datagrid -->
+		<table id="AuthPrivilegeDatagrid1426567235258" style="height: 100%"></table>
+		<!-- end Datagrid -->
+
+		<div id="chart-dlg">
+			<div id="chart"></div>
+		</div>
+		<div id="chart-buttons">
+			<a href="javascript:void(0)" class="easyui-linkbutton"
+				onclick="javascript:$('#chart-dlg').dialog('close')">关闭</a>
+		</div>
+	</div>
+
+	<div data-options="region:'east',split:true" title="资源列表"
+		style="width: 415px;">
+		<div id="privilege_AuthResourceToolBar"
+			style="float: left; height: 25px">
+			<div>
+				<shiro:hasPermission
+					name="webresources:login:AuthPrivilege:savePrivilegeResource">
+					<a class="easyui-linkbutton" iconCls="icon-add" plain="false"><label
+						name="add">增加</label></a>
+				</shiro:hasPermission>
+				<shiro:hasPermission
+					name="webresources:login:AuthPrivilege:deletePrivilegeResource">
+					<a class="easyui-linkbutton" iconCls="icon-remove" plain="false"><label
+						name="delete">删除</label></a>
+				</shiro:hasPermission>
+			</div>
+		</div>
+		<!--工具栏 结束 -->
+		<!--  Datagrid -->
+		<table id="privilege_AuthResourceDatagrid" style="height: 100%"></table>
+	</div>
+</div>
+</html>
+<!-- 脚本控制 -->
+<script type="text/javascript">
+	var dg1 = null;
+    var privilege_selected_tree_id = null;
+    var privilege_selected_grid_id = null;
+    var privilege_AuthResourceDatagrid = null;
+    $(document).ready(function() {
+    	HdUtils.i18n('privilege');
+	    var dg = $("#AuthPrivilegeDatagrid1426567235258");
+	    // buttons
+	    // 增加。
+	    $("#AuthPrivilegeToolBar1426567235258 a[iconCls='icon-add']").on("click", function() {
+		    var node = $('#privilege_tree').tree('getSelected');
+		    if (node) {
+			    row = {
+				    parentId : node.id
+			    };
+			    dg.datagrid("hdAdd", row);
+		    } else {
+			    HdUtils.messager.info("请先选择权限树节点");
+		    }
+	    });
+	    // 编辑。
+	    $("#AuthPrivilegeToolBar1426567235258 a[iconCls='icon-edit']").on("click", function() {
+		    dg.datagrid("hdEdit");
+	    });
+	    // 删除。
+	    $("#AuthPrivilegeToolBar1426567235258 a[iconCls='icon-remove']").on("click", function() {
+		    var nodes = $('#AuthPrivilegeDatagrid1426567235258').datagrid('getChecked');
+		    if (!nodes || nodes.length == 0) {//data===null||data===undefined之前的
+			    HdUtils.messager.info(i18n('请先选择数据！'));
+			    return;
+		    }
+
+		    $.messager.confirm(i18n("提示"), i18n("确认执行本次操作？"), function(r) {
+			    if (r) {
+				    var privilegeIds = "";//必须这样,否则不选择时不能到后台
+				    for (var i = 0; i < nodes.length; i++) {
+					    privilegeIds += nodes[i].privilegeId + ",";
+				    }
+				    HdUtils.ajax.get({
+				        url : "../webresources/login/privilege/AuthPrivilege/remove",
+				        data : {
+					        privilegeIds : privilegeIds
+				        },
+				        success : function(data) {
+					        if (data.code == "-1") {
+						        HdUtils.messager.info(data.message);
+						        return false;
+					        }
+					        HdUtils.messager.bottomRight(data.message);
+					        dg.datagrid("hdReload");
+					        $('#privilege_tree').tree('reload');
+				        }
+				    });
+			    }
+		    });
+	    });
+	    // 保存。
+	    $("#AuthPrivilegeToolBar1426567235258 a[iconCls='icon-save']").on("click", function() {
+		    dg.datagrid("hdIsEndEdit");
+		    dg.datagrid("hdSave", {
+			    url : "../webresources/login/privilege/AuthPrivilege/save",
+			    callback:function(){ $('#privilege_tree').tree('reload');}
+		    });
+
+		    /*  dg.datagrid("hdSave", {url: "../webresources/login/AuthOrgn/save", callback: function() {
+		         $('#privilege_tree').tree({url: "../webresources/login/TenantOrgn/vj/myFindAllForTree?s="+Math.random()});
+		     }}); */
+
+	    });
+	    // 刷新。
+	    $("#AuthPrivilegeToolBar1426567235258 a[iconCls='icon-reload']").on("click", function() {
+		    dg.datagrid("hdReload");
+	    });
+	    // 返回后台参数。
+	    var builder = new HdQuery();
+	    // searchbox
+	    $("#AuthPrivilegeSearchbox1426567235258").searchbox({
+	        prompt : "请输入...",
+	        searcher : function(value, name) {
+		        builder.set("q", value);
+		        builder.set("queryColumns", "text");
+		        dg.datagrid("hdReload");
+	        }
+	    });
+	    // datagrid
+	    $("#AuthPrivilegeDatagrid1426567235258").hddatagrid({
+	        striped : true,
+	        url : "../webresources/login/privilege/AuthPrivilege/find",
+	        queryParams : builder.build(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : false,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#AuthPrivilegeToolBar1426567235258",
+	        fit : true,
+	        fitColumns : false,
+	        autoLoad : false,
+	        sortName : 'sorter',
+	        sortOrder : 'asc',
+	        onSelect : function(rowIndex, rowData) {
+
+		        privilege_selected_grid_id = rowData.privilegeId;
+		        $('#privilege_AuthResourceDatagrid').datagrid('reload', {
+			        privilegeId : rowData.privilegeId
+		        });
+	        },
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true
+	        }, {
+	            field : "privilegeId",
+	            title : '<font color="red">标识</font>',
+	            multiSort : true,
+	            halign : "center",
+	            hidden : true,
+	            sortable : true
+	        }, {
+	            field : "parentId",
+	            title : "父标识",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            hidden : true,
+	            sortable : true
+	        }, {
+	            field : "text",
+	            title : $.i18n.prop("text"),
+	            multiSort : true,
+	            halign : "center",
+	            width : 110,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : true
+	        }, {
+	            field : "enText",
+	            title : '英文名',
+	            multiSort : true,
+	            halign : "center",
+	            width : 110,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : true
+	        },{
+	            field : "imgAddress",
+	            title : '图标地址',
+	            multiSort : true,
+	            halign : "center",
+	            width : 110,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : true
+	        }, {
+	            field : "url",
+	            title : "URL",
+	            multiSort : true,
+	            halign : "center",
+	            width : 350,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : true
+	        }, {
+	            field : "sorter",
+	            title : $.i18n.prop("sorter"),
+	            multiSort : true,
+	            halign : "center",
+	            width : 50,
+	            formatter : function(value) {
+		            return HdUtils.formatter.precisionCommon(value, 0);
+	            },
+	            editor : {
+	                type : "numberbox",
+	                options : {
+	                    required : false,
+	                    precision : 0,
+	                    max : 9999999999,
+	                    groupSeparator : ','
+	                }
+	            },
+	            sortable : true
+	        }, {
+	            width : 50,
+	            field : "state",
+	            title : $.i18n.prop("state"),
+	            multiSort : true,
+	            halign : "center",
+	            align : "center",
+	            formatter : function(value) {
+		            if ("open" == value) {
+			            return "开启";
+		            } else if ("closed" == value) {
+			            return "关闭";
+		            }
+	            },
+
+	            editor : {
+	                type : 'combobox',
+	                options : {
+	                    valueField : 'value',
+	                    textField : 'label',
+	                    data : [ {
+	                        label : '开启',
+	                        value : 'open'
+	                    }, {
+	                        label : '关闭',
+	                        value : 'closed'
+	                    } ],
+	                    required : true
+	                }
+	            },
+	            sortable : true
+	        }, {
+	            width : 80,
+	            field : "openType",
+	            title : $.i18n.prop("openType"),
+	            multiSort : true,
+	            halign : "center",
+	            formatter : function(value) {
+		            if ("1" == value) {
+			            return "iframe";
+		            } else if ("0" == value) {
+			            return "tab";
+		            } else if ("2" == value) {
+			            return "window";
+		            }
+	            },
+	            editor : {
+	                type : 'combobox',
+	                options : {
+	                    valueField : 'value',
+	                    textField : 'label',
+	                    data : [ {
+	                        label : 'iframe',
+	                        value : '1'
+	                    }, {
+	                        label : 'tab',
+	                        value : '0'
+	                    }, {
+	                        label : 'windwow',
+	                        value : '2'
+	                    } ],
+	                    required : true
+	                }
+	            },
+	            sortable : true
+	        }, {
+	            field : "iconCls",
+	            title : $.i18n.prop("iconCls"),
+	            multiSort : true,
+	            halign : "center",
+	            hidden : true,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : true
+	        }, {
+	            field : "recNam",
+	            title : $.i18n.prop("insAccount"),
+	            multiSort : true,
+	            halign : "center",
+	            width : 60,
+	            //  editor: {type: "validatebox", options: {required: false}},
+	            sortable : true
+	        }, {
+	            field : "recTim",
+	            title : $.i18n.prop("insTimestamp"),
+	            multiSort : true,
+	            halign : "center",
+	            width : 130,
+	            //  editor: {type: "datetimebox", options: {required: false}},
+	            sortable : true
+	        }, {
+	            field : "updNam",
+	            title : $.i18n.prop("updAccount"),
+	            multiSort : true,
+	            halign : "center",
+	            width : 60,
+	            // editor: {type: "validatebox", options: {required: false}},
+	            sortable : true
+	        }, {
+	            field : "updTim",
+	            title : $.i18n.prop("updTimestamp"),
+	            multiSort : true,
+	            halign : "center",
+	            width : 130,
+	            // editor: {type: "datetimebox", options: {required: false}},
+	            sortable : true
+	        }, {
+	            field : "description",
+	            title : $.i18n.prop("description"),
+	            multiSort : true,
+	            halign : "center",
+	            width : 200,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : true
+	        } ] ]
+	    });
+
+	    $("#privilege_tree").tree({
+	        url : '../webresources/login/privilege/AuthPrivilege/getAllTree?t=' + Math.random(),
+	        method : 'get',
+	        /*   onBeforeLoad: function(node, param) {
+	          	$.messager.progress({title:'请稍候',msg:'数据加载中...'});
+	         }, */
+	        /*  onLoadSuccess: function(node, data) {
+	             $.messager.progress('close');
+	          }, */
+	        onClick : function(node) {
+		        privilege_selected_tree_id = node.id;
+		        // 返回后台参数。
+		        var builder11 = new HdQuery();
+		        //if (node.privilegeId != "0") {
+		        builder11.add("parentId", node.id);
+		        //}
+		        $("#AuthPrivilegeDatagrid1426567235258").datagrid("load", builder11.build());
+		        pivilege_selected_grid_id = null;
+	        },
+	    /*   onLoadSuccess: function(node, data) {
+	        if (privilege_selected_tree_id != null)
+	        {
+	            var node = $('#privilege_tree').tree('find', privilege_selected_tree_id);
+	            $('#privilege_tree').tree('select', node.target);
+	            builder = new HdEzuiQueryParamsBuilder();
+	            builder.setAndClause("parentId", node.privilegeId, "=", "AND");
+	            var queryParams = builder.build();
+	            $('#AuthPrivilegeDatagrid1426567235258').datagrid({
+	                queryParams: queryParams
+	            });
+	            privilege_selected_grid_id = null;
+	        }
+
+	    }   */
+	    });
+	    dg1 = $("#AuthResourceDatagrid1426483003737");
+	    // buttons
+	    // 增加。
+	    $("#privilege_AuthResourceToolBar a[iconCls='icon-add']").on("click", function() {
+		    if (privilege_selected_grid_id == null || privilege_selected_grid_id == '') {
+			    HdUtils.messager.info(i18n('请先选择数据！'));
+			    return;
+		    }
+		    HdUtils.dialog.show({
+		        title : "资源选择",
+		        href : "../login/system/privilege/privilegeresourceselect.jsp",
+		        width : 700,
+		        height : 500,
+		        isSaveHandler : true
+		    });
+		    HdUtils.dialog.setValue({
+			    saveHandler : function() {
+				    var row = resourceSelect_dg.datagrid('getSelections');
+				    if (!row || row.length == 0) {
+					    return;
+				    }
+				    var resourceIds = "";
+				    $(row).each(function() {
+				    	resourceIds += this.resourceId + ",";
+				    });
+				    HdUtils.ajax.get({
+				        url : "../webresources/login/privilege/AuthPrivilege/savePrivilegeResource",
+				        data : {
+				            'privilegeId' : privilege_selected_grid_id,
+				            'resourceIds' : resourceIds
+				        },
+				        success : function(data) {
+					        $('#privilege_AuthResourceDatagrid').datagrid('reload');
+					        $('#k').datagrid('reload')
+					        HdUtils.dialog.close();
+				        }
+				    });
+			    }
+		    });
+
+	    });
+	    // 删除。
+	    $("#privilege_AuthResourceToolBar a[iconCls='icon-remove']").on("click", function() {
+
+		    var row = privilege_AuthResourceDatagrid.datagrid('getSelections');
+		    if (row.length < 1) {
+			    HdUtils.messager.info(i18n('请先选择数据！'));
+			    return;
+		    }
+		    var resourceIds = "";
+		    $(row).each(function() {
+		    	resourceIds += this.resourceId + ",";
+		    });
+		    $.messager.confirm(i18n("提示"), i18n("确认执行本次操作？"), function(r) {
+			    if (r) {
+				    HdUtils.ajax.get({
+				        url : "../webresources/login/privilege/AuthPrivilege/deletePrivilegeResource",
+				        data : {
+				            'privilegeId' : privilege_selected_grid_id,
+				            'resourceIds' : resourceIds
+				        },
+				        success : function(data) {
+					        $('#privilege_AuthResourceDatagrid').datagrid('reload');
+				        }
+				    });
+			    }
+		    });
+	    });
+	    // datagrid
+	    privilege_AuthResourceDatagrid = $("#privilege_AuthResourceDatagrid").datagrid({
+	        striped : true,
+	        url : "../webresources/login/privilege/AuthPrivilege/getByPrivilegeId",
+	        method : "get",
+	        pagination : true,
+	        singleSelect : false,
+	        rownumbers : true,
+	        autoLoad : false,
+	        pageSize : 20,
+	        toolbar : "#privilege_AuthResourceToolBar",
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true
+	        }, {
+	            field : "permissions",
+	            title : $.i18n.prop("PERMISSIONS"),
+	            multiSort : true,
+	            halign : "center",
+	            sortable : true
+	        }, {
+	            field : "resourceId",
+	            title : '<font color="red">标识</font>',
+	            multiSort : true,
+	            halign : "center",
+	            hidden : true,
+	            sortable : true
+	        }, {
+	            width : 80,
+	            field : "dtype",
+	            title : $.i18n.prop("DTYPE"),
+	            multiSort : true,
+	            halign : "center",
+	            formatter : function(value) {
+		            if ("0" == value) {
+			            return "资源";
+		            } else if ("1" == value) {
+			            return "按钮";
+		            } else if ("2" == value) {
+			            return "元素";
+		            }
+		            // return HdUtils.formatter.precisionCommon(value,0);  
+	            },
+	            sortable : true
+	        }, {
+	            field : "name",
+	            title : $.i18n.prop("NAME"),
+	            multiSort : true,
+	            halign : "center",
+	            sortable : true
+	        }, {
+	            field : "resource",
+	            title : $.i18n.prop("RESOURCE"),
+	            multiSort : true,
+	            halign : "center",
+	            hidden : false,
+	            sortable : true
+	        }, {
+	            field : "description",
+	            title : $.i18n.prop("DESCRIPTION"),
+	            multiSort : true,
+	            halign : "center",
+	            hidden : false,
+	            sortable : true
+	        } ] ]
+	    });
+    });
+</script>

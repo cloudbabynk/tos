@@ -1,0 +1,80 @@
+package net.huadong.tech.privilege.repository;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
+import javax.transaction.Transactional;
+
+import org.springframework.stereotype.Repository;
+
+import net.huadong.idev.hdmessagecode.HdMessageCode;
+import net.huadong.tech.danger.entity.${entity};
+import net.huadong.tech.springboot.core.HdEzuiDatagridData;
+import net.huadong.tech.springboot.core.HdEzuiQueryParams;
+import net.huadong.tech.springboot.core.HdEzuiSaveDatagridData;
+import net.huadong.tech.springboot.core.repository.HdAbstractRepository;
+import net.huadong.tech.dao.JPAUtil;
+/**
+ * @author 
+ */
+@Repository
+public class ${repositoryname} extends HdAbstractRepository<${entity}>{
+
+  	@Autowired
+	private ${repositoryname} ${repositorynamevariable};
+	
+	public ${repositoryname}() {
+		super(${entity}.class);
+	}
+	
+    @Override
+    protected EntityManager getEntityManager() {
+       return JPAUtil.getEntityManager();
+    }
+    
+    public HdEzuiDatagridData ezuiFind(HdEzuiQueryParams hdEzuiQueryParams) {
+      String jpql = "select a from ${entity} a where a.PK =:PK"; //根据主键查询
+		QueryParamLs paramLs = new QueryParamLs();
+		String field = hdEzuiQueryParams.getOthers().get("PK");//前台赋值
+		if (CommonUtil.strNotNull(field)) {
+			paramLs.addParam("PK",field);
+		} else {
+			paramLs.addParam("PK", "0");
+		}
+		SortParamLs sorts = new SortParamLs();
+		sorts.addParam(hdEzuiQueryParams.getSort(), hdEzuiQueryParams.getOrder(), "a");
+		return JPAUtil.findByEz(jpql, paramLs, sorts, hdEzuiQueryParams);
+    }
+
+     @Transactional
+    public HdMessageCode ezuiSave(${entity} entity) {
+       	if (CommonUtil.strIsNull(entity.getPkId())) {//更改为主键
+			orgn.setPkId(CommonUtil.genUuid());
+			super.create(orgn);
+		} else {
+		    super.edit(orgn);
+		}
+		HdMessageCode result = new HdMessageCode();
+		result.setCode("1");
+		result.setMessage("保存成功！");
+		return result;
+    }
+    
+        @Transactional
+    public HdMessageCode ezuiSave(${entity} entity) {
+        super.save(hdEzuiSaveDatagridData);
+        HdMessageCode result = new HdMessageCode();
+		result.setCode("1");
+		result.setMessage("保存成功！");
+		return result;
+    }
+    @Transactional
+    public HdMessageCode ezuiRemove(${entity} entity) {
+        super.remove(entity);
+        HdMessageCode result = new HdMessageCode();
+		result.setCode("1");
+		result.setMessage("删除成功！");
+		return result;
+    }
+
+}

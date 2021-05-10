@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<style type="text/css">
+    .tableform {
+        margin: 16px auto;
+    }
+
+    .tableform tr {
+        height: 30px;
+    }
+
+    .tableform th {
+        text-align: right;
+        white-space: nowrap;
+    }
+
+    .tableform td {
+        text-align: left;
+        width: 80px;
+    }
+
+    .tableform input {
+        text-align: left;
+    }
+</style>
+<!-- 工具栏 -->
+<div id="MChangeshipToolBar1508123307299" style="float: left;">
+    <table id="CAreaTable1507959148710" style="height: 100%; width: 100%"
+           class="tableform">
+        <tr>
+            <th>船名：</th>
+            <td><input id="cShipNam" name="cShipNam" type="text"
+                       data-options="required:false" class="easyui-validatebox"></td>
+            <th>出口航次：</th>
+            <td><input id="evoyage" name="evoyage" type="text"
+                       data-options="required:false" class="easyui-validatebox"></td>
+            <td><a class="easyui-linkbutton" id="chooseShip">选船</a></td>
+        </tr>
+        <tr>
+            <th>新提单号：</th>
+            <td><input id="newBillNo" name="newBillNo" type="text"
+                       data-options="required:false" class="easyui-validatebox"></td>
+            <th>数量：</th>
+            <td><input id="num" name="num" type="text"
+                       data-options="required:true" class="easyui-numberbox"></td>
+        </tr>
+        <tr>
+            <th>新卸货港：</th>
+            <td><input id="newTranPortCod" name="newTranPortCod" type="text"
+                       data-options="required:false" class="easyui-validatebox"></td>
+            <th>新目的港：</th>
+            <td><input id="newDiscPortCod" name="newDiscPortCod" type="text"
+                       data-options="required:false" class="easyui-validatebox"></td>
+        </tr>
+    </table>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<script>
+    $(document).ready(
+        function () {
+            var radimchangeship = HdUtils.dialog.getValue("radimchangeship");
+            var flag = HdUtils.dialog.getValue("flag");
+            var shipNo;
+            var dockCod;
+            var selRow = HdUtils.dialog.getValue("dataRow");
+            $("#chooseShip").on("click", function () {
+                HdUtils.selShip(callback);
+            });
+
+            function callback(data) {
+                $("#cShipNam").val(data.cShipNam);
+                $("#evoyage").val(data.evoyage);
+                shipNo = data.shipNo;
+                dockCod = data.dockCod;
+                $('#newBillNo').combobox({
+                    url: '../webresources/login/cargo/MChangeShip/getShipBillkDropz?shipNo=' + shipNo,
+                    valueField: 'value',
+                    textField: 'label',
+                    onHidePanel: function () {
+                    },
+                    panelWidth: 130,
+                    onSelect: function (rec) {
+                        return rec.value;
+                    }
+                });
+            }
+
+            $('#brandCod').combobox({
+                url: '../webresources/login/cargo/MChangeShip/getCBrandkDrop',
+                valueField: 'value',
+                textField: 'label',
+                onSelect: function (rec) {
+                    return rec.value;
+                }
+            });
+            $('#newTranPortCod').combobox({
+                url: '../webresources/login/ship/CShipData/getCPortDrop',
+                valueField: 'value',
+                textField: 'label',
+                panelWidth: 130,
+                onSelect: function (rec) {
+                    return rec.value;
+                }
+            });
+            $('#newDiscPortCod').combobox({
+                url: '../webresources/login/ship/CShipData/getCPortDrop',
+                valueField: 'value',
+                textField: 'label',
+                panelWidth: 130,
+                onSelect: function (rec) {
+                    return rec.value;
+                }
+            });
+
+            function saveHandler() {
+                if (selRow.length == 0) {
+                    HdUtils.messager.info('请至少选择一条数据！');
+                    return false;
+                }
+                var billNo = $("#newBillNo").combobox('getValue');
+                if (!billNo) {
+                    HdUtils.messager.info('请输入新提单号！');
+                    return false;
+                }
+                var newTranPortCod = $("#newTranPortCod").combobox('getValue');
+                // 		                        if (!newTranPortCod) {
+                // 			                        HdUtils.messager.info('请输入新卸货港！');
+                // 			                        return false;
+                // 		                        }
+                var newDiscPortCod = $("#newDiscPortCod").combobox('getValue');
+                // 		                        if (!newDiscPortCod) {
+                // 			                        HdUtils.messager.info('请输入新目的港！');
+                // 			                        return false;
+                // 		                        }
+                var shipNos = '';
+                var brandCods = "";
+                var carTyps = "";
+                var billNos = "";
+                var cyAreaNos = "";
+                var countNum = "";
+                var num = $("#num").val();
+                $.messager.confirm(Resources.WB_CONFIRM, "请确认是否转配？", function (r) {
+                    if (r) {
+                        for (var i = 0; i < selRow.length; i++) {
+                            shipNos += selRow[i].shipNo + ",";
+                            if (selRow[i].brandCod != null) brandCods += selRow[i].brandCod + ",";
+                            carTyps += selRow[i].carTyp + ",";
+                            billNos += selRow[i].billNo + ",";
+                            cyAreaNos += selRow[i].cyAreaNo + ",";
+                            countNum += selRow[i].cksl + ",";
+                        }
+                            if (countNum < num) {
+                                HdUtils.messager.info('转配车数不能大于在场车数！');
+                                return false;
+                            }
+                            if (0 == num) {
+                                HdUtils.messager.info('转配车数不能为零！');
+                                return false;
+                            }
+                        var url = "../webresources/login/cargo/MChangeShip/savePL?shipNos=" + shipNos + "&billNos=" + billNos + "&brandCods=" + brandCods
+                            + "&carTyps=" + carTyps + "&cyAreaNos=" + cyAreaNos + "&countNum=" + countNum + "&newTranPortCod=" + newTranPortCod
+                            + "&newDiscPortCod=" + newDiscPortCod + "&newShipNo=" + shipNo + "&newBillNo=" + billNo + "&num=" + num + "&flag=" + flag + "&dockCod=" + dockCod;
+                        HdUtils.ajax.post({
+                            url: url,
+                            success: function (data) {
+                                HdUtils.dialog.close();
+                                HdUtils.messager.bottomRight(data.message);
+                                $("#DayWorkClassDatagrid1508123307299" + radimchangeship).datagrid("hdReload");
+                            }
+                        });
+                    }
+                });
+            }
+
+            HdUtils.dialog.setValue({
+                saveHandler: saveHandler
+            });
+        });
+</script>
+</html>

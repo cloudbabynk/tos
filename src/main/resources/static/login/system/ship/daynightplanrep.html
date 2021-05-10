@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+</head>
+<body>
+<iframe id="zyjh" style="width:100%;height:100%;"> </iframe>	
+<script>
+	$(document).ready(function() {
+		 var days=HdUtils.dialog.getValue("days");
+		 var recNam=HdUtils.dialog.getValue("recNam");
+		 var today=HdUtils.dialog.getValue("today");
+		 var nextday=HdUtils.dialog.getValue("nextday");
+		 var src='http://10.163.204.56:8090/show/?fileid=030827cf2e964bfc8e83ca34ed7600ee&rpttoken=333&planTim='+days+'&recNam='+recNam+'&today='+today+'&nextday='+nextday;
+		    $("#zyjh").attr('src',src); 
+    });
+</script>
+</body>
+</html>

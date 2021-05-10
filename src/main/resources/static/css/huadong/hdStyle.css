@@ -1,0 +1,98 @@
+@charset "utf-8";
+
+
+/*按钮位置*/
+.l-btn span .l-btn-icon-left {
+  padding: 0px 10px;
+  background-position: left center;
+}
+
+/*去掉灰边*/
+.panel-body {
+  border-color: #fff;
+}
+
+/*加tab上边
+.tabs-header-noborder {
+  border: 1px;
+  border-bottom:0px;
+  border-left:0px;
+  border-right:0px;
+}*/
+
+/*调搜索条位置*/
+.tabs-tool {
+  position: absolute;
+  bottom: 0;
+  padding: 0px;
+  overflow: hidden;
+  border-width: 1px;
+  border-style: solid;
+  margin-top:-1px;
+}
+.tabs-wrap {
+  position: relative;
+  left: 0;
+  overflow: hidden;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+/*查询条件下面线*/
+.datagrid-toolbar {
+  height: auto;
+  padding: 1px 2px;
+  border-width: 0 0 0px 0;
+  border-style: solid;
+  padding:5px 0px;
+  padding-bottom:7px;
+}
+/*小按钮上下位置*/
+.datagrid-toolbar1 {
+  height: auto;
+  padding: 1px 2px;
+  border-width: 0 0 0px 0;
+  border-style: solid;
+  padding:0px 0px;
+}
+/*调状态栏位置*/
+.panel-header {
+  padding: 5px;
+  padding-bottom:8px;
+  position: relative;
+}
+/*内容区的左右边距*/
+.datagrid .panel-body {
+  overflow: hidden;
+  position: relative;
+  padding:5px;
+  padding-bottom:0px;
+}
+
+.datagrid-view {/*上左右表格线*/
+  position: relative;
+  overflow: hidden;
+  border-left:1px solid #ddd;
+  border-right:1px solid #ddd;
+  border-top:1px solid #ddd;
+  border-bottom:1px solid #ddd;
+}
+
+.datagrid-toolbar,
+.datagrid-pager {
+  background: #fff;
+  text-align:right;/*按钮位置靠右*/
+  padding-right:0px;
+  padding-top:0px !important;
+}
+
+/*组织结构树
+.layout-split-west{ left:5px !important; top:5px !important; border:1px solid #ddd !important;}
+
+.panel-header{ border:1px solid #fff !important; border-bottom:1px solid #ddd;}
+
+.layout-panel-center{ top:5px !important;}*/
+
+.layout-split-west{border-right:5px solid #ddd !important;}
+
+.panel-header{ border:0px !important; border-bottom:1px solid #ddd !important;}

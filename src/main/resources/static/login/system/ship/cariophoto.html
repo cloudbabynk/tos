@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+		  var entityName="Ship";
+	     var radi=HdUtils.dialog.getValue("radi");
+		 var src=HdUtils.dialog.getValue("data").src;
+		 var rowSelected;
+  
+	    // Generate a pseudo-GUID by concatenating random hexadecimal.  
+	 $("#img_2200715").attr("src","data:image/png;base64,"+src);
+ 
+    $("#XmlDatagrid1507959149305").datagrid("hdGetColumnNames");
+	 });
+</script>
+<form th:id="">
+	<img id="img_2200715" src="">
+</form>
+</html>

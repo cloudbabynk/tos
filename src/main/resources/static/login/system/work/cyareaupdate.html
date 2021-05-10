@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="ContractIeDocDatagrid1508123320012+${radi}"
+	style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#ContractIeDocDatagrid1508123320012[(${radi})]");
+	    var shipNo = HdUtils.dialog.getValue("shipNo");
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    onlinquery.add("shipNo", shipNo);
+		    return onlinquery.build();
+	    }
+
+	    function addoredit(shipNo,brandCod,rksl){
+	    	HdUtils.dialog.setValue({
+			    'updateradi' : radi,
+			    'shipNo' : shipNo,
+			    'brandCod' : brandCod,
+			    'rksl' : rksl,
+		    });
+	    	HdUtils.dialog.show({
+		        width : 900,
+		        height : 250,
+		        title : '理货信息',
+		        href : "../login/system/work/cdgx.html",
+		        isSaveHandler : true
+		    });
+	    }
+	    $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/work/WorkCommand/findCyAreaUpdate",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#ContractIeDocToolBar15081233020012" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        onDblClickRow : function(rowIndex, rowData) {
+	        	var shipNo = rowData.shipNo;
+	        	var brandCod = rowData.brandCod;
+	        	var rksl = rowData.rksl;
+			    addoredit(shipNo,brandCod,rksl);
+	        },
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+	        }, {
+	            field : "shipNam",
+	            title : '船名',
+	            multiSort : true,
+	            width : 100,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "voyage",
+	            title : '航次',
+	            multiSort : true,
+	            width : 80,
+	            align : "center",
+	            sortable : false
+	        },{
+	            field : "brandNam",
+	            title : "品牌",
+	            multiSort : true,
+	            width : 80,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "rksl",
+	            title : "数量",
+	            multiSort : true,
+	            width : 100,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "inCyTim",
+	            title : "装卸日期",
+	            multiSort : true,
+	            width : 100,
+	            align : "center",
+	            formatter : $.hd.ezui.formatter.date,
+	            sortable : false
+	        } ] ]
+	    });
+	    $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

@@ -1,0 +1,111 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#ShipExecutionForm1507959148710");
+	    var shipExecutionId = HdUtils.dialog.getValue("shipExecutionId");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    if (shipExecutionId) {
+		    $("#shipExecutionId").attr("readonly", true);
+	    } else {
+		    $("#shipExecutionId").attr("readonly", false);
+	    }
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/ship/ShipExecution/findone?shipExecutionId=" + shipExecutionId,
+	        success : function(data) {
+		        $("#ShipExecutionForm1507959148710").form("loadData", data);
+	        }
+	    })
+	    $('#iEId').combobox(HdUtils.code.scode({
+		    fieldCod : 'I_E_ID'
+	    }, {
+		    required : false
+	    }));
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+		    var isValss = $("#ShipExecutionForm1507959148710").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#ShipExecutionForm1507959148710").serializeObject();
+		    formdata.shipNo = HdUtils.dialog.getValue("shipNo");
+		    formdata.workTon=0;
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/ship/ShipExecution/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#ShipExecutionDatagrid1508123301002" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+    });
+</script>
+<form id="ShipExecutionForm1507959148710">
+	<table id="ShipExecutionTable1507959148710"
+		style="height: 75%; width: 90%" class="tableform">
+		<input id="shipExecutionId" name="shipExecutionId" hidden="true">
+		<input id="shipNo" name="shipNo" class="easyui-validatebox"
+			maxlength="10" hidden="true" />
+		<input id="wokrNum" name="wokrNum" hidden="true"
+			data-options="min:0,max:99999999,precision:3"
+			class="easyui-numberbox" maxlength="10" />
+		<input id="workVolume" name="workVolume" hidden="true"
+			data-options="min:0,max:99999999,precision:3"
+			" class="easyui-numberbox" maxlength="10" />
+		<tr>
+			<th>货类：</th>
+			<td><input id="cargoKind" name="cargoKind"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="20" /></td>
+			<th>进出口：</th>
+			<td><input id="iEId" name="iEId" data-options="required:false"
+				class="easyui-validatebox" maxlength="20" /></td>
+		</tr>
+		<tr>
+			<th>计划件数：</th>
+			<td><input id="planTon" name="planTon"
+				data-options="min:0,max:99999999"
+				class="easyui-numberbox" maxlength="10" /></td>
+			<th><!-- 完成件数： --></th>
+			<td>
+				<input id="workTon" name="workTon" data-options="min:0,max:99999999" type="hidden"  class="easyui-numberbox" maxlength="10" />
+			</td>
+		</tr>
+		<tr>
+			<th>备注：</th>
+			<td colspan="3"><input id="remarks" name="remarks"
+				style="width: 100%;" data-options="required:false"
+				class="easyui-validatebox" maxlength="50" /></td>
+		</tr>
+	</table>
+</form>

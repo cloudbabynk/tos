@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>天津港环球滚装码头有限公司业务系统</title>
+</head>
+<div th:replace="pageset"></div>
+<body class="easyui-layout" id="mainBody" data-options="border:false">
+	<div id="mainWindowTopbar" class="mainHeader"
+		data-options="region:'north',border:false,height:52">
+
+		<div class="headerLogo"></div>
+		<div class="headerIcon">
+			<a href="/login/PrivilegeControllerNew/logout" id="logout"
+				class="headerIconLink5">退出</a>
+			<!--         <a href="javascript:void(0)" id="mainVisitHistory" class="headerIconLink4"></a> -->
+			<!-- 			<a href="javascript:void(0)" id="changeLanguage" -->
+			<!-- 				class="headerIconLink4"></a> -->
+			<a href="javascript:void(0)" id="mainChangeTheme"
+				class="headerIconLink3"></a> <a href="javascript:void(0)"
+				id="updatePassWord201703221715" class="headerIconLink7"></a>
+		</div>
+	</div>
+
+	<!-- 选择语言的dialog -->
+	<!-- <div id="lg" style="margin-top:30px; margin-bottom:30px;text-align:center;display:none" >
+            <input type="radio" name="gender" value="zh" />中文
+            <input type="radio" name="gender" value="en" style="margin-left:60px;"/>English
+</div> -->
+
+	<div id="mainMenuDiv" class="mainLeft" style="z-index: 999;">
+		<!--  必须是layout中的panel -->
+		<div id="col-side">
+
+			<div class="userDiv" id="userDiv">
+				<div class="leftIcon">
+					<a href="#" id="moveLeft"><img src="../images/leftIcon.png"
+						width="20" height="20" alt="" /></a>
+				</div>
+			</div>
+			<div>
+				<ul class="menuUl" id="mainMenu"></ul>
+				<ul class="menuUl" id="subMenu" style="display: none;"></ul>
+				<div id="menuDownUp" class="menuNext"></div>
+			</div>
+		</div>
+	</div>
+
+	<div id="mainMenuDiv1"
+		data-options="region:'west',border:false,title:'菜单导航'"
+		style="width: 142px; z-index: 0;">
+		<!--  此左侧layout为假写的，目a的将center位置挤过去-->
+	</div>
+	<!-- 工作区卡片 -->
+	<div data-options="region:'center',border:false" style="z-index: 0;">
+		<!-- 这里边再套一层layout实现消息的发布 -->
+		<div class="easyui-layout" data-options="fit:true,border:false">
+			<div data-options="region:'center',border:false">
+				<!-- center 区不能fit否则就把别人挤没了 -->
+				<div id="main"
+					data-options="fit:true,tools:'#mainTabsToolbar',border:false">
+					<!-- fxq 2015-11-17 使用特定的tabs组件 取消class="easyui-tabs"调用仍可使用tabs方法调用 -->
+					<!--                 <div id="defaultTabpage1" data-options="title:'首页2',border:false,closable:false,iconCls:'icon-home',fit:true,href:'/login/system/home.html'"> -->
+					<div id="defaultp" width="100%" height="100%"
+						data-options="title:'首页',href:'../login/system/ship/dashboard.html'"
+						style="float: left">
+
+						<div id="mainTabsToolbar"
+							style="border: 0px; height: 20px; top: 0px; border: 0px; border-bottom: 0px solid #ddd; padding-right: 3px;"
+							class="tabs-tool-bottom">
+							<div>
+								<a name="btnGoMsg" style="cursor: pointer;color: red;float: left;margin-right: 2px"><p 
+										id='dp'></p></a><a name="btnGoKshReport" href="#"
+									class="tabIconOpen tabIconReport"><img
+									src="/images/headerIconFavorites.png" /></a>
+								<a name="xinzeng" href="#"
+								   class="tabIconOpen tabIconReport"><img
+										src="/images/headerIconFavorites.png" /></a><a
+									name="btnGoBrowser" href="#" class="tabIconOpen"><img
+									src="/images/tabsIconEmpty.png" /></a> <a name="btnGoHome"
+									href="#" class="tabIconHome"><img
+									src="/images/tabsIconEmpty.png" /></a> <a name="btnRefresh"
+									href="#" class="tabIconRefresh"><img
+									src="/images/tabsIconEmpty.png" /></a> <a name="btnCloseIt"
+									href="#" class="tabIconClose"><img
+									src="/images/tabsIconEmpty.png" /></a> <a name="btnHideHead"
+									href="#" class="tabIconFullUp"><img
+									src="/images/tabsIconEmpty.png" /></a>
+							</div>
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</div>
+		<!--主题列表对话框 -->
+		<div id="mainChangeThemeDialog"></div>
+		<!--以下独立的DIV -->
+		<div id="mainDlg"></div>
+		<div id="mainDlg2"></div>
+		<div id="mainDlg3" class='easyui-dialog'></div>
+		<!--访问列表的下拉菜单 -->
+		<div id="mainVisitDialog"></div>
+
+		<!--遮罩层，显示flex界面。不放入tabpage页是因为在div.show/HIDE过程中，flex应用频繁初始化 -->
+		<div id="swfMaskDiv"
+			style="left: 0px; top: 0px; width: 1px; height: 1px; display: block; border: 0px; z-index: 333333; position: absolute;">
+		</div>
+	</div>
+</body>
+
+<script type="text/javascript">
+/*<![CDATA[*/
+    /*获取浏览器语言*/
+    var browserLanguage = "";
+    function getBrowserLanguage() {
+    	if(browserLanguage){
+    		return browserLanguage;
+    	}
+        $.ajax({
+            url: "/webresources/login/privilege/AuthUser/findLanguage",
+            dataType:"text",
+            method: "get",
+            async: false,//为数不多的需要同步的,wxl
+            success:function(data){
+                browserLanguage = data;
+            },
+            error:function(data){
+            }
+        });
+
+        /* 该部分注释是为了改成下拉实现的 */
+        /*   if (browserLanguage=="zh") {
+         $("#changeLanguage").removeClass().addClass("headerIconLink6");
+         return "zh";
+         } else if (browserLanguage=="en") {
+         $("#changeLanguage").removeClass().addClass("headerIconLink99");
+         return "en";
+         }else{
+         $("#changeLanguage").removeClass().addClass("headerIconLink6");
+         return "zh";
+         }
+         */
+
+        if (browserLanguage=="zh") {
+            return "zh";
+        } else if (browserLanguage=="en") {
+            return "en";
+        }else{
+            return "zh";
+        }
+
+    }
+    function LoadJS(id, fileUrl)
+    {
+        var scriptTag = document.getElementById(id);
+        var oHead = document.getElementsByTagName('HEAD').item(0);
+        var oScript = document.createElement("script");
+        if (scriptTag)
+            oHead.removeChild(scriptTag);
+        oScript.id = id;
+        oScript.type = "text/javascript";
+        oScript.src = fileUrl;
+        oHead.appendChild(oScript);
+    }
+    /*国际化*/
+    var language = getBrowserLanguage();
+    LoadJS("language2", '../js/hdEzuiEx_js/ezuiEx-lang-' + language + '.js');
+    LoadJS("language", '../i18n/locale/easyui-lang-' + language + '.js');
+	
+    
+    var killErrorPrompt = function(errorMessage, scriptURI, lineNumber, columnNumber, errorObj) {}; //屏蔽错误框
+    var tabItemHanlder="";//关闭子的句柄
+    var upDownTheme="";//定义全局变量，用于上下隐藏按钮
+   $(document).ready(function() {
+// 	   setInterval(findNum,60000);
+// 	   function findNum(){
+// 		   $.ajax({
+// 	           url : "../webresources/login/tool/ComMsgRec/findNum",
+// 	           success : function(data) {
+// 	           	if(data){
+// 	               	var str = "未读消息（" + data.unReadNum +"）";
+// 	               	$("#dp").html(str);
+// // 	               	if (data.unReadNum > 0){
+// // 		                $.MsgBox.Alert("消息", "有车来了！");
+// // 	               	}
+// 	               }
+// 	           }
+// 	       });
+// 	   }
+	    $.MsgBox = {
+	            Alert: function (title, msg) {
+	                GenerateHtml("alert", title, msg);
+	                btnOk();  //alert只是弹出消息，因此没必要用到回调函数callback
+	                btnNo();
+	            },
+	            Confirm: function (title, msg, callback) {
+	                GenerateHtml("confirm", title, msg);
+	                btnOk(callback);
+	                btnNo();
+	            }
+	        }
+	        //生成Html
+	        var GenerateHtml = function (type, title, msg) {
+	            var _html = "";
+	            _html += '<div id="mb_box"></div><div id="mb_con"><span id="mb_tit">' + title + '</span>';
+	            _html += '<a id="mb_ico">x</a><div id="mb_msg">' + msg + '</div><div id="mb_btnbox">';
+	            if (type == "alert") {
+	                _html += '<input id="mb_btn_ok" type="button" value="确定" />';
+	            }
+	            if (type == "confirm") {
+	                _html += '<input id="mb_btn_ok" type="button" value="确定" />';
+	                _html += '<input id="mb_btn_no" type="button" value="取消" />';
+	            }
+	            _html += '</div></div>';
+	            //必须先将_html添加到body，再设置Css样式
+	            $("body").append(_html); 
+	            //生成Css
+	             GenerateCss();
+	        }
+	     
+	        //生成Css
+	        var GenerateCss = function () {
+	            $("#mb_box").css({ width: '100%', height: '100%', zIndex: '99999', position: 'fixed',
+	                filter: 'Alpha(opacity=60)', backgroundColor: 'black', top: '0', left: '0', opacity: '0.6'
+	            });
+	            $("#mb_con").css({ zIndex: '999999', width: '400px', position: 'fixed',
+	                backgroundColor: 'White', borderRadius: '15px'
+	            });
+	            $("#mb_tit").css({ display: 'block', fontSize: '14px', color: '#444', padding: '10px 15px',
+	                backgroundColor: '#DDD', borderRadius: '15px 15px 0 0',
+	                borderBottom: '3px solid #009BFE', fontWeight: 'bold'
+	            });
+	            $("#mb_msg").css({ padding: '20px', lineHeight: '20px',
+	                borderBottom: '1px dashed #DDD', fontSize: '13px'
+	            });
+	            $("#mb_ico").css({ display: 'block', position: 'absolute', right: '10px', top: '9px',
+	                border: '1px solid Gray', width: '18px', height: '18px', textAlign: 'center',
+	                lineHeight: '16px', cursor: 'pointer', borderRadius: '12px', fontFamily: '微软雅黑'
+	            });
+	            $("#mb_btnbox").css({ margin: '15px 0 10px 0', textAlign: 'center' });
+	            $("#mb_btn_ok,#mb_btn_no").css({ width: '85px', height: '30px', color: 'white', border: 'none' });
+	            $("#mb_btn_ok").css({ backgroundColor: '#168bbb' });
+	            $("#mb_btn_no").css({ backgroundColor: 'gray', marginLeft: '20px' });
+	            //右上角关闭按钮hover样式
+	            $("#mb_ico").hover(function () {
+	                $(this).css({ backgroundColor: 'Red', color: 'White' });
+	            }, function () {
+	                $(this).css({ backgroundColor: '#DDD', color: 'black' });
+	            });
+	            var _widht = document.documentElement.clientWidth;  //屏幕宽
+	            var _height = document.documentElement.clientHeight; //屏幕高
+	            var boxWidth = $("#mb_con").width();
+	            var boxHeight = $("#mb_con").height();
+	            //让提示框居中
+	            $("#mb_con").css({ top: (_height - boxHeight) / 2 + "px", left: (_widht - boxWidth) / 2 + "px" });
+	        }
+	        //确定按钮事件
+	        var btnOk = function (callback) {
+	            $("#mb_btn_ok").click(function () {
+	                $("#mb_box,#mb_con").remove();
+	                if (typeof (callback) == 'function') {
+	                    callback();
+	                }
+	            });
+	        }
+	        //取消按钮事件
+	        var btnNo = function () {
+	            $("#mb_btn_no,#mb_ico").click(function () {
+	                $("#mb_box,#mb_con").remove();
+	            });
+	        }
+	   HdUtils.global.flushScode();
+	   //datagrid设置奇偶行颜色
+	    $.fn.datagrid.defaults.striped = true;
+        $("#mainDlg").dialog({closed:true});
+        $("#mainDlg2").dialog({closed:true});
+        $("#mainDlg3").dialog({closed:true});
+        if(browserLanguage=="zh"){
+            $("#changeLanguage #optionlanguagefirst").removeAttr("selected");
+            $("#changeLanguage #optionlanguagesecond").removeAttr("selected");
+            $("#changeLanguage #optionlanguagefirst").attr("selected","selected");
+        }else{
+            $("#changeLanguage #optionlanguagefirst").removeAttr("selected");
+            $("#changeLanguage #optionlanguagesecond").removeAttr("selected");
+            $("#changeLanguage #optionlanguagesecond").attr("selected","selected");
+        }
+        //国际化
+        $.i18n.properties({
+            name: 'main', //资源文件名称
+            path: '../i18n/project/', //资源文件路径
+            mode: 'map', //用Map的方式使用资源文件中的值
+            language: getBrowserLanguage(),
+            callback: function () {//加载成功后设置显示内容
+//                        $("label").each(function (i) {
+//                            if ($(this).attr("name")) {
+//                                $(this).html($.i18n.prop($(this).attr("name")));
+//                            }
+//                        });
+                $("#mainVisitHistory").html($.i18n.prop("main.menu.favorites"));
+//                      $("#defaultTabpage").attr("title", $.i18n.prop("clickChange"));
+                $("#mainChangeTheme").html($.i18n.prop("main.changeThemes"));
+                $("#message").html($.i18n.prop("main.message.msg"));
+                $("#logout").html($.i18n.prop("main.logout"));
+                $("#fullscreen").html($.i18n.prop("main.fullscreen"));
+                //以下3个是为了语言下拉的国际化
+              /*   $("#spanlanguage").html($.i18n.prop("main.language"));
+                $("#optionlanguagefirst").html($.i18n.prop("main.optionlanguagefirst"));
+                $("#optionlanguagesecond").html($.i18n.prop("main.optionlanguagesecond")); */
+                //原来的超链接的语言的国际化
+                   $("#changeLanguage").html($.i18n.prop("main.language"));
+            }
+        });
+
+        $('link:first').attr('href', '../css/themes/metro-white/easyui.css');
+
+
+        //全局默认选项，设置的参数会影响所有的$.ajax请求如$.get()、$.post()、$.ajax等。
+        $.ajaxSetup({
+            complete: function(XMLHttpRequest, status) {
+                var sessionStatus = XMLHttpRequest.getResponseHeader("session-status");
+                if(sessionStatus == "timeout"){
+                    $.messager.alert("消息", "session超时或服务器重启，需重新登陆", "info", function() {
+                        clearInterval(newsRefreshTimer);
+                        window.location.replace("/index.jsp");  //跳转到登录界面
+                    });
+                }
+            }
+        });
+        //顶部标准功能
+        //1 主搜索栏 及卡片控制图标
+        $("#mainTabsToolbar .easyui-searchbox").searchbox({
+            searcher: function(value, name) {
+                $.main.onSeachboxValue(value);
+                <!-- 已经封装，每个页面用$.main.registerSeachbox =function(operation,builerOrQueryParam,columns)对查询信息进行注册 -->
+            }
+        });
+
+        //2 全屏显示功能
+        $("#fullscreen").bind('click', function() {
+            var el = document.documentElement,
+                rfs = el.requestFullScreen || el.webkitRequestFullScreen || el.mozRequestFullScreen || el.msRequestFullScreen,
+                wscript;
+
+            if (typeof rfs != "undefined" && rfs) {
+                rfs.call(el);
+                return;
+            }
+
+            if (typeof window.ActiveXObject != "undefined") {
+                wscript = new ActiveXObject("WScript.Shell");
+                if (wscript) {
+                    wscript.SendKeys("{F11}");
+                }
+            }
+        });
+        //3 收藏夹功能
+        $("#mainVisitHistory").bind('click', function() {
+            $("#mainVisitDialog").dialog({
+                noheader: false,
+                title: '功能收藏',
+                closable: true,
+                resizable: true,
+                width: 360,
+                height: 600,
+                left: $('#main').width() + $('#main').offset().left - 360,
+                top: $('#main').offset().top,
+                href: 'system/historyAndFavorite.html',
+                modal: false
+            });
+        });
+
+        //4 换肤功能
+        $("#mainChangeTheme").bind('click', function() {
+            openTab("皮肤管理",'../login/system/skin.html' , false, null);
+        });
+
+        //5 用户按下图标，阅读消息
+        $("#message").bind('click', function() {
+            var clazz=$(this).attr("class");
+            if("headerIconLink1"==clazz){
+                openTab("消息",'../login/system/news/NewsReadAndConfirm.html' , false, null);
+                //   openTab("noticesend",'../login/system/news/NoticeSend.html' , false, null);
+
+            }else{
+                //           openTab("发送消息",'../login/system/news/NewsRelease.html' , false, null);
+            }
+        });
+
+        //6 左侧菜单隐藏
+        $("#moveLeft").bind('click', function() {
+            $('#mainBody').layout('collapse', 'west');
+            $("#mainMenuDiv").css('display', 'none');
+        });
+
+        //7 展开左侧菜单
+        $("#mainMenuDiv1").panel({
+            onExpand: function() {
+                $('#mainBody').layout('expand', 'west');
+                $("#mainMenuDiv").css('display', 'block');
+            }
+        });
+
+        //5 系统管理员修改密码
+        $("#updatePassWord201703221715").bind('click', function() {
+        	$.get('/login/PrivilegeController/getLoginUserId?t=11&s='+Math.random(), function(data) {
+        		modifyPasswordUserId = data;
+                HdUtils.dialog.show({title:"密码修改",href:"../login/system/privilege/password.html",width:370,height:200,isSaveHandler:true});
+            });
+        });
+
+        //8 选择语言
+          $("#changeLanguage").on('click',function(){
+         $.ajax({
+         url: "../webresources/login/privilege/AuthUser/saveLanguage?language="+browserLanguage,
+         dataType:"Json",
+         method: "POST",
+         async: false,
+         success:function(data){
+         location.reload();
+         },
+         error:function(data){
+         }
+         });
+         });
+
+        ///8 选择语言 （语言下拉的国际化）
+       /*  $("#changeLanguage").on('change',function(){
+            var index;
+            if(browserLanguage=="zh"){
+                index=0;
+            }else if(browserLanguage=="en"){
+                index=1;
+            }else{
+                index=0;
+            }
+
+            if(index==0){
+                browserLanguage="zh";
+            }else if(index==1){
+                browserLanguage="en";
+            }else{
+                browserLanguage="zh";
+            }
+            $.ajax({
+                url: "../webresources/login/AuthUser/saveLanguage?language="+browserLanguage,
+                dataType:"Json",
+                method: "POST",
+                async: false,
+                success:function(data){
+                    location.reload();
+                },
+                error:function(data){
+                }
+            });
+
+        }); */
+
+
+        // 显示当前登陆用户信息。
+        $.get('/login/PrivilegeController/getLoginAccount?t=11&s='+Math.random(), function(data) {
+        	if(!data){
+                return;
+            }
+        	$('#updatePassWord201703221715').text(data.name);
+            $('#mainCurrentLogin').html("<a href='#' >" + data.name + "</a>");
+            $('#mainCurrentLogin a').on('click',function(){
+                //openTab('最近访问功能','../login/system/MostRecentUsedPages.html',true);   //未来：打开收藏夹界面
+                HdUtils.dialog.show({title: "密码修改", href: "../login/system/user/password0.html", width: 290, height: 205, isSaveHandler: true});
+            });
+            $.main.loginOper=$.extend({},data);  
+            <!-- 保存用于判断权限等，见$.main.isHaveRequiredRole()函数 -->
+//           defVistListMenu();
+            changeThemByUserInfo(data);
+        });
+        
+        $.ajax({
+            type: "GET",
+            url: "../webresources/login/privilege/AuthUser/valuePassword?t=" + Math.random(),
+            contentType: "application/json",
+            dataType: "json",
+
+            success: function(data) {
+                if(data.message&&data.message=="0"){
+                	HdUtils.dialog.show({title:"密码需要长度大于等于8位，包含大写字母、小写字母、数字、字符",href:"../login/system/privilege/password.html",width:370,height:200,isSaveNoCancel:true,closable: false}); 
+                }
+                
+            }
+        });
+        
+        
+
+        // 显示当前登陆用户信息。
+        function changeThemByUserInfo(data) {
+        		if(!data){
+                    return;
+                }
+                onChangeTheme(data.skin);
+                upDownTheme=data.skin;
+        }
+        
+        $('#mainTabsToolbar a[name="btnGoBrowser"]').on('click', function() {
+        	$.main.toOpenTab();//将tab页在浏览器新标签页打开
+        });
+        $('#mainTabsToolbar a[name="btnGoKshReport"]').on('click', function() {
+        	window.open("../login/index-all.html","_blank");   
+        });
+        
+        $('#mainTabsToolbar a[name="btnGoHome"]').on('click', function() {
+            $('#main').tabs('select', '首页');
+        });
+        
+        $('#mainTabsToolbar a[name="btnGoMsg"]').on('click', function() {
+        	 openTab("消息提醒",'../webresources/login/tool/ComMsgRec/commsgrec.htm' , false, null);
+        });
+
+	   $('#mainTabsToolbar a[name="xinzeng"]').on('click', function() {
+		   window.open("../login/index-allPro.html","_blank");
+	   });
+
+        var upDownFlag="down";
+        $('#mainTabsToolbar a[name="btnHideHead"]').on('click', function() {
+            var img = $(this).children('img').attr('src');
+            if (upDownFlag=="down") {
+                $("#mainMenuDiv").addClass('mainLeftUp')
+                showOrHideHeader('up');
+                upDownFlag="up";
+            } else {
+                $("#mainMenuDiv").removeClass('mainLeftUp')
+                $("#mainMenuDiv").addClass('mainLeft')
+                showOrHideHeader('down');
+                upDownFlag="down";
+
+            }
+        });
+
+        $('#mainTabsToolbar a[name="btnRefresh"]').on('click', function() {
+            var tab = $('#main').tabs('getSelected');  // get selected panel
+            tab.panel('refresh'); //, 'plugin/' + encodeURI(url)
+        });
+
+        $('#mainTabsToolbar a[name="btnCloseIt"]').on('click', function() {
+            $.messager.confirm('关闭所有页面','您确认所有数据已存盘，并要关闭全部工作页面?',function(r){
+                if (r){
+                    var tabsList=$('#main').tabs('tabs');
+                    for(var i=tabsList.length-1;i>=0;i--){
+                        var tab=$(tabsList[i]);
+                        if(tab.size()>0 && $.data(tab[0], "panel")!==undefined){  //未知的原因，tab可能是windows对象而不是tabpage
+                            var num=closeTab(tab);
+                        }
+                    }
+                }
+            });
+            function closeTab(tab){
+                var isCloseable = tab.panel('options').closable; //此属性为ezui内部使用的标志
+                if (isCloseable !==false) {  //首页等不能关闭
+                    var index = $('#main').tabs('getTabIndex', tab);
+                    $('#main').tabs('close', index);
+                }
+            }
+        });
+
+      
+        //2主工作区
+        $("#main").tabsMain({
+            fit: true,
+            tools: '#mainTabsToolbar',
+            onBeforeClose: function(title, index) {
+            	
+            	if(tabItemHanlder!=""){
+            		doMainTabsCallback(eval(tabItemHanlder),[]); 
+            		tabItemHanlder="";
+            	}
+                $.main.destroyDialogsOnClose($('#main').tabs('getTab', index));
+            }
+        });
+        $.main.getSelectTab();//自定义快捷键设置作用域
+        $.HdHotKeys.toIUDQ();//设置通用快捷键
+   });
+    
+   
+
+        //工作方法，关闭banner区
+        function showOrHideHeader(val) {
+            var header = $('#mainWindowTopbar');
+            var logo = header.find('.logo');
+            if (val == 'up') {
+                header.panel('resize', {height: 1}); //可能panel代码限制，小于10时，height总是10
+                logo.css('display', 'none');
+                $('#mainTabsToolbar a[name="btnHideHead"] img').attr('src', '/css/themes/'+upDownTheme+'/images/tabIconFullDown.png');
+            } else if (val == 'down') {
+                header.panel('resize', {height: 55});
+                logo.css('display', 'block');
+                $('#mainTabsToolbar a[name="btnHideHead"] img').attr('src', '/css/themes/'+upDownTheme+'/images/tabIconFullUp.png');
+            }
+            $('#mainBody').layout('resize');
+        }; //END  showOrHideHeader
+
+//        $.get('/login/PrivilegeController/getLoginAccount?t='+Math.random(), function(data) {
+//            $.main.loginOper = $.extend({}, data.context.entity);
+//            <!-- 保存用于判断权限等，见$.main.isHaveRequiredRole()函数 -->
+//        });
+
+        //禁止后退键 ，防止用户按退格导致回到登录页，再回来，当前卡片也关掉了（相当于按了F5刷新）
+        $(document).keydown($.main.forbidBackSpace);
+        $(document).keypress($.main.forbidBackSpace);
+    
+        function onChangeTheme(theme) {
+           
+        	if(theme == "null" || theme == "default") {
+        		return;
+        	}
+            $('link').eq(0).attr('href', '../css/themes/' + theme + '/easyui.css');
+            $('link').eq(1).attr('href', '../css/themes/' + theme + '/hdMain.css');
+            $('link').eq(2).attr('href', '../css/themes/' + theme + '/hdStyle.css');
+        }        
+  
+  //这个方法做了一些操作、然后调用回调函数    
+    function doMainTabsCallback(fn,args)    
+    {    
+        fn.apply(this, args);  
+    }
+    /*]]>*/
+</script>
+
+</html>

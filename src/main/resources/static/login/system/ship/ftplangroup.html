@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- Datagrid -->
+<table th:id="PlanGroupDatagrid1508123301002+${radi}" style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#PlanGroupDatagrid1508123301002[(${radi})]");
+	    function query() {
+	    	var contractNo=$("#contractNo").val();
+	    	var billNo=$("#billNo").val();
+		     var onlinquery = new HdQuery();
+		     onlinquery.add("contractNo",contractNo);
+		     onlinquery.add("billNo", billNo);
+		    return onlinquery.build(); 
+	    }
+	 
+	    $("#chooseShip").bind("click", function() {
+            HdUtils.selShip(callback);
+        });
+	    function callback(data){
+        	$("#shipNam[(${radi})]").val(data.cShipNam);
+        	$("#voyage[(${radi})]").val(data.ivoyage+'/'+data.evoyage);
+        	$("#tradeId[(${radi})]").val(data.tradeId);
+        	$("#shipNo[(${radi})]").val(data.shipNo);
+        	
+        }
+	    $("#PlanGroupDatagrid1508123301002[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/plan/PlanGroup/findft",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#PlanGroupToolBar1508123301002" + /*[[${radi}]]*/'',
+	        fit : true,
+	        onSelect(rowIndex,rowData){
+	           	 HdUtils.dialog.setValue({
+	           		 'planGroupNo' : planGroupNo
+	        	    });
+	           	var planGroupNo = rowData.planGroupNo;
+	           	function queryPlanRange(){
+                  	var builder = new HdQuery();
+                    builder.add("planGroupNo", planGroupNo);
+                    return builder.build();
+                };
+                var radiplanrange = HdUtils.dialog.getValue('radiplanrange');
+                $('#PlanGroupDatagrid1508123301002'+radiplanrange).datagrid({
+                    	 queryParams : queryPlanRange(),
+                   });
+		        },
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+
+	        }, {
+
+	            field : "planGroupNo",
+	            title : '计划号',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "planTyp",
+	            title : "计划类型",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+	        , {
+	            field : "shipNo",
+	            title : "船编号",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+	        , {
+	            field : "shipNam",
+	            title : "船名",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+	        , {
+	            field : "voyage",
+	            title : "航次",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+	        , {
+	            field : "iEId",
+	            title : "进出口",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+	        , {
+	            field : "billNo",
+	            title : "提单号",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+	        , {
+	            field : "contractNo",
+	            title : "委托号",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+	        , {
+	            field : "totalNum",
+	            title : "计划车数",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+	        , {
+	            field : "validatDte",
+	            title : "有效期",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+	        , {
+	            field : "toyotoId",
+	            title : "丰田策划",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+	        ] ]
+	    });
+	    $("#PlanGroupDatagrid1508123301002" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

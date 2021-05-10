@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="CAreaToolBar1508123301002+${radi}" style="float: left">
+		<!-- 查询 -->
+		场号：<input th:id="cyAreaNo+${radi}" name="cyAreaNo"
+			placeholder="请输入场号" type="text" data-options="required:false"
+			style="width: 120px">
+			品牌：<input th:id="brandCod+${radi}" name="brandCod" type="text" data-options="required:false" style="width: 105px"/> 
+			车类：<input th:id="carKind+${radi}" name="carKind" type="text" data-options="required:false" style="width: 105px"/>
+			车型：<input th:id="carTyp+${radi}" name="carTyp" type="text" data-options="required:false" style="width: 105px"/>
+			
+			进出口：<input th:id="iEId+${radi}" name="iEId" type="text" data-options="required:false" style="width: 80px"/>
+			内外贸：<input th:id="tradeId+${radi}" name="tradeId" type="text" data-options="required:false" style="width: 80px"/>
+			船名：<input th:id="cShipNam+${radi}"
+			name="cShipNam" placeholder="请输入船名" type="text"
+			data-options="required:false" style="width: 100px">
+			航次：<input
+			th:id="ivoyage+${radi}" name="ivoyage" placeholder="请输入航次"
+			type="text" data-options="required:false" style="width: 100px"><a
+			class="easyui-linkbutton" th:id="choose+${radi}">选船</a> <a
+			class="easyui-linkbutton" th:id="query+${radi}">查询</a> <a
+			class="easyui-linkbutton" th:id='clear+${radi}'>清空</a>
+			 <a class="easyui-linkbutton" th:id='sendDataJT+${radi}'>上报库存</a>
+</div>
+<table th:id="CAreaDatagrid1508123301002+${radi}" style="height: 100%"></table>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	$(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var shipNo;
+	    var dg = $("#CAreaDatagrid1508123301002[(${radi})]");
+	    $('#cyAreaNo[(${radi})]').combobox({
+	        url : '../webresources/login/base/CCyArea/getCCyAreaDrop?shipNo=' + shipNo,
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 200,
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $('#tradeId[(${radi})]').combobox(HdUtils.code.scode({
+		    fieldCod : 'TRADE_ID'
+	    }, {
+		    required : false
+	    }));
+	    $('#iEId[(${radi})]').combobox(HdUtils.code.scode({
+		    fieldCod : 'I_E_ID'
+	    }, {
+		    required : false
+	    }));
+	    $("#choose[(${radi})]").on("click", function() {
+	    	HdUtils.selShip(callback);
+	    });
+	    function callback(data){
+        	$("#cShipNam[(${radi})]").val(data.cShipNam);
+        	$("#ivoyage[(${radi})]").val(data.ivoyage);
+        	shipNo = data.shipNo;
+        	$("#CAreaDatagrid1508123301002[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+        }
+	    // buttons
+	    // 刷新。
+	    $("#fresh[(${radi})]").on("click", function() {
+		    dg.datagrid("hdReload");
+	    });
+	    // 清空。
+	    $("#clear[(${radi})]").on("click", function() {
+		    $('#cyAreaNo[(${radi})]').combobox('setValue', '');
+		    $("#brandCod[(${radi})]").combobox('setValue','');
+    		$("#carKind[(${radi})]").combobox('setValue','');
+    		$("#carTyp[(${radi})]").combobox('setValue','');
+    		$("#iEId[(${radi})]").combobox('setValue','');
+    		$("#tradeId[(${radi})]").combobox('setValue','');
+		    shipNo = "";
+	    });
+	    //上报库存情况到集团
+	    $("#sendDataJT[(${radi})]").on("click", function() {
+	        HdUtils.ajax.post({
+		        url : "../webresources/login/base/CCyArea/sendDataJT",
+		        success : function(data) {
+			        HdUtils.messager.bottomRight(data.message);
+		        }
+		    });		
+	    });
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+		    $("#CAreaDatagrid1508123301002[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+	  //品牌下拉
+	    $('#brandCod[(${radi})]').combobox({
+	        url : '../webresources/login/base/CCarTyp/getCBrandDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 500,
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    //车类下拉
+	    $('#carKind[(${radi})]').combobox({
+	        url : '../webresources/login/base/CCarTyp/getCCarKindDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 500,
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    //车型下拉
+	     $('#carTyp[(${radi})]').combobox({
+    		url : '../webresources/login/ship/BillCar/getCCarTypDrop',
+   		 	valueField : 'value',
+   			 textField : 'label',
+   			 panelHeight : 500,
+   			 onSelect : function(rec) {
+       			 return rec.value;
+   			 }
+			 });
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    var cyAreaNo = $("#cyAreaNo[(${radi})]").combobox('getValue');
+		    var brandCod = $("#brandCod[(${radi})]").combobox('getValue');
+		    var carKind = $("#carKind[(${radi})]").combobox('getValue');
+			var carTyp = $("#carTyp[(${radi})]").combobox('getValue');
+			var iEId = $("#iEId[(${radi})]").combobox('getValue');
+			var tradeId = $("#tradeId[(${radi})]").combobox('getValue');
+			onlinquery.add("tradeId",tradeId);
+			onlinquery.add("iEId",iEId);
+		    onlinquery.add("cyAreaNo", cyAreaNo); 
+		    onlinquery.add("brandCod", brandCod);
+		    onlinquery.add("carKind", carKind);
+		    onlinquery.add("carTyp", carTyp);
+		    if (shipNo) {
+			    onlinquery.add("shipNo", shipNo);
+		    }
+		    
+		    return onlinquery.build();
+	    }
+
+	    $("#CAreaDatagrid1508123301002[(${radi})]").datagrid({
+	        striped : true,
+	        url : "/webresources/login/base/CCyArea/findDcclhz",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#CAreaToolBar1508123301002" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+	        }, {
+	            field : "CY_AREA_NAM",
+	            title : '堆场名称',
+	            multiSort : true,
+	            halign : "center",
+	            align : "left",
+	            sortable : false
+	        }, {
+	            field : "C_SHIP_NAM",
+	            title : '船名',
+	            multiSort : true,
+	            width : 100,
+	            align : "left",
+	            sortable : false
+	        }, {
+	            field : "VOYAGE",
+	            title : '航次',
+	            multiSort : true,
+	            width : 80,
+	            align : "left",
+	            sortable : false
+	        }, {
+	            field : "IED",
+	            title : '进出口',
+	            multiSort : true,
+	            halign : "center",
+	            align : "left",
+	            editor : {
+	                type : "combobox",
+	                options : HdUtils.code.scode({
+		                fieldCod : 'I_E_ID'
+	                }, {
+		                required : false
+	                })
+	            },
+	            formatter : function(value) {
+		            return HdUtils.code.name('I_E_ID', value);
+	            },
+	            sortable : false
+	        }, {
+	            field : "TID",
+	            title : '内外贸',
+	            multiSort : true,
+	            halign : "center",
+	            align : "left",
+	            editor : {
+	                type : "combobox",
+	                options : HdUtils.code.scode({
+		                fieldCod : 'TRADE_ID'
+	                }, {
+		                required : false
+	                })
+	            },
+	            formatter : function(value) {
+		            return HdUtils.code.name('TRADE_ID', value);
+	            },
+	            sortable : false
+	        }, {
+	            field : "BRAND_NAM",
+	            title : "品牌",
+	            multiSort : true,
+	            width : 60,
+	            align : "left",
+	            sortable : false
+	        }, {
+	            field : "CAR_KIND_NAM",
+	            title : "车类",
+	            multiSort : true,
+	            width : 60,
+	            align : "left",
+	            sortable : false
+	        }, {
+	            field : "CAR_TYP_NAM",
+	            title : "车型",
+	            multiSort : true,
+	            width : 100,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "CNT",
+	            title : "数量",
+	            multiSort : true,
+	            width : 60,
+	            align : "center",
+	            sortable : false
+	        }
+
+	        ] ]
+	    });
+	    $("#CAreaDatagrid1508123301002" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

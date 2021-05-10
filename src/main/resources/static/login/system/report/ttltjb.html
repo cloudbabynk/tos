@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<body>
+<div style="float: left">
+		月份：<input th:id="shipworkTim+${radi}" name="shipworkTim" class="easyui-datebox"
+			style="width: 120px" /><a class="easyui-linkbutton"
+			th:id="report+${radi}">报表</a>
+</div>
+<iframe th:id="workdatadaily+${radi}" style="width:100%;height:100%;"> </iframe>	
+<script>
+	$(document).ready(function() {
+		$("#shipworkTim[(${radi})]").datebox({
+	        height : 26,
+	        width : 130,
+	        editable : false,
+	        onShowPanel : function() {// 显示日趋选择对象后再触发弹出月份层的事件，初始化时没有生成月份层
+		        span.trigger('click'); // 触发click事件弹出月份层
+		        if (!tds) setTimeout(function() { //延时触发获取月份对象，因为上面的事件触发和对象生成有时间间隔
+			        var tableId = p.find('div.calendar-menu-month-inner td');
+			        tableId.click(function(e) {
+				        e.stopPropagation(); //禁止冒泡执行easyui给月份绑定的事件
+				        var year = /\d{4}/.exec(span.html())[0] //得到年份
+				        , month = parseInt($(this).attr('abbr'), 10); //月份 之前是这样的month = parseInt($(this).attr('abbr'), 10) + 1;
+				        if (month < 10) {
+					        month = '0' + month;
+				        }
+				        $('#shipworkTim[(${radi})]').datebox('hidePanel') //隐藏日期对象
+				        .datebox('setValue', year + '-' + month); //设置日期的值
+			        });
+		        }, 0);
+	        },
+	        formatter : function(date) {//格式化日期
+		        var y = date.getFullYear(), m = date.getMonth() + 1;
+		        if (m < 10) m = "0" + m;
+		        return y + "-" + m;
+	        },
+	        parser : function(s) {//解析一个日期字符串
+		        var t = Date.parse(s);
+		        return !isNaN(t) ? new Date(t) : new Date();
+	        },// 配置formatter，只返回年月
+	    });
+	    var p = $('#shipworkTim[(${radi})]').datebox('panel'), // 日期选择对象
+	    tds = false, // 日期选择对象中月份
+	    span = p.find('div.calendar-title span'); // 显示月份层的触发控件
+	    $("#shipworkTim[(${radi})]").datebox("setValue", getYear() + "-" + getMonth());
+	    function getYear() {
+		    var myDate = new Date();
+		    var year = managerNum(myDate.getFullYear()); //获取完整的年份(4位,1970-????)
+		    return year;
+	    }
+	    function getMonth() {
+		    var myDate = new Date();
+		    var month = managerNum(myDate.getMonth() + 1); //获取当前月份(0-11,0代表1月)
+		    return month;
+	    }
+	    function managerNum(data) {
+		    if (parseInt(data) < 10) {
+			    return "0" + data;
+		    } else {
+			    return "" + data;
+		    }
+	    }   
+		$("#report[(${radi})]").on("click", function() {
+		    	var shipworkTim=$("#shipworkTim[(${radi})]").datebox('getValue');
+		    	if (!shipworkTim){
+		    		shipworkTim = getYear() + "-" + getMonth();
+		    	}
+		    	var src='http://10.163.204.56:8090/show/?fileid=7e28f130912448b6b619c456a7fcdeef&rpttoken=333&leavPortTim='+shipworkTim;
+			    $("#workdatadaily[(${radi})]").attr('src',src);  	
+		   });
+    });
+</script>
+</body>
+</html>

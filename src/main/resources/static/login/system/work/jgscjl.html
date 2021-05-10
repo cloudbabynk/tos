@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div class="easyui-layout" data-options="fit:true"
+	style="height: 100%; width: 100%">
+	<div
+		data-options="region:'west',split:true,tools:reload5436,title:'船期预报'"
+		style="width: 280px; padding: 10px;">
+		<input class="easyui-searchbox"
+			data-options="searcher:searchShip,prompt:'搜索船舶'"
+			th:id="searchText+${radi}" style="width: 200px; height: 20px;"
+			name="search"></input>
+		<ul th:id="ShipStatusTree123+${radi}"></ul>
+	</div>
+	<div data-options="region:'center'" style="height: 100%; width: 100%">
+		<!-- 工具栏 -->
+		<div class="easyui-tabs" data-options="fit:true"
+			th:id="jgscjl+${radi}">
+			<div th:id="loadhtml2+${radi}"
+				data-options="title:'批量数据',region:'center',fit:true"
+				style="width: 100%; height: 100%;">
+				<div th:id="DayWorkClassToolBar1508123307299+${radi}"
+					style="float: left; position: relative;">
+						<!-- 查询 -->
+						所属品牌：<input th:id="brandCod+${radi}" name="brandCod"
+							placeholder="请输入所属品牌" type="text" data-options="required:false"
+							style="width: 105px"> 车类：<input th:id="carKind+${radi}"
+							name="carKind" placeholder="请输入车属类别" type="text"
+							data-options="required:false" style="width: 105px"> 车型：<input
+							th:id="carTyp+${radi}" name="carTyp" placeholder="请输入车型代码"
+							type="text" data-options="required:false" style="width: 105px">
+							堆场：<input th:id="cyAreaNo+${radi}" name="cyAreaNo" type="text"data-options="required:false" style="width: 105px"> 货代：<input
+							th:id="consignCod+${radi}" name="consignCod" type="text"
+							data-options="required:false" style="width: 105px"><input
+							th:id="tdjs+${radi}" hidden="true">入库日期：<input th:id="inCyTim+${radi}"
+						name="inCyTim" data-options="required:false"
+						class="easyui-datebox" style="width: 120px"><a
+							class="easyui-linkbutton" th:id="query+${radi}">查询</a><a
+							class="easyui-linkbutton" th:id='clear+${radi}'>重置</a>
+						<shiro:hasPermission name="webresources:login:TruckWork:export">
+							<a class="easyui-linkbutton" iconCls="icon-export" plain="false"
+								th:id="export+${radi}">导出Excel</a>
+						</shiro:hasPermission>
+						<shiro:hasPermission name="webresources:login:TruckWork:Jgcslh">
+							<a class="easyui-linkbutton" plain="false" th:id="jgcslh+${radi}">集港收车理货</a>
+						</shiro:hasPermission>
+						<a class="easyui-linkbutton" th:id="jq+${radi}">集齐</a> <a
+							class="easyui-linkbutton" th:id="qxjq+${radi}">取消集齐</a> <a
+							class="easyui-linkbutton" th:id="zdjy+${radi}">自动校验</a><a
+							class="easyui-linkbutton" th:id="changeBillNo+${radi}">转配</a>
+							<a
+							class="easyui-linkbutton" th:id="seperateBill+${radi}">拆单</a>
+							<a
+							class="easyui-linkbutton" th:id="updateBillNo+${radi}">改单号</a>
+							<a class="easyui-linkbutton" iconCls="icon-export" plain="false"
+								th:id="exportWm+${radi}">导出外贸集港Excel</a>
+					</div>
+				<table th:id="DayWorkClassDatagrid1508123307299+${radi}"
+					style="height: 100%"></table>
+			</div>
+			<div th:id="loadhtml3+${radi}"
+				data-options="title:'单车数据',region:'east',split:true"
+				style="width: 750px; height: 100%"></div>
+		</div>
+	</div>
+</div>
+<script src="../js/datagrid-groupview.js"></script>
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    var reload5436 = [ {
+        iconCls : 'icon-reload',
+        handler : function() {
+	        $('#ShipStatusTree123[(${radi})]').tree('reload');
+        }
+    } ];
+    var searchShip = function() {
+	    var parentNode = $('#ShipStatusTree123[(${radi})]').tree('getRoots'); //得到tree顶级node  
+	    var searchCon = $("input[name='search']").val();
+	    /* alert("parentNode="+parentNode); 
+	    alert("searchCon="+searchCon); */
+	    var children;
+	    for (var i = 0; i < parentNode.length; i++) { //循环顶级 node   
+		    children = $('#ShipStatusTree123[(${radi})]').tree('getChildren', parentNode[i].target);//获取顶级node下所有子节点   
+		    if (children) { //如果有子节点   
+			    for (var j = 0; j < children.length; j++) { //循环所有子节点   
+				    //if($('#ul_tree_dept').tree('isLeaf',children[j].target)){ //判断子级是否为叶子节点,即不是父节点   
+				    if (children[j].text.indexOf(searchCon) >= 0 || children[j].id.indexOf(searchCon) >= 0) { //判断节点text是否包含搜索文本                       
+					    expandParent(children[j]); //设置此节点所有父级展开   
+					    selectNode(children[j]); //设置此节点为选择状态   
+
+					    return;
+				    }
+				    //}   
+			    }
+		    } else {
+			    if (parentNode[i].text.indexOf(searchCon) || children[j].id.indexOf(searchCon) >= 0 >= 0) {
+				    expandParent(parentNode[i]);
+				    selectNode(parentNode[i]);
+				    return;
+			    }
+		    }
+	    }
+    }
+    function selectNode(node) {
+	    $('#ShipStatusTree123[(${radi})]').tree('select', node.target);
+	    $('#ShipStatusTree123[(${radi})]').tree('scrollTo', node.target);
+    };
+    function expandParent(node) {
+	    var parent = node;
+	    var t = true;
+	    do {
+		    parent = $('#ShipStatusTree123[(${radi})]').tree('getParent', parent.target); //获取此节点父节点   
+		    if (parent) { //如果存在   
+			    t = true;
+			    $('#ShipStatusTree123[(${radi})]').tree('expand', parent.target);
+		    } else {
+			    t = false;
+		    }
+	    } while (t);
+    };
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#DayWorkClassDatagrid1508123307299[(${radi})]");
+	    $.parser.parse($('#DayWorkClassToolBar1508123307299[(${radi})]'));
+	    var shipNo = "";
+	    var recId;
+	    var tdjs = 0;
+        $.get('/login/PrivilegeController/getLoginAccount?t=11&s='+Math.random(), function(data) {
+	  		recId = data.account; 
+	  	  })
+	  	$('#loadhtml3[(${radi})]').attr('href', '../webresources/login/work/WorkCommand/jgscjlsingle.htm');
+	    $('#ShipStatusTree123[(${radi})]').tree({
+	        method : "get",
+	        url : "../webresources/login/ship/Ship/gentree",
+	        onClick : treeclick
+	    });
+	    $('#brandCod[(${radi})]').combobox({
+	        url : '../webresources/login/base/CCarTyp/getCBrandDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 'auto',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $('#carKind[(${radi})]').combobox({
+	        url : '../webresources/login/base/CCarTyp/getCCarKindDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 'auto',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $('#carTyp[(${radi})]').combobox({
+	        url : '../webresources/login/ship/BillCar/getCCarTypDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 'auto',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $('#cyAreaNo[(${radi})]').combobox({
+	        url : '../webresources/login/base/CCyArea/getCCyAreaDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight:'200',
+	        onSelect : function(rec) {
+	        	return rec.value;
+	        }
+	    });
+	    $('#consignCod[(${radi})]').combobox({
+	        url : '../webresources/login/contract/ContractIeDoc/getCClientCodDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 100,
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    function treeclick(node) {
+		    shipNo = node.id;
+		    shipNam = node.type.split(",");
+		    cShipNam = shipNam[0];
+		    ivoyage = node.obj.ivoyage;
+		    $('#cShipNam[(${radi})]').val(cShipNam);
+		    $('#ivoyage[(${radi})]').val(ivoyage);
+		    HdUtils.dialog.setValue({
+			    'shipNo' : shipNo
+		    });
+		    $('#DayWorkClassDatagrid1508123307299[(${radi})]').datagrid({
+			    queryParams : query(),
+		    });
+		    var jgscjlsingleRadi = HdUtils.dialog.getValue("jgscjlsingleRadi");
+		    $('#DayWorkClassDatagrid567' + jgscjlsingleRadi).datagrid({
+			    queryParams : query(),
+		    });
+	    }
+	    // 清空。
+	    $("#clear[(${radi})]").on("click", function() {
+		    shipNo = '';
+		    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+	    $("#jq[(${radi})]").on("click", function() {
+	    	var data = dg.datagrid("getSelected");
+        	if (data == null || data == undefined) {
+			    HdUtils.messager.info('请先选择一条数据！');
+			    return;
+		    }
+        	var portCarNo = data.portCarNo;
+        	var type = 'jq';
+        	 HdUtils.ajax.post({
+			        url : "../webresources/login/cargo/PortCar/confrimJq?portCarNo=" + portCarNo + "&type=" + type,
+			        success : function(data) {
+				        if (data.code == '-1') {
+					        HdUtils.messager.info(data.message);
+					        return false;
+				        }
+				        HdUtils.messager.bottomRight(data.message);
+				        $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("hdReload");
+			        }
+			    });
+	    });
+	    $("#zdjy[(${radi})]").on("click", function() {
+        	if (!shipNo) {
+			    HdUtils.messager.info('请先选择一条船！');
+			    return;
+		    }
+	       	 HdUtils.ajax.post({
+			        url : "../webresources/login/cargo/PortCar/confrimAuto?shipNo=" + shipNo,
+			        success : function(data) {
+				        if (data.code == '-1') {
+					        HdUtils.messager.info(data.message);
+					        return false;
+				        }
+				        HdUtils.messager.bottomRight(data.message);
+				        $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("hdReload");
+			        }
+			    });
+	    });
+	    $("#qxjq[(${radi})]").on("click", function() {
+	    	var data = dg.datagrid("getSelected");
+        	if (data == null || data == undefined) {
+			    HdUtils.messager.info('请先选择一条数据！');
+			    return;
+		    }
+        	var portCarNo = data.portCarNo;
+        	var type = 'qxjq';
+        	HdUtils.ajax.post({
+		        url : "../webresources/login/cargo/PortCar/confrimJq?portCarNo=" + portCarNo + "&type=" + type,
+		        success : function(data) {
+			        if (data.code == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.messager.bottomRight(data.message);
+			        $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("hdReload");
+		        }
+		    });
+        	
+	    });
+	    $("#changeBillNo[(${radi})]").on("click", function() {
+	    	var selRow = dg.datagrid("getChecked");
+	    	if (selRow.length == 0) {
+	            HdUtils.messager.info('请至少选择一条数据！');
+	            return false;
+            }
+	    	var billNos = '';
+	    	for (var i = 0; i < selRow.length; i++) {
+	    		if (billNos.indexOf(selRow[i].billNo) < 0){
+	    			billNos += selRow[i].billNo + ",";
+	    		}
+		    }
+
+	    	HdUtils.dialog.setValue({
+         		'billNos' : billNos 
+         	 });
+	    	HdUtils.dialog.setValue({
+         		'radi' : radi 
+         	 });
+         	HdUtils.dialog.setValue({
+         		'shipNo' : selRow[0].shipNo 
+         	 });
+         	
+         	HdUtils.dialog.show({
+		        width : 500,
+		        height : 200,
+		        title : '转配',
+		        href : "../login/system/work/jgsczp.html",
+		        isSaveHandler : true
+		    });
+	    });
+	    //拆单
+	    $("#seperateBill[(${radi})]").on("click", function() {
+	    	var selRow = dg.datagrid("getChecked");
+	    	if (selRow.length == 0) {
+	            HdUtils.messager.info('请至少选择一条数据！');
+	            return false;
+            }
+	    	if (selRow[0].currentStat != '2') {
+	            HdUtils.messager.info('此车辆已不在场，不能拆单！');
+	            return false;
+            }
+	    	HdUtils.dialog.setValue({
+         		'billNo' : selRow[0].billNo,
+         		'radi' : radi,
+         		'shipNo' : selRow[0].shipNo,
+         		'carTyp' : selRow[0].carTyp,
+         		'cyAreaNo' : selRow[0].cyAreaNo,
+         		'currentStat' : selRow[0].currentStat,
+         		'inCyTim' : selRow[0].inCyTim,
+         		'rksl' : selRow[0].rksl
+         	 });
+         	HdUtils.dialog.show({
+		        width : 500,
+		        height : 200,
+		        title : '拆单',
+		        href : "../login/system/work/jgsccd.html",
+		        isSaveHandler : true
+		    });
+	    });
+	    //修改提单号
+	    $("#updateBillNo[(${radi})]").on("click", function() {
+	    	var selRow = dg.datagrid("getChecked");
+	    	if (selRow.length == 0) {
+	            HdUtils.messager.info('请至少选择一条数据！');
+	            return false;
+            }
+	    	if (selRow[0].currentStat != '2') {
+	            HdUtils.messager.info('此车辆已不在场，不能拆单！');
+	            return false;
+            }
+	    	var cargoInfo = new Object();
+		    cargoInfo.billNo = selRow[0].billNo;
+		    cargoInfo.shipNo = selRow[0].shipNo;
+		    cargoInfo.carTyp = selRow[0].carTyp;
+		    cargoInfo.cyAreaNo = selRow[0].cyAreaNo;
+		    cargoInfo.currentStat = selRow[0].currentStat;
+		    cargoInfo.inCyTim = selRow[0].inCyTim;
+		    cargoInfo.rcsl = selRow[0].rksl;
+	    	HdUtils.ajax.post({
+		        url : "../webresources/login/cargo/TruckWork/updateBillNo",
+		        data : cargoInfo,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.messager.bottomRight(data.message);
+			        $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("hdReload");
+		        }
+		    })
+	    });
+	    $("#jgcslh[(${radi})]").on("click", function() {
+	    	var data = dg.datagrid("getSelected");
+        	if (data == null || data == undefined) {
+			    HdUtils.messager.info('请先选择一条数据！');
+			    return;
+		    }
+        	HdUtils.dialog.setValue({
+        		 'recId' : recId
+     	     });
+	    	HdUtils.dialog.setValue({
+         		 'shipNo' : data.shipNo
+      	     });
+         	HdUtils.dialog.setValue({
+         		'contractNo' : data.contractNo 
+         	 });
+         	HdUtils.dialog.setValue({
+         		'billNo' : data.billNo 
+         	 });
+         	HdUtils.dialog.setValue({
+         		'carTyp' : data.carTyp 
+         	 });
+         	HdUtils.dialog.show({
+		        width : 800,
+		        height : 300,
+		        title : '批量集港理货',
+		        href : "../login/system/work/jgscpllh.html",
+		        isSaveHandler : true
+		    });
+	    });
+	    $("#query[(${radi})]").on("click", function() {
+		    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+	    //指定列求和
+   	    function computer(colName) {
+   	      var rows = $('#DayWorkClassDatagrid1508123307299[(${radi})]').datagrid('getRows');
+   	      var total = 0;
+		  for (var i = 0; i < rows.length; i++) {
+				    if(rows[i][colName]!=undefined)
+			        total += parseFloat(rows[i][colName]);
+	      }
+   	      return total;
+   	    }
+	    function compute2(value){
+	    	var cargoInfo = new Object();
+			cargoInfo.billNo = value;
+			cargoInfo.shipNo = HdUtils.dialog.getValue("shipNo");
+			HdUtils.ajax.post({
+		        url : "../webresources/login/ship/ShipBill/findShipBillRecord",
+		        data : cargoInfo,
+		        async: false,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        if(data.pieces){
+			        	tdjs = data.pieces;
+			        	 
+			        }
+		        }
+		    })
+		    return tdjs;
+	    }
+      	function compute(colName,rows) {
+   	   	    var total = 0;
+            if(rows){
+            	for (var i = 0; i < rows.length; i++) {
+       	   		    if(rows[i][colName]!=undefined)
+       	   	        total += parseFloat(rows[i][colName]);
+       	   	      }
+            }
+   	   	    return total;
+   	   	}
+     	$("#export[(${radi})]").on("click", function() {
+            dg.datagrid("hdExportExcel", {
+                url :"../webresources/login/work/WorkCommand/exportExcel",
+                exportFileName : "集港收车记录计划-" + new Date().format("yyyyMMddhhmmss")
+            });
+	    });
+     	$("#exportWm[(${radi})]").on("click", function() {
+            dg.datagrid("hdExportExcel", {
+                url :"../webresources/login/work/WorkCommand/exportExcelWm",
+                exportFileName : "外贸集港收车记录计划-" + new Date().format("yyyyMMddhhmmss")
+            });
+	    });
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    if (shipNo) {
+			    onlinquery.add("shipNo", shipNo);
+		    }
+		    var brandCod = $("#brandCod[(${radi})]").combobox('getValue');
+		    var carKind = $("#carKind[(${radi})]").combobox('getValue');
+		    var carTyp = $("#carTyp[(${radi})]").combobox('getValue');
+		    var cyAreaNo = $("#cyAreaNo[(${radi})]").combobox('getValue');
+		    var consignCod = $("#consignCod[(${radi})]").combobox('getValue');
+		    var date = $("#inCyTim[(${radi})]").datebox("getValue");
+		    onlinquery.add("brandCod", brandCod);
+		    onlinquery.add("carKind", carKind);
+		    onlinquery.add("carTyp", carTyp);
+		    onlinquery.add("cyAreaNo", cyAreaNo);
+		    onlinquery.add("consignCod", consignCod);
+		    onlinquery.add("inCyTim", date);
+		    return onlinquery.build();
+	    }
+
+	    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/work/WorkCommand/findJgcs?Type=PL",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : false,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        view:groupview,
+            groupField:'billNo',
+            groupFormatter:function(value,rows){
+            	
+    			return '提单件数：' + compute2(value) + ' 集港件数：' + compute("rksl",rows) + '';  
+            },
+	        toolbar : "#DayWorkClassToolBar1508123307299" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        rowStyler: function(index,row){ 
+            	if(row.isTiComplete == 1){
+            		return 'background-color: #FFFF00;';
+            	}
+            },
+	        onLoadSuccess() {
+	        	      //添加“合计”列
+	        	      $('#DayWorkClassDatagrid1508123307299[(${radi})]').datagrid('appendRow', {
+	        	        cShipNam: '<span class="subtotal">合计</span>',
+	        	       rksl: '<span class="subtotal">' + computer("rksl") + '</span>'
+	        	      });
+	        	    },
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+	        }, {
+	            field : "cShipNam",
+	            title : '船名',
+	            multiSort : true,
+	            width : 100,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "voyage",
+	            title : '航次',
+	            multiSort : true,
+	            width : 80,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "billNo",
+	            title : '提单号',
+	            multiSort : true,
+	            width : 120,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "brandNam",
+	            title : "品牌",
+	            multiSort : true,
+	            width : 80,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "carKindNam",
+	            title : "车类",
+	            multiSort : true,
+	            width : 60,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "carTypNam",
+	            title : "型号",
+	            multiSort : true,
+	            width : 60,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "cyArea",
+	            title : "堆场",
+	            multiSort : true,
+	            width : 60,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "rksl",
+	            title : "入库数量",
+	            multiSort : true,
+	            width : 100,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "inCyTim",
+	            title : "入库日期",
+	            multiSort : true,
+	            width : 100,
+	            align : "center",
+	            formatter : $.hd.ezui.formatter.date,
+	            sortable : false
+	        }, {
+	            field : "currentStat",
+	            title : '在场状态',
+	            multiSort : true,
+	            width : 100,
+	            halign : "center",
+	            editor : {
+	                type : "combobox",
+	                options : HdUtils.code.scode({
+		                fieldCod : 'CURRENT_STAT'
+	                }, {
+		                required : false
+	                })
+	            },
+	            formatter : function(value) {
+		            return HdUtils.code.name('CURRENT_STAT', value);
+	            },
+	            sortable : false
+	        }, {
+	            field : "consignNam",
+	            title : '货代',
+	            multiSort : true,
+	            width : 100,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "contactInfo",
+	            title : '联系方式',
+	            multiSort : true,
+	            width : 100,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "isTiComplete",
+	            title : '是否集齐',
+	            multiSort : true,
+	            width : 100,
+	            halign : "center",
+	            editor : {
+	                type : "combobox",
+	                options : HdUtils.code.scode({
+		                fieldCod : 'ACTIVE_ID'
+	                }, {
+		                required : false
+	                })
+	            },
+	            formatter : function(value) {
+		            return HdUtils.code.name('ACTIVE_ID', value);
+	            },
+	            sortable : false
+	        } ] ]
+	    });
+	    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

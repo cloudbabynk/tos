@@ -1,0 +1,52 @@
+@charset "utf-8";
+
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	padding-left: 10px;
+	white-space: nowrap;
+	width:60px;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	width:100px;
+}
+.easyui-numberbox {
+	text-align: right;
+	width:100px;
+}
+.easyui-validatebox {
+	width:100px;
+}
+.easyui-datebox {
+	width:105px;
+}
+.easyui-datetimebox {
+	width:105px;
+}
+.easyui-option {
+	width:100px;
+}
+.tableform input[type='radio'] {
+	width:15px;
+}
+.tableform input[type='checkbox'] {
+	width:15px;
+}
+
+.tableform .easyui-numberbox{
+	text-align: right;
+	width:100px;
+}

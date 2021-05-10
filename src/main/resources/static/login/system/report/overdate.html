@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<body>
+<div style="float: left">
+		日期：<input th:id="dte+${radi}" name="dte" class="easyui-datebox"
+			style="width: 120px" />&nbsp;&nbsp;码头：<input th:id="dockCod+${radi}" name="dockCod" data-options="required:false"
+				maxlength="35" />&nbsp;<a class="easyui-linkbutton" style="margin-left:5px"
+			th:id="report+${radi}">报表</a>
+</div>
+<iframe th:id="overdate+${radi}" style="width:100%;height:100%;"> </iframe>	
+<script>
+	$(document).ready(function() {
+		$('#dockCod[(${radi})]').combobox({
+	        url : '../webresources/login/contract/ContractIeDoc/getCDock',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 'auto',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+		var recNam;
+	  	  $.get('/login/PrivilegeController/getLoginAccount?t=11&s='+Math.random(), function(data) {
+	  		recNam=data.name;  
+	  	  })
+		   $("#report[(${radi})]").on("click", function() {
+			    var recTim=Date.prototype.dateAdd(0, "yyyy-MM-dd");
+		    	var inTim=$("#dte[(${radi})]").datebox('getValue');
+		    	var dockCod = $("#dockCod[(${radi})]").combobox("getValue");
+		    	var src='http://10.163.204.56:8090/show/?fileid=3373d452822d4fe29ffe4395a5410ef1&rpttoken=333&inTim='+inTim+'&recNam='+recNam+'&dockCod='+dockCod;
+			    $("#overdate[(${radi})]").attr('src',src);  	
+		   });
+    });
+</script>
+</body>
+</html>

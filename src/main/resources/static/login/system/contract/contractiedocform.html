@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<style type="text/css">
+    .tableform {
+        margin: 16px auto;
+    }
+
+    .tableform tr {
+        height: 30px;
+    }
+
+    .tableform th {
+        text-align: right;
+        white-space: nowrap;
+    }
+
+    .tableform td {
+        text-align: left;
+        width: 100px;
+    }
+
+    .tableform input {
+        text-align: left;
+    }
+</style>
+<script>
+    let hasWC ;
+    $(document).ready(function () {
+        // 		$('#contractTyp').val("");
+        $("#confirmId").val("0");
+        var formObject = $("#ContractIeDocForm1507959148725");
+        var checkAdd = HdUtils.dialog.getValue("checkAdd");
+        var contractNo = HdUtils.dialog.getValue("contractNo");
+        var confirmId = HdUtils.dialog.getValue("confirmId");
+        $("#confirmId").val(confirmId);
+        var radi = HdUtils.dialog.getValue("radi");
+        var cShipNam = HdUtils.dialog.getValue("data").cShipNam;
+        var voyage = HdUtils.dialog.getValue("data").voyage;
+        var dockCod = HdUtils.dialog.getValue("data").dockCod;
+        var shipNo = HdUtils.dialog.getValue("data").shipNo;
+        hasWC = HdUtils.dialog.getValue("data").hasWC;
+        //console.log(hasWC);
+        var contractDte = dateToString();
+        $("#wuliubu").click(function () {
+            if ($(this).val() == "W") {
+                $('#workWay').combobox('setValue', '4');
+                //     		   $('#contractTyp').val("4");
+                //     		   $('#workWay').combobox(HdUtils.code.scode({
+                //    			    fieldCod : 'WORK_WAY'
+                //    		    }, {
+                //    			    required : false
+                //    		    }));
+                //     		   $("#workWay").combobox({
+                // 					disabled:true
+                // 				});
+            }
+        });
+
+        if (checkAdd) {
+            $('#tradeId_1').attr("disabled", true);
+            $('#tradeId_2').attr("disabled", true);
+            $('#iEId_I').attr("disabled", true);
+            $('#iEId_E').attr("disabled", true);
+            $('#wuliubu').attr("disabled", true);
+
+
+            //内外贸进出口   tradeId_1   tradeId_2   iEId_I   iEId_E wuliubu
+            //内外贸
+            // 	    	var html = "<input type=\"radio\" name=\"tradeId\" value=\"1\" checked=\"checked\" class='easyui-radio'>内</input>";
+            // 	    	$("#tradeIdCheck").html(html);
+            //作业类型
+            $('#workWay').combobox({
+                url: '../webresources/login/contract/ContractIeDoc/getSysCodeJiGang',
+                valueField: 'value',
+                textField: 'label',
+                panelWidth: 100,
+                editable: true,
+                panelHeight: 'auto',
+                onSelect: function () {
+                    $('#tradeId_1').attr("disabled", false);
+                    $('#tradeId_2').attr("disabled", false);
+                    $('#iEId_I').attr("disabled", false);
+                    $('#iEId_E').attr("disabled", false);
+                    var workWayCheck = $('#workWay').combobox('getValue');
+                    if (workWayCheck == "1") {
+                        $('#tradeId_1').attr("checked", true);
+                        $('#tradeId_2').attr("checked", false);
+                        $('#iEId_I').attr("checked", false);
+                        $('#iEId_E').attr("checked", true);
+
+                        $('#tradeId_1').attr("disabled", true);
+                        $('#tradeId_2').attr("disabled", true);
+                        $('#iEId_I').attr("disabled", true);
+                        $('#iEId_E').attr("disabled", true);
+                    }
+                    if (workWayCheck == "3") {
+                        $('#tradeId_1').attr("checked", false);
+                        $('#tradeId_2').attr("checked", true);
+                        $('#iEId_I').attr("checked", true);
+                        $('#iEId_E').attr("checked", false);
+
+                        $('#tradeId_1').attr("disabled", true);
+                        $('#tradeId_2').attr("disabled", true);
+                        $('#iEId_I').attr("disabled", true);
+                        $('#iEId_E').attr("disabled", true);
+                    }
+
+                }
+            });
+
+
+            $('#workWay').combobox('setValue', '1');
+        } else {
+            //内外贸
+            // 	    	var html = "<input type=\"radio\" name=\"tradeId\" value=\"1\" checked=\"checked\" class='easyui-radio'>内</input> \n" +
+            // 	        "\t\t\t<input type=\"radio\" name=\"tradeId\" value=\"2\" class='easyui-radio'>外</input>";
+            // 	    	$("#tradeIdCheck").html(html);
+
+            $('#workWay').combobox(HdUtils.code.scode({
+                fieldCod: 'WORK_WAY'
+            }, {
+                required: true,
+                onSelect: function (rec) {
+                    if (rec.sorter == '1') {
+                        $("#iEId_E").attr("checked", "checked");
+                    } else if (rec.sorter == '2') {
+                        $("#iEId_I").attr("checked", "checked");
+                    }
+                    return rec.value;
+                }
+            }));
+        }
+        $("#contractDte").val(contractDte);
+        var validatDte = dateToString2();
+        $("#validatDte").val(validatDte);
+        $("#contractDte").datebox({
+            onSelect: function () {
+                var contractDte = $("#contractDte").datebox('getValue');
+                if (contractDte == "" || contractDte == undefined) {
+                    return;
+                }
+                var cte = $("#contractDte").datebox("getValue");
+                var d = string2date(cte);
+                var dte = d.getDate() + 1;
+                var year = d.getFullYear();
+                var month = d.getMonth() + 1;
+                var day = d.getDate().toString();
+                var da = mGetDate(year, month);
+                if (day == da && month == "12") {
+                    var dd = mGetDate(year + 1, 0);
+                    var mm = "01";
+                    var ds = "01";
+                    var contractDte = year + 1 + "-" + mm + "-" + ds;
+                    $("#validatDte").datebox("setValue", contractDte);
+                } else if (day == da) {
+                    var mm = parseInt(month) + 1;
+                    var ds = "01";
+                    if (mm < 10) mm = 0 + mm.toString();
+                    var contractDte = year + "-" + mm + "-" + ds;
+                    $("#validatDte").datebox("setValue", contractDte);
+                } else {
+                    var mm = parseInt(month);
+                    if (mm < 10) mm = 0 + mm.toString();
+                    day = parseInt(day) + 1;
+                    if (day < 10) day = 0 + day.toString();
+                    var contractDte = year + "-" + mm + "-" + day;
+                    $("#validatDte").datebox("setValue", contractDte);
+                }
+            }
+        });
+        function string2date(str) {
+            return new Date(Date.parse(str));
+        }
+        function mGetDate(year, month) {
+            var d = new Date(year, month, 0);
+            return d.getDate();
+        }
+        function dateToString2() {
+            //时间的后一天
+            var timeStamp = Number(new Date()) / 1000 + 24 * 60 * 60;
+            var dte = new Date(timeStamp * 1000);
+            // 		    var dte = new Date();
+            var year = dte.getFullYear();
+            var month = (dte.getMonth() + 1).toString();
+            var day = dte.getDate().toString();
+            if (month.length == 1) {
+                month = "0" + month;
+            }
+            if (day.length == 1) {
+                day = "0" + day;
+            }
+            var dateTime = year + "-" + month + "-" + day;
+            return dateTime;
+        }
+        function dateToString() {
+            var dte = new Date();
+            var year = dte.getFullYear();
+            var month = (dte.getMonth() + 1).toString();
+            var day = (dte.getDate()).toString();
+            if (month.length == 1) {
+                month = "0" + month;
+            }
+            if (day.length == 1) {
+                day = "0" + day;
+            }
+            var dateTime = year + "-" + month + "-" + day;
+            return dateTime;
+        }
+
+        $('#flow').combobox(HdUtils.code.scode({
+            fieldCod: 'FLOW_AREA'
+        }, {
+            required: false
+        }));
+        $('#brand').combobox({
+            url: '../webresources/login/contract/ContractIeDoc/getCBrandDrop',
+            valueField: 'value',
+            textField: 'label',
+            panelHeight: 100,
+            required: false,
+            onSelect: function (rec) {
+                return rec.value;
+            }
+        });
+        // 	    $('#carTyp').combobox({
+        // 	        url : '../webresources/login/contract/ContractIeDoc/getCCarTyp',
+        // 	        valueField : 'value',
+        // 	        textField : 'label',
+        // 	        panelHeight : 120,
+        // 	        required : false,
+        // 	        onSelect : function(rec) {
+        // 		        return rec.value;
+        // 	        }
+        // 	    });
+        $('#carTyp').combobox({
+            url: '../webresources/login/contract/ContractIeDoc/getCCarTyp',
+            valueField: 'value',
+            textField: 'label',
+            panelHeight: 120,
+            required: false,
+            onSelect: function (rec) {
+                HdUtils.ajax.post({
+                    url: "../webresources/login/contract/ContractIeDoc/findBrandKind?carTyp=" + rec.value,
+                    success: function (data) {
+                        if (!data) {
+                            return false;
+                        }
+                        //页面刷新有些值不变
+                        $('#brand').combobox('setValue', data.brandCod);
+                        $('#carKind').combobox('setValue', data.carKind);
+                    }
+                });
+                return rec.value;
+            }
+        });
+        $('#factoryCod').combobox({
+            url: '../webresources/login/base/CBrand/getCFactoryDrop',
+            valueField: 'value',
+            textField: 'label',
+            mode: 'remote',
+            onSelect: function (rec) {
+                return rec.value;
+            }
+        });
+        $('#consignNam').combobox({
+            url: '../webresources/login/contract/ContractIeDoc/getCClientCodDropHd',
+            valueField: 'value',
+            textField: 'label',
+            panelHeight: 100,
+            required: 'true',
+            onSelect: function (rec) {
+                return rec.value;
+            },
+            onChange: function (n, o) {
+                $("#consignCod").val(n);
+            }
+        });
+        $('#payUnitCod').combobox({
+            url: '../webresources/login/contract/ContractIeDoc/getCClientCodDrop',
+            valueField: 'value',
+            textField: 'label',
+            panelHeight: 100,
+            onSelect: function (rec) {
+                return rec.value;
+            }
+        });
+        $('#agentCod').combobox({
+            url: '../webresources/login/contract/ContractIeDoc/getCClientCodDrop',
+            valueField: 'value',
+            textField: 'label',
+            panelHeight: 100,
+            onSelect: function (rec) {
+                return rec.value;
+            }
+        });
+        $('#discPortCod').combobox({
+            url: '../webresources/login/contract/ContractIeDoc/getCPortDrop',
+            valueField: 'value',
+            textField: 'label',
+            panelHeight: 100,
+            onSelect: function (rec) {
+                return rec.value;
+            }
+        });
+        $('#tranPortCod').combobox({
+            url: '../webresources/login/contract/ContractIeDoc/getCPortDrop',
+            valueField: 'value',
+            textField: 'label',
+            panelHeight: 100,
+            onSelect: function (rec) {
+                return rec.value;
+            }
+        });
+        $('#dockCod').combobox({
+            url: '../webresources/login/contract/ContractIeDoc/getCDock',
+            valueField: 'value',
+            textField: 'label',
+            panelHeight: 'auto',
+            required: 'true',
+            onSelect: function (rec) {
+                $('#planArea').combobox({
+                    url: '../webresources/login/contract/ContractIeDoc/getCCyArea?dockCod=' + rec.value,
+                    valueField: 'value',
+                    textField: 'label',
+                    panelHeight: 100,
+                    multiple: true,
+                    onHidePanel: function () {
+                    },
+                    onSelect: function (rec) {
+                        var val = rec.value; //得到其code值
+                        $('#com_multi').val($('#com_multi').val() + val + ",");
+                    },
+                    onUnselect: function (rec) {
+                        var val = rec.value; //得到其code值
+                        var arr = $('#com_multi').val().split(",");
+                        arr.splice(jQuery.inArray(val, arr), 1);
+                        $('#com_multi').val(arr.join(","));
+                    }
+                });
+                return rec.value;
+
+            },
+            onLoadSuccess: function () {
+                var data = $('#dockCod').combobox('getData');
+                if (data.length > 0) {
+                    $('#dockCod').combobox('select', data[0].value);
+                }
+            }
+        });
+
+        HdUtils.ajax.post({
+            url: "../webresources/login/contract/ContractIeDoc/findone?contractNo=" + contractNo,
+            success: function (data) {
+                if (contractNo) {
+                    $("#startDte").val("00");
+                    $("#endDte").val("00");
+                    var commulti = data.planArea;
+                    if (data.planArea == null) {
+                        data.planArea = "";
+                    }
+                    $("#ContractIeDocForm1507959148725").form("loadData", data);
+                    shipNo = data.shipNo;
+                    $('#billNo').combobox({
+                        url: '../webresources/login/contract/ContractIeDoc/getShipBillDrop?shipNo=' + shipNo,
+                        valueField: 'value',
+                        textField: 'label',
+                        mode: 'remote',
+                        panelHeight: 'auto',
+                        required: 'false',
+                        onHidePanel: function () {
+                        },
+                        onSelect: function (rec) {
+                            return rec.value;
+                        }
+                    });
+                    $("#billNo").combobox('setValue', data.billNo);
+                    $("#com_multi").val(commulti);
+                    $("#planArea").combobox('setValues', data.planArea.split(","));
+                    $("#contractNo").attr("readonly", true);
+                } else {
+                    $("input[name='shipNam']").val(cShipNam);
+                    $("input[name='voyage']").val(voyage);
+                    $("input[name='shipNo']").val(shipNo);
+                    $("#startDte").val("00");
+                    $("#endDte").val("00");
+                    $("#validatDte").val(validatDte);
+                }
+            }
+        })
+        $('#carKind').combobox({
+            url: '../webresources/login/contract/ContractIeDoc/getCCarKind',
+            valueField: 'value',
+            textField: 'label',
+            panelHeight: 100,
+            onSelect: function (rec) {
+                return rec.value;
+            }
+        });
+        //无船名航次提单下拉
+        $('#billNo').combobox({
+            url: '../webresources/login/contract/ContractIeDoc/getShipBillDrop?shipNo=' + shipNo,
+            valueField: 'value',
+            textField: 'label',
+            panelHeight: 'auto',
+            required: 'false',
+            onHidePanel: function () {
+            },
+            onSelect: function (rec) {
+                return rec.value;
+            }
+        });
+        $('#planArea').combobox({
+            url: '../webresources/login/contract/ContractIeDoc/getCCyArea?dockCod=' + $('#dockCod').combobox('getValue'),
+            valueField: 'value',
+            textField: 'label',
+            panelHeight: 100,
+            multiple: true,
+            onHidePanel: function () {
+            },
+            onSelect: function (rec) {
+                var val = rec.value; //得到其code值
+                $('#com_multi').val($('#com_multi').val() + val + ",");
+            },
+            onUnselect: function (rec) {
+                var val = rec.value; //得到其code值
+                var arr = $('#com_multi').val().split(",");
+                arr.splice(jQuery.inArray(val, arr), 1);
+                $('#com_multi').val(arr.join(","));
+            }
+        });
+        //点击显示 时分（hh:mm）格式
+        $.jeDate("#startDte", {
+            format: "hh"
+        });
+        $.jeDate("#endDte", {
+            format: "hh"
+        });
+        HdUtils.dialog.setValue({
+            saveHandler: saveHandler
+        });
+        function saveHandler() {
+            $('#tradeId_1').attr("disabled", false);
+            $('#tradeId_2').attr("disabled", false);
+            $('#iEId_I').attr("disabled", false);
+            $('#iEId_E').attr("disabled", false);
+            var isValss = $("#ContractIeDocForm1507959148725").form('validate');
+            if (!isValss) {
+                return false;
+            }
+            var formdata = $("#ContractIeDocForm1507959148725").serializeObject();
+            if (formdata.workWay == "1") {
+                formdata.contractTyp = '1';
+            }
+            if (formdata.workWay == "2" || formdata.workWay == "3") {
+                formdata.contractTyp = '2';
+            }
+            var planArea = $("#planArea").combobox('getText');
+            if (planArea) {
+                if (planArea.charAt(0) == ',') {
+                    planArea = planArea.substring(1, planArea.length);
+                }
+                formdata.planArea = planArea;
+            }
+            HdUtils.ajax.post({
+                url: "../webresources/login/contract/ContractIeDoc/saveone",
+                data: formdata,
+                success: function (data) {
+                    if (data.key == '-1') {
+                        HdUtils.messager.info(data.message);
+                    }
+                    HdUtils.dialog.close();
+                    HdUtils.messager.bottomRight('保存成功', '保存操作');
+                    $("#ContractIeDocDatagrid1508123320012" + radi).datagrid("hdReload");
+                }
+            })
+            $('#tradeId_1').attr("disabled", true);
+            $('#tradeId_2').attr("disabled", true);
+            $('#iEId_I').attr("disabled", true);
+            $('#iEId_E').attr("disabled", true);
+        }
+    });
+
+    function findCod() {
+        var contractNoValue = $("#contractNo").val();
+        HdUtils.ajax.post({
+            url: "../webresources/login/contract/ContractIeDoc/findContractIeDoc?contractNo=" + contractNoValue,
+            success: function (data) {
+                if (data.code == "-1") {
+                    $('#contractNo').val("");
+                    HdUtils.messager.info(data.message);
+                    return false;
+                }
+            }
+        });
+    }
+    function chooseShip() {
+        HdUtils.selShip(callback);
+    }
+    function callback(data) {
+        $("#shipNam").val(data.cShipNam);
+        $("#voyage").val(data.ivoyage + '/' + data.evoyage);
+        $("#tradeId").val(data.tradeId);
+        $("#shipNo").val(data.shipNo);
+
+        if ($("#shipNo").val() != null && $("#shipNo").val() != "") {
+
+            //返回实际数
+            // 	    	HdUtils.ajax.post({
+            // 		        url : "../webresources/login/contract/ContractIeDoc/getTrueCarNum?shipNo=" +  $("#shipNo").val(),
+            // 		        success : function(data) {
+
+            // 		        }
+            // 		    });
+
+            $('#billNo').combobox({
+                url: '../webresources/login/contract/ContractIeDoc/getShipBillDrop?shipNo=' + $("#shipNo").val(),
+                valueField: 'value',
+                textField: 'label',
+                mode: 'remote',
+                panelHeight: '100',
+                panelWidth: '150',
+                required: 'false',
+                editable: true,
+                onHidePanel: function () {
+                },
+                onSelect: function (rec) {
+                    return rec.value;
+                }
+            });
+            HdUtils.ajax.post({
+                url: "../webresources/login/contract/ContractIeDoc/getShipDockCod?shipNo=" + $("#shipNo").val(),
+                success: function (data) {
+                    $('#dockCod').combobox('setValue', data.dockCod);
+                    $('#planArea').combobox({
+                        url: '../webresources/login/contract/ContractIeDoc/getCCyArea?dockCod=' + data.dockCod,
+                        valueField: 'value',
+                        textField: 'label',
+                        panelHeight: 100,
+                        multiple: true,
+                        onHidePanel: function () {
+                        },
+                        onSelect: function (rec) {
+                            var val = rec.value; //得到其code值
+                            $('#com_multi').val($('#com_multi').val() + val + ",");
+                        },
+                        onUnselect: function (rec) {
+                            var val = rec.value; //得到其code值
+                            var arr = $('#com_multi').val().split(",");
+                            arr.splice(jQuery.inArray(val, arr), 1);
+                            $('#com_multi').val(arr.join(","));
+                        }
+                    });
+                }
+            });
+
+        } else {
+            $('#billNo').validatebox({
+                required: true
+            });
+            $('#billNo').val("");
+            $('#carTyp').val("");
+        }
+    }
+
+    //存栈点击事件
+    $('#czidCheck').on('click', function (e) {
+        $("#shipNam").val("");
+        $("#voyage").val("");
+        $("#shipNo").val("");
+    });
+
+    //编辑时带理货数据的记录控制字段不能编辑
+    function editDisableControl(){
+        $("#chsShipBtn20201118").hide();
+        $('#consignNam').combobox('disable');
+        $("input[name='czId']").attr("disabled","disabled"); 
+        $("input[name='tradeId']").attr("disabled","disabled");
+        $("input[name='iEId']").attr("disabled","disabled");
+        $("#contractDte").datebox({ disabled: true });
+        $('#dockCod').combobox('disable');
+        $('#workWay').combobox('disable');
+    }
+    //非编辑时带理货数据的记录控制字段启动编辑
+    function editEnableControl(){
+        $("#chsShipBtn20201118").show();
+        $('#consignNam').combobox('enable');
+        $("input[name='czId']").removeAttr("disabled"); 
+        $("input[name='tradeId']").removeAttr("disabled"); 
+        $("input[name='iEId']").removeAttr("disabled"); 
+        $("#contractDte").datebox({ disabled: false });
+        $('#dockCod').combobox('enable');
+        $('#workWay').combobox('enable');
+    }
+    //若编辑时候发现有理货数据则控制某些字段不能修改。
+   if("1"==hasWC){
+    editDisableControl();
+   }else{
+    editEnableControl();
+   }
+</script>
+<form id="ContractIeDocForm1507959148725">
+    <table id="ContractIeDocTable1507959148725" style="height: 75%; width: 100%" class="tableform">
+        <tr>
+            <th>船名：</th>
+            <td><input id="shipNam" name="shipNam" style="width: 60px;" readonly="readonly"
+                    data-options="required:false" class="easyui-validatebox" maxlength="10" />
+                <a id="chsShipBtn20201118" href="javascript:void(0)" onclick="chooseShip()">选船</a></td>
+            <th>航次：</th>
+            <td><input id="voyage" name="voyage" readonly="readonly" data-options="required:false"
+                    class="easyui-validatebox" maxlength="10" /></td>
+            <th>提单号：</th>
+            <td><input id="billNo" name="billNo" data-options="required:true" maxlength="10" /></td>
+            <th>货代：</th>
+            <td><input id="consignNam" name="consignNam" data-options="required:false" class="easyui-validatebox"
+                    maxlength="10" /></td>
+        </tr>
+        <tr>
+            <th>存栈：</th>
+            <td><input type="radio" name="czId" value="1">是</input>
+                <input type="radio" name="czId" id="czidCheck" value="0" checked="checked">否</input></td>
+            <th>预约有效期：</th>
+            <td><input id="validatDte" name="validatDte" data-options="required:false" class="easyui-datebox"
+                    maxlength="10" /></td>
+            <th>起始：</th>
+            <td><input class="workinput wicon mr25" id="startDte" name="startDte" type="text"></td>
+            <th>截止：</th>
+            <td><input class="workinput wicon mr25" id="endDte" name="endDte" type="text"></td>
+
+        </tr>
+        <tr>
+            <th>内外贸：</th>
+            <td id="tradeIdCheck">
+                <input type="radio" id="tradeId_1" name="tradeId" value="1" checked="checked"
+                    class='easyui-radio'>内</input>
+                <input type="radio" id="tradeId_2" name="tradeId" value="2" class='easyui-radio'>外</input>
+            </td>
+            <th>进出口：</th>
+            <td style="width: 135px;"><input type="radio" id="iEId_I" name="iEId" value="I">进口</input>
+                <input type="radio" id="iEId_E" name="iEId" value="E" checked="checked">出口</input>
+                <input type="radio" name="iEId" value="W" id="wuliubu">物流部</input>
+            </td>
+            <th>委托日期：</th>
+            <td><input id="contractDte" name="contractDte" data-options="required:true" class="easyui-datebox"
+                    maxlength="10" /></td>
+            <!-- 			<th>激活标志：</th> -->
+            <!-- 			<td><input type="radio" name="activeId" value="0" -->
+            <!-- 				checked="checked" class='easyui-radio'>否</input> <input type="radio" -->
+            <!-- 				name="activeId" value="1" class='easyui-radio'>是</input></td> -->
+            <th>自提标志：</th>
+            <td><input type="radio" name="isTruck" value="1" checked="checked">拖车</input> <input type="radio"
+                    name="isTruck" value="0">地跑</input></td>
+        </tr>
+        <tr>
+            <th>作业码头：</th>
+            <td><input id="dockCod" name="dockCod" class="easyui-validatebox" maxlength="10" /></td>
+            <th>作业类型：</th>
+            <td>
+                <input id="workWay" name="workWay" data-options="required:false" class="easyui-validatebox"
+                    maxlength="10" />
+            </td>
+            <th>流向：</th>
+            <td><input id="flow" name="flow" data-options="required:false" class="easyui-validatebox" maxlength="10" />
+            </td>
+            <th>计划车数：</th>
+            <td><input id="carNum" name="carNum" data-options="required:false" class="easyui-validatebox"
+                    maxlength="10" /></td>
+        </tr>
+        <tr>
+            <th>车辆品牌：</th>
+            <td><input id="brand" name="brand" data-options="required:false" class="easyui-validatebox"
+                    maxlength="10" /></td>
+            <th>车属类别：</th>
+            <td><input id="carKind" name="carKind" data-options="required:false" class="easyui-validatebox"
+                    maxlength="10" /></td>
+            <th>车辆型号：</th>
+            <td><input id="carTyp" name="carTyp" data-options="required:false" class="easyui-validatebox"
+                    maxlength="10" /></td>
+            <th>计划场地：</th>
+            <td><input id="planArea" name="planArea" /> <input readonly="readonly" id="com_multi" /></td>
+
+        </tr>
+        <tr>
+            <th>生产厂家：</th>
+            <td><input id="factoryCod" name="factoryCod" data-options="required:false" class="easyui-validatebox"
+                    maxlength="35" /></td>
+            <th>外方机力：</th>
+            <td><input id="outMac" name="outMac" data-options="required:false" class="easyui-validatebox"
+                    maxlength="10" /></td>
+            <th>外方人力：</th>
+            <td><input id="outPerson" name="outPerson" data-options="required:false" class="easyui-validatebox"
+                    maxlength="10" /></td>
+            <th>港方机力：</th>
+            <td><input id="portMac" name="portMac" data-options="required:false" class="easyui-validatebox"
+                    maxlength="10" /></td>
+        </tr>
+        <!-- 	<tr>
+		<th>缴费单位：</th>
+			<td><input id="payUnitCod" name="payUnitCod" 
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="10" /></td>
+		 <th>代理公司：</th>
+			<td><input id="agentCod" name="agentCod"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="10" /></td>
+		<tr> -->
+        <th>备注：</th>
+        <td colspan="7"><textarea id="remarks" name="remarks" data-options="required:false" class="easyui-validatebox"
+                rows="2" style="width: 100%" maxlength="100" /></td>
+		</tr>
+		<!-- <tr>
+			<th>目的港：</th>
+			<td><input id="discPortCod" name="discPortCod"  hidden="true"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="10" /></td>
+			<th>卸货港：</th>
+			<td><input id="tranPortCod" name="tranPortCod" hidden="true"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="10" /></td>
+		</tr> -->
+		<tr>
+			<!-- <th>shipNo：</th> -->
+			<td><input id="shipNo" name="shipNo" hidden="true"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="10" /></td>
+			<!-- 	<th>委托号：</th> -->
+			<td><input id="contractNo" name="contractNo"
+				onchange="findCod();" hidden="true" data-options="required:false"
+				class="easyui-validatebox" maxlength="10" /></td>
+			<!-- 	<th>二维码路径：</th> -->
+			<td><input id="qrcodePath" name="qrcodePath" hidden="true"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="100" /></td>
+			<!--  <th>委托类型：</th>
+			<td><input id="contractTyp" name="contractTyp" readonly="readonly"
+				data-options="required:false" class="easyui-validatebox" 
+				maxlength="10" /></td> -->
+			<!-- <th>货主代码：</th> -->
+			<td><input id="consignCod" name="consignCod" hidden="true"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="10" /></td>
+			<!--   <th>委托类型：</th> -->
+			<td><input id="contractTyp" name="contractTyp"
+				class="easyui-validatebox" hidden="true" maxlength="10" /></td>
+		</tr>
+	</table>
+	<input id="confirmId" name="confirmId" value="0" type="hidden" />
+</form>
+</html>

@@ -1,0 +1,75 @@
+<!--<div class="easyui-droppable"  style="width:800px;height:400px;">-->
+<div id = "pp" style = "width:800px;height:400px;">
+    <div style = "width:45%" > </div>
+    <div style = "width:45%" > </div>
+</div>
+<!--</div>-->
+<script type="text/javascript">
+    var local = '';
+    function addPortal(id, url, title, height, columnindex, openType) {
+        var p = $('<div/>').attr('id', id).appendTo('body');
+        var content;
+        if (openType === "1") {
+            content = '<iframe scrolling="no" frameborder="0"  src="' + encodeURI(url) + '" style="width:100%;height:100%;"></iframe>';
+        } else if (openType === "0" || openType === "3") {
+            console.log(openType);
+            content = '<iframe scrolling="no" frameborder="0"  src="' + 'signal.html?newPageUrl=' + url + '&title=' + title + '" style="width:100%;height:100%;"></iframe>';
+        } else {
+            content = '<div style="padding:2px;" id="' + id + '" > </div>';
+        }
+        console.log(content);
+        p.panel({
+            title: title,
+            content: content,
+            height: height,
+            closable: true,
+            collapsible: true,
+            onClose: function() {
+                HdUtils.ajax.get({url: "../webresources/normal/CPortal/removeByPortalId?portalId=" + id, success: function() {
+                    },error:function(){}});
+            }
+        });
+
+        $('#pp').portal({onStateChange: function() {
+                getPanelsLoaction();
+            }});
+        $('#pp').portal('add', {
+            panel: p,
+            columnIndex: columnindex % 2
+        });
+        $('#pp').portal('resize');
+//        if (openType == "0") {
+//            p.load(url);
+//        }
+    }
+    //获取当前位置状态
+    function getPanelsLoaction() {
+        var cols = 2;
+        for (var i = 0; i < cols; i++) {
+            var pl = $('#pp').portal("getPanels", i);
+            for (var j = 0; j < pl.length; j++) {
+                var id = pl[j].attr("id");
+                var index = 2*j+i;
+                 HdUtils.ajax.get({url: "../webresources/normal/CPortal/updateByPortalId?portalId="+id+"&columnindex="+index, success: function() {
+                    },error:function(){}});
+            }
+        }
+    }
+    $(function() {
+        $('#pp').portal({
+            border: false,
+            fit: true
+        });
+        HdUtils.ajax.get({
+            url: "../webresources/normal/CPortal/findByUserId",
+            success: function(data) {
+                $.each(data, function(n, d) {
+                    addPortal(d.portalId, d.url, d.title, d.height, d.columnindex, d.openType);
+                });
+            }
+        });
+//        addPortal();
+        //日历
+//        $("#portalDate").append("<div  class='easyui-calendar' style='width:520px;height:340px;padding:5px;'  data-options='border:false'></div>");
+    });
+</script>

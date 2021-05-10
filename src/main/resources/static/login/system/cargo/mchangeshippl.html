@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div id="DayWorkClassToolBar1508123307299+${radi}"
+	style="width: 100%; margin-bottom: 5px">
+	<div style="float: left;">
+		<input th:id="zpcTyp+${radi}" style="width:80px" name="zpcTyp" /><a class="easyui-linkbutton" th:id='query+${radi}'>查询</a>
+	</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="DayWorkClassDatagrid1508123307299+${radi}"
+	style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    HdUtils.dialog.setValue({
+		    'radimchangeship' : radi
+	    });
+	    var shipNo = HdUtils.dialog.getValue('shipNo');
+	    var dg = $("#DayWorkClassDatagrid1508123307299[(${radi})]");
+	    $('#zpcTyp[(${radi})]').combobox(HdUtils.code.scode({
+		    fieldCod : 'ZPC_TYP'
+	    }, {
+		    required : false
+	    }));
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+		    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+			    queryParams : queryMChangeShip(),
+		    })
+	    });
+	    function queryMChangeShip() {
+		    var onlinquery = new HdQuery();
+		    var type = $("#zpcTyp[(${radi})]").combobox('getValue');
+		    var billNo = HdUtils.dialog.getValue('billNo');
+		    if (!type){
+		    	type = 'ALL';
+		    }
+		    onlinquery.add("shipNo", shipNo);
+		    onlinquery.add("billNo", billNo);
+		    onlinquery.add("type", type);
+		    return onlinquery.build();
+	    }
+
+	    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/cargo/MChangeShip/findPL",
+	        queryParams : queryMChangeShip(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#DayWorkClassToolBar1508123307299" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+
+	        }
+	        , {
+	            field : "oldBillNo",
+	            title : "原提单号",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "newBillNo",
+	            title : "新提单号",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "brandNam",
+	            title : "品牌",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "countNum",
+	            title : "数量",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "cyPlac",
+	            title : "堆场场号",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "newTranPortNam",
+	            title : "新卸货港",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "newDiscPortNam",
+	            title : "新目的港",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "oldNamVoyage",
+	            title : "原船名航次",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "newNamVoyage",
+	            title : "新船名航次",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "rfidCardNo",
+	            title : "RFID",
+	            multiSort : true,
+	            hidden : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "portCarNo",
+	            title : "车辆流水号",
+	            hidden : true,
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "recNam",
+	            title : '<font color="red">录入员</font>',
+	            multiSort : true,
+	            hidden : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "recTim",
+	            title : '<font color="red">录入时间</font>',
+	            multiSort : true,
+	            hidden : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.datetime,
+	            width : 120,
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+					field : "flag",
+					title : "是否为中转货",
+					multiSort : true,
+					//hidden : true,
+					halign : "center",
+					formatter : function(value) {
+						if (value == 'T') {	return "是";}
+						else if (value == 'F') {   	return "否";   }
+						else if (value == null) {   	return "否";   }
+					},
+					width : 120,
+					editor : {
+						type : "validatebox",
+						options : {
+							required : true
+						}
+					},
+					sortable : false
+				}
+
+	        ] ]
+	    });
+    });
+</script>
+</html>

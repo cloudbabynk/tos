@@ -1,0 +1,94 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#CMachTypForm1507959148901");
+	    var machTypCod = HdUtils.dialog.getValue("machTypCod");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    if (machTypCod) {
+	    	$("#machTypCod").attr("readonly",true);
+	    } else {
+	    	$("#machTypCod").attr("readonly",false);
+	    }
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/base/CMachTyp/findone?machTypCod=" + machTypCod,
+	        success : function(data) {
+		        $("#CMachTypForm1507959148901").form("loadData", data);
+	        }
+	    })
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+		    var isValss = $("#CMachTypForm1507959148901").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#CMachTypForm1507959148901").serializeObject();
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/base/CMachTyp/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#CMachTypDatagrid1508123309101" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+    });
+    function findCod() {
+	    var machTypCodValue = $("#machTypCod").val();
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/base/CMachTyp/findCMachTyp?machTypCod=" + machTypCodValue,
+	        success : function(data) {
+		        if (data.code == "-1") {
+			        $('#machTypCod').val("");
+			        HdUtils.messager.bottomRight(data.message);
+			        $('#machTypCod').focus();
+			        return false;
+		        }
+	        }
+	    });
+    }
+</script>
+<form id="CMachTypForm1507959148901">
+	<table id="CMachTypTable1507959148901" style="height: 75%; width: 80%"
+		class="tableform">
+		<tr>
+			<th>机械类型代码：</th>
+			<td><input id="machTypCod" name="machTypCod"
+				onchange="findCod();" data-options="required:true"
+				class="easyui-validatebox" maxlength="10" /></td>
+			<th>机械类型名称：</th>
+			<td><input id="machTyp" name="machTyp"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="10" /></td>
+		</tr>
+	</table>
+</form>

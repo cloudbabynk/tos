@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+		<!-- 工具栏 -->
+		<div th:id="DayWorkClassToolBar1508123307299+${radi}" style="width: 100%;margin-bottom:5px">
+			<div style="float: left;">
+				<!-- 查询 -->
+				<shiro:hasPermission name="webresources:login:ShipClassAct:add">
+					<a class="easyui-linkbutton" th:id='add+${radi}' iconCls="icon-add"	plain="false">新增</a>
+				</shiro:hasPermission>
+				<shiro:hasPermission name="webresources:login:ShipClassAct:update">
+					<a class="easyui-linkbutton" th:id='edit+${radi}'>编辑</a>
+				</shiro:hasPermission>
+				<shiro:hasPermission name="webresources:login:ShipClassAct:delete">
+					<a class="easyui-linkbutton" th:id='delete+${radi}'>删除</a>
+				</shiro:hasPermission>
+				<shiro:hasPermission name="webresources:login:ShipClassAct:save">
+					<a class="easyui-linkbutton" th:id='save+${radi}'>保存</a>
+				</shiro:hasPermission>
+				<shiro:hasPermission name="webresources:login:ShipClassAct:upload">
+					<a class="easyui-linkbutton" th:id="upload+${radi}">上报集团</a>
+				</shiro:hasPermission>
+				<a class="easyui-linkbutton" th:id='fresh+${radi}'>刷新</a>
+				<div style="color: red; float: right;" th:id="labMess+${radi}"/>
+			</div>
+		</div>
+		<table th:id="DayWorkClassDatagrid1508123307299+${radi}"	style="height: 100%"></table>
+<!-- Datagrid -->
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+/*<![CDATA[*/
+	$(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#DayWorkClassDatagrid1508123307299[(${radi})]");
+
+	    var shipNo = HdUtils.dialog.getValue('shipNo');
+	    var shiftCode = HdUtils.dialog.getValue('shiftCode');
+	    var newGroupShipNo = HdUtils.dialog.getValue('newGroupShipNo');
+	    var newIShipId = HdUtils.dialog.getValue('newIShipId');
+	    var newEShipId = HdUtils.dialog.getValue('newEShipId');
+	    var cShipName = HdUtils.dialog.getValue('cShipName');
+	    var workDte = HdUtils.dialog.getValue('workDte');
+	    // buttons
+	    // 上报集团
+	    $("#upload[(${radi})]").on("click", function() {
+	    	var selRow = $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("getChecked");
+            if (selRow.length == 0) {
+	            HdUtils.messager.info('请至少选择一条数据！');
+	            return false;
+            }
+		    var ids = '';
+		    $.messager.confirm("发送", "确认上报集团吗?", function(r) {
+			    if (r) {
+			    	for (var i = 0; i < selRow.length; i++) {
+			            ids += selRow[i].scactId + ",";
+		            }
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/ship/ShipClassAct/uploadAll?scactIds=" + ids,
+				        success : function(data) {
+					        HdUtils.messager.bottomRight(data.message);
+					        $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+						        queryParams : query(),
+					        })
+				        }
+				    });
+			    }
+		    });
+	    });
+	    // 刷新。
+	    $("#fresh[(${radi})]").on("click", function() {
+		    dg.datagrid("hdReload");
+	    });
+	    // 增加。
+	    $("#add[(${radi})]").on("click", function() {
+	    	if (!shipNo) {
+			    HdUtils.messager.info("请首先选择一条船！");
+			    return;
+		    }else if (!newGroupShipNo) {
+			    HdUtils.messager.info("请首先到船舶航次预报界面与集团建立连接！");
+			    return;
+		    }
+	    	workDte = Date.prototype.dateAdd(0, "yyyy-MM-dd");
+	    	var myDate = new Date();
+		    var h=myDate.getHours();
+		    if (h <= 8 || h>=20){
+		    	shiftCode = '2';
+		    } else {
+		    	shiftCode = '1';
+		    }
+	    	row = {
+	    			shipNo : shipNo,
+	    			workDate : workDte,
+	    			shipName : cShipName,
+	    			teamOrgnId : dockCod,
+	    			shipId : newEShipId,
+	    			unloadFlag : '2',
+	    			shiftCode : shiftCode
+	    	}
+
+	    	var gradData=dg.datagrid("getData"); //factCarNum
+	    	if(gradData.footer&&gradData.footer.length>0){
+	    		var arow=gradData.footer[0];
+	    		//row.factCarNum=(arow.CAR_NUM-arow.CH_CAR_NUM).toFixed(2);
+	    		//row.factStdCarNum=(arow.CAR_NUM-arow.CH_CAR_NUM).toFixed(2);
+	    		//row.factWgt1=(arow.WEIGHTS-arow.CH_CAR_WGT).toFixed(2); plancarNums
+	    		row.factCarNum    = arow.CH_CAR_NUM;
+	    		row.factStdCarNum = arow.CH_CAR_NUM.toFixed(2);
+	    		row.factWgt1      = arow.CH_CAR_WGT.toFixed(2);
+	    		row.planCarNums   = arow.PLAN_CAR_NUMS;
+	    		row.planCarWeigts   = arow.PLAN_CAR_WEIGTS;
+	    		//row.plancarNums   = arow.plancarNums.toFixed(2);
+	    	}
+	    	
+	    	dg.datagrid("hdAdd",row);
+	    });
+	    // 编辑。
+	    $("#edit[(${radi})]").on("click", function() {
+		    var data = dg.datagrid("getSelected");
+		    if (data == null || data == undefined) {
+			    HdUtils.messager.info('请选择一条数据进行编辑！');
+			    return;
+		    }
+		    dg.datagrid("hdEdit");
+	    });
+	    // 保存。
+	    $("#save[(${radi})]").on("click", function() {
+	    	var rowIndex = dg.datagrid("getRowIndex",dg.datagrid("getSelected"));
+	    	dg.datagrid("endEdit", rowIndex); 
+	    	var data = dg.datagrid("getSelected");
+	    	if (!data.planCarNums && !data.planCarWeigts){
+	    		HdUtils.messager.info("计划车数和吨数不得都为空！");
+	    		return false;
+	    	}
+		    if (data.planCarNums != null && data.planCarNums != 0){
+		    	if (data.factCarNum/data.planCarNums > 1.1 || data.factCarNum/data.planCarNums < 0.9){
+		    		if (!data.causeInfo){
+		    			HdUtils.messager.info("作业车数未按计划完成，未完成原因不能为空！");
+		    			dg.datagrid("beginEdit", rowIndex);
+		    			return false;
+		    		}
+		    	}
+		    }
+		    if (data.planCarWeigts != null && data.planCarWeigts != 0){
+		    	if (data.factWgt1/data.planCarWeigts > 1.1 || data.factWgt1/data.planCarWeigts < 0.9){
+		    		if (!data.causeInfo){
+		    			HdUtils.messager.info("作业吨数未按计划完成，未完成原因不能为空！");
+		    			dg.datagrid("beginEdit", rowIndex);
+		    			return false;
+		    		}
+		    	}
+		    }
+	    	dg.datagrid("hdSave", {
+			    url : "../webresources/login/ship/ShipClassAct/save"
+			   
+		    });
+	    });
+	    // 删除。
+	    $("#delete[(${radi})]").on("click", function() {
+		    var selRow = $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("getChecked");
+		    if (selRow.length == 0) {
+			    HdUtils.messager.info('请至少选择一条数据！');
+			    return false;
+		    }
+		    var ids = '';
+		    $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+			    if (r) {
+				    for (var i = 0; i < selRow.length; i++) {
+					    ids += selRow[i].scactId + ",";
+				    }
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/ship/ShipClassAct/removeAll?scactIds=" + ids,
+				        success : function(data) {
+					        if (data.code == '-1') {
+						        HdUtils.messager.info(data.message);
+						        return false;
+					        }
+					        HdUtils.messager.bottomRight(data.message);
+					        $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("hdReload");
+				        }
+				    });
+			    }
+		    });
+	    });
+
+	    function query() {
+	    	var onlinquery = new HdQuery();
+		    var shiftCode = HdUtils.dialog.getValue('shiftCode');
+	    	var unloadFlag = HdUtils.dialog.getValue('unloadFlag');
+	    	var shipNo = HdUtils.dialog.getValue('shipNo');
+	    	var workDte = HdUtils.dialog.getValue('workDte');
+	    	onlinquery.add("shipNo",shipNo);
+ 		    onlinquery.add("workDte", workDte);
+ 		    onlinquery.add("shiftCode", shiftCode);
+ 		    onlinquery.add("unloadFlag", '2');
+		    return onlinquery.build();
+	    }
+
+	    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/ship/ShipClassAct/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : false,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#DayWorkClassToolBar1508123307299" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+            onLoadSuccess:function(data){
+            	var footData=data.footer;
+            	if(footData.length>0){
+            		var lessInfo="—剩余总车数："+(footData[0].CAR_NUM-footData[0].CH_CAR_NUM).toFixed(2)+",剩余总重量："+ (footData[0].WEIGHTS-footData[0].CH_CAR_WGT).toFixed(2);
+                	$("#labMess[(${radi})]").html("总车数："+footData[0].CAR_NUM+",总重量："+footData[0].WEIGHTS);
+            	}
+
+            },
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+	        }, {
+	            field : "workDate",
+	            title : '日期',
+	            width : 100,
+	            multiSort : true,
+	            align : "center",
+	            formatter : $.hd.ezui.formatter.date,
+	            editor : {
+	                type : "datebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+	            field : "shiftCode",
+	            title : '班次',
+	            width : 100,
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "combogrid",
+	                options : HdUtils.code.workRun({
+	                    parentId : "#DayWorkClassDatagrid1508123307299[(${radi})]",
+	                    fieldMapping : {
+	            	        workRun : 'workRun',
+	            	        workRunNam : 'workRunNam',
+	            	    },
+	                    required : false,
+	                })
+	            },
+	            formatter : function(value) {
+		            if (value != null && value != undefined) {
+			            if (value == 1) {
+				            value = "08-20";
+				            return value;
+			            } else {
+				            value = "20-08";
+				            return value;
+			            }
+		            } else {
+			            return value;
+		            }
+	            },
+	            sortable : false
+	        },{
+                field : "teamOrgnId",
+	            title : '作业区域',
+	            multiSort : true,
+	            width : 80,
+	            align : "center",
+	            rowspan : '2',
+	            sortable : false,
+                editor : {
+	                type : "combobox",
+	                options : HdUtils.code.scode({
+		                fieldCod : 'C_DOCK'
+	                }, {
+		                required : true
+	                })
+	            },
+	            formatter : function(value) {
+		            return HdUtils.code.name('C_DOCK', value);
+	            }
+            }, {
+	            field : "planCarNums",
+	            title : '班次计划车数',
+	            width : 220,
+	            multiSort : true,
+	            align : "left",
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+	                	validType : 'length[0,8]',
+	                	required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "planCarWeigts",
+	            title : '班次计划吨数',
+	            width : 220,
+	            multiSort : true,
+	            align : "left",
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+	                	validType : 'length[0,14]',
+	                	required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+	            field : "factCarNum",
+	            title : '实际作业车数',
+	            width : 100,
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+	                	validType : 'length[0,8]',
+	                	required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "factWgt1",
+	            title : '实际作业吨数',
+	            width : 100,
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+	                	validType : 'length[0,14]',
+	                	required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "causeInfo",
+	            title : '未完成原因',
+	            width : 220,
+	            multiSort : true,
+	            align : "left",
+	            halign : "center",
+	            editor : {
+                    type: 'combogrid',
+                    options: HdUtils.code.unResean({
+                        parentId : "#DayWorkClassDatagrid1508123307299[(${radi})]",
+                        fieldMapping: { causeInfo: 'CODE' },
+                        required: false
+                    })
+                },
+                formatter:function(val,row,index){
+                    if(!row){
+                        return val;
+                    }else{
+                        return row.causeInfoNam;
+                    }
+                },
+	            sortable : false
+	        },{
+
+	            field : "recNam",
+	            title : '创建人',
+	            width : 100,
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        }, {
+
+	            field : "recTim",
+	            title : '创建时间',
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.datetime,
+	            width : 120,
+	            sortable : false
+	        },{
+
+	            field : "updNam",
+	            title : '修改人',
+	            width : 100,
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        }, {
+
+	            field : "updTim",
+	            title : '修改时间',
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.datetime,
+	            width : 120,
+	            sortable : false
+	        }
+
+	        ] ]
+	    });
+    });
+	/*]]>*/
+</script>
+</html>

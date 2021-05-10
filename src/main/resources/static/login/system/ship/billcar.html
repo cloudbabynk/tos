@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+
+<input th:id="Type+${radi}" th:value='${Type}' type="hidden" />
+<!-- Datagrid -->
+<table th:id="DayWorkClassDatagrid1508123307299+${radi}"
+	style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#DayWorkClassDatagrid1508123307299[(${radi})]");
+	    var type = $("#Type[(${radi})]").val();
+	    var shipNo = HdUtils.dialog.getValue("shipNo");
+	    var billNo = HdUtils.dialog.getValue("billNo");
+	    var cargoradi = HdUtils.dialog.getValue("cargoradi");
+	    // buttons
+	    HdUtils.dialog.setValue({
+		    'radibillcar' : radi
+	    });
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+		    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    onlinquery.add("type", type);
+		    onlinquery.add("shipNo", shipNo);
+		    onlinquery.add("billNo", billNo);
+		    return onlinquery.build();
+	    }
+
+	    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/ship/BillCar/findXclh",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : false,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#DayWorkClassToolBar1508123307299" + /*[[${radi}]]*/'',
+	        fit : true,
+	        onSelect(rowIndex,rowData){
+	        	HdUtils.dialog.setValue({
+	           		'billNo' : rowData.billNo,
+	           	    'shipNo' : rowData.shipNo,
+	           		'portCarNo' : rowData.portCarNo,
+	           		'vinNo' : rowData.vinNo
+	        	 });
+	        	$('#cargoId' + cargoradi).layout('panel', 'south').panel('refresh');
+		    },
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+
+	        },  {
+	            field : "billNo",
+	            title : "提单号",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "brandNam",
+	            title : "品牌",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "carTypNam",
+	            title : "车型",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+
+	            field : "vinNo",
+	            title : "车架号",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        }
+
+	        ] ]
+	    });
+	    $("#DayWorkClassDatagrid1508123307299" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

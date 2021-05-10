@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<script src="../../../js/ciyos-canvas.js"></script>
+<style>
+.btn-clicked {
+	background-color: #999999
+}
+
+#CanvasDiv {
+	cursor: pointer
+}
+</style>
+<div class="easyui-layout" data-options="fit:true" style="width: 100%;">
+	<div data-options="region:'north',split:true"
+		style="width: 100%; height: 40px;">
+		<button id="grideBtn" icon="table">网格显示</button>
+<!-- 		<button id="cntrBtn" icon="th">文字显示</button> -->
+<!-- 		<input id="carColor" style="width: 250px;" />  -->
+		<label
+			style="background-color: #ffc0cb">密集车位</label> <label
+			style="background-color: #1AE61A">正常车位</label> <label
+			style="background-color: #000000; color: #ffffff">锁车位</label>
+	</div>
+	<div data-options="region:'center',split:true" style="width: 100%; height: 100%;">
+		<div id="CanvasLayout" title='绘制区域'
+			style='height: 100%; overflow: auto'>
+			<div id="CanvasDiv" style="position: relative;"></div>
+		</div>
+	</div>
+</div>
+<div id="carDetail"
+	style="width: 200px; height: 100px; border: 1px solid blue; background-color: red; position: absolute; display: none;">aa</div>
+<script>
+	$(document).ready(function() {
+	            var baywidth = 5;
+	            var rowheight = 10;
+	            var canvasWidth = 1200; //整个画布的宽度
+	            var canvasHeight = 440;//整个画布的高度
+
+	            var yardAreaList = null;//所有场（普通场和特殊场）
+	            var lockPlacList = null;//所有锁车位
+	            var portCarList = null;//所有在场车
+	            var colorSetList = null;//调色板颜色
+
+	            function findAllYardArea() {//查询所有场
+                    var builder = new HdEzuiQueryParamsBuilder();
+                    builder.setOrderByClause("cyAreaNo", "asc");
+		            $.ajax({
+		                type : "POST",
+		                url : "../webresources/login/base/CCyArea/find",
+		                contentType : "application/json",
+		                dataType : "json",
+		                async : false,//同步
+		                data: $.toJSON(builder.build()),
+		                success : function(data) {
+			                yardAreaList = data.rows;
+			                $("#grideBtn").trigger("click");
+			                var maxX = yardAreaList[0].x0;
+			                var maxY = yardAreaList[0].y0;
+			                var areaWidth = yardAreaList[0].bayNum;
+			                var areaHeight = yardAreaList[0].rowNum;
+			                for (var i = 1; i < yardAreaList.length; i++) {
+				                if (maxX < yardAreaList[i].x0) {
+					                maxX = yardAreaList[i].x0;
+					                areaWidth = yardAreaList[i].bayNum;
+				                }
+				                if (maxY < yardAreaList[i].y0) {
+					                maxY = yardAreaList[i].y0;
+					                areaHeight = yardAreaList[i].rowNum;
+				                }
+			                }
+			                canvasWidth = maxX + areaWidth * baywidth + 50;
+			                canvasHeight = maxY + areaHeight * rowheight + 40;
+		                },
+		                error : function(data) {
+			                HdUtils.messager.info(data);
+		                }
+		            });
+	            }
+
+	            //查询所有场,并计算画布的大小
+	            findAllYardArea();
+	            var canvas = new Canvas("CanvasDiv", canvasWidth, canvasHeight);//定义画布
+	            var yardAreaCanvasLayer = new CanvasLayer("CanvasDiv1", 1);//场图层:
+	            var gridCanvasLayer = new CanvasLayer("CanvasDiv2", 2);//网格层:
+	            var carCanvasLayer = new CanvasLayer("CanvasDiv3", 3);//在场车层:
+	            var placLockCanvasLayer = new CanvasLayer("CanvasDiv4", 4);//锁车位图层:
+	            var yardPercentCanvasLayer = new CanvasLayer("CanvasDiv5", 5);//锁车位图层:
+	            var operCanvasLayer = new CanvasLayer("CanvasDiv99", 99);//操作层:
+	            canvas.push(yardAreaCanvasLayer);
+	            canvas.push(gridCanvasLayer);
+	            canvas.push(carCanvasLayer);
+	            canvas.push(placLockCanvasLayer);
+	            canvas.push(yardPercentCanvasLayer);
+	            canvas.push(operCanvasLayer);
+
+	            drawAllViYardArea();/*绘制所有场*/
+	            drawYardGrid();/*绘制所有网格*/
+	            findPlacLock();/*绘制锁车位*/
+	            findAllCars();/*绘制所有在场车*/
+	            onClickClick();
+	            $("#grideBtn").addClass("btn-clicked");
+// 	            $("#cntrBtn").addClass("btn-clicked");
+
+
+	            //根据点击坐标获得箱子在场区中的起始坐标和结束坐标
+	            function onClickCntr(loc, index) {
+		            var endx = yardAreaList[index].x0 + yardAreaList[index].bayNum * baywidth;
+		            var endy = yardAreaList[index].y0 + yardAreaList[index].rowNum * rowheight;
+		            if (locInRect(loc, yardAreaList[index].x0, yardAreaList[index].y0, endx, endy)) {
+			            for (var k = 0; k < yardAreaList[index].bayNum; k++) {
+				            for (var j = 0; j < yardAreaList[index].rowNum; j++) {
+					            var bayx0 = yardAreaList[index].x0 + k * baywidth;
+					            var bayy0 = yardAreaList[index].y0 + j * rowheight;
+					            var bayx1 = bayx0 + baywidth;
+					            var bayy1 = bayy0 + rowheight;
+
+					            if (locInRect(loc, bayx0, bayy0, bayx1, bayy1)) {
+						            var cyBayNo = k + 1;
+						            if (cyBayNo <= 9) {
+							            cyBayNo = "00" + cyBayNo;
+						            } else if (cyBayNo > 9 && cyBayNo < 99) {
+							            cyBayNo = "0" + cyBayNo;
+						            }
+						            var cyRowNo = j + 1;
+						            if (cyRowNo <= 9) {
+							            cyRowNo = "00" + cyRowNo;
+						            } else if (cyRowNo > 9 && cyRowNo < 99) {
+							            cyRowNo = "0" + cyRowNo;
+						            }
+						            return {
+						                x0 : bayx0,
+						                y0 : bayy0,
+						                x1 : bayx1,
+						                y1 : bayy1,
+						                cyAreaNo : yardAreaList[index].cyAreaNo,
+						                cyBayNo : cyBayNo,
+						                cyRowNo : cyRowNo
+						            };//得到箱子的起始坐标和结束坐标,场号、贝号和排号
+					            }
+				            }
+			            }
+		            }
+	            }
+
+	            //按着ctrl点击时
+	            function onClickClick() {
+		            window.focus();
+		            operCanvasLayer.bindEvent();
+		            operCanvasLayer.onClick = function(event, loc) {
+			                    $("#carDetail").css("display", "none");
+			                    for (var i = 0; i < yardAreaList.length; i++) {
+				                    var point = onClickCntr(loc, i);
+				                    if (point !== null && point !== undefined) {
+				                    	var cyAreaNo = point.cyAreaNo;
+				                    	HdUtils.ajax.post({
+				    		            	url : "../webresources/login/cargo/PortCar/findDchzcl?cyAreaNo=" + cyAreaNo,
+				    	                    success : function(data) {
+				    	                    	$("#carDetail").html(data[cyAreaNo]);
+						                        $("#carDetail").css("height", "100px");
+						                        $("#carDetail").css("display", "block");
+						                        var positionX = event.pageX - $("#CanvasLayout").offset().left; //获取当前鼠标相对img的X坐标  
+						                        var positionY = event.pageY - $("#CanvasLayout").offset().top; //获取当前鼠标相对img的Y坐标  
+						                        $("#carDetail").css("left", positionX);
+						                        $("#carDetail").css("top", positionY);
+				    	                     }
+				    	                });
+
+				                    }
+			                    }
+		                    }
+		            operCanvasLayer.onCtrlClick = function(event, loc) {//按住ctrl坐标显示在场箱
+			            if (yardAreaList != null) {
+				            for (var k = 0; k < yardAreaList.length; k++) {
+					            var endx = yardAreaList[k].x0 + yardAreaList[k].bayNum * baywidth;
+					            var endy = yardAreaList[k].y0 + yardAreaList[k].rowNum * rowheight;
+					            if (locInRect(loc, yardAreaList[k].x0, yardAreaList[k].y0, endx, endy)) {
+						            var currentArea = yardAreaList[k];
+
+						            HdUtils.dialog.setValue({
+							            area : currentArea
+						            });
+						            HdUtils.dialog.show({
+						                height : 500,
+						                width : 1000,
+						                title : currentArea.cyAreaNo,
+						                href : "../login/system/plan/yardcardetail.html"
+						            });
+						            break;
+					            }
+				            }
+			            }
+		            }
+		            operCanvasLayer.onShiftClick = function(event, loc) {//按住Shift坐标显示在场车信息
+			            if (yardAreaList != null) {
+				            for (var k = 0; k < yardAreaList.length; k++) {
+					            var endx = yardAreaList[k].x0 + yardAreaList[k].bayNum * baywidth;
+					            var endy = yardAreaList[k].y0 + yardAreaList[k].rowNum * rowheight;
+					            if (locInRect(loc, yardAreaList[k].x0, yardAreaList[k].y0, endx, endy)) {
+						            var currentArea = yardAreaList[k].cyAreaNo;
+
+						            HdUtils.dialog.setValue({
+							            area : currentArea
+						            });
+						            HdUtils.dialog.show({
+						                height : 500,
+						                width : 1000,
+						                title : currentArea.cyAreaNo,
+						                href : "../login/system/plan/yardcardetaillist.html"
+						            });
+						            break;
+					            }
+				            }
+			            }
+		            }
+		            operCanvasLayer.onAltClick = function(event, loc) {//按住Shift坐标显示在场车信息
+			            if (yardAreaList != null) {
+				            for (var k = 0; k < yardAreaList.length; k++) {
+					            var endx = yardAreaList[k].x0 + yardAreaList[k].bayNum * baywidth;
+					            var endy = yardAreaList[k].y0 + yardAreaList[k].rowNum * rowheight;
+					            if (locInRect(loc, yardAreaList[k].x0, yardAreaList[k].y0, endx, endy)) {
+						            var currentArea = yardAreaList[k];
+
+						            HdUtils.dialog.setValue({
+							            area : currentArea
+						            });
+						            HdUtils.dialog.show({
+						                height : 600,
+						                width : 500,
+						                title : currentArea.cyAreaNo,
+						                href : "../login/system/plan/yardcarshow.html"
+						            });
+						            break;
+					            }
+				            }
+			            }
+		            }
+	            }
+	            
+	            /*绘制场地占有率*/
+	            function findAllAreas(){
+		            if (yardAreaList != null && yardAreaList.length > 0) {
+			            var areaYardArr = [];
+			            for (var i = 0; i < yardAreaList.length; i++) {
+				            var yardArea = yardAreaList[i];
+// 				            if(yardAreaList[i].zyl >= 1){
+// 				            	yardAreaList[i].zyl = 1;
+// 				            }
+				            var area=new AreaPercent(yardArea.cyAreaNo, yardArea.cyAreaNo, 
+				                    yardArea.x0, yardArea.y0, yardArea.bayNum,
+				                    yardArea.rowNum, null, null, 
+				                    null, null,baywidth,rowheight,yardAreaList[i].zyl);
+				            areaYardArr.push(area);
+			            }
+			            yardPercentCanvasLayer.draw(areaYardArr);//画普通场
+		            }
+	            }
+
+	            /*绘制所有场*/
+	            function drawAllViYardArea() {
+		            yardAreaCanvasLayer.clearRect();
+		            if (yardAreaList != null && yardAreaList.length > 0) {
+			            var areaYardArr = [];
+			            for (var i = 0; i < yardAreaList.length; i++) {
+				            var yardArea = yardAreaList[i];
+				            var area=new Area(yardArea.cyAreaNo, yardArea.cyAreaNo, 
+				                    yardArea.x0, yardArea.y0, yardArea.bayNum,
+				                    yardArea.rowNum, null, null, 
+				                    null, null,baywidth,rowheight);
+				            areaYardArr.push(area);
+			            }
+			            yardAreaCanvasLayer.draw(areaYardArr);//画普通场
+		            }
+	            }
+
+	            /*查询所有的锁车位*/
+	            function findPlacLock() {
+		            HdUtils.ajax.post({
+		            	url : "../webresources/login/base/CCyBay/findLocked",
+	                    success : function(data) {
+	                    	lockPlacList = data.list;
+ 			                drawLockPlacs();
+	                     } 
+	                });
+	            }
+
+	            /*绘制锁车位*/
+	            function drawLockPlacs() {
+		            placLockCanvasLayer.clearRect();
+		            if (lockPlacList != null && lockPlacList.length > 0) {
+			            var fillRecArr = [];
+			            var cyPlac = null;
+			            var color = "#000000";
+			            for (var i = 0; i < lockPlacList.length; i++) {
+				            var lockPlac = lockPlacList[i];
+				            var cntrLoc = getPointByArea(lockPlac.cyAreaNo, Number(lockPlac.cyBayNo), Number(lockPlac.cyRowNo));
+				            fillRecArr.push(new FillRec(new XY(cntrLoc.x, cntrLoc.y), baywidth - 1, rowheight - 1, color, "1"));
+			            }
+			            placLockCanvasLayer.draw(fillRecArr);
+		            }
+	            }
+
+	            /*查询所有的场位在场车*/
+	            function findAllCars() {
+		            HdUtils.ajax.post({
+		            	url : "../webresources/login/cargo/PortCar/findDchz",
+	                    success : function(data) {
+	                    	portCarList = data.list;
+			                drawAllCars();
+	                     }
+	                });
+	            }
+
+	            /*查询调色板设置的颜色 */
+	            function findColorSet(ColorCategory) {
+		            var builder = new HdEzuiQueryParamsBuilder();
+		            builder.setAndClause("fldNam", ColorCategory, "=", "and");
+		            builder.setOrderByClause("seqNo", "asc");
+		            $.ajax({
+		                type : "POST",
+		                url : "../webresources/login/work/ColorSet/find",
+		                contentType : "application/json",
+		                dataType : "json",
+		                async : false,//同步
+		                data : $.toJSON(builder.build()),
+		                success : function(data) {
+			                colorSetList = data.rows;
+		                },
+		                error : function(data) {
+			                HdUtils.messager.info(data);
+		                }
+		            });
+	            }
+
+	            /*绘制在场车*/
+	            function drawAllCars() {
+		            carCanvasLayer.clearRect();
+		            if (portCarList != null && portCarList.length > 0) {
+			            var fillRecArr = [];
+			            var cyPlac = null;
+			            var color;
+			            for (var i = 0; i < portCarList.length; i++) {
+				            var portCar = portCarList[i];
+				            var cntrLoc = getPointByArea(portCar.cyAreaNo, Number(portCar.cyBayNo), Number(portCar.cyRowNo));
+
+// 				            if (cyPlac == portCarList[i].cyPlac) {
+// 					            color = "#ffc0cb";//密集
+// 				            } else {
+// 					            cyPlac = portCarList[i].cyPlac;
+// 					            color = "#1AE61A";//正常
+// 					            //根据调色板设置车位的颜色
+// 					            if ($("#carColor").combogrid("getValue")!="") {
+// 						            var ColorCategoryArr = $("#carColor").combogrid("getValue").split("_");
+// 						            var ColorCategory = "";
+// 						            for (var k = 0; k < ColorCategoryArr.length; k++) {
+// 							            if (k == 0 || ColorCategoryArr[k].length <= 1) {//一位字符转为小写
+// 								            ColorCategory += ColorCategoryArr[k].toLowerCase();
+// 							            } else if (ColorCategory == "ie") {
+// 								            ColorCategory += ColorCategoryArr[k].toLowerCase();
+// 							            } else {//多位字符，第一位字符转为大写，其余小写
+// 								            ColorCategory +=
+// 								                    ColorCategoryArr[k].substring(0, 1).toUpperCase()
+// 								                            + ColorCategoryArr[k].substring(1, ColorCategoryArr[k].length).toLowerCase();
+// 							            }
+// 						            }
+
+// 						            for (var j = 0; j < colorSetList.length; j++) {
+// 							            if (portCar[ColorCategory] == colorSetList[j].fldValues) {
+// 								            color = colorSetList[j].color;//正常
+// 							            }
+// 						            }
+// 					            }
+// 				            }
+				            color = "#1AE61A";//正常
+				            fillRecArr.push(new FillRec(new XY(cntrLoc.x, cntrLoc.y), baywidth - 1, rowheight - 1, color, "1"));
+			            }
+			            carCanvasLayer.draw(fillRecArr);
+		            }
+	            }
+
+	            //通过场贝排号获取箱子起始坐标,结束坐标
+	            function getPointByArea(areaNo, bayNo, rowNo) {
+		            var areax0, areay0, areax1, areay1;
+		            //	         var baySeq,rowSeq;
+		            var cntrx0 = 0;
+		            var cntry0 = 0;
+		            for (var i = 0; i < yardAreaList.length; i++) {
+			            if (yardAreaList[i].cyAreaNo == areaNo) {
+				            areax0 = yardAreaList[i].x0;
+				            areay0 = yardAreaList[i].y0;
+				            areax1 = yardAreaList[i].bayNum * baywidth;
+				            areay1 = yardAreaList[i].rowNum * rowheight;
+				            //	                 baySeq=yardAreaList[i].baySeq;
+				            //	                 rowSeq=yardAreaList[i].rowSeq;
+				            break;
+			            }
+		            }
+		            X = areax0 + (baywidth * (bayNo - 1));
+		            Y = areay0 + (rowheight * (rowNo - 1));
+		            return {
+		                x : X,
+		                y : Y
+		            };
+	            }
+
+	            //画网格和障碍区
+	            function drawYardGrid() {
+		            //清空网格画布
+		            gridCanvasLayer.clearRect();
+		            if (yardAreaList != null && yardAreaList.length > 0) {
+			            var gridArr = [];
+			            for (var i = 0; i < yardAreaList.length; i++) {
+				            var yardArea = yardAreaList[i];
+				            //绘制
+				            var lineArr = [];
+				            for (var j = 1; j < yardArea.bayNum; j++) {//竖线
+					            var x1 = yardArea.x0 + j * baywidth;
+					            var y1 = yardArea.y0;
+					            var x2 = x1;
+					            var y2 = y1 + rowheight * yardArea.rowNum;
+					            lineArr.push(new Line(new XY(x1 - 0.5, y1), new XY(x2 - 0.5, y2), 1, "#000000"));
+				            }
+				            for (var k = 1; k < yardArea.rowNum; k++) {//横线
+					            var x1 = yardArea.x0;
+					            var y1 = yardArea.y0 + k * rowheight;
+					            var x2 = x1 + baywidth * yardArea.bayNum;
+					            var y2 = y1;
+					            lineArr.push(new Line(new XY(x1, y1 - 0.5), new XY(x2, y2 - 0.5), 1, "#000000"));
+				            }
+				            var grid = new Grid(lineArr);
+				            gridArr.push(grid);
+				            //得到障碍区
+
+			            }
+			            gridCanvasLayer.draw(gridArr);
+		            }
+	            }
+
+	            /*网格*/
+	            $("#grideBtn").on("click", function() {//网格模式	
+		            if ($("#grideBtn").hasClass("btn-clicked")) {
+			            $("#grideBtn").removeClass("btn-clicked");
+			            placLockCanvasLayer.clearRect();
+			            carCanvasLayer.clearRect();
+			            gridCanvasLayer.clearRect();
+			            findAllAreas();
+		            } else {
+			            $("#grideBtn").addClass("btn-clicked");
+			            yardPercentCanvasLayer.clearRect();
+			            drawYardGrid();
+			            findPlacLock();/*绘制锁车位*/
+			            findAllCars();/*绘制所有在场车*/
+		            }
+	            });
+	            
+	            
+// 	            /*2D在场箱*/
+// 	            $("#cntrBtn").on("click", function() {//网格模式
+// 	                if($("#cntrBtn").hasClass("btn-clicked")){
+// 	                  $("#cntrBtn").removeClass("btn-clicked");
+// 	                  placLockCanvasLayer.clearRect();
+// 			          carCanvasLayer.clearRect();
+// 			          gridCanvasLayer.clearRect();
+// 	                }else{
+// 	                  $("#cntrBtn").addClass("btn-clicked");
+// 	                  findAllAreas();
+// 	                }
+// 	            });
+
+            })
+</script>
+</html>

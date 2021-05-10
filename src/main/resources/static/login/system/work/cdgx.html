@@ -1,0 +1,189 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#BillCarForm15079591491234807");
+	    var updateradi = HdUtils.dialog.getValue("updateradi");
+	    var shipNo = HdUtils.dialog.getValue("shipNo");
+	    var brandCod = HdUtils.dialog.getValue("brandCod");
+	    var rksl = HdUtils.dialog.getValue("rksl");
+	    if (!rksl){
+	    	HdUtils.messager.info("数量不能为空！");
+	    	return false;
+	    }
+	    if (!shipNo) {
+		    return false;
+	    } else {
+		    $("#shipNo").val(shipNo);
+	    }
+	    $('#cyAreaNo1').combobox({
+	        url : '../webresources/login/base/CCyArea/getCCyAreaDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 200,
+	        required : false,
+	    });
+	    $('#cyAreaNo2').combobox({
+	        url : '../webresources/login/base/CCyArea/getCCyAreaDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 200,
+	        required : false,
+	    });
+	    $('#cyAreaNo3').combobox({
+	        url : '../webresources/login/base/CCyArea/getCCyAreaDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 200,
+	        required : false,
+	    });
+	    $('#cyAreaNo4').combobox({
+	        url : '../webresources/login/base/CCyArea/getCCyAreaDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 200,
+	        required : false,
+	    });
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+		    var isValss = $("#BillCarForm15079591491234807").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var num1 = $("#cs1").val();
+		    var num2 = $("#cs2").val();
+		    var num3 = $("#cs3").val();
+		    var num4 = $("#cs4").val();
+		    var sum = Number(num1) + Number(num2) + Number(num3) + Number(num4);
+		    if (sum > rksl){
+		    	HdUtils.messager.info("车数总和不对，请再次确认！");
+		    	return false;
+		    }
+		    var list = '';
+		    if (num1){
+		    	var cyarea1 = $("#cyAreaNo1").combobox('getValue');
+		    	if (!cyarea1){
+		    		HdUtils.messager.info("场地1为空！");
+			    	return false;
+		    	} else {
+		    		list += cyarea1 + ",";
+		    		list += num1 + ",";
+		    	}
+		    }
+		    if (num2){
+		    	var cyarea2 = $("#cyAreaNo2").combobox('getValue');
+		    	if (!cyarea2){
+		    		HdUtils.messager.info("场地2为空！");
+			    	return false;
+		    	} else {
+		    		list += cyarea2 + ",";
+		    		list += num2 + ",";
+		    	}
+		    }
+		    if (num3){
+		    	var cyarea3 = $("#cyAreaNo3").combobox('getValue');
+		    	if (!cyarea3){
+		    		HdUtils.messager.info("场地3为空！");
+			    	return false;
+		    	} else {
+		    		list += cyarea3 + ",";
+		    		list += num3 + ",";
+		    	}
+		    }
+		    if (num4){
+		    	var cyarea4 = $("#cyAreaNo4").combobox('getValue');
+		    	if (!cyarea4){
+		    		HdUtils.messager.info("场地4为空！");
+			    	return false;
+		    	} else {
+		    		list += cyarea4 + ",";
+		    		list += num4 + ",";
+		    	}
+		    }
+		    if (!list){
+		    	HdUtils.messager.info("信息为空！");
+		    	return false;
+		    }
+		    var formdata = $("#BillCarForm15079591491234807").serializeObject();
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/work/WorkCommand/updateCyArea?cyArealist=" + list + "&shipNo=" + shipNo + "&brandCod=" + brandCod,
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#ContractIeDocDatagrid1508123320012" + updateradi).datagrid("hdReload");
+		        }
+		    })
+	    }
+    });
+</script>
+<form id="BillCarForm15079591491234807">
+	<input id="shipNo" name="shipNo" hidden="true">
+	<table id="BillCarTable15079591491234807"
+		style="height: 75%; width: 80%" class="tableform">
+		<tr>
+			<th>场地1：</th>
+			<td><input id="cyAreaNo1" name="cyAreaNo"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="35" /></td>
+			<th>车数：</th>
+			<td><input id="cs1" name="cs1" data-options="required:false"
+				class="easyui-validatebox" maxlength="35" /></td>
+		</tr>
+		<tr>
+			<th>场地2：</th>
+			<td><input id="cyAreaNo2" name="cyAreaNo2"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+			<th>车数：</th>
+			<td><input id="cs2" name="cs2" data-options="required:false"
+				class="easyui-validatebox" maxlength="255" /></td>
+		</tr>
+		<tr>
+			<th>场地3：</th>
+			<td><input id="cyAreaNo3" name="cyAreaNo3"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+			<th>车数：</th>
+			<td><input id="cs3" name="cs3" data-options="required:false"
+				class="easyui-validatebox" maxlength="255" /></td>
+		</tr>
+		<tr>
+			<th>场地4：</th>
+			<td><input id="cyAreaNo4" name="cyAreaNo4"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+			<th>车数：</th>
+			<td><input id="cs4" name="cs4" data-options="required:false"
+				class="easyui-validatebox" maxlength="255" /></td>
+		</tr>
+	</table>
+</form>

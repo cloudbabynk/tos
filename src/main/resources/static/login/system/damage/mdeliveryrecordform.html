@@ -1,0 +1,97 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#MDeliveryRecordForm1507959148710");
+	    var deliveryid = HdUtils.dialog.getValue("deliveryid");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    if (deliveryid) {
+	    	$("#deliveryid").attr("readonly",true);
+	    } else {
+	    	$("#deliveryid").attr("readonly",false);
+	    }
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/damage/MDeliveryRecord/findone?deliveryid=" + deliveryid,
+	        success : function(data) {
+		        $("#MDeliveryRecordForm1507959148710").form("loadData", data);
+	        }
+	    })
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    $('#classRun').combobox({
+	        url : '../webresources/login/damage/MDeliveryRecord/getClassRunDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 'auto',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    function saveHandler() {
+		    var isValss = $("#MDeliveryRecordForm1507959148710").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#MDeliveryRecordForm1507959148710").serializeObject();
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/damage/MDeliveryRecord/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#MDeliveryRecordDatagrid1508123301002" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+    });
+</script>
+<form id="MDeliveryRecordForm1507959148710">
+	<table id="MDeliveryRecordTable1507959148710" style="height: 75%; width: 80%"
+		class="tableform">
+		<input id="deliveryid" name="deliveryid" data-options="required:false"
+			class="easyui-validatebox" maxlength="100" hidden="true" />
+		<tr>
+			<th>日期：</th>
+			<td><input id="workDte" name="workDte"
+				data-options="required:false" class="easyui-datebox"
+				maxlength="100" /></td>
+			<th>班次：</th>
+			<td><input id="classRun" name="classRun"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="10" /></td>
+		</tr>
+		<tr>
+			<th>交接内容：</th>
+			<td colspan='3'><input id="deliveryContent" name="deliveryContent"
+				data-options="required:false" class="easyui-validatebox" style="width: 100%"
+				maxlength="255" /></td>
+		</tr>
+	</table>
+</form>

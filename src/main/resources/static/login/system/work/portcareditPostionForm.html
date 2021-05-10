@@ -1,0 +1,44 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+  	 	 HdUtils.dialog.setValue({saveHandler: mulPortCarPostionHandler});
+  	 	 function mulPortCarPostionHandler(){
+  	 		if($("#formRowNo").val()!=""){
+  	  	 		mulPortCarPostion();
+  	  	 	 	HdUtils.dialog.close();
+  	 		}; 
+  	 	 }
+    });
+</script>
+
+
+<div class="easyui-panel"  style="padding:30px 50px 50px 50px">
+		<div style="margin-bottom:20px">
+			<div>行号(初始行号)：</div>
+			<input id="formRowNo" class="easyui-textbox" data-options="required:true" style="width:100%">
+		</div>
+
+	</div>

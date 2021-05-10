@@ -1,0 +1,264 @@
+<div class="mainRight">
+
+    <div class="mainBanner" style="width:95%"></div>
+
+    <div class="mainMessage">
+        <div class="mainMessageTitle">
+            <span>最新公告</span>
+            <div class="mainMessageTitleMore"><a href="#" id="moreMessage">更多</a></div>
+        </div>
+        <div class="mainMessageCon" id="proclamation">
+            <ul id="publicProclamation">
+                <li><a href="#">Idev7最新公告最新公告最新公告最新公告...</a></li>
+                <li><a href="#">Idev7最新公告最新公告最新公告最新公告...</a></li>
+                <li><a href="#">Idev7最新公告最新公告最新公告最新公告......</a></li>
+                <li><a href="#">Idev7最新公告最新公告最新公告最新公告......</a></li>
+                <li><a href="#">Idev7最新公告最新公告最新公告最新公告......</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="mainCommonFunction">
+      <div class="mainCommonFunctionTitle">
+        <span>常用功能</span>
+        <div class="mainCommonFunctionTitleMore"><a href="#">更多</a></div>
+      </div>
+      <div class="mainCommonFunctionCon">
+          <a href="#"  class="linkColor1" id="linkColor" onmouseover="jQuery(this).stop().animate({boxShadow: '0 0 15px #022c56'})" onmouseout="jQuery(this).stop().animate({boxShadow: '0 0 0px #fff'})">常用功能1</a>
+          <a href="#" class="linkColor2" id="linkColor" onmouseover="jQuery(this).stop().animate({boxShadow: '0 0 15px #022c56'})" onmouseout="jQuery(this).stop().animate({boxShadow: '0 0 0px #fff'})">常用功能2</a>
+          <a href="#" class="linkColor3" id="linkColor" onmouseover="jQuery(this).stop().animate({boxShadow: '0 0 15px #022c56'})" onmouseout="jQuery(this).stop().animate({boxShadow: '0 0 0px #fff'})">常用功能3</a>
+          <a href="#" class="linkColor4" id="linkColor" onmouseover="jQuery(this).stop().animate({boxShadow: '0 0 15px #022c56'})" onmouseout="jQuery(this).stop().animate({boxShadow: '0 0 0px #fff'})">常用功能4</a>
+          <a href="#" class="linkColor5" id="linkColor" onmouseover="jQuery(this).stop().animate({boxShadow: '0 0 15px #022c56'})" onmouseout="jQuery(this).stop().animate({boxShadow: '0 0 0px #fff'})">常用功能5</a>
+          <a href="#" class="linkColor6" id="linkColor" onmouseover="jQuery(this).stop().animate({boxShadow: '0 0 15px #022c56'})" onmouseout="jQuery(this).stop().animate({boxShadow: '0 0 0px #fff'})">常用功能6</a>
+          <a href="#" class="linkColor7" id="linkColor" onmouseover="jQuery(this).stop().animate({boxShadow: '0 0 15px #022c56'})" onmouseout="jQuery(this).stop().animate({boxShadow: '0 0 0px #fff'})">常用功能7</a>
+          <a href="#" class="linkColor8" id="linkColor" onmouseover="jQuery(this).stop().animate({boxShadow: '0 0 15px #022c56'})" onmouseout="jQuery(this).stop().animate({boxShadow: '0 0 0px #fff'})">常用功能8</a>
+          <a href="#" class="linkColor9" id="linkColor" onmouseover="jQuery(this).stop().animate({boxShadow: '0 0 15px #022c56'})" onmouseout="jQuery(this).stop().animate({boxShadow: '0 0 0px #fff'})">常用功能9</a>
+          <a href="#" class="linkColor10" id="linkColor" onmouseover="jQuery(this).stop().animate({boxShadow: '0 0 15px #022c56'})" onmouseout="jQuery(this).stop().animate({boxShadow: '0 0 0px #fff'})">常用功能10</a>
+          <a href="#" class="linkColor11" id="linkColor" onmouseover="jQuery(this).stop().animate({boxShadow: '0 0 15px #022c56'})" onmouseout="jQuery(this).stop().animate({boxShadow: '0 0 0px #fff'})">常用功能11</a>
+          <a href="#" class="linkColor12" id="linkColor" onmouseover="jQuery(this).stop().animate({boxShadow: '0 0 15px #022c56'})" onmouseout="jQuery(this).stop().animate({boxShadow: '0 0 0px #fff'})">常用功能12</a>
+      </div>
+    </div>
+   
+</div>           
+<script type="text/javascript">
+    $(document).ready(function() {
+        $("#moreMessage").bind('click', function() {
+            openTab("更多公告",'../login/system/NewsRelease.html' , false, null);
+        });
+        //公告
+//        $.ajax({
+//            method: "post",
+//            url: "../webresources/normal/workspaceRest/getNotice?newsNo="+"",
+//            success: function(data) {
+//                for (var i = 0; i < data.rows.length; i++) {
+//                    var datas = data.rows[i];
+//                    var tittle=datas.NEWS_TITLE;
+//                    if(tittle.length>17){
+//                        tittle=tittle.substring(0,16)+" .......";
+//                    }
+//                    var date=datas.NEWS_DTE.substring(0,9);
+//                    var item = $("<li id=\"" + datas.NEWS_NO + "\"> <a id=\"" + datas.NEWS_NO + "\" href=\"#\">" + tittle + "</a><span style=\" float:right;padding-right:10px\">"+date+"</span>");
+//                    $("#publicProclamation").append(item);
+//                    $(item[0]).on('click', function() {  
+//                        openTab("公告", "system/proclamation.jsp?newsNo="+ $(this)[0].id, false, null);
+//                    });
+//                }
+//            }
+//        });
+        //常用功能
+//        $.ajax({
+//            method: "post",
+//            url: "../webresources/normal/workspaceRest/getNormalFunc",
+//            success: function(data) {
+//                for (var i = 0; i < 12; i++) {
+//                    var datas = data.rows[i];
+//                    var item = $("<a class=\"linkColor" + (i + 1) + "\" id=\"" + datas.ID + "\"  name=\"" + datas.NO + "\"href=\"#\">" + datas.FUNCTION_DECI + "</a>");
+//                    $("#normalFunction").append(item);
+//                    $("#" + datas.ID).data("tittle", datas.FUNCTION_DECI);
+//                    $("#" + datas.ID).data("url", datas.WINDOW_URL);
+//                    item.on('dblclick', function() {  
+//                        if (this.innerHTML == "敬请添加") {
+//                            return;
+//                        }
+//                        openTab($(this).data("tittle"), $(this).data("url"), false, null);
+//                    });
+//                }
+//                var oUl = document.getElementById("normalFunction");
+//                var aLi = oUl.getElementsByTagName("a");
+//                var disX = 0;
+//                var disY = 0;
+//                var minZindex = 1;
+//                var aPos = [];
+//                for (var i = 0; i < aLi.length; i++) {
+//                    var t = aLi[i].offsetTop;
+//                    var l = aLi[i].offsetLeft;
+//                    aLi[i].style.top = t + "px";
+//                    aLi[i].style.left = l + "px";
+//                    aPos[i] = {left: l, top: t};
+//                    aLi[i].index = i;
+//                }
+//                for (var i = 0; i < aLi.length; i++) {
+//                    aLi[i].style.position = "absolute";
+//                    aLi[i].style.margin = 0;
+//                    setDrag(aLi[i]);
+//                }
+//                //拖拽
+//                function setDrag(obj) {
+//                    obj.onmousedown = function() {
+//                        obj.style.cursor = "move";
+//                    }
+//                    obj.onmousedown = function(event) {
+//                        if (obj.innerHTML == "敬请添加") {
+//                            return;
+//                        }
+//
+//                        var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+//                        var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft;
+//                        obj.style.zIndex = minZindex++;
+//                        //当鼠标按下时计算鼠标与拖拽对象的距离
+//                        disX = event.clientX + scrollLeft - obj.offsetLeft;
+//                        disY = event.clientY + scrollTop - obj.offsetTop;
+//                        document.onmousemove = function(event) {
+//                            //当鼠标拖动时计算div的位置
+//                            var l = event.clientX - disX + scrollLeft;
+//                            var t = event.clientY - disY + scrollTop;
+//                            obj.style.left = l + "px";
+//                            obj.style.top = t + "px";
+//                            for (var i = 0; i < aLi.length; i++) {
+//                                aLi[i].accessKey = "";
+//                            }
+//
+//                            var oNear = findMin(obj);
+//                            if (oNear) {
+//                                oNear.accessKey = "active";
+//                            }
+//                        }
+//                        document.onmouseup = function() {
+//                            document.onmousemove = null;//当鼠标弹起时移出移动事件
+//                            document.onmouseup = null;//移出up事件，清空内存
+//                            //检测是否普碰上，在交换位置
+//                            var oNear = findMin(obj);
+//                            if (oNear == null || oNear.innerHTML == "敬请添加") {//控制使拖拽不成功后返回到原来的位置
+//                                startMove(obj, aPos[obj.index]);    
+//                                return;
+//                            }
+//                            var objId = obj.id.substring(0, 36);
+//                            var oNearId = oNear.id.substring(0, 36);
+//                            var objSort = obj.name;
+//                            var oNearSort = oNear.name;
+//                            $.ajax({
+//                                method: "get",
+//                                url: "../webresources/login/main/workspaceRest/upDateSort?objId=" + objId + "&oNearId=" + oNearId + "&objSort=" + objSort + "&oNearSort=" + oNearSort,
+//                                success: function(data) {
+//                                    $('#' + objId).attr("name", oNearSort);
+//                                    $('#' + oNearId).attr("name", objSort);
+//                                }
+//                            });
+//                            if (oNear) {
+//                                var className = obj.className;
+//                                obj.className = oNear.className;
+//                                oNear.className = className;
+//                                oNear.accessKey = "";
+//                                oNear.style.zIndex = minZindex++;
+//                                obj.style.zIndex = minZindex++;
+//                                startMove(oNear, aPos[obj.index]);
+//                                startMove(obj, aPos[oNear.index]);
+//                                //交换index
+//                                oNear.index += obj.index;
+//                                obj.index = oNear.index - obj.index;
+//                                oNear.index = oNear.index - obj.index;
+//                            } else {
+//                                startMove(obj, aPos[obj.index]);
+//                            }
+//                        }
+//                        clearInterval(obj.timer);
+//                        return false;//低版本出现禁止符号
+//                    }
+//                }
+//                //碰撞检测
+//                function colTest(obj1, obj2) {
+//                    var t1 = obj1.offsetTop;
+//                    var r1 = obj1.offsetWidth + obj1.offsetLeft;
+//                    var b1 = obj1.offsetHeight + obj1.offsetTop;
+//                    var l1 = obj1.offsetLeft;
+//
+//                    var t2 = obj2.offsetTop;
+//                    var r2 = obj2.offsetWidth + obj2.offsetLeft;
+//                    var b2 = obj2.offsetHeight + obj2.offsetTop;
+//                    var l2 = obj2.offsetLeft;
+//
+//                    if (t1 > b2 || r1 < l2 || b1 < t2 || l1 > r2) {
+//                        return false;
+//                    } else {
+//                        return true;
+//                    }
+//                }
+//                //勾股定理求距离
+//                function getDis(obj1, obj2) {
+//                    var a = obj1.offsetLeft - obj2.offsetLeft;
+//                    var b = obj1.offsetTop - obj2.offsetTop;
+//                    return Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2));
+//                }
+//                //找到距离最近的
+//                function findMin(obj) {
+//                    var minDis = 999999999;
+//                    var minIndex = -1;
+//                    for (var i = 0; i < aLi.length; i++) {
+//                        if (obj == aLi[i])
+//                            continue;
+//                        if (colTest(obj, aLi[i])) {
+//                            var dis = getDis(obj, aLi[i]);
+//                            if (dis < minDis) {
+//                                minDis = dis;
+//                                minIndex = i;
+//                            }
+//                        }
+//                    }
+//                    if (minIndex == -1) {
+//                        return null;
+//                    } else {
+//                        return aLi[minIndex];
+//                    }
+//                }
+//                function getStyle(obj, attr) {//解决JS兼容问题获取正确的属性值
+//                    return obj.currentStyle ? obj.currentStyle[attr] : getComputedStyle(obj, false)[attr];
+//                }
+//                function startMove(obj, json, fun) {
+//                    clearInterval(obj.timer);
+//                    obj.timer = setInterval(function() {
+//                        var isStop = true;
+//                        for (var attr in json) {
+//                            var iCur = 0;
+//                            //判断运动的是不是透明度值
+//                            if (attr == "opacity") {
+//                                iCur = parseInt(parseFloat(getStyle(obj, attr)) * 100);
+//                            } else {
+//                                iCur = parseInt(getStyle(obj, attr));
+//                            }
+//                            var ispeed = (json[attr] - iCur) / 8;
+//                            //运动速度如果大于0则向下取整，如果小于0想上取整；
+//                            ispeed = ispeed > 0 ? Math.ceil(ispeed) : Math.floor(ispeed);
+//                            //判断所有运动是否全部完成
+//                            if (iCur != json[attr]) {
+//                                isStop = false;
+//                            }
+//                            //运动开始
+//                            if (attr == "opacity") {
+//                                obj.style.filter = "alpha:(opacity:" + (json[attr] + ispeed) + ")";
+//                                obj.style.opacity = (json[attr] + ispeed) / 100;
+//                            } else {
+//                                obj.style[attr] = iCur + ispeed + "px";
+//                            }
+//                        }
+//                        //判断是否全部完成
+//                        if (isStop) {
+//                            clearInterval(obj.timer);
+//                            if (fun) {
+//                                fun();
+//                            }
+//                        }
+//                    }, 30);
+//                }
+//            }
+//        });
+    });
+</script>

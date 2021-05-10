@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="moverlength+${radi}" class="easyui-layout"
+	style="width: 100%; height: 100%;">
+	<div
+		data-options="region:'west',split:true,tools:reload5439,title:'船期状态'"
+		style="width: 240px; padding: 10px;">
+		<input class="easyui-searchbox"
+			data-options="searcher:searchShip,prompt:'搜索船舶'"
+			th:id="searchText+${radi}" style="width: 200px; height: 20px;"
+			name="search"></input>
+		<ul th:id="ShipStatusTree123+${radi}"></ul>
+	</div>
+	<div data-options="region:'center'" style="height: 100%; width: 100%">
+		<div th:id="MOverlenghConfirmToolBar1508123301002+${radi}" style="float:left;">
+			<div>
+				<!-- 查询 -->
+				<span> 登记日期：<input th:id="regDte+${radi}" name="regDte"
+					class="easyui-datebox" data-options="required:false"
+					style="width: 120px">车型：<input th:id="carTyp+${radi}"
+					class="easyui-validatebox" name="carTyp" placeholder="请输入班次"
+					data-options="required:false" style="width: 120px"> <a
+					class="easyui-linkbutton" th:id="query+${radi}">查询</a> <a
+					class="easyui-linkbutton" th:id='clear+${radi}'>重置</a> <shiro:hasPermission
+						name="webresources:login:MOverlenghConfirm:add">
+						<a class="easyui-linkbutton" th:id='add+${radi}'
+							iconCls="icon-add" plain="false">新增</a>
+					</shiro:hasPermission> <shiro:hasPermission
+						name="webresources:login:MOverlenghConfirm:update">
+						<a class="easyui-linkbutton" th:id='edit+${radi}'>编辑</a>
+					</shiro:hasPermission> <shiro:hasPermission
+						name="webresources:login:MOverlenghConfirm:save">
+						<a class="easyui-linkbutton" th:id='save+${radi}'>保存</a>
+					</shiro:hasPermission> <shiro:hasPermission
+						name="webresources:login:MOverlenghConfirm:delete">
+						<a class="easyui-linkbutton" th:id='delete+${radi}'>删除</a>
+					</shiro:hasPermission> <a class="easyui-linkbutton" th:id='fresh+${radi}'>刷新</a> <input
+					id="vinNo" name="vinNo" type="text" hidden="true"
+					data-options="required:false" style="width: 120px"> <input
+					id="portCarNo" name="portCarNo" type="text" hidden="true"
+					data-options="required:false" style="width: 120px"> <input
+					id="rfidCardNo" name="rfidCardNo" type="text" hidden="true"
+					data-options="required:false" style="width: 120px"> <input
+					id="brandCod" name="brandCod" type="text" hidden="true"
+					data-options="required:false" style="width: 120px">
+					 <input
+					id="shipNo" name="shipNo" type="text" hidden="true"
+					data-options="required:false" style="width: 120px">
+				</span>
+			</div>
+		</div>
+		<!-- 工具栏 结束 -->
+		<!-- Datagrid -->
+		<table th:id="MOverlenghConfirmDatagrid1508123301002+${radi}"
+			style="height: 100%"></table>
+	</div>
+
+
+</div>
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	var reload5439 = [ {
+        iconCls : 'icon-reload',
+        handler : function() {
+	        $('#ShipStatusTree123[(${radi})]').tree('reload');
+        }
+    }];
+    var searchShip = function() {
+	    var parentNode = $('#ShipStatusTree123[(${radi})]').tree('getRoots'); //得到tree顶级node  
+	    var searchCon = $("input[name='search']").val();
+	    var children;
+	    for (var i = 0; i < parentNode.length; i++) { //循环顶级 node   
+		    children = $('#ShipStatusTree123[(${radi})]').tree('getChildren', parentNode[i].target);//获取顶级node下所有子节点   
+		    if (children) { //如果有子节点   
+			    for (var j = 0; j < children.length; j++) { //循环所有子节点   
+				    //if($('#ul_tree_dept').tree('isLeaf',children[j].target)){ //判断子级是否为叶子节点,即不是父节点   
+				    if (children[j].text.indexOf(searchCon) >= 0 || children[j].id.indexOf(searchCon) >= 0) { //判断节点text是否包含搜索文本                       
+					    selectNode(children[j]); //设置此节点为选择状态   
+					    expandParent(children[j]); //设置此节点所有父级展开   
+					    return;
+				    }
+				    //}   
+			    }
+		    } else {
+			    if (parentNode[i].text.indexOf(searchCon) || children[j].id.indexOf(searchCon) >= 0 >= 0) {
+				    selectNode(parentNode[i]);
+				    expandParent(parentNode[i]);
+				    return;
+			    }
+		    }
+	    }
+    }
+    function selectNode(node) {
+	    $('#ShipStatusTree123[(${radi})]').tree('select', node.target);
+	    $('#ShipStatusTree123[(${radi})]').tree('scrollTo', node.target);
+    };
+
+    function expandParent(node) {
+	    var parent = node;
+	    var t = true;
+	    do {
+		    parent = $('#ShipStatusTree123[(${radi})]').tree('getParent', parent.target); //获取此节点父节点   
+		    if (parent) { //如果存在   
+			    t = true;
+			    $('#ShipStatusTree123[(${radi})]').tree('expand', parent.target);
+		    } else {
+			    t = false;
+		    }
+	    } while (t);
+    };
+    /*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    $("#regDte[(${radi})]").val(Date.prototype.dateAdd(0, "yyyy-MM-dd"));
+	    var dg = $("#MOverlenghConfirmDatagrid1508123301002[(${radi})]");
+	    $.parser.parse($('#MOverlenghConfirmToolBar1508123301002[(${radi})]'));
+	    var shipNo;
+	    var vinNo;
+	    var portCarNo;
+	    var rfidCardNo;
+	    var brandCod;
+
+	    $('#ShipStatusTree123[(${radi})]').tree({
+	        method : "get",
+	        url : "../webresources/login/ship/Ship/gentree",
+	        onClick : treeclick
+	    });
+
+	    function treeclick(node) {
+		    shipNo = node.id;
+		    shipNam = node.type;
+		    function queryM(){
+		      var onlinquery = new HdQuery();
+		      onlinquery.add("shipNo", shipNo);
+		      onlinquery.add("regDte", null);
+		      onlinquery.add("carTyp", null);
+              return onlinquery.build();
+          };
+          $("#MOverlenghConfirmDatagrid1508123301002[(${radi})]").datagrid({
+			    queryParams : queryM(),
+		    })
+	    }
+	    // buttons
+	    // 增加。
+	    $("#add[(${radi})]").on("click", function() {
+		    	    	if(shipNo!=null||shipNo!=undefined){
+		    	    		 addoredit("");
+		    	    	}
+		    	    	else{
+		    	    		   HdUtils.messager.info('请先选择船舶！');
+		    	    	}
+	    });
+	    $('#carTyp[(${radi})]').combobox({
+	        url : '../webresources/login/damage/MOverlenghConfirm/getCarTypDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 200,
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    // 编辑。
+	    $("#edit[(${radi})]").on("click", function() {
+		    var data = dg.datagrid("getChecked");
+		    if (data == null || data == undefined) {
+			    HdUtils.messager.info('请选择一条数据进行编辑！');
+			    return;
+		    }
+		    dg.datagrid("hdEdit");
+	    });
+	    // 保存。
+	    $("#save[(${radi})]").on("click", function() {
+		    dg.datagrid("hdSave", {
+			    url : "../webresources/login/damage/MOverlenghConfirm/save"
+		    });
+	    });
+	    function addoredit(confirmid) {
+		    HdUtils.dialog.setValue({
+			    'confirmid' : confirmid
+		    });
+		    HdUtils.dialog.setValue({
+		        'shipNo':shipNo,
+		    	'radi' : radi,
+		        'vinNo' : vinNo,
+		        'portCarNo' : portCarNo,
+		        'rfidCardNo' : rfidCardNo
+		    });
+		    HdUtils.dialog.show({
+		        width : 400,
+		        height : 280,
+		        title : '超长管理',
+		        href : "../login/system/damage/moverlenghconfirmform.html",
+		        isSaveHandler : true
+		    });
+	    }
+	    // 删除。
+	    $("#delete[(${radi})]").on("click", function() {
+		    var selRow = $("#MOverlenghConfirmDatagrid1508123301002[(${radi})]").datagrid("getChecked");
+		    if (selRow.length == 0) {
+			    HdUtils.messager.info('请至少选择一条数据！');
+			    return false;
+		    }
+		    var ids = '';
+		    $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+			    if (r) {
+				    for (var i = 0; i < selRow.length; i++) {
+					    ids += selRow[i].confirmid + ",";
+				    }
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/damage/MOverlenghConfirm/removeAll?confirmids=" + ids,
+				        success : function(data) {
+					        HdUtils.messager.bottomRight(data.message);
+					        $("#MOverlenghConfirmDatagrid1508123301002[(${radi})]").datagrid("hdReload");
+				        }
+				    });
+			    }
+		    });
+	    });
+	    // 刷新。
+	    $("#fresh[(${radi})]").on("click", function() {
+		    dg.datagrid("hdReload");
+	    });
+	    // 清空。
+	    $("#clear[(${radi})]").on("click", function() {
+		    $("#regDte[(${radi})]").datebox("setValue", "");
+		    $("#carTyp[(${radi})]").combobox("setValue", "");
+		    $("#MOverlenghConfirmDatagrid1508123301002[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+		    $("#MOverlenghConfirmDatagrid1508123301002[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    var shipNo=null;
+		    var regDte = $("#regDte[(${radi})]").datebox("getValue");
+		    var carTyp = $("#carTyp[(${radi})]").combobox("getValue");
+		    onlinquery.add("shipNo", shipNo);
+		    onlinquery.add("regDte", regDte);
+		    onlinquery.add("carTyp", carTyp);
+		    return onlinquery.build();
+	    }
+
+	    $("#MOverlenghConfirmDatagrid1508123301002[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/damage/MOverlenghConfirm/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : false,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#MOverlenghConfirmToolBar1508123301002" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+
+	        }, {
+
+	            field : "regDte",
+	            title : '登记日期',
+	            multiSort : true,
+	            halign : "center",
+	            // 	            editor : {
+	            // 	                type : "datebox",
+	            // 	                options : {
+	            // 		                required : false
+	            // 	                }
+	            // 	            },
+	            sortable : false
+	        }, {
+	            field : "vinNo",
+	            title : "车架号",
+	            multiSort : true,
+	            halign : "center",
+	            // 	            editor : {
+	            // 	                type : "validatebox",
+	            // 	                options : {
+	            // 		                required : false
+	            // 	                }
+	            // 	            },
+	            sortable : false
+	        }, {
+	            field : "portCarNo",
+	            title : "流水号",
+	            multiSort : true,
+	            hidden:true,
+	            halign : "center",
+	            // 	            editor : {
+	            // 	                type : "validatebox",
+	            // 	                options : {
+	            // 		                required : false
+	            // 	                }
+	            // 	            },
+	            sortable : false
+	        }, {
+	            field : "rfidCardNo",
+	            title : "RFID",
+	            multiSort : true,
+	            hidden:true,
+	            halign : "center",
+	            // 	            editor : {
+	            // 	                type : "validatebox",
+	            // 	                options : {
+	            // 		                required : false
+	            // 	                }
+	            // 	            },
+	            sortable : false
+	        }, {
+	            field : "brandNam",
+	            title : "品牌",
+	            multiSort : true,
+	            halign : "center",
+	            // 	            editor : {
+	            // 	                type : "validatebox",
+	            // 	                options : {
+	            // 		                required : false
+	            // 	                }
+	            // 	            },
+	            sortable : false
+	        }, {
+	            field : "carTypNam",
+	            title : "车型",
+	            multiSort : true,
+	            halign : "center",
+	            // 	            editor : {
+	            // 	                type : "validatebox",
+	            // 	                options : {
+	            // 		                required : false
+	            // 	                }
+	            // 	            },
+	            sortable : false
+	        }, {
+	            field : "cyPlac",
+	            title : "车位",
+	            multiSort : true,
+	            halign : "center",
+	            // 	            editor : {
+	            // 	                type : "validatebox",
+	            // 	                options : {
+	            // 		                required : false
+	            // 	                }
+	            // 	            },
+	            sortable : false
+	        }, {
+
+	            field : "lengh",
+	            title : "车长",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "width",
+	            title : "车宽",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "height",
+	            title : "车高",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "lengthOverId",
+	            title : "超长",
+	            multiSort : true,
+	            halign : "center",
+	            editor : $.hd.ezui.editor.checkbox,
+	            formatter : $.hd.ezui.formatter.checkbox2,
+	            sortable : false
+	        }
+
+	        , {
+
+	            field : "widthOverId",
+	            title : "超宽",
+	            multiSort : true,
+	            hidden:true,
+	            halign : "center",
+	            editor : $.hd.ezui.editor.checkbox,
+	            formatter : $.hd.ezui.formatter.checkbox2,
+	            sortable : false
+	        }, {
+
+	            field : "recNam",
+	            title : '<font color="red">录入员</font>',
+	            multiSort : true,
+	            hidden:true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "recTim",
+	            title : '<font color="red">录入时间</font>',
+	            multiSort : true,
+	            hidden:true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.date,
+	            width : 120,
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "updNam",
+	            title : '<font color="red">修改人</font>',
+	            multiSort : true,
+	            hidden:true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "updTim",
+	            title : '<font color="red">修改时间</font>',
+	            multiSort : true,
+	            hidden:true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.date,
+	            width : 120,
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }
+
+	        ] ]
+	    });
+	    $("#MOverlenghConfirmDatagrid1508123301002" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

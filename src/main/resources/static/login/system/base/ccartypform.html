@@ -1,0 +1,200 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#CCarTypForm1507959148750");
+	    var carTyp = HdUtils.dialog.getValue("carTyp");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    if (carTyp) {
+		    $("#carTyp").attr("readonly", true);
+	    } else {
+		    $("#carTyp").attr("readonly", false);
+	    }
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/base/CCarTyp/findone?carTyp=" + carTyp,
+	        success : function(data) {
+		        $("#CCarTypForm1507959148750").form("loadData", data);
+	        }
+	    })
+
+	    $('#brandCod').combobox({
+	        url : '../webresources/login/base/CCarTyp/getCBrandDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 200,
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $('#carKind').combobox({
+	        url : '../webresources/login/base/CCarTyp/getCCarKindDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 200,
+	        required:true,
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $('#carLevel').combobox(HdUtils.code.scode({
+		    fieldCod : 'CAR_LEVEL'
+	    }, {
+		    required : false
+	    }));
+	    $('#factoryCod').combobox({
+	        url : '../webresources/login/base/CCarTyp/getCFactoryDrop',
+	        valueField : 'value',
+	        textField : 'label',
+			panelHeight : 200,
+	        //panelHeight : 'auto',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $('#carFeeTyp').combobox(HdUtils.code.scode({
+		    fieldCod : 'CAR_FEE_TYP'
+	    }, {
+		    required : false
+	    }));
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+
+	    function saveHandler() {
+		    var isValss = $("#CCarTypForm1507959148750").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#CCarTypForm1507959148750").serializeObject();
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/base/CCarTyp/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#CCarTypDatagrid1508123307500" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+    });
+    function findCod() {
+	    var carTypValue = $("#carTyp").val();
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/base/CCarTyp/findCCarTyp?carTyp=" + carTypValue,
+	        success : function(data) {
+		        if (data.code == "-1") {
+			        $('#carTyp').val("");
+			        HdUtils.messager.bottomRight(data.message);
+			        $('#carTyp').focus();
+			        return false;
+		        }
+	        }
+	    });
+    }
+</script>
+<form id="CCarTypForm1507959148750">
+	<input id="carTyp" name="carTyp" onchange="findCod();" hidden="true"
+		data-options="required:false" class="easyui-validatebox"
+		maxlength="10" />
+	<table id="CCarTypTable1507959148750" style="height: 75%; width: 80%"
+		class="tableform">
+		<tr>
+			<!-- 			<th>车型代码：</th> -->
+			<!-- 			<td><input id="carTyp" name="carTyp" onchange="findCod();" hidden="true" -->
+			<!-- 				data-options="required:false" class="easyui-validatebox" -->
+			<!-- 				maxlength="10" /></td> -->
+			<th>车型英文名称：</th>
+			<td><input id="carTypENam" name="carTypENam"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="200" /></td>
+			<th>车型中文名称：</th>
+			<td><input id="carTypNam" name="carTypNam"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="200" /></td>
+			<!--<th>计费类型：</th>
+			<td><input id="carFeeTyp" name="carFeeTyp"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="200" /></td>-->
+		</tr>
+		<tr>
+			<th>所属品牌：</th>
+			<td><input id="brandCod" name="brandCod"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="35" /></td>
+
+			<th>车属类别：</th>
+			<td><input id="carKind" name="carKind"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+			<th>车辆等级：</th>
+			<td><input id="carLevel" name="carLevel"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		</tr>
+		<tr>
+			<th>排量：</th>
+			<td><input id="sweptVolume" name="sweptVolume"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+			<th>重量：</th>
+			<td><input id="weights" name="weights"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="35" /></td>
+
+			<th>体积：</th>
+			<td><input id="volumes" name="volumes"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		</tr>
+		<tr>
+			<th>长：</th>
+			<td><input id="length" name="length"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="35" /></td>
+
+			<th>宽：</th>
+			<td><input id="width" name="width" data-options="required:false"
+				class="easyui-validatebox" maxlength="255" /></td>
+			<th>高：</th>
+			<td><input id="height" name="height"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="35" /></td>
+		</tr>
+		<tr>
+			<th>生产厂家：</th>
+			<td><input id="factoryCod" name="factoryCod"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="35" /></td>
+			<th>备注：</th>
+			<td colspan='3'><input id="remarks" name="remarks"
+				style="width: 100%;" data-options="required:false"
+				class="easyui-validatebox" maxlength="255" /></td>
+		</tr>
+	</table>
+</form>

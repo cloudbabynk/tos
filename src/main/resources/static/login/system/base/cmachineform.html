@@ -1,0 +1,121 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#CMachineForm1507959148902");
+	    var machNo = HdUtils.dialog.getValue("machNo");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    if (machNo) {
+	    	$("#machNo").attr("readonly",true);
+	    } else {
+	    	$("#machNo").attr("readonly",false);
+	    }
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/base/CMachine/findone?machNo=" + machNo,
+	        success : function(data) {
+		        $("#CMachineForm1507959148902").form("loadData", data);
+	        }
+	    })
+	    $('#machTyp').combobox({
+	        url : '../webresources/login/base/CMachine/getCMachTypDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $('#dockCod').combobox({
+	        url : '../webresources/login/base/CMachine/getCDockDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+		    var isValss = $("#CMachineForm1507959148902").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#CMachineForm1507959148902").serializeObject();
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/base/CMachine/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#CMachineDatagrid1508123309102" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+    });
+    function findCod() {
+	    var machNoValue = $("#machNo").val();
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/base/CMachine/findCMachine?machNo=" + machNoValue,
+	        success : function(data) {
+		        if (data.code == "-1") {
+			        $('#machNo').val("");
+			        HdUtils.messager.bottomRight(data.message);
+			        $('#machNo').focus();
+			        return false;
+		        }
+	        }
+	    });
+    }
+</script>
+<form id="CMachineForm1507959148902">
+	<table id="CMachineTable1507959148902" style="height: 75%; width: 80%"
+		class="tableform">
+		<tr>
+			<th>机械代码：</th>
+			<td><input id="machNo" name="machNo" onchange="findCod();"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="10" /></td>
+			<th>机械名称：</th>
+			<td><input id="machNam" name="machNam"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="10" /></td>
+		</tr>
+		<tr>
+			<th>机械类型：</th>
+			<td><input id="machTyp" name="machTyp"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="35" /></td>
+
+			<th>所属码头代码：</th>
+			<td><input id="dockCod" name="dockCod"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		</tr>
+	</table>
+</form>

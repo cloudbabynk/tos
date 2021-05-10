@@ -1,0 +1,150 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var cardamagId = HdUtils.dialog.getValue("cardamagId");
+	    var vinNo= HdUtils.dialog.getValue('vinNo');
+        var portCarNo= HdUtils.dialog.getValue('portCarNo');
+        $("input[name='vinNo']").val(vinNo);
+        $("input[name='portCarNo']").val(portCarNo);
+	    var radi = HdUtils.dialog.getValue("radi");
+	    if (cardamagId) {
+	    	$("#cardamagId").attr("readonly",true);
+	    	 HdUtils.ajax.post({
+	 	        url : "../webresources/login/damage/CarDamage/findone?cardamagId=" + cardamagId,
+	 	        success : function(data) {
+	 		        $("#CarDamageForm1507959148710").form("loadData", data);
+	 	        }
+	 	    })
+	    } else {
+	    	$("#cardamagId").attr("readonly",false);
+	    }
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+		    var isValss = $("#CarDamageForm1507959148710").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#CarDamageForm1507959148710").serializeObject();
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/damage/CarDamage/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#CarDamageDatagrid1508123301002" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+	    $('#damCod').combobox({
+	        url : '../webresources/login/damage/CarDamage/getCDamageCodDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 'auto',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $('#damLevel').combobox({
+	        url : '../webresources/login/damage/CarDamage/getCDamgLevelDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 'auto',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $('#damArea').combobox({
+	        url : '../webresources/login/damage/CarDamage/getCDamgAreaDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 'auto',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    //残损责任方
+	    $('#incharge').combobox(HdUtils.code.scode({
+		    fieldCod : 'INCHARGE'
+	    }, {
+		    required : false
+	    })
+	    );
+	  
+    });
+</script>
+<form id="CarDamageForm1507959148710">
+		<table id="CarDamageTable1507959148710" style="height: 75%; width: 80%"
+		class="tableform">
+		<tr>
+			<th>大驾号：</th>
+			<td><input id="vinNo" name="vinNo" readonly="readonly"
+				data-options="required:true" class="easyui-validatebox" 
+				maxlength="10" />
+			</td>
+			<th>车辆流水号：</th>
+			<td><input id="portCarNo" name="portCarNo" readonly="readonly"
+				data-options="required:true" class="easyui-validatebox" 
+				maxlength="10" />
+			</td>
+		</tr>
+		<tr>
+			<th>残损代码：</th>
+			<td><input id="damCod" name="damCod"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+			<th>残损范围：</th>
+			<td><input id="damArea" name="damArea"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		</tr>
+		<tr>
+			<th>残损等级：</th>
+			<td><input id="damLevel" name="damLevel"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+			<th>责任方：</th>
+			<td><input id="incharge" name="incharge"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		</tr>
+		<tr>
+			<th>登记岗位：</th>
+			<td><input id="regPost" name="regPost"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		<!-- 	<th>cardamagId:</th> -->
+			<td><input id="cardamagId" name="cardamagId"  hidden="true"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="20" /></td>
+		</tr>
+	</table>
+</form>

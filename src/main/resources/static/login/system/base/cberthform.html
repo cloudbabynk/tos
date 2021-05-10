@@ -1,0 +1,170 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#CBerthForm1507959148956");
+	    var berthCod = HdUtils.dialog.getValue("berthCod");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    if (berthCod) {
+	    	$("#berthCod").attr("readonly",true);
+	    } else {
+	    	$("#berthCod").attr("readonly",false);
+	    }
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/base/CBerth/findone?berthCod=" + berthCod,
+	        success : function(data) {
+		        $("#CBerthForm1507959148956").form("loadData", data);
+	        }
+	    })
+	    $('#dockCod').combobox({
+	        url : '../webresources/login/base/CBerth/getCGateDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        required : true,
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+		    var isValss = $("#CBerthForm1507959148956").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#CBerthForm1507959148956").serializeObject();
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/base/CBerth/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#CBerthDatagrid1508123308499" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+    });
+    function findCod() {
+	    var berthCodValue = $("#berthCod").val();
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/base/CBerth/findCBerth?berthCod=" + berthCodValue,
+	        success : function(data) {
+		        if (data.code == "-1") {
+			        $('#berthCod').val("");
+			        HdUtils.messager.bottomRight(data.message);
+			        $('#berthCod').focus();
+			        return false;
+		        }
+	        }
+	    });
+    }
+</script>
+<form id="CBerthForm1507959148956">
+	<table id="CBerthTable1507959148956" style="height: 75%; width: 80%"
+		class="tableform">
+		<tr>
+			<th>泊位代码</th>
+			<td><input id="berthCod" name="berthCod" onchange="findCod();"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="10" /></td>
+			<th>泊位名称：</th>
+			<td><input id="berthNam" name="berthNam"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="10" /></td>
+			<th>泊位类型：</th>
+			<td><input id="berthTyp" name="berthTyp"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="2" /></td>
+
+			<th>泊位长度：</th>
+			<td><input id="berthLong" name="berthLong"
+				data-options="min:0,max:100000,precision:2" class="easyui-numberbox"
+				/></td>
+		</tr>
+		<tr>
+			<th>泊位高度：</th>
+			<td><input id="berthHigh" name="berthHigh"
+				data-options="min:0,max:10000,precision:2" class="easyui-numberbox"
+				/></td>
+
+			<th>泊位水深：</th>
+			<td><input id="berthDepth" name="berthDepth"
+				data-options="min:0,max:10000,precision:2" class="easyui-numberbox"
+				/></td>
+			<th>所属码头：</th>
+			<td><input id="dockCod" name="dockCod"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="35" /></td>
+
+			<th>序号：</th>
+			<td><input id="dispSeq" name="dispSeq"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="4" /></td>
+		</tr>
+		<tr>
+			<th>起始X坐标：</th>
+			<td><input id="beginX" name="beginX"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="5" /></td>
+
+			<th>起始Y坐标：</th>
+			<td><input id="beginY" name="beginY"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="5" /></td>
+			<th>结束X坐标：</th>
+			<td><input id="endX" name="endX" data-options="required:false"
+				class="easyui-validatebox" maxlength="5" /></td>
+
+			<th>结束Y坐标：</th>
+			<td><input id="endY" name="endY" data-options="required:false"
+				class="easyui-validatebox" maxlength="5" /></td>
+		</tr>
+		<tr>
+			<th>起始米数：</th>
+			<td><input id="begMeter" name="begMeter"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="5" /></td>
+
+			<th>结束米数：</th>
+			<td><input id="endMeter" name="endMeter"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="5" /></td>
+			<th>缆桩数量：</th>
+			<td><input id="cableNum" name="cableNum"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="5" /></td>
+
+			<th>备注：</th>
+			<td><input id="remarks" name="remarks"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		</tr>
+	</table>
+</form>

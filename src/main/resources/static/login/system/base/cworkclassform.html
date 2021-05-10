@@ -1,0 +1,97 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#CWorkClassForm1507959148645");
+	    var classCod = HdUtils.dialog.getValue("classCod");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    if (classCod) {
+	    	$("#classCod").attr("readonly",true);
+	    } else {
+	    	$("#classCod").attr("readonly",false);
+	    }
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/base/CWorkClass/findone?classCod=" + classCod,
+	        success : function(data) {
+		        $("#CWorkClassForm1507959148645").form("loadData", data);
+	        }
+	    })
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+		    var isValss = $("#CWorkClassForm1507959148645").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#CWorkClassForm1507959148645").serializeObject();
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/base/CWorkClass/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#DayWorkClassDatagrid1508123307299" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+    });
+	
+	function findCod(){
+    	var classCodValue = $("#classCod").val();
+    	HdUtils.ajax.post({
+			url : "../webresources/login/base/CWorkClass/findCWorkClass?classCod=" + classCodValue,
+			success : function(data) {
+				if (data.code == "-1") {
+					$('#classCod').val("");
+					HdUtils.messager.bottomRight(data.message);
+					$('#classCod').focus();
+			        return false;
+				}
+			}
+		});
+    }
+</script>
+<form id="CWorkClassForm1507959148645">
+    <input id="recTim" name="recTim" hidden="true">
+    <input id="recNam" name="recNam" hidden="true">
+	<table id="CWorkClassTable1507959148645" style="height: 75%; width: 80%"
+		class="tableform">
+		<tr>
+			<th>班组代码：</th>
+			<td><input id="classCod" name="classCod"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="10" onchange="findCod();" /></td>
+			<th>班组名称：</th>
+			<td><input id="classNam" name="classNam"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="10" /></td>
+		</tr>		
+	</table>
+</form>

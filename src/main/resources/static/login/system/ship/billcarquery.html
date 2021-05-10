@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="BillCarToolBar1508123301002+${radi}" style="float: left">
+	<div>
+		<!-- 查询 -->
+	</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="BillCarDatagrid1508123301002+${radi}" style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#ShipBillDatagrid1508123301002[(${radi})]");
+	    // buttons
+           HdUtils.dialog.setValue({
+		    'radibillcar' : radi
+	    });
+	    var billNo = HdUtils.dialog.getValue('billNo');
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    if(billNo)
+		    onlinquery.add("billNo", billNo);
+		    return onlinquery.build();
+	    }
+
+	    $("#BillCarDatagrid1508123301002[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/ship/BillCar/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#BillCarToolBar1508123301002" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+
+	        }, {
+
+	            field : "portCarNo",
+	            title : '车辆流水号',
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        }
+	        , {
+
+	            field : "vinNo",
+	            title : '车架号',
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        }, {
+	            field : "rfidCardNo",
+	            title : "RFID号",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "brandCod",
+	            title : "品牌",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+                formatter: function(value,row,index){
+                	return row.brandNam;
+				},
+	            sortable : false
+	        }
+	        , {
+	            field : "carTyp",
+	            title : "车型",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+                formatter: function(value,row,index){
+                	return row.carTypNam;
+				},
+	            sortable : false
+	        }
+	        , {
+
+	            field : "carKind",
+	            title : "分类",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+                formatter: function(value,row,index){
+                	return row.carKindNam;
+				},
+	            sortable : false
+	        }, {
+
+	            field : "colorCod",
+	            title : "颜色",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "weights",
+	            title : "重量(T)",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "volumes",
+	            title : "体积(M3)",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "length",
+	            title : "长(M)",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+	        , {
+
+	            field : "width",
+	            title : "宽长(M)",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "height",
+	            title : "高长(M)",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+	        ] ]
+	    });
+	    $("#BillCarDatagrid1508123301002" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="cc+${radi}" class="easyui-layout" style="width: 100%; height: 100%;">
+		<div data-options="region:'center'" style="height: 100%; width: 100%">
+				<div th:id="tt+${radi}" class="easyui-tabs" data-options="fit:true"
+					style="width: 1220px; height: 100%;">
+					<div th:id="shipthruputhtml+${radi}"
+						data-options="title:'吞吐量过录',href:'../webresources/login/ship/ShipThruputRecord/shipthruputrecord.htm'"
+						style="width: 100%; height: 300px; padding: 20px;"></div>
+					<div th:id="shipthruputqueryhtml+${radi}"
+						data-options="title:'吞吐量过录查询',href:'../webresources/login/ship/ShipThruputRecord/shipthruputrecordquery.htm'"
+						style="width: 100%; height: 300px;"></div>
+				</div>
+		</div>
+</div>
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	 
+    });
+    /*]]>*/
+</script>
+</html>

@@ -1,0 +1,171 @@
+ <!--
+   Document   : 参照IE的“添加到收藏夹”界面，可收藏当前功能，并可整理收藏夹
+    
+          说明：
+
+    Created on : 2015-06-06
+    Author     : 傅新奇
+
+    Modifications:
+       1.1  2016-08-23 by huxj 从gh-base-web 引入，在此基础上修改 
+       1.0  2015-06-06 by fuxinqi: 照IE的“添加到收藏夹”界面，绘制此界面
+-->
+
+<div class="easyui-layout" data-options="fit:true">
+     <div data-options="region:'center',fit:true"  > 
+        <div id="historyAndFavorToolbar" style="width:auto">
+            目录：
+            <input type="text" name="historyAndFavorFolderName" id="historyAndFavorFolderName" value="" size="5" />
+            <a class="easyui-linkbutton" iconCls="icon-add" plain="false">新目录</a>
+            <a class="easyui-linkbutton" iconCls="icon-save" plain="false" >收藏</a>
+            <a class="easyui-linkbutton" iconCls="icon-remove" plain="false" >删除</a>
+        </div>
+         <div id="tt" class="easyui-tabs" data-options="fit:true">  
+            <div title="收藏夹" style="padding:20px;">  
+                <ul id="historyAndFavorFolderNav" class="easyui-tree" data-options="url:'../webresources/login/code/FavoriteFolderREST/asTree',method:'post',fit:true,state:'closed'"></ul>   
+            </div>  
+<!--            <div title="浏览历史"  style="padding:20px;">  
+                <table id="historyAndFavorDatagrid" ></table>
+            </div>  -->
+        </div>
+      </div>
+    </div>
+</div>  
+<script type="text/javascript">
+	
+     $(document).ready(function() {
+//    	var historyAndFavorDatagrid =$('#historyAndFavorDatagrid');
+//        var operation = new DatagridOperation(historyAndFavorDatagrid, '..', 'KEY,VALUE,REMARK');
+        $('#historyAndFavorFolderNav').tree({
+            onDblClick: function(node) {
+                var selected = $('#historyAndFavorFolderNav').tree('getSelected');
+                var urls=selected.id;
+                var texts=selected.text;
+                if(selected.data.linkUrl=="1"){
+                    openTab(texts,urls,true);
+                }
+            }
+        });
+        $("#historyAndFavorToolbar a[iconCls='icon-add']").on("click", function(){
+            var historyAndFavorFolderName = $('#historyAndFavorFolderName').val();
+            if(historyAndFavorFolderName!=""){
+                var selected = $('#historyAndFavorFolderNav').tree('getSelected');
+                if(selected){
+                    var upFolderId=selected.id;
+                    if(selected.data.linkUrl=="0"){
+                        $.ajax({
+                               url: "../webresources/login/code/FavoriteFolderREST/saveFavoriteFolder?historyAndFavorFolderName="+historyAndFavorFolderName+"&upFolderId="+upFolderId,
+                               type: 'GET',
+                               data: $.toJSON(),
+                               success: function(data) {
+                                   $('#historyAndFavorFolderNav').tree("reload");
+                               }
+                           });
+                       }else{
+                           $.messager.alert(Resources.WB_INFO, "收藏的功能下无法创建文件目录，请重新选择！", "info");
+                       }
+                   }else{
+                        $.messager.alert(Resources.WB_INFO, "请选择父文件夹！", "info");
+                   }
+            }else{
+                $.messager.alert(Resources.WB_INFO, "请输入新目录名称！", "info");
+            }
+
+        });
+        $("#historyAndFavorToolbar a[iconCls='icon-save']").on("click",function(){
+        	if(!mainPanel){
+        		$.messager.alert(Resources.WB_INFO, "请打开要收藏的功能！", "info");
+        		return;
+        	}
+            var windowUrl=$.main.getUrl();
+            var cuiFuncName=$.main.getCurFuncName();
+            var selected = $('#historyAndFavorFolderNav').tree('getSelected');
+            if(selected){
+            	 var folderId=selected.id;
+                 $.ajax({
+                           url: "../webresources/login/code/FavoriteREST/saveFavorite?windowUrl="+windowUrl+"&cuiFuncName="+encodeURI(encodeURI(cuiFuncName))+"&folderId="+folderId,
+                           type: 'GET',
+//                           data: $.toJSON(),
+                           dataType:'JSON',
+//                           contentType: "application/x-www-form-urlencoded;charset=utf-8", 
+                           success: function(data) {
+                               $('#historyAndFavorFolderNav').tree("reload");
+                           }
+                       });
+            }else{
+                $.messager.alert(Resources.WB_INFO, "请选择父文件夹！", "info");
+            }
+           
+           
+        });
+        $("#historyAndFavorToolbar a[iconCls='icon-remove']").on("click", function(){
+            var selected = $('#historyAndFavorFolderNav').tree('getSelected');
+            if(selected){
+            	var flag=selected.id;
+                if(selected.data.linkUrl=="1"){
+                     $.ajax({
+                          url: "../webresources/login/code/FavoriteREST/deleteItem?account="+selected.data.account+"&sn="+selected.data.sn,
+                          type: 'GET',
+                          data: $.toJSON(),
+                          success: function(data) {
+                              $('#historyAndFavorFolderNav').tree("reload");
+                          }
+                      });
+                }else{
+                    $.ajax({
+                          url: "../webresources/login/code/FavoriteFolderREST/judge?flag="+flag,
+                          type: 'GET',
+                          data: $.toJSON(),
+                          success: function(data) {
+                              if(data==0){
+                                  $.messager.alert(Resources.WB_INFO, "目录删除成功！", "info");
+                                  $('#historyAndFavorFolderNav').tree("reload");
+                              }else{
+                                  $.messager.alert(Resources.WB_INFO, "目录下存在收藏的内容，请先删除收藏！", "info");
+                              }
+                          }
+                      });
+                }
+            }else{
+                $.messager.alert(Resources.WB_INFO, "请选择要删除的内容！", "info");
+            }
+            
+        });
+        
+//        historyAndFavorDatagrid.datagrid({
+//            url:'../webresources/normal/workspaceRest/getMruList',      
+//            method:'post',
+//            sortName:'ROWINDEX',
+//            rownumbers:false,
+//            sortOrder:'asc',
+//            remoteSort:false,
+//            fitColumns:false,
+//            pagination:false,  //最多100后台已限制
+//            fit:true,
+//            columns: [[{
+//                title: '序号',  
+//                field: 'ROWINDEX',
+//                sortable: true,
+//                width: 70,
+//                align: 'center',
+//                halign: 'center'
+//            }, {
+//                title: '功能名',  
+//                field: 'MENUNAM',
+//                formatter: function(value,row,index){
+//                      return "<a href='#'>"+row.MENUNAM+"</a>";
+//                },
+//                sortable: true,
+//                width: 140,
+//                halign: 'center'
+//            },{
+//                title: '次数',  
+//                field: 'VISITCOUNT',
+//                sortable: true,
+//                width: 70,
+//                align: 'center',
+//                halign: 'center'
+//            }]] 
+//        });
+    });
+</script>

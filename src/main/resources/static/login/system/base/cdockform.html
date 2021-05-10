@@ -1,0 +1,113 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#CDockForm1507959148645");
+	    var dockCod = HdUtils.dialog.getValue("dockCod");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    if (dockCod) {
+	    	$("#dockCod").attr("readonly",true);
+	    } else {
+	    	$("#dockCod").attr("readonly",false);
+	    }
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/base/CDock/findone?dockCod=" + dockCod,
+	        success : function(data) {
+		        $("#CDockForm1507959148645").form("loadData", data);
+	        }
+	    })
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+		    var isValss = $("#CDockForm1507959148645").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#CDockForm1507959148645").serializeObject();
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/base/CDock/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#DayWorkClassDatagrid1508123307299" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+    });
+	
+	function findCod(){
+    	var dockCodValue = $("#dockCod").val();
+    	HdUtils.ajax.post({
+			url : "../webresources/login/base/CDock/findCDock?dockCod=" + dockCodValue,
+			success : function(data) {
+				if (data.code == "-1") {
+					$('#dockCod').val("");
+					HdUtils.messager.bottomRight(data.message);
+					$('#dockCod').focus();
+			        return false;
+				}
+			}
+		});
+    }
+</script>
+<form id="CDockForm1507959148645">
+    <input id="recTim" name="recTim" hidden="true">
+    <input id="recNam" name="recNam" hidden="true">
+	<table id="CDockTable1507959148645" style="height: 75%; width: 80%"
+		class="tableform">
+		<tr>
+			<th>码头代码：</th>
+			<td><input id="dockCod" name="dockCod"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="10" onchange="findCod();" /></td>
+			<th>码头名称：</th>
+			<td><input id="dockNam" name="dockNam"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="10" /></td>
+		</tr>
+		<tr>
+			<th>公司中文全称：</th>
+			<td><input id="cDockNam" name="cDockNam"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="35" /></td>
+			
+			<th>公司英文全称：</th>
+			<td><input id="eDockNam" name="eDockNam"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="35" /></td>
+
+			<th>备注：</th>
+			<td><input id="remarks" name="remarks"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		</tr>
+	</table>
+</form>

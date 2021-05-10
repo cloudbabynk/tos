@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<div class="easyui-layout" data-options="fit:true"
+	style="height: 100%; width: 100%">
+	<div
+		data-options="region:'west',split:true,tools:reload5436,title:'船期预报'"
+		style="width: 280px; padding: 10px;">
+		<input class="easyui-searchbox" data-options="searcher:searchShip,prompt:'搜索船舶'"  
+               th:id="searchText+${radi}" style="width: 200px; height: 20px;" name="search"></input>  
+		<ul th:id="ShipStatusTree123+${radi}"></ul>
+	</div>
+	<div data-options="region:'center'" style="height: 100%; width: 100%">
+		<!-- 工具栏 -->
+		<div th:id="DayWorkClassToolBar1508123307299+${radi}"
+			style="float: left; position: relative;">
+			<div>
+				<!-- 查询 -->
+				船名：<input th:id='cShipNam+${radi}' name="cShipNam" readOnly="readonly" style="width:100px">
+			            航次：<input th:id='ivoyage+${radi}' name="ivoyage" readOnly="readonly" style="width:100px">
+				进出口：<input th:id='iEId+${radi}' name="iEId">
+				<a class="easyui-linkbutton" th:id='query+${radi}'>查询</a>
+				<shiro:hasPermission name="webresources:login:mbillvin:add">
+					<a class="easyui-linkbutton" th:id='add+${radi}' iconCls="icon-add"
+						plain="false">新增</a>
+				</shiro:hasPermission>
+				<shiro:hasPermission name="webresources:login:mbillvin:update">
+					<a class="easyui-linkbutton" th:id='edit+${radi}'>编辑</a>
+				</shiro:hasPermission>
+				<shiro:hasPermission name="webresources:login:mbillvin:delete">
+					<a class="easyui-linkbutton" th:id='delete+${radi}'>删除</a>
+				</shiro:hasPermission>
+				<shiro:hasPermission name="webresources:login:mbillvin:save">
+					<a class="easyui-linkbutton" th:id='save+${radi}'>保存</a>
+				</shiro:hasPermission>
+				<a class="easyui-linkbutton" th:id='fresh+${radi}'>刷新</a>
+				<a class="easyui-linkbutton" th:id='import+${radi}'>卸船一键导入</a>
+				<a class="easyui-linkbutton" th:id='excelImport+${radi}'>excel导入</a>
+			</div>
+		</div>
+		<table th:id="DayWorkClassDatagrid1508123307299+${radi}"
+			style="height: 100%"></table>
+	</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	var reload5436 = [ {
+        iconCls : 'icon-reload',
+        handler : function() {
+	        $('#ShipStatusTree123[(${radi})]').tree('reload');
+        }
+    } ];
+	var searchShip = function(){
+		var parentNode=$('#ShipStatusTree123[(${radi})]').tree('getRoots'); //得到tree顶级node  
+	     var searchCon = $("input[name='search']").val();  
+	     /* alert("parentNode="+parentNode); 
+	     alert("searchCon="+searchCon); */  
+	     var children;   
+	     for(var i=0;i<parentNode.length;i++){ //循环顶级 node   
+	         children = $('#ShipStatusTree123[(${radi})]').tree('getChildren',parentNode[i].target);//获取顶级node下所有子节点   
+	         if(children){ //如果有子节点   
+	             for(var j=0;j<children.length;j++){ //循环所有子节点   
+	                 //if($('#ul_tree_dept').tree('isLeaf',children[j].target)){ //判断子级是否为叶子节点,即不是父节点   
+	                     if(children[j].text.indexOf(searchCon)>=0||children[j].id.indexOf(searchCon)>=0){ //判断节点text是否包含搜索文本                       
+	                    	 expandParent(children[j]); //设置此节点所有父级展开   
+	                    	 selectNode(children[j]); //设置此节点为选择状态   
+	                    	 
+	                         return;  
+	                     }   
+	                 //}   
+	             }   
+	         }else{   
+	             if(parentNode[i].text.indexOf(searchCon)||children[j].id.indexOf(searchCon)>=0>=0){   
+	            	 expandParent(parentNode[i]); 
+	            	 selectNode(parentNode[i]);   
+	                 return;   
+	             }   
+	         }   
+	     }   
+	}
+	function selectNode(node){   
+	    $('#ShipStatusTree123[(${radi})]').tree('select',node.target);   
+	    $('#ShipStatusTree123[(${radi})]').tree('scrollTo',node.target);
+	};   
+	function expandParent(node){   
+	    var parent = node;   
+	    var t = true;   
+	    do {   
+	    parent = $('#ShipStatusTree123[(${radi})]').tree('getParent',parent.target); //获取此节点父节点   
+	    if(parent){ //如果存在   
+	        t=true;   
+	        $('#ShipStatusTree123[(${radi})]').tree('expand',parent.target);   
+	    }else{   
+	        t=false;   
+	    }   
+	    }while (t);              
+	};  
+    $(document).ready(function() {
+	    $("#days[(${radi})]").val(Date.prototype.dateAdd(0, "yyyy-MM-dd"));
+	    $.parser.parse($('#DayWorkClassToolBar1508123307299[(${radi})]'));
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#DayWorkClassDatagrid1508123307299[(${radi})]");
+	    var shipNo;
+	    var cShipNam;
+	    var eShipName;
+	    var ivoyage;
+	    var berthCod;
+	    var length;
+	    var statBegTim;
+	    var newGroupShipNo;
+	    $('#ShipStatusTree123[(${radi})]').tree({
+	        method : "get",
+	        url : "../webresources/login/ship/Ship/gentree",
+	        onClick : treeclick
+	    });
+	    function treeclick(node) {
+		    shipNo = node.id;
+		    if(shipNo){
+		    	shipNam = node.type.split(",");
+			    cShipNam = shipNam[0];
+			    $('#cShipNam[(${radi})]').val(cShipNam);
+			    ivoyage = node.obj.ivoyage;
+			    berthCod = node.obj.berthCod;
+			    statBegTim = node.obj.conArrvTim;
+			    newGroupShipNo=node.obj.newGroupShipNo;
+			    $('#ivoyage[(${radi})]').val(ivoyage);
+			    HdUtils.dialog.setValue({
+				    'shipNo' : shipNo
+			    });
+			    $('#DayWorkClassDatagrid1508123307299[(${radi})]').datagrid({
+				    queryParams : query(),
+				    url : '../webresources/login/base/MBillVin/find'
+			    });
+		    }
+	    }
+	    //进出口
+	    $("#iEId[(${radi})]").combobox(HdUtils.code.scode({
+		    fieldCod : 'BILL_VIN_IEID'
+	    }, {
+		    required : false
+	    })); 
+	    // 增加。
+	    $("#add[(${radi})]").on("click", function() {
+		    if (!shipNo) {
+			    HdUtils.messager.info("请在右侧选择一条船！");
+			    return;
+		    }
+		    var iEId = $("#iEId[(${radi})]").combobox('getValue');
+		    if (!iEId) {
+		    	HdUtils.messager.info("请先选择进出口！");
+			    return;
+		    }
+		    row = {
+			        shipNo : shipNo,
+			        iEId : iEId,
+		    };
+		    dg.datagrid("hdAdd",row);
+	    });
+	    //一键导入。
+	    $("#import[(${radi})]").on("click", function() {
+		    if (!shipNo) {
+			    HdUtils.messager.info("请在右侧选择一条船！");
+			    return;
+		    }
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/base/MBillVin/importAll?shipNo=" + shipNo,
+		        success : function(data) {
+			        if (data.code == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.messager.bottomRight(data.message);
+			        $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("hdReload");
+		        }
+		    });
+	    });
+	    //excel上传。
+	    $("#excelImport[(${radi})]").on("click", function() {
+	    	var iEId = $("#iEId[(${radi})]").combobox('getValue');
+		    if (!iEId) {
+		    	HdUtils.messager.info("请先选择进出口！");
+			    return;
+		    }
+	    	HdUtils.billVinupload({
+	    		mutiple : false,
+	            isReadOnly : false,
+	            shipNo : shipNo,
+	            iEId : iEId,
+	        });
+	    });
+	    // 编辑。
+	    $("#edit[(${radi})]").on("click", function() {
+		    var data = dg.datagrid("getSelected");
+		    if (data == null || data == undefined) {
+			    HdUtils.messager.info('请选择一条数据进行编辑！');
+			    return;
+		    }
+		    dg.datagrid("hdEdit");
+	    });
+	    // 保存。
+	    $("#save[(${radi})]").on("click", function() {
+		    dg.datagrid("hdSave", {
+			    url : "../webresources/login/base/MBillVin/save"
+		    });
+	    });
+	    // 删除。
+	    $("#delete[(${radi})]").on("click", function() {
+		    var selRow = $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("getChecked");
+		    if (selRow.length == 0) {
+			    HdUtils.messager.info('请至少选择一条数据！');
+			    return false;
+		    }
+		    var ids = '';
+		    $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+			    if (r) {
+				    for (var i = 0; i < selRow.length; i++) {
+					    ids += selRow[i].billVinId + ",";
+				    }
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/base/MBillVin/removeAll?billVinIds=" + ids,
+				        success : function(data) {
+					        if (data.code == '-1') {
+						        HdUtils.messager.info(data.message);
+						        return false;
+					        }
+					        HdUtils.messager.bottomRight(data.message);
+					        $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("hdReload");
+				        }
+				    });
+			    }
+		    });
+	    });
+	    // 刷新。
+	    $("#fresh[(${radi})]").on("click", function() {
+		    dg.datagrid("hdReload");
+	    });
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+		    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+			    queryParams : query(),
+			    url : '../webresources/login/base/MBillVin/find'
+		    })
+	    });
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    var iEId = $("#iEId[(${radi})]").combobox('getValue'); 
+		    onlinquery.add("shipNo", shipNo);
+		    onlinquery.add("iEId", iEId);
+		    return onlinquery.build();
+	    }
+	    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+	        striped : true,
+	        url : "",
+	        queryParams : query(),
+	        method : "post",
+			autoLoad:false,
+	        pagination : true,
+	        singleSelect : false,
+	        selectOnCheck : false,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#DayWorkClassToolBar1508123307299" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+	        }, {
+	            field : "billVinId",
+	            title : '主键',
+	            multiSort : true,
+	            hidden : "true",
+	            sortable : false
+	        },
+	         {
+	            field : "iEId",
+	            title : '进出口',
+	            multiSort : true,
+	            width : 140,
+	            align : "center",
+	            editor : {
+	                type : "combobox",
+	                options : HdUtils.code.scode({
+		                fieldCod : 'BILL_VIN_IEID'
+	                }, {
+		                required : false
+	                })
+	            },
+	            formatter : function(value) {
+		            return HdUtils.code.name('BILL_VIN_IEID', value);
+	            },
+	            sortable : false
+	        }, 
+	        {
+	            field : "billNo",
+	            title : '提单号',
+	            multiSort : true,
+	            width : 140,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },  {
+	            field : "vinNo",
+	            title : '车架号',
+	            multiSort : true,
+	            width : 160,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },  {
+	            field : "rfidNo",
+	            title : 'RFID编号',
+	            multiSort : true,
+	            width : 160,
+	            align : "center",
+	            hidden : true,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+
+	        ] ]
+	    });
+	    $("#DayWorkClassDatagrid1508123307299" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+</script>
+</html>

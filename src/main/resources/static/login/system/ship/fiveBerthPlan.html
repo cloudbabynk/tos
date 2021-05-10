@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<div class="easyui-layout" data-options="fit:true"
+	style="height: 100%; width: 100%">
+	<div
+		data-options="region:'west',split:true,tools:[{iconCls:'icon-reload',handler:function(){$('#ShipStatusTree123').tree('reload');}
+               }],title:'船期预报'"
+		style="width: 280px; padding: 10px;">
+		<!--  <input id="ShipStatusSearchbox4354576586" placeholder="船名" style="width:90px"/> 
+		<a class="easyui-linkbutton" iconCls="icon-reload" id="allotrolquery42363456">查询</a><br>  -->
+		<ul th:id="ShipStatusTree123+${radi}"></ul>
+	</div>
+
+	<div data-options="region:'center'" style="height: 100%; width: 100%">
+		<div th:id="ShipBillToolBar1508736069318+${radi}"
+			style="float: left; position: relative;">
+			<div>
+		<!-- 查询 -->
+		<span style="padding:0px 250px;"> 
+			<shiro:hasPermission name="webresources:login:ShipBill:add">
+			<a	class="easyui-linkbutton" th:id='add+${radi}' iconCls="icon-add" plain="false">新增</a> 
+			</shiro:hasPermission>
+			<shiro:hasPermission name="webresources:login:ShipBill:delete">
+			<a
+			class="easyui-linkbutton" th:id='delete+${radi}'>删除</a>
+			</shiro:hasPermission>
+			<shiro:hasPermission name="webresources:login:ShipBill:save">
+			<a
+			class="easyui-linkbutton" th:id='edit+${radi}'>保存</a> 
+			</shiro:hasPermission>
+			<shiro:hasPermission name="webresources:login:ShipBill:refresh">
+			<a
+			class="easyui-linkbutton" th:id='fresh+${radi}'>刷新</a>
+			</shiro:hasPermission>
+			<shiro:hasPermission name="webresources:login:ShipBill:copy">
+			<a
+			class="easyui-linkbutton" th:id='edit+${radi}'>复制</a> 
+			</shiro:hasPermission>
+			<shiro:hasPermission name="webresources:login:ShipBill:import">
+			<a
+			class="easyui-linkbutton" th:id='edit+${radi}'>导入</a> 
+			</shiro:hasPermission>
+			<shiro:hasPermission name="webresources:login:ShipBill:detail">
+			<a
+			class="easyui-linkbutton" th:id='edit+${radi}'>明细</a> 
+			</shiro:hasPermission>
+		</span>
+		</div>
+		<table th:id="ShipBillDatagrid1508736069318+${radi}"
+			style="height: 100%"></table>
+		<input type="hidden" th:value="${banliType}" th:id="banliType+${radi}" />
+	</div>
+</div>
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document)
+            .ready(function() {
+	            var banliType = $("#banliType[(${radi})]").val();
+	            var voyageId;
+	            var shipId;
+	            $('#ShipStatusTree123[(${radi})]').tree({
+	                method : "get",
+	                url : "../webresources/login/ship/ShipBill/gentree",
+	                onClick : treeclick
+	            });
+
+	            function treeclick(node) {
+		            chuanming = node.type;
+		            if (chuanming == null) {
+			            return false;
+		            }
+		            voyageId = node.id;
+		            shipId = node.obj.shipId;
+		            //shipStatFlg =node.userId;
+		            /* HdUtils.dialog.setValue({
+		            	shipId : shipId
+		            }); */
+
+		            /* var query = new HdQuery();
+		            query.add("voyageId", node.id); */
+		            $('#ShipBillDatagrid1508736069318[(${radi})]').datagrid({
+		                url : "../webresources/login/ship/ShipBill/find?shipNo=" + shipNo,
+		                queryParams : query()
+		            });
+
+	            }
+	            var dg = $("#ShipBillDatagrid1508736069318[(${radi})]");
+	         // var shipdg = $("#ShipForegrpDayDatagrid1051212057523[(${radi})]");
+	            $.parser.parse($('#ShipBillToolBar1508736069318[(${radi})]'));
+	            // buttons
+	            // 增加。
+	            $("#ShipBillToolBar1508736069318[(${radi})] a[iconCls='icon-add']").on("click", function() {
+
+		            //var data = shipdg.datagrid("getSelected");
+		            if (!shipId) {
+			            HdUtils.messager.info('请先选中一条船期预报!');
+			            return;
+		            }
+		            planedit(1, shipId);
+
+	            });
+	            // 编辑。
+	            $("#ShipBillToolBar1508736069318[(${radi})] a[iconCls='icon-edit']").on("click", function() {
+		            var data = dg.datagrid("getSelected");
+		            if (!data) {
+			            HdUtils.messager.info('请先选中一条记录!');
+			            return;
+		            }
+		            planedit(2, data.fivePlanId);
+	            });
+	            // 删除。
+	            $("#ShipBillToolBar1508736069318[(${radi})] a[iconCls='icon-remove']").on("click", function() {
+
+		            var selRow = dg.datagrid("getChecked");
+		            if (selRow.length == 0) {
+			            HdUtils.messager.info('请至少选择一条数据！');
+			            return;
+		            }
+		            var ids = '';
+		            $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+			            if (r) {
+				            for (var i = 0; i < selRow.length; i++) {
+					            ids += selRow[i].fivePlanId + ",";
+				            }
+				            HdUtils.ajax.post({
+				                url : "../webresources/login/ship/ShipBill/removeAll?ids=" + ids,
+				                success : function(data) {
+					                HdUtils.messager.bottomRight(data.message);
+					                dg.datagrid("hdReload");
+				                }
+				            });
+
+			            }
+		            });
+	            });
+
+	            // 刷新。
+	            $("#ShipBillToolBar1508736069318[(${radi})] a[iconCls='icon-reload']").on("click", function() {
+		            dg.datagrid("hdReload");
+	            });
+	            // 条件类。
+	            //var hdConditions = new HdConditions();
+	            //var query = new HdQuery();
+	            
+	            function query(){
+	            	var query = new HdQuery();
+	            	var val=$("input[name='examflg']:checked").val();
+		            query.add("flg",val);
+		            query.add("voyageId",voyageId);
+		               return query.build();
+		        }
+	            
+	            
+	            $("#search1474275205585[(${radi})]").on("click", function() {
+		            dg.hddatagrid({
+			            queryParams : query()
+		            });
+	            });
+
+	      	  $("#ShipBillDatagrid1508736069318[(${radi})]").datagrid({
+	      	        striped : true,
+	      	        url : "../webresources/login/ship/ShipBill/find",
+	      	        queryParams : query(),
+	      	        method : "post",
+	      	        pagination : true,
+	      	        singleSelect : true,
+	      	        selectOnCheck : true,
+	      	        checkOnSelect : true,
+	      	        rownumbers : true,
+	      	        pageSize : 20,
+                    toolbar : "#ShipBillToolBar1508736069318[(${radi})]",
+	      	        fit : true,
+	      	        fitColumns : false,
+	      	        columns : [ [ {
+	      	            field : "ck",
+	      	            checkbox : true,
+	      	            sortable : false,
+
+	      	        }, {
+
+	      	            field : "billNo",
+	      	            title : '提单号',
+	      	            multiSort : true,
+	      	            halign : "center",
+	      	            editor : {
+	      	                type : "validatebox",
+	      	                options : {
+	      		                required : false
+	      	                }
+	      	            },
+	      	            sortable : false
+	      	        },
+	      	         {
+
+	      	            field : "marks",
+	      	            title : '唛头',
+	      	            multiSort : true,
+	      	            halign : "center",
+	      	            editor : {
+	      	                type : "validatebox",
+	      	                options : {
+	      		                required : false
+	      	                }
+	      	            },
+	      	            sortable : false
+	      	        }, {
+
+	      	            field : "brandCod",
+	      	            title : '品牌',
+	      	            multiSort : true,
+	      	            halign : "center",
+	      	            editor : {
+	      	                type : "validatebox",
+	      	                options : {
+	      		                required : false
+	      	                }
+	      	            },
+	      	            sortable : false
+	      	        }, {
+
+	      	            field : "carTyp",
+	      	            title : '车型',
+	      	            multiSort : true,
+	      	            halign : "center",
+	      	            editor : {
+	      	                type : "validatebox",
+	      	                options : {
+	      		                required : false
+	      	                }
+	      	            },
+	      	            sortable : false
+	      	        }, {
+
+	      	            field : "carNum",
+	      	            title : '车数',
+	      	            multiSort : true,
+	      	            halign : "center",
+	      	            editor : {
+	      	                type : "validatebox",
+	      	                options : {
+	      		                required : false
+	      	                }
+	      	            },
+	      	            sortable : false
+	      	        }, {
+
+	      	            field : "weights",
+	      	            title : '总吨数',
+	      	            multiSort : true,
+	      	            halign : "center",
+	      	            editor : {
+	      	                type : "validatebox",
+	      	                options : {
+	      		                required : false
+	      	                }
+	      	            },
+	      	            sortable : false
+	      	        },
+	      	        {
+
+	      	            field : "pieces",
+	      	            title : '总件数',
+	      	            multiSort : true,
+	      	            halign : "center",
+	      	            editor : {
+	      	                type : "validatebox",
+	      	                options : {
+	      		                required : false
+	      	                }
+	      	            },
+	      	            sortable : false
+	      	        },
+	      	        {
+	      	            field : "loadPortCod",
+	      	            title : "装货港",
+	      	            multiSort : true,
+	      	            halign : "center",
+	      	            editor : {
+	      	                type : "validatebox",
+	      	                options : {
+	      		                required : false
+	      	                }
+	      	            },
+	      	            sortable : false
+	      	        }, {
+
+	      	            field : "tranPortCod",
+	      	            title : "卸货港",
+	      	            multiSort : true,
+	      	            halign : "center",
+	      	            editor : {
+	      	                type : "validatebox",
+	      	                options : {
+	      		                required : false
+	      	                }
+	      	            },
+	      	            sortable : false
+	      	        }, {
+
+	      	            field : "receiveCod",
+	      	            title : "收货人",
+	      	            multiSort : true,
+	      	            halign : "center",
+	      	            editor : {
+	      	                type : "validatebox",
+	      	                options : {
+	      		                required : false
+	      	                }
+	      	            },
+	      	            sortable : false
+	      	        }, {
+
+	      	            field : "remarks",
+	      	            title : '<font color="red">备注</font>',
+	      	            multiSort : true,
+	      	            halign : "center",
+	      	            editor : {
+	      	                type : "validatebox",
+	      	                options : {
+	      		                required : true
+	      	                }
+	      	            },
+	      	            sortable : false
+	      	        }, {
+
+	      	            field : "recNam",
+	      	            title : '<font color="red">录入员</font>',
+	      	            multiSort : true,
+	      	            halign : "center",
+	      	            editor : {
+	      	                type : "validatebox",
+	      	                options : {
+	      		                required : true
+	      	                }
+	      	            },
+	      	            sortable : false
+	      	        }
+	      	        , {
+
+	      	            field : "recTim",
+	      	            title : '<font color="red">录入时间</font>',
+	      	            multiSort : true,
+	      	            halign : "center",
+	      	            formatter : $.hd.ezui.formatter.datetime,
+	      	            width : 120,
+	      	            editor : {
+	      	                type : "datetimebox",
+	      	                options : {
+	      		                required : true
+	      	                }
+	      	            },
+	      	            sortable : false
+	      	        }, {
+
+	      	            field : "updNam",
+	      	            title : '<font color="red">修改人</font>',
+	      	            multiSort : true,
+	      	            halign : "center",
+	      	            editor : {
+	      	                type : "validatebox",
+	      	                options : {
+	      		                required : true
+	      	                }
+	      	            },
+	      	            sortable : false
+	      	        }, {
+
+	      	            field : "updTim",
+	      	            title : '<font color="red">修改时间</font>',
+	      	            multiSort : true,
+	      	            halign : "center",
+	      	            formatter : $.hd.ezui.formatter.datetime,
+	      	            width : 120,
+	      	            editor : {
+	      	                type : "datetimebox",
+	      	                options : {
+	      		                required : true
+	      	                }
+	      	            },
+	      	            sortable : false
+	      	        }
+
+	      	        ] ]
+	      	    });
+	         $("#ShipBillDatagrid1508736069318" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+	       
+    function planSubmit(type, value) {
+	    $.messager.confirm(Resources.WB_CONFIRM, '确定进行该操作？', function(r) {
+		    if (r) {
+			    HdUtils.ajax.post({
+			        url : "../webresources/login/ship/ShipBill/planSubmit?type=" + type + "&fivePlanId=" + value,
+			        success : function(data) {
+				        if (data.code === '-1') {
+					        HdUtils.messager.info(data.message);
+					        return false;
+				        }
+				        HdUtils.messager.bottomRight('修改成功', '保存操作');
+				        $("#ShipBillDatagrid1508736069318[(${radi})]").datagrid("hdReload");
+			        }
+			    });
+		    }
+	    });
+    }
+
+    function planedit(type, id) {
+	    HdUtils.dialog.setValue({
+	        type : type,
+	        id : id
+	    });
+	    HdUtils.dialog.show({
+	        width : 750,
+	        height : 240,
+	        title : '五日计划',
+	        href : "../login/system/ship/ShipBillform.html",
+	        isSaveHandler : true
+	    });
+    }
+
+    /*]]>*/
+</script>
+</html>
+
+

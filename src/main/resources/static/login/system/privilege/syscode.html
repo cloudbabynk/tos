@@ -1,0 +1,438 @@
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<div class="easyui-layout" style="width: 100%; height: 100%;">
+
+	<div data-options="region:'west',split:true,"
+		style="width: 500px; height: 100%; padding: 5px" id="container">
+		<div id="SysField1ToolBar1475916907308" style="float: left;">
+			<shiro:hasPermission name="webresources:login:SysField:add">
+				<a class="easyui-linkbutton" id="sysfieldadd" iconCls="icon-add"
+					plain="false">增加</a>
+			</shiro:hasPermission>
+			<shiro:hasPermission name="webresources:login:SysField:update">
+				<a class="easyui-linkbutton" id="sysfieldedit" iconCls="icon-edit"
+					plain="false">编辑</a>
+			</shiro:hasPermission>
+			<shiro:hasPermission name="webresources:login:SysField:delete">
+				<a class="easyui-linkbutton" id="sysfielddelete"
+					iconCls="icon-remove" plain="false">删除</a>
+			</shiro:hasPermission>
+			<shiro:hasPermission name="webresources:login:SysField:save">
+				<a class="easyui-linkbutton" id="sysfieldsave" iconCls="icon-save"
+					plain="false">保存</a>
+			</shiro:hasPermission>
+			&nbsp; <input id="searchTextsysfield" /> <a
+				class="easyui-linkbutton" id="querysysfield">查找</a>
+			<!-- <input class="easyui-searchbox" id="SysFieldSearchbox1475916907308" /> -->
+		</div>
+		<table id="SysField1Datagrid1475916907308" style="height: 100%"></table>
+	</div>
+	<div data-options="region:'center'" style="height: 100%; width: 980px">
+		<div id="SysCode1ToolBar1475916907">
+			<div>
+				<span style="float: left;"> <shiro:hasPermission
+						name="webresources:login:SysCode:add">
+						<a class="easyui-linkbutton" id="syscodeadd" iconCls="icon-add"
+							plain="false">增加</a>
+					</shiro:hasPermission> <shiro:hasPermission name="webresources:login:SysCode:update">
+						<a class="easyui-linkbutton" id="syscodeedit" iconCls="icon-edit"
+							plain="false">编辑</a>
+					</shiro:hasPermission> <shiro:hasPermission name="webresources:login:SysCode:delete">
+						<a class="easyui-linkbutton" id="syscodedelete"
+							iconCls="icon-remove" plain="false">删除</a>
+					</shiro:hasPermission> <shiro:hasPermission name="webresources:login:SysCode:save">
+						<a class="easyui-linkbutton" id="syscodesave" iconCls="icon-save"
+							plain="false">保存</a>
+						<!-- 					</shiro:hasPermission> <shiro:hasPermission name="webresources:login:SysCode:refresh">
+						<a class="easyui-linkbutton" id="syscodereload"iconCls="icon-reload" plain="false">刷新</a>
+					</shiro:hasPermission>  -->&nbsp;
+				</span> <input class="easyui-searchbox" id="SysCodeSearchbox1475916907308" />
+			</div>
+		</div>
+		<table id="SysCode1Datagrid1475916907" style="height: 100%"></table>
+	</div>
+</div>
+<script type="text/javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var searchBuilder = new HdQuery();//右侧列表
+	    var hdQuery = new HdQuery();//左侧
+	    var dg = $("#SysField1Datagrid1475916907308");
+	    var dg1 = $("#SysCode1Datagrid1475916907");
+
+	    // 增加。
+	    $("#sysfieldadd").on("click", function() {
+		    dg.datagrid("hdAdd");
+	    });
+	    // 编辑。
+	    $("#sysfieldedit").on("click", function() {
+		    dg.datagrid("hdEdit");
+	    });
+	    // 删除。
+	    $("#sysfielddelete").on("click", function() {
+		    /*     dg.datagrid("hdRealRemove", {
+		    	    url : "../webresources/login/privilege/SysField/save"
+		        }); */
+		    var fieldCod = [];
+		    var obj = {};
+		    var deleteData = dg.datagrid("getChecked");
+		    if (deleteData.length == 0) {
+			    HdUtils.messager.info(i18n('请先选择数据！'));
+			    return;
+		    }
+		    var idLs = "";
+		    for (var a = 0; a < deleteData.length; a++) {
+			    idLs += deleteData[a].fieldCod + ",";
+		    }
+		    //  var fieldCod = deleteData[0].fieldCod;
+		    $.messager.confirm(i18n("提示"), i18n("确认执行本次操作？"), function(r) {
+			    if (r) {
+				    HdUtils.ajax.post({
+				        url : "./webresources/login/privilege/SysField/remove?idLs=" + idLs,
+				        success : function(data) {
+					        if (data.code == "-1") {
+						        HdUtils.messager.info(data.message);
+						        return false;
+					        }
+					        dg.datagrid("hdReload");
+					        HdUtils.messager.info(data.message);
+				        }
+				    });
+			    }
+		    });
+	    });
+	    // 保存。
+	    $("#sysfieldsave").on("click", function() {
+		    dg.datagrid("hdSave", {
+			    url : "../webresources/login/privilege/SysField/save"
+		    });
+	    });
+
+	    $("#querysysfield").on("click", function() {
+		    var searchCon = $("#searchTextsysfield").val();
+		    hdQuery.add("fieldName", searchCon);
+		    dg.datagrid({
+			    queryParams : hdQuery.build(),
+		    });
+	    });
+	    // buttons
+	    // 增加。
+	    $("#syscodeadd").on("click", function() {
+
+		    var node = dg.datagrid('getSelected');
+		    row = {
+			    fieldCod : node.fieldCod,
+		    };
+
+		    dg1.datagrid("hdAdd", row);
+
+	    });
+	    // 编辑。
+	    $("#syscodeedit").on("click", function() {
+		    dg1.datagrid("hdEdit");
+	    });
+	    // 删除。
+	    $("#syscodedelete").on("click", function() {
+		    dg1.datagrid("hdRealRemove", {
+			    url : "../webresources/login/privilege/SysCode/save"
+		    });
+	    });
+	    // 保存。
+	    $("#syscodesave").on("click", function() {
+		    dg1.datagrid("hdSave", {
+			    url : "../webresources/login/privilege/SysCode/save"
+		    });
+	    });
+	    // 刷新。
+	    $("#syscodereload").on("click", function() {
+		    dg1.datagrid("hdReload");
+	    });
+
+	    // searchbox
+	    $("#SysCodeSearchbox1475916907308").searchbox({
+	        prompt : "请输入...",
+	        searcher : function(value, name) {
+		        builder.set("q", value);
+		        builder.set("queryColumns", "name,code");
+		        dg1.datagrid({
+		            url : "../webresources/login/privilege/SysCode/findsyscodeByfieldCod",
+		            queryParams : builder.build()
+		        });
+	        }
+	    });
+
+	    $("#SysField1Datagrid1475916907308").datagrid({
+	        striped : true,
+	        method : "post",
+	        url : '../webresources/login/privilege/SysField/find',
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : false,
+	        rownumbers : true,
+	        pageSize : 20,
+	        fit : true,
+	        fitColumns : true,
+	        toolbar : "#SysField1ToolBar1475916907308",
+	        onSelect : function(rowIndex, rowData) {
+	        	searchBuilder.add("fieldCod", rowData.fieldCod);
+		        dg1.datagrid({
+		            url : "../webresources/login/privilege/SysCode/findsyscodeByfieldCod",
+		            queryParams : searchBuilder.build()
+		        });
+	        },
+	        columns : [ [ {
+	            field : 'ck',
+	            checkbox : true
+	        }, {
+	            field : "fieldId",
+	            title : "ID",
+	            multiSort : true,
+	            halign : "center",
+	            hidden : true,
+	            width : 120,
+	            sortable : true
+	        }, {
+	            field : "fieldName",
+	            title : "名字",
+	            multiSort : true,
+	            width : 60,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false,
+	                }
+	            },
+	            halign : "center",
+	            width : 60,
+	            sortable : true
+	        }, {
+	            field : "fieldCod",
+	            title : "代码",
+	            multiSort : true,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false,
+	                }
+	            },
+	            halign : "center",
+	            width : 60,
+	            sortable : true
+	        } ] ]
+	    });
+	    // datagrid
+	    dg1.hddatagrid({
+	        //	url : "../webresources/login/privilege/SysCode/findsyscodeByfieldCod",
+	        striped : true,
+	        pagination : true,
+	        singleSelect : true,
+	        checkOnSelect : true,
+	        sortName : 'sorter',
+	        selectOnCheck : false,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#SysCode1ToolBar1475916907",
+	        fit : true,
+	        //fitColumns:true,
+	        columns : [ [
+
+	        {
+	            field : 'ck',
+	            checkbox : true
+	        }, {
+	            field : "code",
+	            title : '<font color="red">代码</font>',
+	            halign : "center",
+	            width : 80,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+	                    required : false,
+	                    validType : 'maxLength[30]'
+	                }
+	            },
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                //validType : [ 'isSysCodeRepeat["SysCode1Datagrid1475916907","code","CUSTOMER_CLASSIFICATION"]', 'length[1,30]' ]
+	                }
+	            },
+	            sortable : true
+	        }, {
+	            field : "name",
+	            title : "名称",
+	            halign : "center",
+	            width : 80,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+	                    required : true,
+	                    validType : 'maxLength[100]'
+	                }
+	            },
+	            sortable : true
+	        }, {
+	            field : "enName",
+	            title : "英文名",
+	            halign : "center",
+	            width : 80,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                validType : 'maxLength[100]'
+	                }
+	            },
+	            sortable : true
+	        }, {
+	            field : "fieldCod",
+	            hidden : true,
+	        }, {
+	            field : "sorter",
+	            title : "排序号",
+
+	            halign : "center",
+	            width : 80,
+	            // 	formatter:function(value) {
+	            // 	return HdUtils.formatter.precisionCommon(value,0);  
+	            // 	},
+	            //要限制输入的最大数，请修改max
+	            editor : {
+	                type : "numberbox",
+	                options : {
+	                    required : false,
+	                    precision : 0,
+	                    max : 99999,
+	                    groupSeparator : ','
+	                }
+	            },
+	            sortable : true
+	        }, {
+	            field : "sysMark",
+	            title : '系统',
+
+	            halign : "center",
+	            align : "center",
+	            width : 60,
+	            formatter : $.hd.ezui.formatter.checkbox,
+	            editor : $.hd.ezui.editor.checkbox,
+	            sortable : true
+	        }, {
+	            field : "abandonedMark",
+	            title : '废弃',
+	            halign : "center",
+	            align : "center",
+	            width : 60,
+	            formatter : $.hd.ezui.formatter.checkbox,
+	            editor : $.hd.ezui.editor.checkbox,
+	            sortable : true
+	        },
+	        // 	{
+	        // 	field:"customEx1",
+	        // 	title:"自定义字段1",
+	        // 	multiSort:true,
+	        // 	halign:"center",
+	        // 	editor:{type:"validatebox",options:{required:false,validType: 'maxLength[1000]'}},
+	        // 	sortable:true
+	        // 	}
+	        // 	,
+	        // 	{
+	        // 	field:"customEx2",
+	        // 	title:"自定义字段2",
+	        // 	multiSort:true,
+	        // 	halign:"center",
+	        // 	editor:{type:"validatebox",options:{required:false,validType: 'maxLength[1000]'}},
+	        // 	sortable:true
+	        // 	}
+	        // 	,
+	        // 	{
+	        // 	field:"customEx3",
+	        // 	title:"自定义字段3",
+	        // 	multiSort:true,
+	        // 	halign:"center",
+	        // 	editor:{type:"validatebox",options:{required:false,validType: 'maxLength[1000]'}},
+	        // 	sortable:true
+	        // 	}
+	        // 	,
+	        // 	{
+	        // 	field:"customEx4",
+	        // 	title:"自定义字段4",
+	        // 	multiSort:true,
+	        // 	halign:"center",
+	        // 	editor:{type:"validatebox",options:{required:false,validType: 'maxLength[1000]'}},
+	        // 	sortable:true
+	        // 	},
+	        // 	{
+	        // 		field:"customEx5",
+	        // 		title:"自定义字段5",
+	        // 		multiSort:true,
+	        // 		halign:"center",
+	        // 		editor:{type:"validatebox",options:{required:false,validType: 'maxLength[1000]'}},
+	        // 		sortable:true
+	        // 	},
+	        // 	{
+	        // 		field:"customEx6",
+	        // 		title:"自定义字段6",
+	        // 		multiSort:true,
+	        // 		halign:"center",
+	        // 		editor:{type:"validatebox",options:{required:false,validType: 'maxLength[1000]'}},
+	        // 		sortable:true
+	        // 	},
+	        {
+	            field : "description",
+	            title : "备注",
+	            multiSort : true,
+	            width : 80,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+	                    required : false,
+	                    validType : 'maxLength[1000]'
+	                }
+	            },
+	            sortable : true
+	        }, {
+	            field : "recNam",
+	            title : '创建人',
+	            multiSort : true,
+	            halign : "center",
+	            width : 80,
+	            sortable : true
+	        }, {
+	            field : "recTim",
+	            title : '创建时间',
+	            formatter : $.hd.ezui.formatter.datetime,
+	            multiSort : true,
+	            halign : "center",
+	            width : 120,
+	            sortable : true
+	        }, {
+	            field : "updNam",
+	            title : '更新人',
+	            multiSort : true,
+	            width : 80,
+	            halign : "center",
+	            sortable : true
+	        }, {
+	            field : "updTim",
+	            title : '更新时间',
+	            formatter : $.hd.ezui.formatter.datetime,
+	            multiSort : true,
+	            halign : "center",
+	            width : 120,
+	            sortable : true
+	        }, ] ],
+	        onDblClickRow : function(index, data) {
+		        dg1.datagrid("hdEdit");
+		        dg1.datagrid('getEditor', {
+		            index : index,
+		            field : 'code'
+		        }).target.prop('disabled', true);
+	        }
+	    });
+
+    });
+    /*]]>*/
+</script>
+</html>

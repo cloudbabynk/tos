@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="CAreaToolBar1508123301002+${radi}" style="float: left">
+	<div>
+		<!-- 查询 -->
+	</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="CAreaDatagrid1508123301002+${radi}" style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	 function udpateLockId(checked,cyPlac) {
+			if (checked) {
+				// save
+				$.ajax({
+				    url : '/webresources/login/base/CCyBay/add?cyPlac=' + cyPlac,
+				    method : 'POST',
+				    dataType : 'json',
+				    contentType : "application/json",
+				    success : function(data) {
+				    	$("#CAreaDatagrid1508123301002[(${radi})]").datagrid("load");
+				    }
+				});
+			}  else {
+				// delete
+				$.ajax({
+				    url : '/webresources/login/base/CCyBay/delete?cyPlac='+ cyPlac,
+				    method : 'POST',
+				    dataType : 'json',
+				    contentType : "application/json",
+				    success : function(data) {
+				    	$("#CAreaDatagrid1508123301002[(${radi})]").datagrid("load");
+				    }
+				});
+			} 
+		}
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#CAreaDatagrid1508123301002[(${radi})]");
+	    // buttons
+        HdUtils.dialog.setValue({
+		    'radiccybay' : radi
+	    });
+	    var cyAreaNo = HdUtils.dialog.getValue('cyAreaNo');
+	    var cyRowNo = HdUtils.dialog.getValue('cyRowNo');
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    if(cyAreaNo)
+		    onlinquery.add("cyAreaNo", cyAreaNo);
+		    if(cyRowNo)
+		    onlinquery.add("cyRowNo", cyRowNo);
+		    return onlinquery.build();
+	    }
+	    
+
+	
+	    $("#CAreaDatagrid1508123301002[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/base/CCyBay/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#CAreaToolBar1508123301002" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+
+	        }, {
+
+	            field : "cyBayNo",
+	            title : '车位序号',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "cyPlac",
+	            title : "车位号",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "lockId",
+	            title : "锁",
+	            multiSort : true,
+	            halign : "center",
+	            //editor : {
+	            //    type : "validatebox",
+	            //    options : {
+		        //        required : false
+	            //    }
+	            //},
+	            sortable : false,
+	            formatter : function(val, row, idx) {
+		            if(val=='0'){
+			        	return "否";
+			        }else{
+			        	return "是";
+			        }
+			    },
+	        }
+
+	        ] ],
+	        onLoadSuccess : function(data) {
+			    if (data) {
+				    $.each(data.rows, function(index, item) {
+					    if (item.checked) {
+					    	$("#CAreaDatagrid1508123301002[(${radi})]").datagrid('checkRow', index);
+					    }
+				    });
+			    }
+		    },
+		    onCheck : function(rowIndex, rowData) {
+		    	if (rowIndex >= 0) {
+				    if (rowData.lockId=='0') {
+				    	udpateLockId(true, rowData.cyPlac);
+				    }else{
+				    	udpateLockId(false, rowData.cyPlac);
+				    }
+			    }
+		    }
+	    });
+	    $("#CAreaDatagrid1508123301002" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

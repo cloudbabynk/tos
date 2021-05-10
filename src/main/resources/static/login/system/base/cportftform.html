@@ -1,0 +1,120 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#CPortFtFtForm1551855248645");
+	    var typ = HdUtils.dialog.getValue("typ");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    
+	    $('#portId').combobox({
+	        url : '../webresources/login/ship/CPortFt/findCPortNam',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 100,
+	        width: 160,
+	        required : 'true',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    
+	    if(typ == "add"){
+	    	
+	    }
+	    if(typ =="edit") {  
+	    	
+		    var vcPortId = HdUtils.dialog.getValue("vcPortId");
+		    var vcPortName = HdUtils.dialog.getValue("vcPortName");
+		    var portId = HdUtils.dialog.getValue("portId");
+		    var portFtId = HdUtils.dialog.getValue("portFtId");
+		    
+		    if(vcPortId) {
+		    	$("#vcPortId").val(vcPortId);
+		    }
+		    if (vcPortName) {
+		    	$("#vcPortName").val(vcPortName);
+		    } 
+		    if(portFtId){
+		    	$("#portFtId").val(portFtId);
+		    }
+		    
+		    if(portId){
+		    	$("#portId").combobox('setValue', portId);
+		    }
+	    }
+	    
+
+// 	    HdUtils.ajax.post({
+// 	        url : "../webresources/login/base/CCarKind/findone?carKind=" + carKind,
+// 	        success : function(data) {
+// 		        $("#CPortFtFtForm1551855248645").form("loadData", data);
+// 	        }
+// 	    })
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });	    
+	    function saveHandler() {
+		    var isValss = $("#CPortFtFtForm1551855248645").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#CPortFtFtForm1551855248645").serializeObject();
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/ship/CPortFt/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#DayWorkClassDatagrid1551851699299" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+	    
+    });
+</script>
+<form id="CPortFtFtForm1551855248645">
+	<input id="portFtId" name="portFtId" hidden="true">
+	<table id="CCarKindTable1507959148645" style="height: 75%; width: 80%"
+		class="tableform">
+		<tr>
+			<th>丰田港口ID：</th>
+			<td><input id="vcPortId" name="vcPortId"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="10" /></td>
+			<th>丰田港口名称：</th>
+			<td><input id="vcPortName" name="vcPortName"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="255" /></td>
+			<th>系统港口：</th>
+			<td><input id="portId" name="portId"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		</tr>
+	</table>
+</form>

@@ -1,0 +1,96 @@
+@charset "utf-8";
+/* CSS Document */
+body{margin:0;padding:0;font-size:12px;color:#444;font-family:Arial;background:repeat-x left top;}
+ul,li,img,div,p,h1,h2,h3,h4,dl,dd,dt,tr,td,table,p{padding:0;margin:0;border:0;font-weight:normal;font-size:12px;}
+ul,li{list-style-type:none;}
+input,select{font-size:12px;padding:0;margin:0;border:0;}
+
+a{text-decoration: none;}
+a:link{color:#444;text-decoration:none;}
+a:visited{color:#444;text-decoration:none;}
+a:hover{color:#ff5400;text-decoration:underline;}
+a:active{color:#444;text-decoration:none;}
+
+.gtos-header-top{height:32px;background:#3b4042;}
+.gtos-header-top-nav{height:32px;font-family:"微软雅黑";}
+.gtos-header-top-nav a{margin-right:20px;line-height:32px;color:#ffffff;font-family:"微软雅黑";}
+.gtos-header-top-nav span{float:right;line-height:32px;color:#ffffff;font-family:"微软雅黑";}
+.gtos-header-top-nav span font{font-family:Georgia;font-size:16px;}
+.gtos-header-top-nav,.gtos-header-con,.gtos-nav,.gtos-top5-list,.gtos-top5-title,.gtos-second-con,.gtos-icon-hover{width:1000px;margin:0 auto;}
+.gtos-header-con{height:85px;clear:both;}
+.gtos-header-logo{width:330px;float:left;}
+.gtos-header-right{width:440px;float:right;}
+.gtos-header-right li{width:110px;float:left;height:74px;text-align:center;padding-top:10px;}
+.gtos-first-li{}
+.gtos-header-right li a{line-height:74px;font-family:"微软雅黑";font-size:15px;}
+.gtos-first-li a{color:#0067cc;font-weight:700;}
+.gtos-con{border-top:1px solid #e1f0fb;background:url(../images/gtos-banner-back.gif) repeat-x left top;height:453px;}
+.gtos-con-banner{padding:119px 0 0 801px;width:199px;margin:0 auto;background:url(../images/gtos-banner.jpg) no-repeat left top;height:334px;}
+.gtos-con-banner li{height:26px;margin-bottom:15px;}
+.user-input{background:url(../images/user-input.gif) no-repeat left top;height:26px;width:174px;padding-left:5px;line-height:26px;}
+.key-input{background:url(../images/key-input.gif) no-repeat left top;height:26px;width:174px;padding-left:5px;line-height:26px;}
+.yzm-input{background:url(../images/yzm-input.gif) no-repeat left top;height:26px;width:80px;padding-left:5px;line-height:26px;margin-right:7px;float:left;}
+.login-button{background:url(../images/login-button.gif) no-repeat left top;height:26px;width:177px;cursor:pointer;font-family:"微软雅黑";color:#fff;}
+.gtos-icons{padding:35px 0;height:466px;text-align:center;background:url(../images/gtos-icons.gif) no-repeat center 35px;}
+.gtos-icon-hover{position:relative;}
+.gtos-icon-hover li{height:72px;width:74px;position:absolute;}
+.gtos-icon-hover li a{display:block;height:72px;width:73px;text-indent:-9999px;}
+.gtos-li-01{left:471px;top:20px;}
+.gtos-li-01 a:hover{background:url(../images/gtos-icons-hover.gif) no-repeat left top;}
+.gtos-li-02{left:692px;top:108px;}
+.gtos-li-02 a:hover{background:url(../images/gtos-icons-hover.gif) no-repeat -74px top;}
+.gtos-li-03{left:692px;top:244px;}
+.gtos-li-03 a:hover{background:url(../images/gtos-icons-hover.gif) no-repeat -147px top;}
+.gtos-li-04{left:469px;top:352px;}
+.gtos-li-04 a:hover{background:url(../images/gtos-icons-hover.gif) no-repeat -221px top;}
+.gtos-li-05{left:234px;top:244px;}
+.gtos-li-05 a:hover{background:url(../images/gtos-icons-hover.gif) no-repeat -295px top;}
+.gtos-li-06{left:234px;top:109px;}
+.gtos-li-06 a:hover{background:url(../images/gtos-icons-hover.gif) no-repeat -369px top;}
+.gtos-nav{padding-top:15px;height:221px;}
+.gtos-nav-left{width:427px;float:left;margin-right:13px;}
+.gtos-nav-left h2{height:42px;line-height:42px;font-family:"微软雅黑";font-size:16px;padding-left:35px;background:url(../images/gtos-left-icon.gif) no-repeat left 13px;}
+.gtos-nav-l-box{border:1px solid #e1e1e1;padding:8px 0 9px 21px;height:160px;}
+.gtos-nav-l-box a{display:block;width:70px;padding-left:29px;float:left;height:40px;line-height:40px;font-family:"微软雅黑";font-size:14px;margin-right:34px;background:url(../images/gtos-mv-icon.gif) no-repeat left 12px;}
+.gtos-nav-con{float:left;width:270px;}
+.gtos-nav-con h2{height:42px;line-height:42px;font-family:"微软雅黑";font-size:16px;}
+.gtos-nav-c-box{background:url(../images/wx-back.gif) no-repeat left top;height:141px;padding:38px 0 0 22px;}
+.gtos-nav-right{float:right;width:278px;}
+.gtos-nav-right h2{height:42px;line-height:42px;font-family:"微软雅黑";font-size:16px;}
+.gtos-nav-r-box{background:url(../images/load-back.gif) no-repeat left top;height:179px;}
+.gtos-rb{float:left;width:130px;padding:139px 0 0 17px;}
+.gtos-rt{float:right;width:117px;padding-top:39px;}
+.gtos-1000-top5{height:246px;background:#f5f5f5;margin-top:16px;}
+.gtos-top5-title{padding-top:21px;}
+.gtos-top5-list{padding-top:26px;}
+.gtos-top5-list li{width:247px;float:left;text-align:center;}
+.gtos-top5-text{height:26px;line-height:26px;padding-top:13px;font-family:"微软雅黑";font-size:16px;}
+.footer {width:100%;min-height:250px;height:auto !important;line-height:25px;margin:0 auto;color:#fff;background:url(../images/footerBg.jpg) repeat-x;}
+.footerLink{ width:980px; height:130px; margin:0 auto; padding:20px 10px 10px 10px;}
+.footerLinkSpan{ width:119px; height:130px; float:left; margin-right:50px; text-align:center;}
+.footerLinkSpanTitle{width:119px; height:40px; line-height:40px; float:left; text-align:center; background:url(../images/footerSpanBg.jpg) bottom left no-repeat; font-size:16px;font-family:"微软雅黑";}
+.footerLinkSpanCon{width:99px; height:80px; line-height:40px; float:left; padding:10px;}
+.footerLinkSpanCon ul li{ width:99px; height:35px; line-height:35px; float:left; text-align:center;}
+.footerLinkSpanCon li a{ width:99px; height:35px; line-height:35px; float:left; color:#FFF; text-align:center;font-family:"微软雅黑";}
+.footerLinkSpanWx{ width:119px; height:40px; float:left; background-color:#2f3545; margin-top:5px; text-align:center; border-radius:8px;line-height:20px;}
+.footerInfo{ width:980px; height:49px; margin:0 auto; padding:10px; padding-top:30px; text-align:center;}
+
+
+
+.gtos2-banner{background:#f7f7f7;height:162px;text-align:center;}
+.gtos-second-con{padding:12px 0;}
+.gtos-second-con-left{width:225px;float:left;}
+.gtos-second-con-right{width:741px;float:right;}
+.gtos-second-con-left-tit{background:url(../images/gtos2-icon.gif) no-repeat left 12px;height:40px;border-bottom:2px solid #d8e2ec;padding-left:30px;font-size:16px;font-family:"微软雅黑";font-weight:700;line-height:40px;}
+.gtos-second-con-left-list{background:#fafafa;padding-bottom:80px;}
+.gtos-second-con-left-list li{background:url(../images/gtos2-li.gif) no-repeat left top;height:40px;border-bottom:1px solid #fafafa;padding-left:35px;}
+.gtos-second-con-left-list li a{line-height:40px;font-size:14px;color:#666666;font-family:"微软雅黑";}
+.gtos-left-li-first{background:url(../images/gtos2-first.gif) no-repeat left top!important;}
+.gtos-left-li-first a{color:#ffffff!important;}
+.gtos-second-right-title{background:url(../images/gtos2-right-icon.gif) no-repeat left 14px;height:40px;border-bottom:2px solid #d8e2ec;font-size:16px;font-family:"微软雅黑";font-weight:700;line-height:40px;padding-left:30px;}
+.gtos2-table{margin-top:15px;border:1px solid #f1f1f1;padding:5px 10px 15px 10px;}
+.gtos2-table th{border-bottom:1px solid #f1f1f1;color:#666666;}
+.gtos2-table td{border-bottom:1px dashed #f1f1f1;}
+
+.gtos-bottom-back{background:url(../images/gtos-border-112.gif) repeat-x left top;height:7px;clear:both;}
+.gtos-nav-c-box img{padding-left:8px;}

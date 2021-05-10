@@ -1,0 +1,31 @@
+package net.huadong.tech.privilege.service.impl;
+import com.alibaba.dubbo.config.annotation.Service;
+import net.huadong.tech.base.bean.HdQuery;
+import net.huadong.idev.hdmessagecode.HdMessageCode;
+import net.huadong.tech.privilege.entity.${entity};
+import net.huadong.tech.privilege.service.${servicename};
+import org.springframework.beans.factory.annotation.Autowired;
+import net.huadong.tech.springboot.core.HdEzuiDatagridData;
+import net.huadong.tech.springboot.core.HdEzuiQueryParams;
+import net.huadong.tech.springboot.core.HdEzuiSaveDatagridData;
+
+/**
+ * @author 
+ */
+@Component
+public class ${serviceImpName} implements ${servicename} {
+	@Override
+	public HdEzuiDatagridData find(HdQuery hdQuery) {
+		String jpql="select a from ${entity} a";
+		QueryParamLs paramLs = new QueryParamLs();
+		return JPAUtil.findByEz(jpql, paramLs , hdQuery);
+	}
+
+	@Override
+	public HdMessageCode save(HdEzuiSaveDatagridData<${entity}> hdEzuiSaveDatagridData) {
+		// TODO Auto-generated method stub
+		return JPAUtil.save(hdEzuiSaveDatagridData);
+	}
+
+}
+

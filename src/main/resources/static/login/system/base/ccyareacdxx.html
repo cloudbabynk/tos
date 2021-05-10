@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+
+<style type="text/css">
+	.container {  width: 150px;  background-color: #ddd;  position:relative }
+	.skills { text-align: right;    color: white;}
+	.css { background-color: #2196F3;}
+	.lab{	position:absolute;	right:1px; 	top:0px;}
+</style>
+
+
+<!-- 工具栏 -->
+<div th:id="CAreaToolBar1508123301002+${radi}" style="float: left">
+	<div>
+		<!-- 查询 -->
+		<span> 场号：<input th:id="cyAreaNo+${radi}" name="cyAreaNo"
+			placeholder="请输入场号" type="text" data-options="required:false"
+			style="width: 120px">
+<!-- 			堆场类型：<input th:id="cyTyp+${radi}" -->
+<!-- 			name="cyTyp" placeholder="请输入堆场类型" type="text" -->
+<!-- 			data-options="required:false" style="width: 120px">  -->
+			<a
+			class="easyui-linkbutton" th:id="query+${radi}">查询</a> <a
+			class="easyui-linkbutton" th:id='clear+${radi}'>清空</a>
+		</span>
+	</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="CAreaDatagrid1508123301002+${radi}" style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#CAreaDatagrid1508123301002[(${radi})]");
+	    // buttons
+	    // 刷新。
+	    $("#fresh[(${radi})]").on("click", function() {
+		    dg.datagrid("hdReload");
+	    });
+	    $('#cyAreaNo[(${radi})]').combobox({
+	        url : '../webresources/login/base/CCyArea/getCCyAreaDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 200,
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    // 清空。
+	    $("#clear[(${radi})]").on("click", function() {
+	       $("#cyAreaNo[(${radi})]").val("");
+	       $("#cyTyp[(${radi})]").val("");
+	      });
+
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+		    $("#CAreaDatagrid1508123301002[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    var cyAreaNo = $("#cyAreaNo[(${radi})]").combobox('getValue');
+// 		    var cyTyp = $("#cyTyp[(${radi})]").val();
+		    onlinquery.add("cyAreaNo", cyAreaNo);
+// 		    onlinquery.add("cyTyp", cyTyp);
+		    return onlinquery.build();
+	    }
+
+	    $("#CAreaDatagrid1508123301002[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/base/CCyArea/findCdxx",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#CAreaToolBar1508123301002" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+
+	        }, {
+
+	            field : "cyAreaNam",
+	            title : '堆场名称',
+	            multiSort : true,
+	            halign : "center",
+	            align : "left",
+	            sortable : false
+	        }, {
+	            field : "zdcc",
+	            title : "最大场存",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        }, {
+	            field : "jcs",
+	            title : "车数",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        }, {
+
+	            field : "sbs",
+	            title : '设备数',
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        }, {
+
+	            field : "per",
+	            title : '占用率',
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false,
+	            width:160,
+	            formatter : function(index,row,value) {
+					var ch=(Number(row.sbs)+Number(row.jcs))/Number(row.zdcc);
+					if(ch>1)ch=1;
+					
+					var appCh=parseFloat((ch*100).toFixed(2));
+					return "<div class='container'> "+
+					 " <div class='skills css' style='width:"+appCh+"%'>&nbsp;</div> "+
+					 " <div class='lab'>"+appCh+"%</div> "+
+					 " </div>";
+	            }
+	        }, {
+	            field : "per2",
+	            title : '周转率',
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false,
+	            width:160,
+	            formatter : function(index,row,value) {
+					var ch=row.otNum!="0"?Number(row.otNum)/Number(row.inNum):0;
+					var appCh=parseFloat((ch*100).toFixed(2));
+					return "<div class='container'> "+
+					 " <div class='skills css' style='width:"+appCh+"%'>&nbsp;</div> "+
+					 " <div class='lab'>"+appCh+"%</div> "+
+					 " </div>";
+	            }
+	        }
+
+	        ] ],
+	        onDblClickRow : function(rowIndex, rowData) {	        	
+	 		    HdUtils.dialog.show({
+	 		        width : 800,
+	 		        height : 400,
+	 		        title : '堆场车辆信息',
+	 		        href : "../webresources/login/base/CCyArea/dcclxxhzcx.htm?cyAreaNo=" + rowData.cyAreaNo,
+	 		        isSaveHandler : false
+	 		    });
+	        }
+	    });
+	    $("#CAreaDatagrid1508123301002" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

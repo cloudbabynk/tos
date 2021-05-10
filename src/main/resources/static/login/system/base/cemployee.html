@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="DayWorkClassToolBar1508123307299+${radi}"
+	style="float: left">
+	<div>
+		<!-- 查询 -->
+		<span> 工号：<input th:id="empNo+${radi}" name="empNo"
+			placeholder="请输入工号" type="text" data-options="required:false"
+			style="width: 120px">姓名：<input th:id="empNam+${radi}" name="empNam"
+			placeholder="请输入姓名" type="text" data-options="required:false"
+			style="width: 120px">性别：<input th:id="sex+${radi}"
+			name="sex"  data-options="required:false" style="width: 120px">
+			班组：<input th:id="classNo+${radi}" type="text"  style="width: 120px"> 
+			工种：<input th:id="empTypCod+${radi}" type="text"  style="width: 120px">  <a
+			class="easyui-linkbutton" th:id="query+${radi}">查询</a> 
+			<a class="easyui-linkbutton" th:id='clear+${radi}'>重置</a>
+			<shiro:hasPermission name="webresources:login:CEmployee:add">
+			<a	class="easyui-linkbutton" th:id='add+${radi}' iconCls="icon-add" plain="false">新增</a> 
+			</shiro:hasPermission>
+			<shiro:hasPermission name="webresources:login:CEmployee:update">
+			<a
+			class="easyui-linkbutton" th:id='edit+${radi}'>编辑</a> 
+			</shiro:hasPermission>
+			<shiro:hasPermission name="webresources:login:CEmployee:delete">
+			<a
+			class="easyui-linkbutton" th:id='delete+${radi}'>删除</a>
+			</shiro:hasPermission> <a
+			class="easyui-linkbutton" th:id='fresh+${radi}'>刷新</a>
+			
+		</span>
+	</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="DayWorkClassDatagrid1508123307299+${radi}"
+	style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#DayWorkClassDatagrid1508123307299[(${radi})]");
+	    $.parser.parse($('#DayWorkClassToolBar1508123307299[(${radi})]'));
+	    $('#empTypCod[(${radi})]').combobox({
+	        url : '../webresources/login/base/CEmployee/getDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        onSelect : function(rec) {
+	        	return rec.value;
+	        }
+	    });
+	    $('#classNo[(${radi})]').combobox({
+	        url : '../webresources/login/base/CEmployee/getDrop1',
+	        valueField : 'value',
+	        textField : 'label',
+	        onSelect : function(rec) {
+	        	return rec.value;
+	        }
+	    });
+	    $('#sex[(${radi})]').combobox(HdUtils.code.scode({
+		    fieldCod : 'SEX_TYP'
+	    }, {
+		    required : false
+	    }));
+	    // buttons
+	    // 增加。
+	    $("#add[(${radi})]").on("click", function() {
+	    	addoredit("");
+	    });
+	    // 编辑。
+	    $("#edit[(${radi})]").on("click", function() {
+	    	var data = dg.datagrid("getSelected");
+		    if (data == null || data == undefined) {
+			    HdUtils.messager.info('请选择一条数据进行编辑！');
+			    return;
+		    }
+		    var empNo = data.empNo;
+		    addoredit(empNo);
+	    });
+	    function addoredit(empNo) {
+		    HdUtils.dialog.setValue({
+			    'empNo' : empNo
+		    });
+		    HdUtils.dialog.setValue({
+			    'radi' : radi
+		    });
+		    HdUtils.dialog.show({
+		        width : 800,
+		        height : 300,
+		        title : '雇员资料',
+		        href : "../login/system/base/cemployeeform.html",
+		        isSaveHandler : true
+		    });
+	    }
+	    // 删除。
+	    $("#delete[(${radi})]").on("click", function() {
+	    	 var selRow = $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("getChecked");
+	            if (selRow.length == 0) {
+		            HdUtils.messager.info('请至少选择一条数据！');
+		            return false;
+	            }
+	            var ids = '';
+	            $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+		            if (r) {
+			            for (var i = 0; i < selRow.length; i++) {
+				            ids += selRow[i].empNo + ",";
+			            }
+			            HdUtils.ajax.post({
+			                url : "../webresources/login/base/CEmployee/removeAll?empNos=" + ids,
+			                success : function(data) {
+				                HdUtils.messager.bottomRight(data.message);
+				                $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("hdReload");
+			                }
+			            });
+		            }
+	            });
+	    });
+	    // 刷新。
+	    $("#fresh[(${radi})]").on("click", function() {
+		    dg.datagrid("hdReload");
+	    });
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+		    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+	    // 清空。
+	    $("#clear[(${radi})]").on("click", function() {
+	    	$("#empNo[(${radi})]").val("");
+	    	$("#empNam[(${radi})]").val("");
+	    	$('#empTypCod[(${radi})]').combobox('setValue', '');
+	    	$('#classNo[(${radi})]').combobox('setValue', '');
+	    	$('#sex[(${radi})]').combobox('setValue', '');
+	        $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+				    queryParams : query(),
+			    })
+	    });
+
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    var empNo = $("#empNo[(${radi})]").val();
+		    var empNam = $("#empNam[(${radi})]").val();
+		    var empTypCod = $("#empTypCod[(${radi})]").combobox('getValue');
+		    var classNo = $("#classNo[(${radi})]").combobox('getValue');
+		    var sex = $("#sex[(${radi})]").combobox('getValue');
+		    onlinquery.add("empNo", empNo);
+		    onlinquery.add("empTypCod", empTypCod);
+		    onlinquery.add("classNo", classNo);
+		    onlinquery.add("empNam", empNam);
+		    onlinquery.add("sex", sex);
+		    return onlinquery.build();
+	    }
+
+	    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/base/CEmployee/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#DayWorkClassToolBar1508123307299" + /*[[${radi}]]*/'',
+	        fit : true,
+	        onDblClickRow : function(rowIndex, rowData) {
+	        	var empNo = rowData.empNo;
+			    addoredit(empNo);
+	        },
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+
+	        }, {
+
+	            field : "empNo",
+	            title : '工号',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+
+	            field : "empNam",
+	            title : '姓名',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "classNoNam",
+	            title : "班组",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "sex",
+	            title : "性别",
+	            multiSort : true,
+	            halign : "center",
+	            formatter : function (value){
+	            	return HdUtils.code.name('SEX_TYP',value);
+	            },
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+	            field : "empTypCodNam",
+	            title : "工种",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+	            field : "onDutyId",
+	            title : "是否在职",
+	            multiSort : true,
+	            align : "center",
+	            formatter : function(value) {
+					if (value != null && value != undefined) {
+						if (value == 0) {
+							value = "×";
+							return value;
+						} else {
+							value = "√";
+							return value;
+							 }
+					} else {
+							return value;
+						}
+				},
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+
+	            field : "remarks",
+	            title : "备注",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "recNam",
+	            title : '<font color="red">录入员</font>',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "recTim",
+	            title : '<font color="red">录入时间</font>',
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.datetime,
+	            width : 120,
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "updNam",
+	            title : '<font color="red">修改人</font>',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "updTim",
+	            title : '<font color="red">修改时间</font>',
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.datetime,
+	            width : 120,
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }
+
+	        ] ]
+	    });
+	    $("#DayWorkClassDatagrid1508123307299" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

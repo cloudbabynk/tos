@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="ShipBillToolBar1508123301002+${radi}">
+		<span> 
+			<a class="easyui-linkbutton" th:id='chooseShip'>选船</a>
+			船名：<input th:id="shipNam+${radi}" name="shipNam" type="text" style="width: 80px"/>
+			航次：<input th:id="voyage+${radi}" name="voyage" type="text" style="width: 80px"/>
+			    提单号：<input th:id="billNo+${radi}" name="billNo" type="text" style="width: 80px"/>
+			进出口：<input th:id="iEId+${radi}" name="iEId" type="text" style="width: 80px"/>
+			品牌：<input th:id="brandCod+${radi}" name="brandCod" type="text" style="width: 100px"/>
+			发货人：<input th:id="consignCod+${radi}" name="consignCod" type="text" style="width: 120px"/>
+			<a class="easyui-linkbutton" th:id="query+${radi}">查询</a>
+		</span>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="ShipBillDatagrid1508123301002+${radi}" style="height: 280px"></table>
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#ShipBillDatagrid1508123301002[(${radi})]");
+	    var shipNo;
+	    $('#iEId[(${radi})]').combobox(HdUtils.code.scode({
+		    fieldCod : 'I_E_ID'
+	    }, {
+		    required : false
+	    }));
+	    $('#brandCod[(${radi})]').combobox({
+	        url : '../webresources/login/base/CCarTyp/getCBrandDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 200,
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $('#consignCod[(${radi})]').combobox({
+	        url : '../webresources/login/base/CClientCod/getCClientCodDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $("#query[(${radi})]").on("click", function() {
+	   	    $("#ShipBillDatagrid1508123301002[(${radi})]").datagrid({
+			    queryParams : query(),
+		    });
+	    });
+	    function query() {
+		     var onlinquery = new HdQuery();
+		     onlinquery.add("shipNo",shipNo);
+		     onlinquery.add("billNo",$("#billNo[(${radi})]").val());
+		     onlinquery.add("iEId",$("#iEId[(${radi})]").combobox('getValue'));
+		     onlinquery.add("brandCod",$("#brandCod[(${radi})]").combobox('getValue'));
+		     onlinquery.add("consignCod",$("#consignCod[(${radi})]").combobox('getValue'));
+		    return onlinquery.build(); 
+	    }
+	    $("#chooseShip").bind("click", function() {
+            HdUtils.selShip(callback);
+        });
+	    function callback(data){
+        	$("#shipNam[(${radi})]").val(data.cShipNam);
+        	$("#voyage[(${radi})]").val(data.ivoyage+'/'+data.evoyage);
+        	$("#tradeId[(${radi})]").val(data.tradeId);
+        	shipNo = data.shipNo;
+        	  $('#ShipBillDatagrid1508123301002[(${radi})]').datagrid({
+           	   queryParams : query(),	
+           })  	
+        }
+	    $('#ShipBillDatagrid1508123301002[(${radi})]').datagrid({
+            striped : true,
+            url : "../webresources/login/ship/ShipBill/findSBQuery",
+            queryParams : query(),
+            method : "post",
+            pagination : true,
+            singleSelect : true,
+            selectOnCheck : true,
+            checkOnSelect : true,
+            rownumbers : true,
+            pageSize : 20,
+            fit : true,
+            onSelect(rowIndex,rowData){
+           	 HdUtils.dialog.setValue({
+           		 'billNo' : rowData.billNo
+        	    });
+	           	var billNo = rowData.billNo;
+	           	function queryBillCar(){
+                 	var builder = new HdQuery();
+                   builder.add("billNo", billNo);
+                   return builder.build();
+               };
+               var radibillcar = HdUtils.dialog.getValue('radibillcar');
+               $('#BillCarDatagrid1508123301002'+radibillcar).datagrid({
+                   	 queryParams : queryBillCar(),
+                  });
+		    },
+            fitColumns : false,
+            columns : [ [ {
+                field : "ck",
+                checkbox : true,
+                sortable : false,
+
+            }, {
+
+                field : "cShipNam",
+                title : '船名',
+                multiSort : true,
+                halign : "center",
+                editor : {
+                    type : "validatebox",
+                    options : {
+	                    required : false
+                    }
+                },
+                sortable : false
+            }, {
+
+                field : "voyage",
+                title : '航次',
+                multiSort : true,
+                halign : "center",
+                editor : {
+                    type : "validatebox",
+                    options : {
+	                    required : false
+                    }
+                },
+                sortable : false
+            }
+            , {
+
+                field : "billNo",
+                title : '提单号',
+                multiSort : true,
+                halign : "center",
+                editor : {
+                    type : "validatebox",
+                    options : {
+	                    required : false
+                    }
+                },
+                sortable : false
+            }, {
+
+                field : "iEId",
+                title : '进出口',
+                multiSort : true,
+                halign : "center",
+                editor : {
+                    type : "combobox",
+                    options : HdUtils.code.scode({
+	                    fieldCod : 'I_E_ID'
+                    }, {
+	                    required : true
+                    })
+                },
+                formatter : function(value) {
+	                return HdUtils.code.name('I_E_ID', value);
+                },
+                sortable : false
+            }
+            , {
+
+                field : "tradeId",
+                title : '内外贸',
+                multiSort : true,
+                halign : "center",
+                editor : {
+                    type : "combobox",
+                    options : HdUtils.code.scode({
+	                    fieldCod : 'TRADE_ID'
+                    }, {
+	                    required : true
+                    })
+                },
+                formatter : function(value) {
+	                return HdUtils.code.name('TRADE_ID', value);
+                },
+                sortable : false
+            }, {
+
+                field : "brandCod",
+                title : '品牌',
+                multiSort : true,
+                halign : "center",
+                editor : {
+                    type : "validatebox",
+                    options : {
+	                    required : false
+                    }
+                },
+                formatter: function(value,row,index){
+	            	return row.brandNam;
+				},
+                sortable : false
+            }, {
+
+                field : "carTyp",
+                title : '车型',
+                multiSort : true,
+                halign : "center",
+                editor : {
+                    type : "validatebox",
+                    options : {
+	                    required : false
+                    }
+                },
+                formatter: function(value,row,index){
+                	return row.carTypNam;
+				},
+                sortable : false
+            }, {
+
+                field : "carNum",
+                title : '车数',
+                multiSort : true,
+                halign : "center",
+                editor : {
+                    type : "validatebox",
+                    options : {
+	                    required : false
+                    }
+                },
+                sortable : false
+            }, {
+
+                field : "weights",
+                title : '总吨数',
+                multiSort : true,
+                halign : "center",
+                editor : {
+                    type : "validatebox",
+                    options : {
+	                    required : false
+                    }
+                },
+                sortable : false
+            }, {
+
+                field : "pieces",
+                title : '总件数',
+                multiSort : true,
+                halign : "center",
+                editor : {
+                    type : "validatebox",
+                    options : {
+	                    required : false
+                    }
+                },
+                sortable : false
+            }, {
+                field : "consignCod",
+                width:160,
+                title : "发货人",
+                multiSort : true,
+                halign : "center",
+                editor : {
+                    type : "validatebox",
+                    options : {
+	                    required : false
+                    }
+                },
+                formatter: function(value,row,index){
+                	return row.consignNam;
+				},
+                sortable : false
+            }
+            , {
+
+                field : "receiveCod",
+                width:160,
+                title : "收货人",
+                multiSort : true,
+                halign : "center",
+                editor : {
+                    type : "validatebox",
+                    options : {
+	                    required : false
+                    }
+                },
+                formatter: function(value,row,index){
+                	return row.receiveNam;
+				},
+                sortable : false
+            }, {
+                field : "loadPortCod",
+                title : "装货港",
+                multiSort : true,
+                halign : "center",
+                editor : {
+                    type : "validatebox",
+                    options : {
+	                    required : false
+                    }
+                },
+                formatter: function(value,row,index){
+	            	return row.loadPortNam;
+				},
+                sortable : false
+            }, {
+
+                field : "tranPortCod",
+                title : "卸货港",
+                multiSort : true,
+                halign : "center",
+                editor : {
+                    type : "validatebox",
+                    options : {
+	                    required : false
+                    }
+                },
+                formatter: function(value,row,index){
+                	return row.tranPortNam;
+				},
+                sortable : false
+            }
+            , {
+
+                field : "remarks",
+                title : '备注',
+                multiSort : true,
+                halign : "center",
+                editor : {
+                    type : "validatebox",
+                    options : {
+	                    required : false
+                    }
+                },
+                sortable : false
+            } ] ]
+        });
+        $("#ShipBillDatagrid1508123301002"+ /*[[${radi}]]*/).datagrid("hdGetColumnNames");   });
+    /*]]>*/
+</script>
+</html>

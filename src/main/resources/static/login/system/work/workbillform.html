@@ -1,0 +1,290 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#WorkBillForm1507959148645");
+	    var workbillNo = HdUtils.dialog.getValue("workbillNo");
+	    var workDte = HdUtils.dialog.getValue("workDte");
+	    var workRunCod = HdUtils.dialog.getValue("workRunCod");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    var type;
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/work/WorkBill/findone?workbillNo=" + workbillNo,
+	        success : function(data) {
+		        $("#WorkBillForm1507959148645").form("loadData", data);
+		        if (!workbillNo) {
+			        $("#workDte").datebox("setValue", workDte);
+			        $("#workRunCod").combobox('setValue', workRunCod);
+		        }
+	        }
+	    })
+	    $('#workRunCod').combobox({
+	        url : '../webresources/login/damage/MDeliveryRecord/getClassRunDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 'auto',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $('#fDirectorCod').combobox({
+	        url : '../webresources/login/work/WorkBill/getCEmployeeDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $('#sDirectorCod').combobox({
+	        url : '../webresources/login/work/WorkBill/getCEmployeeDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    //作业类型
+	    $('#workTyp').combobox({
+	        url : '../webresources/login/work/WorkBill/getSyscodeDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        required : true,
+	        onSelect : function(rec) {
+		        return rec.value;
+	        },
+	        onChange : function(n, o) {
+		        if (n) {
+			        type = n;
+			        if (type == 'TI' || type == 'TO') {
+				        $('#contractNo').combobox({
+				            url : '../webresources/login/work/WorkBill/getContractNoDrop?contractTyp=' + n,
+				            valueField : 'value',
+				            textField : 'label',
+				            onSelect : function(rec) {
+					            return rec.value;
+				            }
+				        });
+			        }
+			        if (type == 'MV') {
+				        $('#contractNo').combobox({
+				            url : '../webresources/login/work/WorkBill/getMoveCarPlanDrop',
+				            valueField : 'value',
+				            textField : 'label',
+				            onSelect : function(rec) {
+					            return rec.value;
+				            }
+				        });
+			        }
+
+		        }
+	        }
+	    });
+	    $("#query").on("click", function() {
+		    if (!type) {
+			    HdUtils.messager.info("请先选择作业类型！");
+			    return false;
+		    }
+		    HdUtils.selShip(callback);
+
+	    });
+	    function callback(data) {
+		    $("#shipNam").val(data.cShipNam);
+		    $("#shipNo").val(data.shipNo);
+		    if (type == 'SI') {
+			    $("#voyage").val(data.ivoyage);
+		    } else if (type == 'SO') {
+			    $("#voyage").val(data.evoyage);
+		    }
+	    }
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+		    var isValss = $("#WorkBillForm1507959148645").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#WorkBillForm1507959148645").serializeObject();
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/work/WorkBill/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#DayWorkClassDatagrid1508123307299" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+    });
+	function addNum(obj){
+    	if(obj.id == 'jtcNum'){
+    		if(obj.value > 18){
+    			$("#jtcNum").val("");
+				HdUtils.messager.bottomRight("交通车数量最多为18！");
+				obj.focus();
+		        return false;
+    		}
+    	}
+    	if(obj.id == 'ccNum'){
+    		if(obj.value > 6){
+    			$("#ccNum").val("");
+				HdUtils.messager.bottomRight("叉车数量最多为6！");
+				obj.focus();
+		        return false;
+    		}
+    	}
+    	if(obj.id == 'qycNum'){
+    		if(obj.value > 4){
+    			$("#qycNum").val("");
+				HdUtils.messager.bottomRight("牵引车数量最多为4！");
+				obj.focus();
+		        return false;
+    		}
+    	}
+    }
+</script>
+<form id="WorkBillForm1507959148645">
+    <input id="driverBillConf" name="driverBillConf" type="hidden">
+    <input id="tallyBillConf" name="tallyBillConf" type="hidden">
+    <input id="machBillConf" name="machBillConf" type="hidden">
+    <input id="checkId" name="checkId" type="hidden">
+    <input id="checkerMan" name="checkerMan" type="hidden">
+    <input id="machTxt" name="machTxt" type="hidden">
+    <input id="shipNo" name="shipNo" type="hidden">
+    
+	<table id="WorkBillTable1507959148645" style="height: 75%; width: 80%"
+		class="tableform">
+		<tr>
+			<th>作业票号：</th>
+			<td><input id="workbillNo" name="workbillNo"
+				data-options="required:false" class="easyui-validatebox"
+				readOnly="readonly" /></td>
+			<th>班次日期：</th>
+			<td><input id="workDte" name="workDte" readOnly="readonly"
+				data-options="required:true" class="easyui-datebox" /></td>
+			<th>班次：</th>
+			<td><input id="workRunCod" name="workRunCod" readOnly="readonly"
+				data-options="required:false" class="easyui-validatebox" /></td>
+		</tr>
+		<tr>
+			<th>作业类型：</th>
+			<td><input id="workTyp" name="workTyp"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="3" /></td>
+			<th>委托号：</th>
+			<td><input id="contractNo" name="contractNo"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="3" /></td>
+		</tr>
+		<tr>
+			<th>船名：</th>
+			<td><input id="shipNam" name="shipNam"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="3" /></td>
+			<th>航次：</th>
+			<td><input id="voyage" name="voyage"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="3" /></td>
+			<td><a class="easyui-linkbutton" id="query">选船</a></td>
+		</tr>
+		<tr>
+			<th>开始时间：</th>
+			<td><input id="begTim" name="begTim"
+				data-options="required:true" class="easyui-datetimebox" /></td>
+			<th>结束时间：</th>
+			<td><input id="endTim" name="endTim"
+				data-options="required:true" class="easyui-datetimebox" /></td>
+			<th>工时：</th>
+			<td><input id="worktimeNum" name="worktimeNum"
+				data-options="required:false"
+				data-options="min:0,max:1000,precision:2" class="easyui-numberbox" /></td>
+		</tr>
+		<tr>
+			<th>指导员1：</th>
+			<td><input id="fDirectorCod" name="fDirectorCod"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="10" /></td>
+			<th>指导员2：</th>
+			<td><input id="sDirectorCod" name="sDirectorCod"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="10" /></td>
+		</tr>
+		<tr>
+			<th>理货员数量：</th>
+			<td><input id="tallyNum" name="tallyNum"
+				data-options="min:0,max:1000,precision:0" class="easyui-numberbox"
+				maxlength="3" /></td>
+			<th>司机数量：</th>
+			<td><input id="driverNum" name="driverNum"
+				data-options="min:0,max:1000,precision:0" class="easyui-numberbox"
+				maxlength="3" /></td>
+				
+			
+		</tr>
+<!-- 		<tr> -->
+<!-- 		<th>机械情况：</th> -->
+<!-- 		<td colspan="7"><textarea id="machTxt" name="machTxt" readOnly="readonly" -->
+<!-- 					data-options="required:false" rows="2" style="width: 96%;resize:none" -->
+<!-- 					maxlength="255" ></textarea></td> -->
+<!-- 		</tr> -->
+		<tr>
+			<th>交通车数量：</th>
+			<td><input id="jtcNum" name="jtcNum" class="easyui-numberbox" onchange="addNum(this);"
+				maxlength="2" /></td>
+			<th>叉车数量：</th>
+			<td><input id="ccNum" name="ccNum" class="easyui-numberbox" onchange="addNum(this);"
+				maxlength="1" /></td>
+			<th>牵引车数量：</th>
+			<td><input id="qycNum" name="qycNum" class="easyui-numberbox" onchange="addNum(this);"
+				maxlength="1" /></td>
+		</tr>
+		<tr>
+			<th>计划件数：</th>
+			<td><input id="planNum" name="planNum" class="easyui-numberbox" "
+				data-options="min:0,max:10000,precision:0" /></td>
+			<th>计划吨数：</th>
+			<td><input id="planWeight" name="planWeight" class="easyui-numberbox" "
+				data-options="min:0,max:10,precision:3" /></td>
+			<th>完成轿车数：</th>
+			<td><input id="workCarNum" name="workCarNum" class="easyui-numberbox" "
+				data-options="min:0,max:10000,precision:0"/></td>
+		</tr>
+		<tr>
+			<th>完成大车数：</th>
+			<td><input id="workTruckNum" name="workTruckNum" class="easyui-numberbox" "
+				data-options="min:0,max:10000,precision:0" /></td>
+			<th>完成设备数：</th>
+			<td><input id="workBulkNum" name="workBulkNum" class="easyui-numberbox" "
+				data-options="min:0,max:10000,precision:0" /></td>
+			<th>完成油品吨数：</th>
+			<td><input id="workBulkWeight" name="workBulkWeight" class="easyui-numberbox" "
+				data-options="min:0,max:10,precision:3" /></td>
+		</tr>
+	</table>
+</form>

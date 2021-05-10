@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="CShipLineToolBar1508123309001+${radi}" style="float: left">
+	<div>
+		<!-- 查询 -->
+		<span> 航线代码：<input th:id="shipLineCod+${radi}"
+			name="shipLineCod" placeholder="请输入航线代码" type="text"
+			data-options="required:false" style="width: 120px">航线名称：<input
+			th:id="shipLineNam+${radi}" name="shipLineNam" placeholder="请输入航线名称"
+			type="text" data-options="required:false" style="width: 120px">
+			航线类别：<input th:id="lineId+${radi}" name="lineId"
+			placeholder="请输入航线类别" type="text" data-options="required:false"
+			style="width: 120px"> 内外贸：<input th:id="tradeId+${radi}"
+			name="tradeId" placeholder="请输入内外贸" type="text"
+			data-options="required:false" style="width: 120px"> <a
+			class="easyui-linkbutton" th:id="query+${radi}">查询</a> <a
+			class="easyui-linkbutton" th:id='clear+${radi}'>重置</a> <shiro:hasPermission
+				name="webresources:login:CShipLine:add">
+				<a class="easyui-linkbutton" th:id='add+${radi}' iconCls="icon-add"
+					plain="false">新增</a>
+			</shiro:hasPermission> <shiro:hasPermission name="webresources:login:CShipLine:update">
+				<a class="easyui-linkbutton" th:id='edit+${radi}'>编辑</a>
+			</shiro:hasPermission> <shiro:hasPermission name="webresources:login:CShipLine:delete">
+				<a class="easyui-linkbutton" th:id='delete+${radi}'>删除</a>
+			</shiro:hasPermission> <a class="easyui-linkbutton" th:id='fresh+${radi}'>刷新</a>
+
+		</span>
+	</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="CShipLineDatagrid1508123309001+${radi}"
+	style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#CShipLineDatagrid1508123309001[(${radi})]");
+	    $.parser.parse($('#CShipLineToolBar1508123309001[(${radi})]'));
+	    $('#lineId[(${radi})]').combobox(HdUtils.code.scode({
+		    fieldCod : 'LINE_ID'
+	    }, {
+		    required : false
+	    }));
+	    $('#tradeId[(${radi})]').combobox(HdUtils.code.scode({
+		    fieldCod : 'TRADE_ID'
+	    }, {
+		    required : false
+	    }));
+
+	    // buttons
+	    // 增加。
+	    $("#add[(${radi})]").on("click", function() {
+		    addoredit("");
+	    });
+	    // 编辑。
+	    $("#edit[(${radi})]").on("click", function() {
+		    var data = dg.datagrid("getSelected");
+		    if (data == null || data == undefined) {
+			    HdUtils.messager.info('请选择一条数据进行编辑！');
+			    return;
+		    }
+		    var shipLineCod = data.shipLineCod;
+		    addoredit(shipLineCod);
+	    });
+	    function addoredit(shipLineCod) {
+		    HdUtils.dialog.setValue({
+			    'shipLineCod' : shipLineCod
+		    });
+		    HdUtils.dialog.setValue({
+			    'radi' : radi
+		    });
+		    HdUtils.dialog.show({
+		        width : 500,
+		        height : 250,
+		        title : '航线信息',
+		        href : "../login/system/base/cshiplineform.html",
+		        isSaveHandler : true
+		    });
+	    }
+	    // 删除。
+	    $("#delete[(${radi})]").on("click", function() {
+		    var selRow = $("#CShipLineDatagrid1508123309001[(${radi})]").datagrid("getChecked");
+		    if (selRow.length == 0) {
+			    HdUtils.messager.info('请至少选择一条数据！');
+			    return false;
+		    }
+		    var ids = '';
+		    $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+			    if (r) {
+				    for (var i = 0; i < selRow.length; i++) {
+					    ids += selRow[i].shipLineCod + ",";
+				    }
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/base/CShipLine/removeAll?shipLineCods=" + ids,
+				        success : function(data) {
+					        HdUtils.messager.bottomRight(data.message);
+					        $("#CShipLineDatagrid1508123309001[(${radi})]").datagrid("hdReload");
+				        }
+				    });
+			    }
+		    });
+	    });
+	    // 刷新。
+	    $("#fresh[(${radi})]").on("click", function() {
+		    dg.datagrid("hdReload");
+	    });
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+		    $("#CShipLineDatagrid1508123309001[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+	    //回车键触发操作
+	    $(document).keydown(function(event) {
+		    if (event.keyCode == 13) {
+			    $("#CShipLineDatagrid1508123309001[(${radi})]").datagrid({
+				    queryParams : query(),
+			    })
+		    }
+	    })
+	    // 清空。
+	    $("#clear[(${radi})]").on("click", function() {
+		    $("#shipLineCod[(${radi})]").val("");
+		    $("#shipLineNam[(${radi})]").val("");
+		    $('#lineId[(${radi})]').combobox('setValue', '');
+		    $('#tradeId[(${radi})]').combobox('setValue', '');
+		    $("#CShipLineDatagrid1508123309001[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    var shipLineCod = $("#shipLineCod[(${radi})]").val();
+		    var shipLineNam = $("#shipLineNam[(${radi})]").val();
+		    var lineId = $("#lineId[(${radi})]").combobox('getValue');
+		    var tradeId = $("#tradeId[(${radi})]").combobox('getValue');
+		    onlinquery.add("shipLineCod", shipLineCod);
+		    onlinquery.add("shipLineNam", shipLineNam);
+		    onlinquery.add("lineId", lineId);
+		    onlinquery.add("tradeId", tradeId);
+		    return onlinquery.build();
+	    }
+
+	    $("#CShipLineDatagrid1508123309001[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/base/CShipLine/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#CShipLineToolBar1508123309001" + /*[[${radi}]]*/'',
+	        fit : true,
+	        onDblClickRow : function(rowIndex, rowData) {
+	        	var shipLineCod = rowData.shipLineCod;
+			    addoredit(shipLineCod);
+	        },
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+
+	        }, {
+
+	            field : "shipLineCod",
+	            title : '航线代码',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "shipLineNam",
+	            title : "航线名称",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "cshipLineNam",
+	            title : "中文名称",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "eshipLineNam",
+	            title : "英文名称",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "lineId",
+	            title : "航线类别",
+	            multiSort : true,
+	            halign : "center",
+	            formatter : function(value) {
+		            if (value != null && value != undefined) {
+			            if (value == 2) {
+				            value = "国际";
+				            return value;
+			            } else {
+				            value = "国内";
+				            return value;
+			            }
+		            }
+	            },
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "tradeId",
+	            title : "内外贸",
+	            multiSort : true,
+	            halign : "center",
+	            formatter : function(value) {
+		            if (value != null && value != undefined) {
+			            if (value == 2) {
+				            value = "外贸";
+				            return value;
+			            } else {
+				            value = "内贸";
+				            return value;
+			            }
+		            } else {
+			            return value;
+		            }
+	            },
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "mainStem",
+	            title : "干支线标志",
+	            multiSort : true,
+	            halign : "center",
+	            formatter : function(value) {
+		            if (value != null && value != undefined) {
+			            if (value == 0) {
+				            value = "干线";
+				            return value;
+			            } else {
+				            value = "支线";
+				            return value;
+			            }
+		            } else {
+			            return value;
+		            }
+	            },
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "oceanId",
+	            title : "近远洋标志",
+	            multiSort : true,
+	            halign : "center",
+	            formatter : function(value) {
+		            if (value != null && value != undefined) {
+			            if (value == 0) {
+				            value = "近洋";
+				            return value;
+			            } else {
+				            value = "远洋";
+				            return value;
+			            }
+		            } else {
+			            return value;
+		            }
+	            },
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "recNam",
+	            title : '<font color="red">录入员</font>',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "recTim",
+	            title : '<font color="red">录入时间</font>',
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.datetime,
+	            width : 120,
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "updNam",
+	            title : '<font color="red">修改人</font>',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "updTim",
+	            title : '<font color="red">修改时间</font>',
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.datetime,
+	            width : 120,
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }
+
+	        ] ]
+	    });
+	    $("#CShipLineDatagrid1508123309001" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

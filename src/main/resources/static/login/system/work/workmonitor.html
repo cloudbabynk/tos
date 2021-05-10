@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<script type="text/javascript" src="../../../js/jedate/jquery.jedate.js">
+	<script type="text/javascript" src="../../../js/jedate/test/jedate-test.js">
+</script>
+<link type="text/css" rel="stylesheet"
+	href="../../../js/jedate/skin/jedate.css">
+<link type="text/css" rel="stylesheet"
+	href="../../../js/jedate/test/jeDate-test.css">
+</script>
+<style type="text/css">
+
+.container {  width: 150px;  background-color: #ddd;  position:relative }
+.skills { text-align: right;    color: white;}
+.css { background-color: #2196F3;}
+.lab{	position:absolute;	right:1px; 	top:0px;}
+
+</style>
+
+
+<!-- 工具栏 -->
+<div class="easyui-layout" style="width: 100%; height: 100%;"  data-options="fit:true" id="shipbillquery298">
+	<div id="workprogresshtml"	data-options="region:'east',split:true,title:'堆场作业进度'" style="height: 100%; width:780px">
+	<table>
+		<tr>
+			<td >
+				<div id="workprogress" style="height: 275px; width:420px"></div>
+			</td>
+			<td>
+				<div id="workprogressTol" style="height: 275px; width:420px"></div>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<div id="workprogressMon" style="height: 275px; width:420px"></div>
+			</td>
+			<td>
+				<div id="workprogressTolMon" style="height: 275px; width:420px"></div>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<div id="workprogressYear" style="height: 275px; width:420px"></div>
+			</td>
+			<td>
+				<div id="workprogressTolYear" style="height: 275px; width:420px"></div>
+			</td>
+		</tr>
+	</table>		
+	</div>
+	
+	<div data-options="region:'center',title:'堆场作业计划'"  style="height: 100%; width: 100%">
+				<div th:id="ShipBillToolBar1508123301002+${radi}">
+					<span>
+						 委托号：<input th:id="contractNo+${radi}" name="contractNo" type="text" data-options="required:false"	style="width:80px"/>
+						作业类型：<input th:id="workTyp+${radi}"	name="workTyp" type="text" data-options="required:false"	style="width:80px"/> 
+						货代：<input th:id="consignCod+${radi}" name="consignCod" type="text" data-options="required:false" style="width: 105px"><br/>	
+						作业公司：<input th:id="unit+${radi}"	name="unit" type="text" data-options="required:false"	style="width:80px"/> <br/>
+						有效日期：<input th:id="validatDte+${radi}" name="validatDte" class="easyui-datebox" style="width: 100px" />-
+						<input th:id="validatDte1+${radi}" name="validatDte1" class="easyui-datebox" style="width: 100px" />		
+						<a class="easyui-linkbutton"	th:id="query+${radi}">查询</a> 
+						<a class="easyui-linkbutton" th:id='fresh+${radi}'>刷新</a>
+					</span>
+				</div>
+				<div th:id="WorkPlanDatagrid1508123301002+${radi}" style="height:100px;"></div>
+	</div>
+	
+
+</div>
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#WorkPlanDatagrid1508123301002[(${radi})]");
+	    
+	    $('#workTyp[(${radi})]').combobox(HdUtils.code.scode({
+            fieldCod : 'WORK_TYP' }, { required : false  }) 
+        );
+	    $('#unit[(${radi})]').combobox({
+	        url : '../webresources/login/ship/ShipThruputRecord/getCDock',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 120
+	    });
+	    $('#consignCod[(${radi})]').combobox({
+	        url : '/webresources/login/contract/ContractIeDoc/getCClientCodDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        mode : 'remote',
+	        panelHeight:380,
+	        panelWidth:240,
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    var curDate=HdUtils.ezui.dateBox.getCurentDateStr;
+	    
+	    $("#validatDte[(${radi})]").datebox({
+	    	value:curDate()
+		});
+	    $("#validatDte1[(${radi})]").datebox({
+	    	value:curDate()
+		});
+
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+		    $("#WorkPlanDatagrid1508123301002[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+		    loadChart();//新增加的点击查询重载chart
+	    });
+	    function formEdit(contractNo){//编辑增加统一入口
+		    HdUtils.dialog.setValue({
+			    'contractNo' : contractNo,
+			    'confirmId' : '1',
+			     data : {
+			        cShipNam : '',
+			        shipNo : '',
+			        voyage : '',
+			        tradeId : '',
+			        dockCod : ''
+			    }
+		    });
+	   		 HdUtils.dialog.show({
+	   			width : 860,
+		        height : 380,
+		        title : '委托信息',
+		        href : "../login/system/contract/contractiedocform.html",
+		        isSaveHandler : false
+		    	});
+	    }
+	    function query() {
+ 	    	var contractNo=$("#contratcNo[(${radi})]").val();
+	    	var workTyp=$("#workTyp[(${radi})]").combobox('getValue');
+	    	var unit=$("#unit[(${radi})]").combobox('getValue');
+	    	var consignCod=$("#consignCod[(${radi})]").combobox('getValue');
+	    	var validatDte=$("#validatDte[(${radi})]").datebox("getValue"); 
+	    	var validatDte1=$("#validatDte1[(${radi})]").datebox("getValue"); 
+
+		     var onlinquery = new HdQuery();
+	     if(contractNo){onlinquery.add("contractNo",contractNo);}
+		     if(workTyp){onlinquery.add("workTyp",workTyp);}
+		     if(unit){onlinquery.add("unit",unit);}
+		     if(consignCod){onlinquery.add("consignCod",consignCod);}
+		     if(validatDte){onlinquery.add("validatDte",validatDte);} 
+		     if(validatDte1){onlinquery.add("validatDte1",validatDte1);} 
+		     return onlinquery.build(); 
+	    }
+	    
+
+	    
+	    $('#WorkPlanDatagrid1508123301002[(${radi})]').datagrid({
+            striped : true,
+            url : "../webresources/login/work/WorkQueue/findWorkPlan",
+            queryParams : query(),
+            method : "post",
+            pagination : true,
+            singleSelect : false,
+            selectOnCheck : true,
+            checkOnSelect : true,
+            rownumbers : true,
+            pageSize : 20,
+            toolbar : "#ShipBillToolBar1508123301002[(${radi})]",
+            fit : true,
+            onLoadSuccess(data){
+            	  $('#WorkPlanDatagrid1508123301002[(${radi})]').datagrid("selectRow",0);
+            },
+            onDblClickRow : function(rowIndex, rowData) {	        	
+	        	formEdit(rowData.contractNo)
+	        },
+            onSelect(rowIndex,rowData){
+	        	var rows=$("#WorkPlanDatagrid1508123301002[(${radi})]").datagrid('getChecked');
+	        	var contractNo = "";
+	           	var truckNo = "";
+	        	var planNum = 0;
+	        	var workNum= 0;
+	        	for(var i=0;i<rows.length;i++){
+	        		contractNo=contractNo+rows[i].contractNo+",";
+	        		truckNo=truckNo+rows[i].truckNo+",";
+	        		planNum=planNum+rows[i].planNum;
+	        		workNum=workNum+rows[i].workNum;
+	        	}
+	        	contractNo=contractNo.substring(0, contractNo.length - 1);
+	        	truckNo=truckNo.substring(0, truckNo.length - 1);
+	        	var json={"name":["计划数量","完成数量","未完成数量"],"data":[planNum,workNum,planNum-workNum<0?0:planNum-workNum]};
+	            var myChart = echarts.init(document.getElementById('workprogress'));
+                myChart.setOption({
+                	title: {   left: 'center',  text: '当计划日完成情况'  },
+                    tooltip: {  trigger: 'axis',  axisPointer: {   type: 'shadow'  }  },
+                    legend:{
+                        data:['作业进度']
+                    },
+                    xAxis: {   type: 'value',	boundaryGap: [0, 0.03]},
+           	        yAxis: { type: 'category',    data: ['计划数量','完成数量','未完成数量'] },
+                    series:[
+                        {
+                            name:'作业进度',type:'bar', barWidth:'25',
+                            data:json.data
+                        }
+                    ]
+                });
+                var monPam={};
+ 			    monPam.ctType="mon";
+ 			    monPam.contactNo=contractNo;
+ 			  
+ 			    $.ajax({
+ 			    	url: "/webresources/login/work/WorkQueue/findWorkCharts1",
+ 			        contentType:"application/json",
+ 			        type: "POST",
+ 			        data: $.toJSON(monPam),
+ 			        dataType: 'json',
+ 			        success: function (data) {
+ 					    var myChartTol = echarts.init(document.getElementById('workprogressMon'));
+ 					    var dataInfo=data.data;
+ 					    var yAxisArr=[];
+ 	    
+ 					    var objPlan={};
+ 					    objPlan.name="计划数量";
+ 					    objPlan.type='line';
+ 					    objPlan.data=[];
+ 					    
+ 					    var objAct={};
+ 					    objAct.name="完成数量";
+ 					    objAct.type='line';
+ 					    objAct.data=[];
+ 					    
+ 					    var objCha={};
+ 					    objCha.name="未完成数量";
+ 					    objCha.type='line';
+ 					    objCha.data=[];
+ 					    
+ 					    for(var i=0;i<dataInfo.length;i++){
+ 					    	yAxisArr.push(dataInfo[i].IN_GAT_DATA);
+ 					    	var ct=(dataInfo[i].PLAN_NUM-dataInfo[i].WORK_NUM)>0?dataInfo[i].PLAN_NUM-dataInfo[i].WORK_NUM:0;
+ 					    	objPlan.data.push(dataInfo[i].PLAN_NUM);
+ 					    	objAct.data.push(dataInfo[i].WORK_NUM);
+ 					    	objCha.data.push(ct);
+ 					    }
+ 					    var dataArr=[objPlan,objAct,objCha];
+ 					     var option = {
+ 					    	    title: {text: '当计划月完成情况' },
+ 					    	    tooltip: {trigger: 'axis'},
+ 					    	    legend: {
+ 					    	        data:['计划数量','完成数量','未完成数量']
+ 					    	    },
+ 					    	    xAxis: {
+ 					    	        type: 'category',
+ 					    	        boundaryGap: false,
+ 					    	        data: yAxisArr
+ 					    	    },
+ 					    	    yAxis: {
+ 					    	        type: 'value'
+ 					    	    },
+ 					    	    series:dataArr
+ 					    }; 
+ 					    myChartTol.setOption(option);
+ 			        }
+ 				}); 
+ 			    var yearPam={};
+		    	yearPam.ctType="year";
+		    	yearPam.contactNo=contractNo;
+		    	$.ajax({
+ 			    	url: "/webresources/login/work/WorkQueue/findWorkCharts1",
+ 			        contentType:"application/json",
+ 			        type: "POST",
+ 			        data: $.toJSON(yearPam),
+ 			        dataType: 'json',
+ 			        success: function (data) {
+ 					    var myChartTol = echarts.init(document.getElementById('workprogressYear'));
+ 					    var dataInfo=data.data;
+ 					    var yAxisArr=[];
+
+ 					    var objPlan={};
+ 					    objPlan.name="计划数量";
+ 					    objPlan.type='bar';
+ 					    objPlan.data=[];
+ 					    
+ 					    var objAct={};
+ 					    objAct.name="完成数量";
+ 					    objAct.type='bar';
+ 					    objAct.data=[];
+ 					    
+ 					    var objCha={};
+ 					    objCha.name="未完成数量";
+ 					    objCha.type='bar';
+ 					    objCha.data=[];
+ 					    
+ 					    for(var i=0;i<dataInfo.length;i++){
+ 					    	yAxisArr.push(dataInfo[i].IN_GAT_DATA);
+ 					    	var ct=(dataInfo[i].PLAN_NUM-dataInfo[i].WORK_NUM)>0?dataInfo[i].PLAN_NUM-dataInfo[i].WORK_NUM:0;
+ 					    	objPlan.data.push(dataInfo[i].PLAN_NUM);
+ 					    	objAct.data.push(dataInfo[i].WORK_NUM);
+ 					    	objCha.data.push(ct);
+ 					    }
+ 					    var dataArr=[objPlan,objAct,objCha];
+ 					     var option = {
+ 					    	    title: {text: '当计划年完成情况' },
+ 					    	    tooltip: {
+ 					    	    	trigger: 'axis',
+ 					    	    	 axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+ 					    	             type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+ 					    	         }
+ 					    	    },
+ 					    	    legend: {
+ 					    	        data:['计划数量','完成数量','未完成数量']
+ 					    	    },
+ 					    	    xAxis: {
+ 					    	        type : 'category',
+ 					    	        data: yAxisArr
+ 					    	    },
+ 					    	    yAxis: {
+ 					    	        type: 'value'
+ 					    	    },
+ 			                    series:dataArr
+ 					    }; 
+ 					    myChartTol.setOption(option);
+ 			        }
+ 				});  
+	        },
+	        /* 	onSelect(rowIndex,rowData){
+            	if(rowData){ 
+		           	var contractNo = rowData.contractNo;
+		           	var truckNo = rowData.truckNo;
+		        	var planNum =rowData.planNum;
+		        	var workNum=rowData.workNum;
+		        	var json={"name":["计划数量","完成数量","未完成数量"],"data":[planNum,workNum,planNum-workNum<0?0:planNum-workNum]};
+		            var myChart = echarts.init(document.getElementById('workprogress'));
+	                myChart.setOption({
+	                	title: {   left: 'center',  text: '当计划日完成情况'  },
+	                    tooltip: {  trigger: 'axis',  axisPointer: {   type: 'shadow'  }  },
+	                    legend:{
+	                        data:['作业进度']
+	                    },
+	                    xAxis: {   type: 'value',	boundaryGap: [0, 0.03]},
+	           	        yAxis: { type: 'category',    data: ['计划数量','完成数量','未完成数量'] },
+	                    series:[
+	                        {
+	                            name:'作业进度',type:'bar', barWidth:'25',
+	                            data:json.data
+	                        }
+	                    ]
+	                });
+	                var monPam={};
+	 			    monPam.ctType="mon";
+	 			    monPam.contactNo=contractNo;
+	 			  
+	 			    $.ajax({
+	 			    	url: "/webresources/login/work/WorkQueue/findWorkCharts",
+	 			        contentType:"application/json",
+	 			        type: "POST",
+	 			        data: $.toJSON(monPam),
+	 			        dataType: 'json',
+	 			        success: function (data) {
+	 					    var myChartTol = echarts.init(document.getElementById('workprogressMon'));
+	 					    var dataInfo=data.data;
+	 					    var yAxisArr=[];
+	 	    
+	 					    var objPlan={};
+	 					    objPlan.name="计划数量";
+	 					    objPlan.type='line';
+	 					    objPlan.data=[];
+	 					    
+	 					    var objAct={};
+	 					    objAct.name="完成数量";
+	 					    objAct.type='line';
+	 					    objAct.data=[];
+	 					    
+	 					    var objCha={};
+	 					    objCha.name="未完成数量";
+	 					    objCha.type='line';
+	 					    objCha.data=[];
+	 					    
+	 					    for(var i=0;i<dataInfo.length;i++){
+	 					    	yAxisArr.push(dataInfo[i].IN_GAT_DATA);
+	 					    	var ct=(dataInfo[i].PLAN_NUM-dataInfo[i].WORK_NUM)>0?dataInfo[i].PLAN_NUM-dataInfo[i].WORK_NUM:0;
+	 					    	objPlan.data.push(dataInfo[i].PLAN_NUM);
+	 					    	objAct.data.push(dataInfo[i].WORK_NUM);
+	 					    	objCha.data.push(ct);
+	 					    }
+	 					    var dataArr=[objPlan,objAct,objCha];
+	 					     var option = {
+	 					    	    title: {text: '当计划月完成情况' },
+	 					    	    tooltip: {trigger: 'axis'},
+	 					    	    legend: {
+	 					    	        data:['计划数量','完成数量','未完成数量']
+	 					    	    },
+	 					    	    xAxis: {
+	 					    	        type: 'category',
+	 					    	        boundaryGap: false,
+	 					    	        data: yAxisArr
+	 					    	    },
+	 					    	    yAxis: {
+	 					    	        type: 'value'
+	 					    	    },
+	 					    	    series:dataArr
+	 					    }; 
+	 					    myChartTol.setOption(option);
+	 			        }
+	 				}); 
+	 			    var yearPam={};
+	 		    	yearPam.ctType="year";
+	 		    	yearPam.contactNo=contractNo;
+	 			    $.ajax({
+	 			    	url: "/webresources/login/work/WorkQueue/findWorkCharts",
+	 			        contentType:"application/json",
+	 			        type: "POST",
+	 			        data: $.toJSON(yearPam),
+	 			        dataType: 'json',
+	 			        success: function (data) {
+	 					    var myChartTol = echarts.init(document.getElementById('workprogressYear'));
+	 					    var dataInfo=data.data;
+	 					    var yAxisArr=[];
+	
+	 					    var objPlan={};
+	 					    objPlan.name="计划数量";
+	 					    objPlan.type='bar';
+	 					    objPlan.data=[];
+	 					    
+	 					    var objAct={};
+	 					    objAct.name="完成数量";
+	 					    objAct.type='bar';
+	 					    objAct.data=[];
+	 					    
+	 					    var objCha={};
+	 					    objCha.name="未完成数量";
+	 					    objCha.type='bar';
+	 					    objCha.data=[];
+	 					    
+	 					    for(var i=0;i<dataInfo.length;i++){
+	 					    	yAxisArr.push(dataInfo[i].IN_GAT_DATA);
+	 					    	var ct=(dataInfo[i].PLAN_NUM-dataInfo[i].WORK_NUM)>0?dataInfo[i].PLAN_NUM-dataInfo[i].WORK_NUM:0;
+	 					    	objPlan.data.push(dataInfo[i].PLAN_NUM);
+	 					    	objAct.data.push(dataInfo[i].WORK_NUM);
+	 					    	objCha.data.push(ct);
+	 					    }
+	 					    var dataArr=[objPlan,objAct,objCha];
+	 					     var option = {
+	 					    	    title: {text: '当计划年完成情况' },
+	 					    	    tooltip: {
+	 					    	    	trigger: 'axis',
+	 					    	    	 axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+	 					    	             type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+	 					    	         }
+	 					    	    },
+	 					    	    legend: {
+	 					    	        data:['计划数量','完成数量','未完成数量']
+	 					    	    },
+	 					    	    xAxis: {
+	 					    	        type : 'category',
+	 					    	        data: yAxisArr
+	 					    	    },
+	 					    	    yAxis: {
+	 					    	        type: 'value'
+	 					    	    },
+	 			                    series:dataArr
+	 					    }; 
+	 					    myChartTol.setOption(option);
+	 			        }
+	 				});  
+            	}
+		    },
+		     */
+		    
+            fitColumns : false,
+            columns : [ [ {
+                field : "ck",
+                checkbox : true,
+                sortable : false,
+
+            }, {
+
+                field : "contractNo",
+                title : '委托号',
+                multiSort : true,
+                halign : "center",
+                align:"left",
+                sortable : false
+            }, {
+
+                field : "workTypName",
+                title : '作业类型',
+                multiSort : true,
+                halign : "center",
+                align:"left",
+                sortable : false
+            }
+            , {
+
+                field : "planNum",
+                title : '计划数量',
+                multiSort : true,
+                halign : "center",
+                sortable : false
+            }, {
+
+                field : "workNum",
+                title : '完成数量',
+                multiSort : true,
+                halign : "center",
+                sortable : false
+            }, {
+
+                field : "truckNo",
+                title : '拖车号',
+                multiSort : true,
+                hidden : true,
+                halign : "center",
+                align:"left",
+                sortable : false
+            }, {field : "consignNam",
+                title : '货代',
+                multiSort : true,
+                halign : "center",
+                align:"left",
+                sortable : false
+            }, {field : "contractDte",
+                title : '委托日期',
+                multiSort : true,
+                halign : "center",
+                align:"left",
+                sortable : false
+            }, {field : "validatDte",
+                title : '有效期',
+                multiSort : true,
+                halign : "center",
+                align:"left",
+                sortable : false
+            }, {
+	            field : "per",
+	            title : '兑现率',
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false,
+	            width:160,
+	            formatter : function(index,row,value) {
+					var ch=row.planNum!="0"?Number(row.workNum)/Number(row.planNum):0;
+					if(ch==Infinity)ch=0;
+					if(ch>1)ch=1;
+					var appCh=parseFloat((ch*100).toFixed(2));
+					return "<div class='container'> "+
+					 " <div class='skills css' style='width:"+appCh+"%'>&nbsp;</div> "+
+					 " <div class='lab'>"+appCh+"%</div> "+
+					 " </div>";
+	            }
+	        }
+            ] ]
+        });
+       // $("#WorkPlanDatagrid1508123301002"+ /*[[${radi}]]*/).datagrid("hdGetColumnNames");
+        loadChart();
+        function loadChart(){   
+			   var dayPam={};
+			   dayPam.ctType="day";
+			    $.ajax({
+			    	url: "/webresources/login/work/WorkQueue/findWorkCharts",
+			        contentType:"application/json",
+			        type: "POST",
+			        data: $.toJSON(dayPam),
+			        dataType: 'json',
+			        success: function (data) {
+			        	  if(data.data.length>0){
+							    var myChartTol = echarts.init(document.getElementById('workprogressTol'));
+							    var dataInfo=data.data[0];
+							    var opt={
+							    	    title: {   text: '日完成情况', },
+							    	    tooltip: {
+							    	        trigger: 'axis',
+							    	        axisPointer: { type: 'shadow' }
+							    	    },
+							    	    legend: {
+							    	    	data:['作业进度']
+							    	    },
+							    	    xAxis: {
+							    	        type: 'value',
+							    	        boundaryGap: [0, 0.01]
+							    	    },
+							    	    yAxis: {
+							    	        type: 'category',
+							    	        data: ['计划数量','完成数量','未完成数量']
+							    	    },
+							    	    series: [
+							    	        {
+							    	            name: dataInfo.IN_GAT_DATA,
+							    	            type: 'bar',
+							    	            barWidth:'25',
+							    	            data: [dataInfo.PLAN_NUM, dataInfo.WORK_NUM, dataInfo.PLAN_NUM-dataInfo.WORK_NUM>0?0:dataInfo.PLAN_NUM-dataInfo.WORK_NUM]
+							    	        }
+							    	    ]
+							    	};
+							    myChartTol.setOption(opt);
+					        }
+			        }
+				});
+    
+			   var monPam={};
+			   monPam.ctType="mon";
+			    $.ajax({
+			    	url: "/webresources/login/work/WorkQueue/findWorkCharts",
+			        contentType:"application/json",
+			        type: "POST",
+			        data: $.toJSON(monPam),
+			        dataType: 'json',
+			        success: function (data) {
+					    var myChartTol = echarts.init(document.getElementById('workprogressTolMon'));
+					    var dataInfo=data.data;
+					    var yAxisArr=[];
+	    
+					    var objPlan={};
+					    objPlan.name="计划数量";
+					    objPlan.type='line';
+					    objPlan.data=[];
+					    
+					    var objAct={};
+					    objAct.name="完成数量";
+					    objAct.type='line';
+					    objAct.data=[];
+					    
+					    var objCha={};
+					    objCha.name="未完成数量";
+					    objCha.type='line';
+					    objCha.data=[];
+					    
+					    for(var i=0;i<dataInfo.length;i++){
+					    	yAxisArr.push(dataInfo[i].IN_GAT_DATA);
+					    	var ct=(dataInfo[i].PLAN_NUM-dataInfo[i].WORK_NUM)>0?dataInfo[i].PLAN_NUM-dataInfo[i].WORK_NUM:0;
+					    	objPlan.data.push(dataInfo[i].PLAN_NUM);
+					    	objAct.data.push(dataInfo[i].WORK_NUM);
+					    	objCha.data.push(ct);
+					    }
+					    var dataArr=[objPlan,objAct,objCha];
+					     var option = {
+					    	    title: {text: '按月完成情况' },
+					    	    tooltip: {trigger: 'axis'},
+					    	    legend: {
+					    	        data:['计划数量','完成数量','未完成数量']
+					    	    },
+					    	    xAxis: {
+					    	        type: 'category',
+					    	        boundaryGap: false,
+					    	        data: yAxisArr
+					    	    },
+					    	    yAxis: {
+					    	        type: 'value'
+					    	    },
+					    	    series:dataArr
+					    }; 
+					    myChartTol.setOption(option);
+			        }
+				}); 
+			    var yearPam={};
+		    	yearPam.ctType="year";
+		    	var validatDte=$("#validatDte[(${radi})]").datebox("getValue"); 
+		    	var validatDte1=$("#validatDte1[(${radi})]").datebox("getValue"); 
+		    	yearPam.validatDte=validatDte;
+		    	yearPam.validatDte1=validatDte1;
+			    $.ajax({
+			    	url: "/webresources/login/work/WorkQueue/findWorkCharts",
+			        contentType:"application/json",
+			        type: "POST",
+			        data: $.toJSON(yearPam),
+			        dataType: 'json',
+			        success: function (data) {
+					    var myChartTol = echarts.init(document.getElementById('workprogressTolYear'));
+					    var dataInfo=data.data;
+					    var yAxisArr=[];
+
+					    var objPlan={};
+					    objPlan.name="计划数量";
+					    objPlan.type='bar';
+					    objPlan.data=[];
+					    
+					    var objAct={};
+					    objAct.name="完成数量";
+					    objAct.type='bar';
+					    objAct.data=[];
+					    
+					    var objCha={};
+					    objCha.name="未完成数量";
+					    objCha.type='bar';
+					    objCha.data=[];
+					    
+					    for(var i=0;i<dataInfo.length;i++){
+					    	yAxisArr.push(dataInfo[i].IN_GAT_DATA);
+					    	var ct=(dataInfo[i].PLAN_NUM-dataInfo[i].WORK_NUM)>0?dataInfo[i].PLAN_NUM-dataInfo[i].WORK_NUM:0;
+					    	objPlan.data.push(dataInfo[i].PLAN_NUM);
+					    	objAct.data.push(dataInfo[i].WORK_NUM);
+					    	objCha.data.push(ct);
+					    }
+					    var dataArr=[objPlan,objAct,objCha];
+					     var option = {
+					    	    title: {text: '按年完成情况' },
+					    	    tooltip: {
+					    	    	trigger: 'axis',
+					    	    	 axisPointer : {            // 坐标轴指示器，坐标轴触发有效
+					    	             type : 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+					    	         }
+					    	    },
+					    	    legend: {
+					    	        data:['计划数量','完成数量','未完成数量']
+					    	    },
+					    	    xAxis: {
+					    	        type : 'category',
+					    	        data: yAxisArr
+					    	    },
+					    	    yAxis: {
+					    	        type: 'value'
+					    	    },
+					    	    series:dataArr
+					    }; 
+					    myChartTol.setOption(option);
+			        }
+				});    
+
+		   }
+        
+        
+    
+    });
+
+    /*]]>*/
+</script>
+</html>

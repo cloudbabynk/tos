@@ -1,0 +1,208 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var radi = HdUtils.dialog.getValue("radi");
+	    var radivin = HdUtils.dialog.getValue("radivin");
+	    var shipNo = null;
+	    $('#planTyp').combobox(HdUtils.code.scode({
+		    fieldCod : 'PLAN_TYP'
+	    }, {
+		    required : true
+	    }));
+	    $('#contractNo').combobox({
+	        url : '../webresources/login/contract/ContractIeDoc/getAllContractIeDocDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 'auto',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        },
+	        onChange : function(n, o) {
+		        HdUtils.ajax.post({
+		            url : "../webresources/login/contract/ContractIeDoc/getShipBillInfo?contractNo=" + $("#contractNo").combobox('getValue'),
+		            success : function(data) {
+			            $("input[name='totalNum']").val(data.carNum);
+			            $("input[name='iEId']").val(data.iEId);
+		            }
+		        })
+	        }
+	    });
+	    function queryBill() {
+		    var billBuilder = new HdQuery();
+		    billBuilder.add("shipNo", shipNo);
+		    return billBuilder.build();
+	    }
+	    $("#billNo").combogrid(HdUtils.code.bill({
+	        queryParams : queryBill(),
+	        required : true
+	    }))
+	    var planTyp;
+	    $('#planTyp').combobox({
+		    onChange : function(rec) {
+			    planTyp = $('#planTyp').combobox('getValue');
+		    }
+	    });
+	    $("#chooseShip").bind("click", function() {
+		    HdUtils.selShip(callback);
+	    });
+	    function callback(data) {
+		    if (planTyp == "TI") {
+			    $("#shipNam").val(data.cShipNam);
+			    $("#voyage").val(data.evoyage);
+			    $("#tradeId").val(data.tradeId);
+			    $("#shipNo").val(data.shipNo);
+			    shipNo = data.shipNo;
+			    $('#contractNo').combobox({
+			        url : '../webresources/login/contract/ContractIeDoc/getContractIeDocDrop?shipNo=' + $("#shipNo").val(),
+			        valueField : 'value',
+			        textField : 'label',
+			        panelHeight : 'auto',
+			        onSelect : function(rec) {
+				        return rec.value;
+			        },
+			        onChange : function(n, o) {
+				        HdUtils.ajax.post({
+				            url : "../webresources/login/contract/ContractIeDoc/getShipBillInfo?contractNo=" + $("#contractNo").combobox('getValue'),
+				            success : function(data) {
+					            $("input[name='totalNum']").val(data.carNum);
+					            $("input[name='iEId']").val(data.iEId);
+					            $("input[name='billNo']").val(data.billNo);
+				            }
+				        })
+			        }
+			    });
+			    $("#billNo").combogrid(HdUtils.code.bill({
+			        queryParams : queryBill(),
+			        required : true,
+			        onSelect : function(rowIndex, rowData) {
+				        $("input[name='totalNum']").val(data.pieces);
+				        $("input[name='iEId']").val(data.iEId);
+			        }
+			    }))
+		    }
+		    if (planTyp == "SI") {
+			    $("#shipNam").val(data.cShipNam);
+			    $("#voyage").val(data.ivoyage);
+			    $("#tradeId").val(data.tradeId);
+			    $("#shipNo").val(data.shipNo);
+			    shipNo = data.shipNo;
+			    $("#billNo").combogrid(HdUtils.code.bill({
+			        queryParams : queryBill(),
+			        required : true,
+			        onSelect : function(rowIndex, rowData) {
+				        $("#totalNum").val(rowData.pieces);
+				        $("#iEId").val(rowData.iEId);
+			        }
+			    }))
+		    }
+	    }
+
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+		    var isValss = $("#PlanGroupForm1507959148710").form('validate');
+
+		    var formdata = $("#PlanGroupForm1507959148710").serializeObject();
+		    formdata.toyotoId = "1";
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/plan/PlanGroup/ftsaveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#PlanGroupDatagrid1508123301002" + radi).datagrid("hdReload");
+			        $("#PlanPlacVinDatagrid1508123301002" + radivin).datagrid("hdReload");
+		        }
+		    })
+	    }
+    });
+</script>
+<form id="PlanGroupForm1507959148710">
+	<table id="PlanGroupTable1507959148710" style="height: 75%; width: 80%"
+		class="tableform">
+		<tr>
+			<th>策划类型：</th>
+			<td><input id="planTyp" name="planTyp"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="10" /></td>
+			<th>有效期：</th>
+			<td><input id="validatDte" name="validatDte"
+				data-options="required:true" class="easyui-datebox" maxlength="10" /></td>
+		</tr>
+		<tr>
+			<th>船名：</th>
+			<td><input id="shipNam" name="shipNam" style="width: 80px;"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="10" /><a href="javascript:void(0)" id="chooseShip">选船</a></td>
+			<th>航次：</th>
+			<td><input id="voyage" name="voyage"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="10" /></td>
+		</tr>
+		<tr>
+
+			<th>委托号：</th>
+			<td><input id="contractNo" name="contractNo"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+
+			<th>提单号：</th>
+			<td><input id="billNo" name="billNo"
+				data-options="required:false" maxlength="255" /></td>
+		</tr>
+		<tr>
+			<!-- 			<th>planGroupNo：</th> -->
+			<td><input id="planGroupNo" name="planGroupNo" hidden="true"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+			<!-- 			<th>iEId：</th> -->
+			<td><input id="iEId" name="iEId"  hidden="true"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		</tr>
+		<tr>
+			<!-- 			<th>车数：</th> -->
+			<td><input id="totalNum" name="totalNum" hidden="true"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+			<!-- 			<th>shipNo：</th> -->
+			<td><input id="shipNo" name="shipNo" readonly="readonly"
+				hidden="true" data-options="required:false"
+				class="easyui-validatebox" maxlength="255" /></td>
+		</tr>
+		<!-- 		<tr> -->
+		<!-- 			<th>toyotoId：</th> -->
+		<!-- 			<td><input id="toyotoId" name="toyotoId" -->
+		<!-- 				data-options="required:false" class="easyui-validatebox" -->
+		<!-- 				maxlength="255" /></td> -->
+		<!-- 		</tr> -->
+	</table>
+</form>

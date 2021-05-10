@@ -1,0 +1,189 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<script type="text/javascript">
+	/*<![CDATA[*/
+    Array.prototype.removeByValue = function(val) {
+	    for (var i = 0; i < this.length; i++) {
+		    if (this[i] == val) {
+			    this.splice(i, 1);
+			    break;
+		    }
+	    }
+    }
+
+    $(function() {
+	    //intiShipLine(selectedShipLineCod);
+	    //function intiShipLine(selectedShipLineCod){	
+	    var notSeled = new HdQuery();//未选
+	    var hasSeled = new HdQuery();
+	    var gridSetVal = HdUtils.dialog.getValue('gridSetVal');
+	    var _this = HdUtils.dialog.getValue('gridSetObj');
+
+	    console.debug(gridSetVal);
+	    // 主datagrid堆场
+	    $("#GridSelNotSelectedDatagrid").datagrid({
+	        striped : true,
+	        title:"不显示(全部不显示为恢复默认)",
+	        url : "../webresources/login/com/SysCusGrid/findNotSel",
+	        queryParams : gridSetVal,
+	        method : "POST",
+	        pagination : false,
+	        singleSelect : true,
+	        selectOnCheck : false,
+	        rownumbers : true,
+	        pageSize : 20,
+	        fit : true,
+	        fitColumns : true,
+	        columns : [ [ {
+	            field : 'ck',
+	            checkbox : "checkbox"
+	        }, {
+	            field : "field",
+	            title : '代码',
+	            multiSort : true,
+	            halign : "center",
+	            hidden : true,
+	            sortable : true
+	        }, {
+	            field : "title",
+	            title : '名称',
+	            multiSort : true,
+	            halign : "center",
+	            width : 200,
+	            sortable : true
+	        } ] ],
+	        onDblClickRow : function(rowIndex, rowData) {
+		        $("#GridSelNotSelectedDatagrid").datagrid('deleteRow', rowIndex);
+		        $("#GridSelSelectedDatagrid").datagrid("appendRow", rowData);
+	        }
+	    });
+
+	    $("#GridSelSelectedDatagrid").datagrid({
+	        striped : true,
+	        title:"显示",
+	        url : "../webresources/login/com/SysCusGrid/findSel",
+	        queryParams : gridSetVal,
+	        method : "POST",
+	        singleSelect : true,
+	        selectOnCheck : false,
+	        rownumbers : true,
+	        fit : true,
+	        fitColumns : true,
+	        columns : [ [ {
+	            field : 'ck',
+	            checkbox : "checkbox"
+	        }, {
+	            field : "field",
+	            title : '代码',
+	            multiSort : true,
+	            halign : "center",
+	            hidden : true,
+	            sortable : true
+	        }, {
+	            field : "title",
+	            title : '名称',
+	            multiSort : true,
+	            halign : "center",
+	            width : 180,
+	            sortable : true
+	        } ] ],
+	        onDblClickRow : function(rowIndex, rowData) {
+		        $("#GridSelSelectedDatagrid").datagrid('deleteRow', rowIndex);
+		        $("#GridSelNotSelectedDatagrid").datagrid("hdAdd", rowData);
+	        }
+	    });
+	    $("#gridadd").on("click", function() {
+		    var leftGridData = $("#GridSelNotSelectedDatagrid").datagrid("getRows");
+		    var rowDatas = $("#GridSelNotSelectedDatagrid").datagrid("getChecked");
+		    var rightGridData = $("#GridSelSelectedDatagrid").datagrid("getRows");
+		    if (rowDatas) {
+			    var rightGridData = rightGridData.concat(rowDatas);
+			    for (var i = 0; i < rowDatas.length; i++) {
+				    leftGridData.removeByValue(rowDatas[i]);
+			    }
+			    $("#GridSelNotSelectedDatagrid").datagrid("loadData", leftGridData);
+			    $("#GridSelSelectedDatagrid").datagrid("loadData", rightGridData);
+
+		    }
+	    });
+	    $("#gridremove").on("click", function() {
+		    var rowDatas = $("#GridSelSelectedDatagrid").datagrid("getChecked");
+		    var leftGridData = $("#GridSelNotSelectedDatagrid").datagrid("getRows");
+		    var rightGridData = $("#GridSelSelectedDatagrid").datagrid("getRows");
+		    if (rowDatas) {
+			    for (var i = 0; i < rowDatas.length; i++) {
+				    rightGridData.removeByValue(rowDatas[i]);
+			    }
+			    $("#GridSelSelectedDatagrid").datagrid("loadData", rightGridData);
+			    var leftGridData = leftGridData.concat(rowDatas);
+			    $("#GridSelNotSelectedDatagrid").datagrid("loadData", leftGridData);
+		    }
+	    });
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveAndClose
+	    });//设置弹窗确定时的回调
+
+	    function saveAndClose() {
+		    var result = '';
+		    var rightGridData = $("#GridSelSelectedDatagrid").datagrid("getRows");
+		    if (rightGridData) {
+			    for (var i = 0; i < rightGridData.length; i++) {
+				    result += rightGridData[i].field + ",";
+			    }
+		    }
+		    HdUtils.ajax.post({//gridSetVal.url父窗口传来
+		        url : "../webresources/login/com/SysCusGrid/save?gridSelId=" + encodeURIComponent(gridSetVal.gridSelId) + "&fileIds=" + result,
+		        success : function(data) {
+			        if (data.code == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        _this.reload();
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight(data.message);
+		        }
+
+		    });
+	    }
+
+	    //}
+
+    });
+    /*]]>*/
+</script>
+<style>
+.trStyle {
+	height: 50px;
+}
+</style>
+<div class="easyui-layout" style="width: 100%; height: 100%;" fit="true">
+	<div data-options="region:'west'" style="width: 260px;">
+		<table id="GridSelNotSelectedDatagrid">
+
+		</table>
+	</div>
+	<div data-options="region:'center'">
+		<table width="100%" height="100%" border="0" cellspacing="0"
+			cellpadding="0">
+			<tr>
+				<td align="center" valign="middle">
+					<table width="50%" align="center" cellpadding="0" cellspacing="0">
+						<tr class="trStyle">
+							<td><a class="easyui-linkbutton" id="gridadd" plain="false">>></a>
+							</td>
+						</tr>
+						<tr class="trStyle">
+							<td><a class="easyui-linkbutton" id="gridremove"
+								plain="false">&lt;&lt;</a></td>
+						</tr>
+
+					</table>
+				</td>
+			</tr>
+		</table>
+	</div>
+	<div data-options="region:'east'" style="width: 260px;">
+		<table id="GridSelSelectedDatagrid">
+
+		</table>
+	</div>
+</div>

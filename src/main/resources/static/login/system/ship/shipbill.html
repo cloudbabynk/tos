@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<style type="text/css">
+.subtotal {
+	font-weight: bold;
+} /*合计单元格样式*/
+</style>
+<body>
+    <div th:id="cc+${radi}" class="easyui-layout" style="width: 100%; height: 100%;">
+        <div data-options="region:'west',split:true,tools:reload5439,title:'船期状态'" style="width: 240px; padding: 10px;">
+            <input class="easyui-searchbox" data-options="searcher:searchShip,prompt:'搜索船舶'" th:id="searchText+${radi}"
+                style="width: 200px; height: 20px;" name="search" />
+            <input class="easyui-searchbox" data-options="searcher:searchShipBill,prompt:'搜索提单'"
+                th:id="searchShipBill+${radi}" style="width: 200px; height: 20px;" name="searchShipBill" />
+            <input th:id="iEId+${radi}" th:value='${iEId}' type="hidden" /> <input th:id="tradeId+${radi}"
+                th:value='${tradeId}' type="hidden" />
+            <ul th:id="ShipStatusTree123+${radi}"></ul>
+        </div>
+        <div data-options="region:'center'" style="height: 100%; width: 100%">
+            <div th:id="sbillhtml+${radi}" class="easyui-layout" style="width: 100%; height: 100%;" data-options="fit:true">
+                <div th:id="shipbillhtml+${radi}" data-options="region:'center',fit:true,title:'提单'"></div>
+                <div th:id="billsplithtml+${radi}"
+                    data-options="region:'south',onResize:resizeLayoutCenter,split:true,title:'分单' "
+                    style="width: 100%; height:340px"></div>
+            </div>
+    
+        </div>
+    </div>
+	<script type="text/javascript" th:inline="javascript">
+	  var reload5439 = [ {
+          iconCls : 'icon-reload',
+          handler : function() {
+              $('#ShipStatusTree123[(${radi})]').tree('reload');
+          }
+      } ];
+		var searchShip = function(){
+			var parentNode=$('#ShipStatusTree123[(${radi})]').tree('getRoots'); //得到tree顶级node  
+		     var searchCon = $("input[name='search']").val();   
+		     var children;   
+		     for(var i=0;i<parentNode.length;i++){ //循环顶级 node   
+		         children = $('#ShipStatusTree123[(${radi})]').tree('getChildren',parentNode[i].target);//获取顶级node下所有子节点   
+		         if(children){ //如果有子节点   
+		             for(var j=0;j<children.length;j++){ //循环所有子节点   
+		                 //if($('#ul_tree_dept').tree('isLeaf',children[j].target)){ //判断子级是否为叶子节点,即不是父节点   
+		                     if(children[j].text.indexOf(searchCon)>=0||children[j].id.indexOf(searchCon)>=0){ //判断节点text是否包含搜索文本                       
+		                         selectNode(children[j]); //设置此节点为选择状态   
+		                         expandParent(children[j]); //设置此节点所有父级展开   
+		                         return;  
+		                     }   
+		                 //}   
+		             }   
+		         }else{   
+		             if(parentNode[i].text.indexOf(searchCon)||children[j].id.indexOf(searchCon)>=0>=0){   
+		                 selectNode(parentNode[i]);   
+		                 expandParent(parentNode[i]);   
+		                 return;   
+		             }   
+		         }   
+		     }   
+		}
+		var searchShipBill = function(){
+			var parentNode=$('#ShipStatusTree123[(${radi})]').tree('getRoots'); //得到tree顶级node  
+		     var billNo = $("input[name='searchShipBill']").val();
+		     var searchCon="";
+		     HdUtils.ajax.get({
+		            url : "../webresources/login/ship/ShipBill/searchShipBill?billNo=" + billNo,
+		            success : function(data) {
+		            	searchCon = data.shipNo; 
+		       	     var children;   
+				     for(var i=0;i<parentNode.length;i++){ //循环顶级 node   
+				         children = $('#ShipStatusTree123[(${radi})]').tree('getChildren',parentNode[i].target);//获取顶级node下所有子节点   
+				         if(children){ //如果有子节点   
+				             for(var j=0;j<children.length;j++){ //循环所有子节点   
+				                 //if($('#ul_tree_dept').tree('isLeaf',children[j].target)){ //判断子级是否为叶子节点,即不是父节点   
+				                     if(children[j].text.indexOf(searchCon)>=0||children[j].id.indexOf(searchCon)>=0){ //判断节点text是否包含搜索文本                       
+				                         selectNode(children[j]); //设置此节点为选择状态   
+				                         expandParent(children[j]); //设置此节点所有父级展开   
+				                         return;  
+				                     }   
+				                 //}   
+				             }   
+				         }else{   
+				             if(parentNode[i].text.indexOf(searchCon)||children[j].id.indexOf(searchCon)>=0>=0){   
+				                 selectNode(parentNode[i]);   
+				                 expandParent(parentNode[i]);   
+				                 return;   
+				             }   
+				         }   
+				     } 
+		            }
+		        });
+	  
+		}
+		function selectNode(node){   
+		    $('#ShipStatusTree123[(${radi})]').tree('select',node.target);
+		    $('#ShipStatusTree123[(${radi})]').tree('scrollTo',node.target);
+		};   
+		function expandParent(node){   
+		    var parent = node;   
+		    var t = true;   
+		    do {   
+		    parent = $('#ShipStatusTree123[(${radi})]').tree('getParent',parent.target); //获取此节点父节点   
+		    if(parent){ //如果存在   
+		        t=true;   
+		        $('#ShipStatusTree123[(${radi})]').tree('expand',parent.target);   
+		    }else{   
+		        t=false;   
+		    }   
+		    }while (t);              
+		}; 
+        function resizeLayoutCenter (ctWidth,ctHeight){
+        	if(typeof setSubHeight==="function"){
+        		if(ctHeight){
+            		setSubHeight(ctHeight,$('#sbillhtml[(${radi})]'));
+        		}
+
+        	}
+        	
+        };
+		$(document).ready(function() {
+	        var shipNo;
+	        var voyage;
+	        var dockCod;
+	        var eShipNam;
+	        HdUtils.dialog.setValue({
+		        'subHeight':340
+	        });
+	        $.parser.parse($('#ShipBillToolBar1508123309099[(${radi})]'));
+	        var radi = /*[[${radi}]]*/'';
+	        var iEId = $("#iEId[(${radi})]").val();
+	        var tradeId= $("#tradeId[(${radi})]").val();
+	        $('#shipbillhtml[(${radi})]').attr('href','../webresources/login/ship/ShipBill/bill.htm?iEId='+iEId+'&tradeId='+tradeId); 
+	        $('#billsplithtml[(${radi})]').attr('href','../webresources/login/ship/BillSplit/billsplit.htm?iEId='+iEId+'&tradeId='+tradeId); 
+	        $('#ShipStatusTree123[(${radi})]').tree({
+	            method : "get",
+	            url : "../webresources/login/ship/ShipBill/gentree?iEId="+iEId+'&tradeId='+tradeId,
+	            onClick : treeclick
+	        });
+/* 	        $('#sbillhtml[(${radi})]').layout('panel', 'south').panel({
+	        	onResize: function (width, height) {
+	        		alert("21");
+	        	}
+	        }) */
+	        
+
+	        function treeclick(node) {
+		        shipNo = node.id;
+	        	shipNam=node.type;
+	        	dockCod=node.obj.dockCod;
+	        	eShipNam = node.obj.eShipNam;
+	        	if(iEId=='I'){
+	        		voyage=node.obj.ivoyage;
+	        	}
+	        	if(iEId=='E'){
+	        		voyage=node.obj.evoyage;
+	        	}
+		        HdUtils.dialog.setValue({
+			        'shipNo' : shipNo,
+			        'iEId'   : iEId,
+			        'tradeId':tradeId,
+			        'shipNam': shipNam,
+			        'voyage' :voyage,
+			        'dockCod':dockCod,
+			        'eShipNam' : eShipNam
+		        });
+               $('#sbillhtml[(${radi})]').layout('panel', 'center').panel('refresh');
+               
+          
+               
+               $('#sbillhtml[(${radi})]').layout('panel', 'south').panel('refresh');
+
+
+               setTimeout(function () {
+                   HdUtils.dialog.setValue({
+                       'shipNo' : "",
+                       'iEId'   : "",
+                       'tradeId':"",
+                       'shipNam': "",
+                       'voyage' :"",
+                       'dockCod':"",
+                       'eShipNam' : ""
+                   });
+
+               },2000)
+	        }
+	        function queryBillSplit(){
+            	var builder = new HdQuery();
+              builder.add("shipbillId", null);
+              builder.add("shipNo", shipNo);
+              builder.add("iEId",iEId);
+              return builder.build();
+          };
+
+        });
+	</script>
+
+</body>
+</html>

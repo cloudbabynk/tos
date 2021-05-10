@@ -1,0 +1,39 @@
+
+<script type="text/javascript" src="baseCode/carmera/carmera.js"></script>
+<script type="text/javascript">
+$(function(){
+	intiDVRCamera();
+});
+</script>
+
+	<table id="CCameraDatagrid1489649064228" style="height:100%"></table>
+		<div id="CCameraToolBar1489649064228" style="padding: 0px;margin: 0px;">
+		    <div style="float: left;">
+		    	 <a class="easyui-linkbutton" id="drawCameraBtn" plain="false">绘制</a>
+		    	 <a class="easyui-linkbutton" id="editCameraPosBtn" plain="false">修改坐标</a>
+	             <a class="easyui-linkbutton" iconCls="icon-add" plain="false">新增</a>
+	             <a class="easyui-linkbutton" iconCls="icon-edit" plain="false">修改</a>
+	             <a class="easyui-linkbutton" iconCls="icon-remove" plain="false">删除</a>
+	             <a class="easyui-linkbutton" iconCls="icon-save" plain="false">保存</a>
+	             <a class="easyui-linkbutton" iconCls="icon-reload" plain="false">刷新</a>
+		    </div>
+	            <input class="easyui-searchbox" id="CCameraSearchbox1489649064228"/>
+		</div>
+
+<!-- 修改坐标 -->
+<div id="openEditCameraPos" data-options="closed:true">
+	<table>
+		<tr>
+			<td>坐标点X：<input type="text" id="cameraPosX" style="width:280px"/></td>
+		</tr>
+		<tr>
+			<td>坐标点Y：<input type="text" id="cameraPosY" style="width:280px"/></td>
+		</tr>
+	</table>
+	<input type="hidden" id="cameraId" />
+	
+</div>
+
+
+
+

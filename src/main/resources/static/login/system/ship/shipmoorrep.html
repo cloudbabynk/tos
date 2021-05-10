@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+</head>
+<body>
+<iframe id="xjl" style="width:100%;height:100%;"> </iframe>	
+<script>
+	$(document).ready(function() {
+		var shipNo=HdUtils.dialog.getValue("shipNo");
+		var recNam=HdUtils.dialog.getValue("recNam");
+		var xl_berth_cod=HdUtils.dialog.getValue("xl_berth_cod");
+		var xl_work_beg_tim=HdUtils.dialog.getValue("xl_work_beg_tim");
+		var xl_work_end_tim=HdUtils.dialog.getValue("xl_work_end_tim");
+		var xl_draft_f=HdUtils.dialog.getValue("xl_draft_f");
+		if(xl_draft_f==null){xl_draft_f="";}
+		var xl_draft_a=HdUtils.dialog.getValue("xl_draft_a");
+		if(xl_draft_a==null){xl_draft_a="";}
+		var jl_berth_cod=HdUtils.dialog.getValue("jl_berth_cod");
+		var jl_work_beg_tim=HdUtils.dialog.getValue("jl_work_beg_tim");
+		var jl_work_end_tim=HdUtils.dialog.getValue("jl_work_end_tim");
+		var jl_draft_f=HdUtils.dialog.getValue("jl_draft_f");
+		if(jl_draft_f==null){jl_draft_f="";}
+		var jl_draft_a=HdUtils.dialog.getValue("jl_draft_a");
+		if(jl_draft_a==null){jl_draft_a="";}
+		  var src='http://10.163.204.56:8090/show/?fileid=48495df1b94144c18920b6a99db26d78&rpttoken=333&shipNo='+shipNo+'&recNam='+recNam+'&xl_berth_cod='+xl_berth_cod+
+			'&xl_work_beg_tim='+xl_work_beg_tim+'&xl_work_end_tim='+xl_work_end_tim+'&xl_draft_f='+xl_draft_f+'&xl_draft_a='+xl_draft_a+
+			'&jl_berth_cod='+jl_berth_cod+'&jl_work_beg_tim='+jl_work_beg_tim+'&jl_work_end_tim='+jl_work_end_tim+'&jl_draft_f='+
+			jl_draft_f+'&jl_draft_a='+jl_draft_a;
+		    $("#xjl").attr('src',src); 
+    });
+</script>
+</body>
+</html>

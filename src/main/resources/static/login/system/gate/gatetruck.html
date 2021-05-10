@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<input th:id="Type+${radi}" th:value='${Type}' type="hidden" />
+<div th:id="DayWorkClassToolBar1508123307299+${radi}"
+	style="float: left">
+	<div th:id="HYCZ+${radi}">
+		<!-- 查询 -->
+		<span> 委托号：<input name="contractNo" th:id="contractNo+${radi}"
+		class="easyui-validatebox" /> <a class="easyui-linkbutton"
+		th:id='query+${radi}'> 查询</a>
+	</span>
+	</div>
+</div>
+<table th:id="DayWorkClassDatagrid1508123307299+${radi}"
+	style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#DayWorkClassDatagrid1508123307299[(${radi})]");
+	    var Type = $("#Type[(${radi})]").val();
+	    var cargoradi = HdUtils.dialog.getValue("cargoradi");
+	    if(Type == 'SG' || Type == 'JG' ){
+	    	$("#HYCZ[(${radi})]").hide();
+	    }
+// 	    $('#gateNo[(${radi})]').combobox({
+// 	        url : '../webresources/login/gate/GateTruckContract/getCGateDrop?gateTyp=O',
+// 	        valueField : 'value',
+// 	        textField : 'label',
+// 	        onSelect : function(rec) {
+// 		        return rec.value;
+// 	        }
+// 	    });
+	    // 出闸。
+	    $("#hycz[(${radi})]").on("click", function() {
+	    	var data = dg.datagrid("getSelected");
+		    if (data == null || data == undefined) {
+			    HdUtils.messager.info('请选择一条数据！');
+			    return;
+		    }
+		    var gateNo;
+		    var ingateId = data.ingateId;
+		    var truckNo = data.truckNo;
+		    if(truckNo.indexOf("H") != -1){
+		    	gateNo = "G6";
+		    }else if(truckNo.indexOf("G") != -1){
+		    	gateNo = "R2";
+		    }else{
+		    	return false;
+		    }
+		    $.messager.confirm(Resources.WB_CONFIRM, "请确认是否出闸？", function(r) {
+			    if (r) {
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/cargo/TruckWork/saveHycz?gateNo=" + gateNo + "&ingateId=" + ingateId,
+				        success : function(data) {
+					        HdUtils.messager.bottomRight(data.message);
+					        $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("hdReload");
+				        }
+				    });
+			    }
+		    });
+	    });
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+		    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    onlinquery.add("Type", Type);
+		    onlinquery.add("contractNo",$("#contractNo[(${radi})]").val());
+		    return onlinquery.build();
+	    }
+
+	    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/gate/GateTruck/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : false,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#DayWorkClassToolBar1508123307299" + /*[[${radi}]]*/'',
+	        fit : true,
+	        onSelect(rowIndex,rowData){
+	        	HdUtils.dialog.setValue({
+	           		 'ingateId' : rowData.ingateId
+	        	 });
+	           	$('#shipdynamic259' + cargoradi).layout('panel', 'east').panel('refresh');
+		    },
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "id",
+	            multiSort : true,
+	            hidden : true,
+	            sortable : false
+	        }, {
+	            field : "platNo",
+	            title : '拖车',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "inGatTim",
+	            title : '进闸时间',
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.datetime,
+	            width : 120,
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "singleId",
+	            title : '自提',
+	            multiSort : true,
+	            align : "center",
+	            width : 40,
+	            formatter : function(value) {
+					if (value != null && value != undefined) {
+						if (value == 0) {
+							value = "×";
+							return value;
+						} else {
+							value = "√";
+							return value;
+							 }
+					} else {
+							return value;
+						}
+				},
+	            sortable : false
+	        }
+
+	        ] ]
+	    });
+	    $("#DayWorkClassDatagrid1508123307299" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

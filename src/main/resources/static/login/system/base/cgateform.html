@@ -1,0 +1,135 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#CGateForm1507959148645");
+	    var gateNo = HdUtils.dialog.getValue("gateNo");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    if (gateNo) {
+	    	$("#gateNo").attr("readonly",true);
+	    } else {
+	    	$("#gateNo").attr("readonly",false);
+	    }
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/base/CGate/findone?gateNo=" + gateNo,
+	        success : function(data) {
+		        $("#CGateForm1507959148645").form("loadData", data);
+	        }
+	    })
+	    $('#gateTyp').combobox(HdUtils.code.scode({
+		    fieldCod : 'GATE_TYP'
+	    }, {
+		    required : false
+	    }));
+	    $('#dockCod').combobox({
+	        url : '../webresources/login/base/CGate/getCGateDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+		    var isValss = $("#CGateForm1507959148645").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#CGateForm1507959148645").serializeObject();
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/base/CGate/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#CGateDatagrid1508123308501" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+    });
+    function findCod() {
+	    var gateNoValue = $("#gateNo").val();
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/base/CGate/findCGate?gateNo=" + gateNoValue,
+	        success : function(data) {
+		        if (data.code == "-1") {
+			        $('#gateNo').val("");
+			        HdUtils.messager.bottomRight(data.message);
+			        $('#gateNo').focus();
+			        return false;
+		        }
+	        }
+	    });
+    }
+</script>
+<form id="CGateForm1507959148645">
+	<table id="CGateTable1507959148645" style="height: 75%; width: 80%"
+		class="tableform">
+		<tr>
+			<th>闸口号：</th>
+			<td><input id="gateNo" name="gateNo" onchange="findCod();"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="10" /></td>
+			<th>闸口名称：</th>
+			<td><input id="gateNam" name="gateNam"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="10" /></td>
+		</tr>
+		<tr>
+			<th>闸口类型：</th>
+			<td><input id="gateTyp" name="gateTyp"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="35" /></td>
+			<th>所属码头：</th>
+			<td><input id="dockCod" name="dockCod"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		</tr>
+		<tr>
+			<th>X坐标：</th>
+			<td><input id="x" name="x" data-options="required:false"
+				class="easyui-validatebox" maxlength="35" /></td>
+			<th>Y坐标：</th>
+			<td><input id="y" name="y" data-options="required:false"
+				class="easyui-validatebox" maxlength="255" /></td>
+		</tr>
+		<tr>
+			<th>设备IP：</th>
+			<td><input id="machIp" name="machIp"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="35" /></td>
+			<th>备注：</th>
+			<td><input id="remarks" name="remarks"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		</tr>
+	</table>
+</form>

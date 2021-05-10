@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div class="easyui-layout" data-options="fit:true"
+	style="height: 100%; width: 100%">
+	<input th:id="Type+${radi}" th:value='${Type}' type="hidden" />
+	<div
+		data-options="region:'west',split:true,tools:reload5436,title:'船期预报'"
+		style="width: 280px; padding: 10px;">
+		<input class="easyui-searchbox"
+			data-options="searcher:searchShip,prompt:'搜索船舶'"
+			th:id="searchText+${radi}" style="width: 200px; height: 20px;"
+			name="search"></input>
+		<ul th:id="ShipStatusTree123+${radi}"></ul>
+	</div>
+	<div data-options="region:'center'" style="height: 100%; width: 100%">
+		<div th:id="sbillhtml+${radi}" class="easyui-layout"
+				style="width: 100%; height: 100%;" data-options="fit:true">
+			<div data-options="region:'center',title:'shipInOutCheck'" style="height: 100%; width: 100%">
+				<!-- 工具栏 -->
+				<div th:id="DayWorkClassToolBar1508123307299+${radi}"
+					style="float: left; position: relative;">
+					<div>
+						<!-- 查询 -->
+						船名：<input th:id='cShipNam+${radi}' name="cShipNam"
+							readOnly="readonly" style="width: 100px"> 航次：<input
+							th:id='ivoyage+${radi}' name="ivoyage" readOnly="readonly"
+							style="width: 100px">
+						<!-- 				<input type="radio" name="loadflg" value="I" checked="true"><label>进口</label> -->
+						<!-- 				<input type="radio" name="loadflg" value="E"><label>出口</label> -->
+						<a class="easyui-linkbutton" th:id='clear+${radi}'>重置</a>
+						
+						<shiro:hasPermission name="webresources:login:ShipInOutCheck:delete">
+							<a class="easyui-linkbutton" th:id='delete+${radi}'>清空计划</a>
+						</shiro:hasPermission>
+						
+						<shiro:hasPermission name="webresources:login:ShipInOutCheck:add">
+						<a class="easyui-linkbutton" th:id='add+${radi}' iconCls="icon-add" plain="false">新增</a> 
+						</shiro:hasPermission>
+						<shiro:hasPermission name="webresources:login:ShipInOutCheck:update">
+						<a class="easyui-linkbutton" th:id='edit+${radi}'>编辑</a> 
+						</shiro:hasPermission>
+						<shiro:hasPermission name="webresources:login:ShipInOutCheck:delete">
+						<a class="easyui-linkbutton" th:id='deleteCheck+${radi}'>删除</a>
+						</shiro:hasPermission>
+						
+						<shiro:hasPermission name="webresources:login:ShipInOutCheck:upload">
+							<a class="easyui-linkbutton" th:id='upload+${radi}'>上传db文件</a>
+						</shiro:hasPermission>
+						<shiro:hasPermission name="webresources:login:ShipInOutCheck:import">
+							<a class="easyui-linkbutton" type="file" th:id='import+${radi}'>导入文件</a>
+						</shiro:hasPermission>
+						<shiro:hasPermission name="webresources:login:ShipInOutCheck:create">
+							<a class="easyui-linkbutton" th:id='create+${radi}'>生成db文件</a>
+						</shiro:hasPermission>
+						<shiro:hasPermission name="webresources:login:ShipInOutCheck:download">
+							<a class="easyui-linkbutton" th:id='download+${radi}'>下载db文件</a>
+						</shiro:hasPermission>
+					</div>
+				</div>
+				<table th:id="DayWorkClassDatagrid1508123307299+${radi}"
+					style="height: 100%"></table>
+			</div>
+			<div data-options="region:'east',split:true" style="height: 100%; width: 400px" th:id="YardInSI+${radi}">
+				<table th:id="YardInDatagrid1551315377+${radi}"
+					style="height: 100%">
+				</table>
+			</div>
+			
+			<div th:id="shipInOuthtml+${radi}" data-options="region:'south',split:true,title:'shipInOut'" style="width: 100%; height: 240px">
+<!-- 				<table th:id="ShipInDatagrid1551334258000+${radi}" -->
+<!-- 					style="height: 100%"></table> -->
+				<table th:id="ShipoutDatagrid1551334266000+${radi}"
+					style="height: 100%"></table>
+			</div>
+	
+		</div>
+	</div>
+	
+</div>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	var reload5436 = [ {
+        iconCls : 'icon-reload',
+        handler : function() {
+	        $('#ShipStatusTree123[(${radi})]').tree('reload');
+        }
+    } ];
+    var searchShip = function() {
+	    var parentNode = $('#ShipStatusTree123[(${radi})]').tree('getRoots'); //得到tree顶级node  
+	    var searchCon = $("input[name='search']").val();
+	    /* alert("parentNode="+parentNode); 
+	    alert("searchCon="+searchCon); */
+	    var children;
+	    for (var i = 0; i < parentNode.length; i++) { //循环顶级 node   
+		    children = $('#ShipStatusTree123[(${radi})]').tree('getChildren', parentNode[i].target);//获取顶级node下所有子节点   
+		    if (children) { //如果有子节点   
+			    for (var j = 0; j < children.length; j++) { //循环所有子节点   
+				    //if($('#ul_tree_dept').tree('isLeaf',children[j].target)){ //判断子级是否为叶子节点,即不是父节点   
+				    if (children[j].text.indexOf(searchCon) >= 0 || children[j].id.indexOf(searchCon) >= 0) { //判断节点text是否包含搜索文本                       
+					    expandParent(children[j]); //设置此节点所有父级展开   
+					    selectNode(children[j]); //设置此节点为选择状态   
+
+					    return;
+				    }
+				    //}   
+			    }
+		    } else {
+			    if (parentNode[i].text.indexOf(searchCon) || children[j].id.indexOf(searchCon) >= 0 >= 0) {
+				    expandParent(parentNode[i]);
+				    selectNode(parentNode[i]);
+				    return;
+			    }
+		    }
+	    }
+    }
+    function selectNode(node) {
+	    $('#ShipStatusTree123[(${radi})]').tree('select', node.target);
+	    $('#ShipStatusTree123[(${radi})]').tree('scrollTo', node.target);
+    };
+
+    function expandParent(node) {
+	    var parent = node;
+	    var t = true;
+	    do {
+		    parent = $('#ShipStatusTree123[(${radi})]').tree('getParent', parent.target); //获取此节点父节点   
+		    if (parent) { //如果存在   
+			    t = true;
+			    $('#ShipStatusTree123[(${radi})]').tree('expand', parent.target);
+		    } else {
+			    t = false;
+		    }
+	    } while (t);
+    };
+    
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#DayWorkClassDatagrid1508123307299[(${radi})]");
+	    var type = $("#Type[(${radi})]").val();
+	    var shipNo = "";
+	    
+	    var shipInOutDataGridURL = "";
+	    
+	 	// 增加。
+	    $("#add[(${radi})]").on("click", function() {
+	    	if(shipNo) {
+	    		addoredit("");
+	    	} else {
+	    		HdUtils.messager.info('请选船！');
+		        return false;
+	    	}
+	    });
+	 	
+	 	//编辑
+	 	$("#edit[(${radi})]").on("click", function() {
+	    	if(shipNo) {
+	    		var data = $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("getSelected");
+	    		if (data == null || data == undefined) {
+				    HdUtils.messager.info('请选择一条数据进行编辑！');
+				    return;
+			    }
+			    var checkId = data.checkId;
+			    addoredit(checkId);
+	    	} else {
+	    		HdUtils.messager.info('请选船！');
+		        return false;
+	    	}
+	    });
+	 	
+	    function addoredit(checkId) {
+		    HdUtils.dialog.setValue({
+			    'shipNo' : shipNo,
+			    'type' : type
+		    });
+		    HdUtils.dialog.setValue({
+			    'checkId' : checkId
+		    });
+		    HdUtils.dialog.setValue({
+			    'radi' : radi
+		    });
+		    HdUtils.dialog.show({
+		        width : 550,
+		        height : 330,
+		        title : '丰田信息',
+		        href : "../login/system/cargo/shipinoutcheckform.html",
+		        isSaveHandler : true
+		    });
+	    }
+	    
+	  //选中删除
+	    $("#deleteCheck[(${radi})]").on("click", function() {
+	    	 var selRow = $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("getChecked");
+	            if (selRow.length == 0) {
+		            HdUtils.messager.info('请至少选择一条数据！');
+		            return false;
+	            }
+	            var ids = '';
+	            $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+		            if (r) {
+			            for (var i = 0; i < selRow.length; i++) {
+				            ids += selRow[i].checkId + ",";
+			            }
+			            HdUtils.ajax.post({
+			                url : "../webresources/login/cargo/ShipInOutCheck/removeshipInOutCheck?checkIds=" + ids,
+			                success : function(data) {
+				                HdUtils.messager.bottomRight(data.message);
+				                $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("hdReload");
+			                }
+			            });
+		            }
+	            });
+	    });
+	    
+	    
+	    //装船
+	    if(type == 'SO'){
+	    	$('#YardInSI[(${radi})]').hide();
+	    }
+	    
+	    $('#ShipStatusTree123[(${radi})]').tree({
+	        method : "get",
+	        url : "../webresources/login/ship/Ship/gentree",
+	        onClick : treeclick
+	    });
+
+	    function treeclick(node) {
+		    shipNo = node.id;
+		    shipNam = node.type.split(",");
+		    cShipNam = shipNam[0];
+		    ivoyage = node.obj.ivoyage;
+		    $('#cShipNam[(${radi})]').val(cShipNam);
+		    $('#ivoyage[(${radi})]').val(ivoyage);
+		    HdUtils.dialog.setValue({
+			    'shipNo' : shipNo
+		    });
+		    $('#DayWorkClassDatagrid1508123307299[(${radi})]').datagrid({
+			    queryParams : query(),
+		    });
+		    $("#YardInDatagrid1551315377[(${radi})]").datagrid({
+		    	queryParams : query(),
+		    });
+		    if(type == 'SI'){ 
+			    $('#ShipoutDatagrid1551334266000[(${radi})]').datagrid('hideColumn','vcPort');
+			    $('#ShipoutDatagrid1551334266000[(${radi})]').datagrid('hideColumn','vcStartSite');
+		    	shipInOutDataGridURL = "../webresources/login/cargo/ShipInOutCheck/findShipOut";
+		    	$("#ShipoutDatagrid1551334266000[(${radi})]").datagrid({
+			    	queryParams : query(),
+			    });
+		    }
+		    if(type == 'SO'){
+			    $('#ShipoutDatagrid1551334266000[(${radi})]').datagrid('hideColumn','vcSite');
+			    $('#ShipoutDatagrid1551334266000[(${radi})]').datagrid('hideColumn','vcException');
+		    	shipInOutDataGridURL = "../webresources/login/cargo/ShipInOutCheck/findShipIn";
+		    	$("#ShipoutDatagrid1551334266000[(${radi})]").datagrid({
+			    	queryParams : query(),
+			    });
+		    }
+		    
+	    }
+	    
+	    //删除
+	    $("#delete[(${radi})]").on("click", function() {
+	    	if(shipNo){
+	    		HdUtils.ajax.post({
+		            url : "../webresources/login/cargo/ShipInOutCheck/removeAll?shipNo=" + shipNo +"&workTyp=" +type,
+		            success : function(data) {
+			            HdUtils.messager.bottomRight(data.message);
+			            $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("hdReload");
+			            $("#YardInDatagrid1551315377[(${radi})]").datagrid("hdReload");
+// 			            $("#ShipoutDatagrid1551334266000[(${radi})]").datagrid("hdReload");
+		            }
+		        });
+	    	} else {
+	    		HdUtils.messager.info('请选船！');
+		        return false;
+	    	}
+	    });
+	    // 清空。
+	    $("#clear[(${radi})]").on("click", function() {
+		    shipNo = '';
+		    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+			    queryParams : query(),
+		    });
+		    $("#YardInDatagrid1551315377[(${radi})]").datagrid({
+		    	queryParams : query(),
+		    });
+// 		    $("#ShipoutDatagrid1551334266000[(${radi})]").datagrid({
+// 		    	queryParams : query(),
+// 		    });
+	    });
+	    //radio点击触发事件
+	    $(":radio").click(function() {
+		    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+			    queryParams : query(),
+		    });
+		    $("#YardInDatagrid1551315377[(${radi})]").datagrid({
+		    	queryParams : query(),
+		    });
+		    if(type == 'SI'){ 
+			    $('#ShipoutDatagrid1551334266000[(${radi})]').datagrid('hideColumn','vcPort');
+			    $('#ShipoutDatagrid1551334266000[(${radi})]').datagrid('hideColumn','vcStartSite');
+		    	shipInOutDataGridURL = "../webresources/login/cargo/ShipInOutCheck/findShipOut";
+		    	$("#ShipoutDatagrid1551334266000[(${radi})]").datagrid({
+			    	queryParams : query(),
+			    });
+		    }
+		    if(type == 'SO'){
+			    $('#ShipoutDatagrid1551334266000[(${radi})]').datagrid('hideColumn','vcSite');
+			    $('#ShipoutDatagrid1551334266000[(${radi})]').datagrid('hideColumn','vcException');
+		    	shipInOutDataGridURL = "../webresources/login/cargo/ShipInOutCheck/findShipIn";
+		    	$("#ShipoutDatagrid1551334266000[(${radi})]").datagrid({
+			    	queryParams : query(),
+			    });
+		    }
+	    });
+	    //上传DB文件
+	    $("#upload[(${radi})]").on("click", function() {
+		    if (!shipNo) {
+			    HdUtils.messager.info('请先选择船名航次！');
+		    } else {
+			    var entityid = shipNo + type;
+			    HdUtils.fileupload({
+			        entityName : 'ShipInOutCheck',
+			        entityId : entityid,
+			        mutiple : false,
+			        isReadOnly : false
+			    });
+		    }
+	    });
+	    //下载DB文件
+	    $("#download[(${radi})]").on("click", function() {
+	    	if(shipNo){
+	    		if(type == "SI") {
+	    			HdUtils.ajax.post({
+			            url : "../webresources/login/cargo/ShipInOutCheck/downLoadDBCheck?workTyp=" +type,
+			            success : function(data) {
+			            	if (data.key == '-1') {
+	    				        HdUtils.messager.info("先生成BD文件");
+	    				        return false;
+	    			        } else {
+	    			        	window.open("../webresources/login/cargo/ShipInOutCheck/downLoadDB?workTyp="+type);
+	    			        }
+			            	
+			            }
+			        });
+	    		}
+	    		if(type == "SO") {
+	    			HdUtils.ajax.post({
+			            url : "../webresources/login/cargo/ShipInOutCheck/downLoadDBCheck?workTyp=" +type,
+			            success : function(data) {
+			            	if (data.key == '-1') {
+	    				        HdUtils.messager.info("先生成BD文件");
+	    				        return false;
+	    			        } else {
+	    			        	window.open("../webresources/login/cargo/ShipInOutCheck/downLoadDB?workTyp="+type);
+	    			        }
+			            	
+			            }
+			        });
+	    		}
+	    		
+	    	} else {
+	    		HdUtils.messager.info('请选船！');
+		        return false;
+	    	}
+	    	
+	    });
+	    //生成DB文件
+	    $("#create[(${radi})]").on("click", function() {
+	    	if(shipNo){
+	    		HdUtils.ajax.post({
+		            url : "../webresources/login/cargo/ShipInOutCheck/createDB?shipNo=" + shipNo +"&workTyp=" +type,
+		            success : function(data) {
+		            	if (data.key == '-1') {
+//     				        HdUtils.messager.info("操作失败");
+    				        HdUtils.messager.bottomRight(data.message);
+    				        return false;
+    			        }
+			            HdUtils.messager.bottomRight(data.message);
+		            }
+		        });
+	    	} else {
+	    		HdUtils.messager.info('请选船！');
+		        return false;
+	    	}
+	    });
+	    //打印
+	    $("#export[(${radi})]").on("click", function() {
+		    dg.datagrid("hdExportExcel", {
+		        url : "../webresources/login/cargo/PortCar/exportExcel",
+		        exportFileName : "集疏港计划-" + new Date().format("yyyyMMddhhmmss")
+		    });
+	    });
+	    // 导入
+	    $("#import[(${radi})]").on("click", function() {
+		    if (!shipNo) {
+			    HdUtils.messager.info('请先选择船名航次！');
+		    } else {
+			    HdUtils.dialog.setValue({
+				    'radi' : radi
+			    });
+			    HdUtils.dialog.show({
+			        width : 700,
+			        height : 300,
+			        title : '导入db文件',
+			        href : "../login/system/ship/choosedbform.html",
+			        isSaveHandler : true
+			    });
+			    HdUtils.dialog.setValue({
+				    data : {
+				        shipNo : shipNo,
+				        type : type
+				    }
+			    });
+		    }
+	    });
+
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    if (shipNo) {
+			    onlinquery.add("shipNo", shipNo);
+		    }
+		    onlinquery.add("workTyp",type);
+		    return onlinquery.build();
+	    }
+
+	    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/cargo/ShipInOutCheck/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : false,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#DayWorkClassToolBar1508123307299" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ 
+        	{
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+	        }, 
+	        {
+	            field : "checkId",
+	            title : '主键',
+	            multiSort : true,
+	            hidden : true,
+	            width : 160,
+	            align : "center",
+	            sortable : false
+	        },
+	        {
+	            field : "vcVinNo",
+	            title : '车架号',
+	            multiSort : true,
+	            width : 160,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "vcPortNam",
+	            title : '港口',
+	            multiSort : true,
+	            width : 120,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "vcGarage",
+	            title : '场地',
+	            multiSort : true,
+	            width : 120,
+	            align : "center",
+	            sortable : false
+	        } ] ]
+	    });
+	    
+	    $("#YardInDatagrid1551315377[(${radi})]").datagrid({
+	    	striped : true,
+	        url : "../webresources/login/cargo/ShipInOutCheck/findYardIn",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : false,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+// 	        toolbar : "#DayWorkClassToolBar1508123307299" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ 
+//         	{
+// 	            field : "ck",
+// 	            checkbox : true,
+// 	            sortable : false,
+// 	        }, 
+	        {
+	            field : "vcVinNo",
+	            title : '车架号',
+	            multiSort : true,
+	            width : 160,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "vcSite",
+	            title : '港口',
+	            multiSort : true,
+	            width : 120,
+	            align : "center",
+	            sortable : false
+	        }, 
+            {
+                field : "dYardInTime",
+                title : "下载时间",
+                multiSort : true,
+                halign : "center",
+                sortable : false
+            } ] ]
+	    });
+	    
+	    //shipInOut
+	    
+	    
+	    
+	    if(type == 'SO'){
+	    	shipInOutDataGridURL = "../webresources/login/cargo/ShipInOutCheck/findShipIn";
+	    }
+	    
+	    if(type == 'SI'){
+	    	shipInOutDataGridURL = "../webresources/login/cargo/ShipInOutCheck/findShipOut";
+	    }
+	    
+	    $("#ShipoutDatagrid1551334266000[(${radi})]").datagrid({
+	    	striped : true,
+	        url : shipInOutDataGridURL,
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : false,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        fit : true,
+	        fitColumns : false,
+	        onLoadSuccess : function(data) {
+	        	if(shipNo) {
+	        		HdUtils.ajax.post({
+			            url : "../webresources/login/cargo/ShipInOutCheck/checkShip?shipNo=" + shipNo,
+			            success : function(data) {
+				            HdUtils.messager.bottomRight(data.message);
+			            }
+			        });
+	        	}
+	        },
+	        columns : [ [ 
+// 			{
+// 	            field : "outId",
+// 	            title : '主键',
+// 	            hidden:true,
+// 	            multiSort : true,
+// 	            width : 160,
+// 	            align : "center",
+// 	            sortable : false
+// 	        }
+// 	        , 
+	        {
+	            field : "vcVinNo",
+	            title : '车架号',
+	            multiSort : true,
+	            width : 160,
+	            align : "center",
+	            sortable : false
+	        }
+	        , 
+	        {
+	            field : "vcSite",
+	            title : '卸货港',
+	            multiSort : true,
+	            width : 120,
+	            align : "center",
+	            sortable : false
+	        }, 
+            {
+                field : "vcCreateDate",
+                title : "扫描时间",
+                multiSort : true,
+                halign : "center",
+                sortable : false
+            } , 
+            {
+                field : "vcException",
+                title : "异常代码",
+                multiSort : true,
+                formatter: function(value,row,index){
+            		if(value=="1"){
+	    				return "异常";
+            		}else
+            		{
+            			return "正常";
+            		}
+				},
+                halign : "center",
+                sortable : false
+            }, 
+            {
+                field : "vcShipId",
+                title : "船ID",
+                multiSort : true,
+                halign : "center",
+                sortable : false
+            }, 
+            {
+                field : "vcPort",
+                title : "装船港代码",
+                multiSort : true,
+                halign : "center",
+                sortable : false
+            }, 
+            {
+                field : "vcStartSite",
+                title : "装船港名称",
+                multiSort : true,
+                halign : "center",
+                sortable : false
+            }
+	        ] ]
+	    });
+	    
+	    
+	    
+	    
+	    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("hdGetColumnNames");
+    });
+</script>
+</html>

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div class="easyui-layout" data-options="fit:true"
+	style="height: 100%; width: 100%">
+	<div data-options="region:'center'" style="height: 100%; width: 100%">
+		<div th:id="ShipExecutionToolBar1508123301002+${radi}"
+			style="float: left">
+			<shiro:hasPermission name="webresources:login:ShipExecution:add">
+				<a class="easyui-linkbutton" th:id='add+${radi}' iconCls="icon-add"	plain="false">新增</a>
+			</shiro:hasPermission>
+			<shiro:hasPermission name="webresources:login:ShipExecution:update">
+				<a class="easyui-linkbutton" th:id='edit+${radi}'>编辑</a>
+			</shiro:hasPermission>
+			<shiro:hasPermission name="webresources:login:ShipExecution:delete">
+				<a class="easyui-linkbutton" th:id='delete+${radi}'>删除</a>
+			</shiro:hasPermission>
+			<a class="easyui-linkbutton" th:id='genExecution+${radi}'>作业引入</a>
+			<shiro:hasPermission name="webresources:login:ShipClassAct:save">
+					<a class="easyui-linkbutton" th:id='save+${radi}'>保存</a>
+			</shiro:hasPermission>
+				
+			<a class="easyui-linkbutton" th:id='fresh+${radi}'>刷新</a>
+				
+		</div>
+		<!-- 工具栏 结束 -->
+		<!-- Datagrid -->
+		<table th:id="ShipExecutionDatagrid1508123301002+${radi}"
+			style="height: 100%"></table>
+	</div>
+</div>
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+
+    	
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#ShipExecutionDatagrid1508123301002[(${radi})]");
+	    var shipNo=HdUtils.dialog.getValue('shipNo');
+	    $('#ShipExecutionDatagrid1508123301002'+radi).datagrid({
+            queryParams : query(),
+        });
+	    // buttons
+	    // 增加。
+	    $("#add[(${radi})]").on("click", function() {
+	    	if(shipNo==null||shipNo==""||shipNo==undefined){
+		          	HdUtils.messager.info('请选择一条船！');	
+		    	}else{
+		    		addoredit("");
+		    	}
+	    });
+	    // 编辑。
+	    $("#edit[(${radi})]").on("click", function() {
+		    var data = dg.datagrid("getSelected");
+		    if (data == null || data == undefined) {
+			    HdUtils.messager.info('请选择一条数据进行编辑！');
+			    return;
+		    }
+		    var shipExecutionId = data.shipExecutionId;
+		    addoredit(shipExecutionId);
+	    });
+	    //导入数据
+	    $("#genExecution[(${radi})]").on("click", function() {	
+		    var pam={};
+		    pam.shipNo=shipNo;
+	        $.ajax({
+	        	url: "/webresources/login/ship/ShipExecution/genExecutionByship",
+	            contentType:"application/json",
+	            type: "POST",
+	            data: $.toJSON(pam),
+	            dataType: 'json',
+	            success: function (data) {
+	            	var datas=data.rows;
+	            	for(var i=0;i<datas.length;i++){
+	            		dg.datagrid('insertRow',{
+	            			index: 0,	// index start with 0
+	            			row:datas[i]
+	            		});
+	            	}
+	            	
+	            },
+	            error: function (data) {
+	                console.log("保存失败！");
+	            }
+	    	});
+	    });
+	    
+	    // 保存。
+	    $("#save[(${radi})]").on("click", function() {
+		    dg.datagrid("hdSave", {
+			    url : "/webresources/login/ship/ShipExecution/save"
+			   
+		    });
+	    });
+	    function addoredit(shipExecutionId) {
+		    HdUtils.dialog.setValue({
+			    'shipExecutionId' : shipExecutionId
+		    });
+		    HdUtils.dialog.setValue({
+			    'radi' : radi,
+			    'shipNo' : shipNo
+		    });
+		    HdUtils.dialog.show({
+		        width : 450,
+		        height : 250,
+		        title : '完成情况',
+		        href : "../login/system/ship/shipexecutionform.html",
+		        isSaveHandler : true
+		    });
+	    }
+	    // 删除。
+	    $("#delete[(${radi})]").on("click", function() {
+		    var selRow = $("#ShipExecutionDatagrid1508123301002[(${radi})]").datagrid("getChecked");
+		    if (selRow.length == 0) {
+			    HdUtils.messager.info('请至少选择一条数据！');
+			    return false;
+		    }
+		    var ids = '';
+		    $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+			    if (r) {
+				    for (var i = 0; i < selRow.length; i++) {
+					    ids += selRow[i].shipExecutionId + ",";
+				    }
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/ship/ShipExecution/removeAll?shipExecutionIds=" + ids,
+				        success : function(data) {
+					        HdUtils.messager.bottomRight(data.message);
+					        $("#ShipExecutionDatagrid1508123301002[(${radi})]").datagrid("hdReload");
+				        }
+				    });
+			    }
+		    });
+	    });
+	    // 刷新。
+	    $("#fresh[(${radi})]").on("click", function() {
+		    dg.datagrid("hdReload");
+	    });
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    onlinquery.add("shipNo", shipNo);
+		    return onlinquery.build();
+	    }
+
+	    $("#ShipExecutionDatagrid1508123301002[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/ship/ShipExecution/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : false,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#ShipExecutionToolBar1508123301002" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false
+	        }, {
+	            field : "shipExecutionId",
+	            title : '主键',
+	            multiSort : true,
+	            halign : "center",
+	            hidden : "true",
+	            width : "80",
+	            editor : {
+	                type : "validatebox",
+	                options:{required : false}
+	            },
+	            sortable : false
+	        }, {
+	            field : "ieNam",
+	            title : "进出口",
+	            multiSort : true,
+	            halign : "center",
+	            align : "left",
+	            width : "80",
+	            sortable : false
+	        }, {
+	            field : "cargoKind",
+	            title : "货类",
+	            multiSort : true,
+	            halign : "center",
+	            align : "left",
+	            width : "80",
+	            
+	            editor : {
+	                type : "validatebox",
+	                options : {required : false}
+	            },
+	            sortable : false
+	        }, {
+	            field : "planTon",
+	            title : "计划件数",
+	            multiSort : true,
+	            halign : "center",
+	            align : "right",
+	            width : "120",
+	            editor : {
+	                type : "validatebox",
+	                options : {required : false }
+	            },
+	            sortable : false
+	        }, {
+	            field : "workTon",
+	            title : "完成件数",
+	            multiSort : true,
+	            width : "80",
+	            align : "right",
+	            halign : "center",
+	            hidden : "true",
+	            editor : {
+	                type : "validatebox",
+	                options : { required : false}
+	            },
+	            sortable : false
+	        },{
+	            field : "remarks",
+	            title : "备注",
+	            width : "80",
+	            multiSort : true,
+	            halign : "center",
+	            align : "left",
+	            editor : {
+	                type : "validatebox",
+	                options : {required : false}
+	            },
+	            sortable : false
+	        } ] ]
+	    });
+    });
+    /*]]>*/
+</script>
+</html>

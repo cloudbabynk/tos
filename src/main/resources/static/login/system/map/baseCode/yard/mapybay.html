@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div id="cybayToolBar20181027" style="float: left">
+	<div>
+		<!-- 查询 -->
+	</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table id="cyBaydg20181027" style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var dg = $("#cyBaydg20181027");
+
+	    var cyAreaNo = HdUtils.dialog.getValue('cyAreaNo');
+	    var cyRowNo = HdUtils.dialog.getValue('cyRowNo');
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    if(cyAreaNo)
+		    onlinquery.add("cyAreaNo", cyAreaNo);
+		    if(cyRowNo)   onlinquery.add("cyRowNo", cyRowNo);
+		    return onlinquery.build();
+	    }
+
+	    $("#cyBaydg20181027").datagrid({
+	        striped : true,
+	        url : "/webresources/login/base/CCyBay/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#cybayToolBar20181027",
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+
+	        }, {
+
+	            field : "cyBayNo",
+	            title : '车位序号',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "cyPlac",
+	            title : "车位号",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "lockId",
+	            title : "锁",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+
+	        ] ]
+	    });
+	    $("#cyBaydg20181027").datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

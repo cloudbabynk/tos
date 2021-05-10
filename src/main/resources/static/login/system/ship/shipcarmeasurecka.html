@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8" />
+
+		<!-- 工具栏 -->
+		<div th:id="ShipCarMeasureToolBar+${radi}" style="float: left; position: relative;">
+			<div style="float: left;">
+				<!-- 查询 -->
+				 货代：<input th:id="consignCod+${radi}" name="consignCod" style="width: 140px" data-options="required:false" /> 
+				<a class="easyui-linkbutton" th:id="query+${radi}" plain="false">查询</a>
+				<a class="easyui-linkbutton" iconCls="icon-add" plain="false">增加</a>
+				<a class="easyui-linkbutton" iconCls="icon-edit" plain="false">编辑</a>
+				<a class="easyui-linkbutton" th:id="plbj+${radi}" plain="false">批量编辑</a>
+				<a class="easyui-linkbutton" iconCls="icon-remove" plain="false">删除</a>
+				<!-- <a class="easyui-linkbutton" iconCls="icon-export" plain="false"
+				th:id="export+${radi}">导出Excel</a> -->
+			</div>
+		</div>
+		<table th:id="ShipCarMeasureDatagrid +${radi}" style="height: 100%"></table>
+	
+<!-- 脚本控制 -->
+<script type="text/javascript">
+	$(document).ready(function() {
+	    var shipNo = "";
+	    var dg = $("#ShipCarMeasureDatagrid[(${radi})]");
+	    $('#consignCod[(${radi})]').combobox({
+	        url : '../webresources/login/contract/ContractIeDoc/getCClientCodDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        mode : 'remote',
+	        panelHeight : 100,
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $("#ShipCarMeasureToolBar[(${radi})] a[iconCls='icon-add']").on("click", function() {
+            if (!shipNo){
+		    	 HdUtils.messager.info('请至少选择一条船！');
+				 return false;
+		    }
+		    HdUtils.dialog.setValue({
+			    'aradi' : "[(${radi})]",
+			    'iEId' : 'E',
+		    });
+		    HdUtils.dialog.show({
+		        width : 1100,
+		        height : 550,
+		        title : '',
+		        href : "../webresources/login/work/WorkCommand/workcommandfcd.htm?ShipNo=" + shipNo,
+		        isSaveHandler : true
+		    });
+	    });
+	 // 编辑。
+	    $("#ShipCarMeasureToolBar[(${radi})] a[iconCls='icon-edit']").on("click", function() {
+		    //只能选定一条数据
+		    var selRow = $("#ShipCarMeasureDatagrid[(${radi})]").datagrid("getChecked");
+		    if (selRow.length == 0) {
+			    HdUtils.messager.info('请选择一条数据！');
+			    return false;
+		    }
+		    if (selRow.length > 1) {
+			    HdUtils.messager.info('只能选择一条数据！');
+			    return false;
+		    }
+		    var id = selRow[0].id;
+		    formEdit(id);
+	    });
+	    // 删除。
+	    $("#ShipCarMeasureToolBar[(${radi})] a[iconCls='icon-remove']").on("click", function() {
+		    dg.datagrid("hdRealRemove", {
+			    url : "../webresources/login/ship/ShipCarMeasure/save"
+		    });
+	    });
+	    //导出excel
+	    $("#export[(${radi})]").on("click", function() {
+	    	var selRow = $("#ShipCarMeasureDatagrid[(${radi})]").datagrid("getChecked");//新增了选中行的id 
+	    	var id = '';
+	    	if (selRow.length > 0) {
+		    	for (var i = 0; i < selRow.length; i++) {
+				    id += selRow[i].id + ",";
+			    }
+		    }  
+		    dg.datagrid("hdExportExcel", {
+		        url : "../webresources/login/ship/ShipCarMeasure/exportExcelCk?ids="+id,
+		        exportFileName : "出口复尺单-" + new Date().format("yyyyMMddhhmmss"),
+		    //columnTitles:"船名,航次,进出口,提单号,车名,原尺寸,体积,复尺寸,体积,备注",
+		    //columnNames:"shipNam,voyage,iEIdStr,billNo,carTypStr,oldSize,oldVol,newSize,newVol,remarkTxt"
+		    });
+	    });
+	    function formEdit(id) {//编辑删除统一入口
+		    HdUtils.dialog.setValue({
+			    'radi' : "[(${radi})]"
+		    });
+		    HdUtils.dialog.show({
+		        width : 700,
+		        height : 350,
+		        title : '编辑',
+		        href : "../webresources/login/ship/ShipCarMeasure/shipcarmeasureckform.htm?id=" + id,
+		        isSaveHandler : true
+		    });
+	    }
+	    $("#plbj[(${radi})]").on("click", function() {
+	    	var selRow = $("#ShipCarMeasureDatagrid[(${radi})]").datagrid("getChecked");
+		    if (selRow.length == 0) {
+			    HdUtils.messager.info('请至少选择一条数据！');
+			    return false;
+		    }
+		    HdUtils.dialog.setValue({
+			    'aplradi' : "[(${radi})]"
+		    });
+		    var ids = '';
+		    for (var i = 0; i < selRow.length; i++) {
+			    ids += selRow[i].id + ",";
+		    }
+		    HdUtils.dialog.show({
+		        width : 700,
+		        height : 350,
+		        title : '编辑',
+		        href : "../webresources/login/ship/ShipCarMeasure/shipcarmeasureformpl.htm?ids=" + ids,
+		        isSaveHandler : true
+		    });
+		    
+	    });
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    var consignCod = $("#consignCod[(${radi})]").combobox('getValue');
+		    shipNo = HdUtils.dialog.getValue('shipNoCK');//tree中选中的船号
+		    onlinquery.add("shipNo", shipNo);
+		    onlinquery.add("consignCod", consignCod);
+		    onlinquery.add("iEId", 'E');
+		    return onlinquery.build();
+	    }
+	    $("#query[(${radi})]").on("click", function() {
+	    	$("#ShipCarMeasureDatagrid[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+	    $("#ShipCarMeasureDatagrid[(${radi})]").hddatagrid({
+	        striped : true,
+	        url : "../webresources/login/ship/ShipCarMeasure/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : false,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#ShipCarMeasureToolBar[(${radi})]",
+	        fit : true,
+	        fitColumns : false,
+	        onDblClickRow : function(rowIndex, rowData) {	        	
+	        	formEdit(rowData.id)
+	        },
+	        columns : [ [ {
+	            field : 'ck',
+	            checkbox : true
+	        }, {
+
+	            field : "id",
+	            title : '',
+	            multiSort : true,
+	            halign : "center",
+	            sortable : true,
+	            hidden : true
+	        }, {
+
+	            field : "shipNo",
+	            title : "",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            hidden : true,
+	            sortable : true
+	        }, {
+
+	            field : "shipNam",
+	            title : "船名",
+	            width : 80,
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : true
+	        }, {
+
+	            field : "voyage",
+	            title : "航次",
+	            width : 80,
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : true
+	        }, {
+
+	            field : "iEId",
+	            title : "进出口",
+	            width : 80,
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            formatter : function(value, row, index) {
+		            return row.ieNam;
+	            },
+	            sortable : true
+	        }, {
+
+	            field : "billNo",
+	            title : "提单号",
+	            width : 80,
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : true
+	        }, {
+
+	            field : "carTypNam",
+	            title : "车名",
+	            width : 80,
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : true
+	        },{
+
+	            field : "carVin",
+	            title : "车架号",
+	            width : 130,
+	            halign : "center",
+	            align : 'right',
+	        }, {
+
+	            field : "oldCarLength",
+	            title : "原长",
+	            width : 80,
+	            multiSort : true,
+	            halign : "center",
+	            align : 'right',
+	            formatter : function(value) {
+		            return HdUtils.formatter.precisionCommon(value, 0);
+	            },
+	            //要限制输入的最大数，请修改max
+	            editor : {
+	                type : "numberbox",
+	                options : {
+	                    required : false,
+	                    precision : 0,
+	                    max : "9999999999.999",
+	                    groupSeparator : ','
+	                }
+	            },
+	            sortable : true
+	        }, {
+
+	            field : "oldCarWidth",
+	            title : "原宽",
+	            width : 80,
+	            multiSort : true,
+	            halign : "center",
+	            align : 'right',
+	            formatter : function(value) {
+		            return HdUtils.formatter.precisionCommon(value, 0);
+	            },
+	            //要限制输入的最大数，请修改max
+	            editor : {
+	                type : "numberbox",
+	                options : {
+	                    required : false,
+	                    precision : 0,
+	                    max : "9999999999.999",
+	                    groupSeparator : ','
+	                }
+	            },
+	            sortable : true
+	        }, {
+
+	            field : "oldCarHighth",
+	            title : "原高",
+	            width : 80,
+	            multiSort : true,
+	            halign : "center",
+	            align : 'right',
+	            formatter : function(value) {
+		            return HdUtils.formatter.precisionCommon(value, 0);
+	            },
+	            //要限制输入的最大数，请修改max
+	            editor : {
+	                type : "numberbox",
+	                options : {
+	                    required : false,
+	                    precision : 0,
+	                    max : "9999999999.999",
+	                    groupSeparator : ','
+	                }
+	            },
+	            sortable : true
+	        }, {
+
+	            field : "oldCarVol",
+	            title : "原体积",
+	            width : 80,
+	            halign : "center",
+	            align : 'right',
+	            formatter : function(value) {
+		            return HdUtils.formatter.precisionCommon(value, 3);
+	            }
+	        }, {
+
+	            field : "newCarLength",
+	            title : "新长",
+	            width : 80,
+	            multiSort : true,
+	            halign : "center",
+	            align : 'right',
+	            formatter : function(value) {
+		            return HdUtils.formatter.precisionCommon(value, 0);
+	            },
+	            //要限制输入的最大数，请修改max
+	            editor : {
+	                type : "numberbox",
+	                options : {
+	                    required : false,
+	                    precision : 0,
+	                    max : "9999999999.999",
+	                    groupSeparator : ','
+	                }
+	            },
+	            sortable : true
+	        }, {
+
+	            field : "newCarWidth",
+	            title : "新宽",
+	            width : 80,
+	            multiSort : true,
+	            halign : "center",
+	            align : 'right',
+	            formatter : function(value) {
+		            return HdUtils.formatter.precisionCommon(value, 0);
+	            },
+	            //要限制输入的最大数，请修改max
+	            editor : {
+	                type : "numberbox",
+	                options : {
+	                    required : false,
+	                    precision : 0,
+	                    max : "9999999999.999",
+	                    groupSeparator : ','
+	                }
+	            },
+	            sortable : true
+	        }, {
+
+	            field : "newCarHighth",
+	            title : "新高",
+	            width : 80,
+	            multiSort : true,
+	            halign : "center",
+	            align : 'right',
+	            formatter : function(value) {
+		            return HdUtils.formatter.precisionCommon(value, 0);
+	            },
+	            //要限制输入的最大数，请修改max
+	            editor : {
+	                type : "numberbox",
+	                options : {
+	                    required : false,
+	                    precision : 0,
+	                    max : "9999999999.999",
+	                    groupSeparator : ','
+	                }
+	            },
+	            sortable : true
+	        }, {
+
+	            field : "carVol",
+	            title : "新体积",
+	            width : 80,
+	            halign : "center",
+	            align : 'right',
+	            formatter : function(value) {
+		            return HdUtils.formatter.precisionCommon(value, 3);
+	            }
+	        }, {
+
+	            field : "carWeight",
+	            title : "重量",
+	            width : 80,
+	            halign : "center",
+	            align : 'right',
+	            formatter : function(value) {
+		            return HdUtils.formatter.precisionCommon(value, 3);
+	            }
+	        },{
+	        	field : "consignCod",
+	            title : "货代",
+	            width : 80,
+	            halign : "center",
+	            align : 'right',
+	           
+	        },{
+
+	            field : "remarkTxt",
+	            title : "备注",
+	            width : 80,
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : true
+	        }, {
+
+	            field : "recNam",
+	            title : "录入人",
+	            width : 80,
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : true
+	        }, {
+
+	            field : "recTim",
+	            title : "录入时间",
+	            width : 120,
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : true
+	        }, {
+
+	            field : "updNam",
+	            title : "修改人",
+	            width : 80,
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : true
+	        }, {
+
+	            field : "updTim",
+	            title : "修改时间",
+	            width : 120,
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : true
+	        } ] ]
+	    });
+    });
+</script>
+</html>

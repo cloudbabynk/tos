@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<div style="float: left">
+	日期：<input th:id="shipworkTim+${radi}" name="shipworkTim"
+		class="easyui-datebox" style="width: 120px" />&nbsp;&nbsp;码头：<input th:id="dockCod+${radi}" name="dockCod" data-options="required:false"
+				maxlength="35" />&nbsp;<a
+		class="easyui-linkbutton" th:id="report+${radi}">报表</a>
+</div>
+<iframe th:id="workdata+${radi}" style="width: 100%; height: 100%;">
+</iframe>
+<script>
+	$(document).ready(function() {
+	    $('#dockCod[(${radi})]').combobox({
+	        url : '../webresources/login/contract/ContractIeDoc/getCDock',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 'auto',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $("#shipworkTim[(${radi})]").datebox({
+	        height : 26,
+	        width : 130,
+	        editable : false,
+	        onShowPanel : function() {// 显示日趋选择对象后再触发弹出月份层的事件，初始化时没有生成月份层
+		        span.trigger('click'); // 触发click事件弹出月份层
+		        if (!tds) setTimeout(function() { //延时触发获取月份对象，因为上面的事件触发和对象生成有时间间隔
+			        var tableId = p.find('div.calendar-menu-month-inner td');
+			        tableId.click(function(e) {
+				        e.stopPropagation(); //禁止冒泡执行easyui给月份绑定的事件
+				        var year = /\d{4}/.exec(span.html())[0] //得到年份
+				        , month = parseInt($(this).attr('abbr'), 10); //月份 之前是这样的month = parseInt($(this).attr('abbr'), 10) + 1;
+				        if (month < 10) {
+					        month = '0' + month;
+				        }
+				        $('#shipworkTim[(${radi})]').datebox('hidePanel') //隐藏日期对象
+				        .datebox('setValue', year + '-' + month); //设置日期的值
+			        });
+		        }, 0);
+	        },
+	        formatter : function(date) {//格式化日期
+		        var y = date.getFullYear(), m = date.getMonth() + 1;
+		        if (m < 10) m = "0" + m;
+		        return y + "-" + m;
+	        },
+	        parser : function(s) {//解析一个日期字符串
+		        var t = Date.parse(s);
+		        return !isNaN(t) ? new Date(t) : new Date();
+	        },// 配置formatter，只返回年月
+	    });
+	    var p = $('#shipworkTim[(${radi})]').datebox('panel'), // 日期选择对象
+	    tds = false, // 日期选择对象中月份
+	    span = p.find('div.calendar-title span'); // 显示月份层的触发控件
+	    $("#shipworkTim[(${radi})]").datebox("setValue", getYear() + "-" + getMonth());
+	    function getYear() {
+		    var myDate = new Date();
+		    var year = managerNum(myDate.getFullYear()); //获取完整的年份(4位,1970-????)
+		    return year;
+	    }
+	    function getMonth() {
+		    var myDate = new Date();
+		    var month = managerNum(myDate.getMonth() + 1); //获取当前月份(0-11,0代表1月)
+		    return month;
+	    }
+	    function managerNum(data) {
+		    if (parseInt(data) < 10) {
+			    return "0" + data;
+		    } else {
+			    return "" + data;
+		    }
+	    }
+	    /**
+         * 获取下一个月
+         *
+         * @date 格式为yyyy-mm-dd的日期，如：2014-01-25
+         */ 
+	    function getNextMonth(date) {
+            var arr = date.split('-');
+            var year = arr[0]; //获取当前日期的年份
+            var month = arr[1]; //获取当前日期的月份
+            var day = arr[2]; //获取当前日期的日
+            var days = new Date(year, month, 0);
+            days = days.getDate(); //获取当前日期中的月的天数
+            var year2 = year;
+            var month2 = parseInt(month) + 1;
+            if (month2 == 13) {
+                year2 = parseInt(year2) + 1;
+                month2 = 1;
+            }
+            var day2 = day;
+            var days2 = new Date(year2, month2, 0);
+            days2 = days2.getDate();
+            if (day2 > days2) {
+                day2 = days2;
+            }
+            if (month2 < 10) {
+                month2 = '0' + month2;
+            }
+        
+            var t2 = year2 + '-' + month2 + '-' + day2;
+            return t2;
+        }
+	    $("#report[(${radi})]").on("click", function() {
+	    	var shipworkTim = $("#shipworkTim[(${radi})]").datebox('getValue');
+	    	if (!shipworkTim){
+	    		shipworkTim = getYear() + "-" + getMonth();
+	    	}
+		    //获取选择的时间的下一个月1号
+		    var date = getNextMonth(shipworkTim+'-01');
+		    var dockCod = $("#dockCod[(${radi})]").combobox("getValue");
+		    var src = 'http://10.163.204.56:8090/show/?fileid=68a730e8636c4ecfaaed466744cbc6d5&rpttoken=333&shipworkTim=' + shipworkTim + "&dockCod=" + dockCod + "&workDte=" + date;
+		    $("#workdata[(${radi})]").attr('src', src);
+	    });
+    });
+</script>
+</html>

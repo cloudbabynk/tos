@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+
+		<!-- 工具栏 -->
+		<div th:id="DayWorkClassToolBar1508123307299+${radi}"
+			style="float: left; position: relative;">
+			<div>
+				<!-- 查询 -->
+				<!-- 				计划日期：<input th:id="days+${radi}" name="days" class="easyui-datebox" -->
+				<!-- 					style="width: 120px" data-options="required:false" /> <a -->
+				<!-- 					class="easyui-linkbutton" th:id="query+${radi}">查询</a>  -->
+				<shiro:hasPermission name="webresources:login:DayNightTrend:add">
+					<a class="easyui-linkbutton" th:id='add+${radi}' iconCls="icon-add"
+						plain="false">引入动态计划</a>
+				</shiro:hasPermission>
+				<shiro:hasPermission name="webresources:login:DayNightTrend:update">
+					<a class="easyui-linkbutton" th:id='edit+${radi}'>编辑</a>
+				</shiro:hasPermission>
+				<shiro:hasPermission name="webresources:login:DayNightTrend:save">
+					<a class="easyui-linkbutton" th:id='save+${radi}'>保存</a>
+				</shiro:hasPermission>
+				<shiro:hasPermission name="webresources:login:DayNightTrend:delete">
+					<a class="easyui-linkbutton" th:id='delete+${radi}'>删除</a>
+				</shiro:hasPermission>
+<!-- 				<shiro:hasPermission name="webresources:login:DayNightTrend:import"> -->
+<!-- 					<a class="easyui-linkbutton" th:id='import+${radi}'>引入上昼夜进出口计划</a> -->
+<!-- 				</shiro:hasPermission> -->
+				<a class="easyui-linkbutton" th:id='fresh+${radi}'>刷新</a>
+			</div>
+		</div>
+		<table th:id="DayWorkClassDatagrid1508123307299+${radi}"
+			style="height: 100%"></table>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	var reload5438 = [ {
+        iconCls : 'icon-reload',
+        handler : function() {
+	        $('#ShipStatusTree123[(${radi})]').tree('reload');
+        }
+    } ];
+    $(document).ready(function() {
+	    // 	    $("#days[(${radi})]").val(Date.prototype.dateAdd(0, "yyyy-MM-dd"));
+	    $.parser.parse($('#DayWorkClassToolBar1508123307299[(${radi})]'));
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#DayWorkClassDatagrid1508123307299[(${radi})]");
+	    var days = HdUtils.dialog.getValue('days');
+	    var shipNo;
+	    var cShipNam;
+	    var ivoyage;
+	    var workNum;
+	    var dockCod;
+
+	    // 引入动态计划。
+	    $("#add[(${radi})]").on("click", function() {
+	    	var radiAttention = /*[[${radi}]]*/'';
+		    HdUtils.dialog.setValue({
+			    'radiAttention' : radiAttention
+		    })
+	    	HdUtils.dialog.show({
+		        width : 1000,
+		        height : 450,
+		        title : '引入计划动态',
+		        href : "../webresources/login/ship/DayNightTrend/exdaynighttrend.htm",
+		        isSaveHandler : false
+		    });
+	    });
+	    // 编辑。
+	    $("#edit[(${radi})]").on("click", function() {
+		    var data = dg.datagrid("getSelected");
+		    if (data == null || data == undefined) {
+			    HdUtils.messager.info('请选择一条数据进行编辑！');
+			    return;
+		    }
+		    dg.datagrid("hdEdit");
+	    });
+	    //引入上昼夜计划。
+// 	    $("#import[(${radi})]").on("click", function() {
+// 		    var radiImport = /*[[${radi}]]*/'';
+// 		    if (!shipNo) {
+// 			    HdUtils.messager.info('请先选择一条船！');
+// 			    return false;
+// 		    }
+// 		    HdUtils.dialog.setValue({
+// 			    'radiImport' : radiImport
+// 		    })
+// 		    HdUtils.dialog.setValue({
+// 			    'shipNo' : shipNo
+// 		    })
+// 		    HdUtils.dialog.show({
+// 		        width : 1000,
+// 		        height : 450,
+// 		        title : '引入上昼夜计划',
+// 		        href : "../webresources/login/ship/DayNightTrend/exdaynighttrend.htm",
+// 		        isSaveHandler : false
+// 		    });
+// 	    });
+	    // 保存。
+	    $("#save[(${radi})]").on("click", function() {
+		    if (days < Date.prototype.dateAdd(0, "yyyy-MM-dd")) {
+			    HdUtils.messager.info('以前的计划无法编辑！');
+			    return false;
+		    }
+		    dg.datagrid("hdSave", {
+			    url : "../webresources/login/ship/DayNightTrend/save?days=" + days
+		    });
+	    });
+	    // 删除。
+	    $("#delete[(${radi})]").on("click", function() {
+		    var selRow = $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("getChecked");
+		    if (selRow.length == 0) {
+			    HdUtils.messager.info('请至少选择一条数据！');
+			    return false;
+		    }
+		    var ids = '';
+		    $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+			    if (r) {
+				    for (var i = 0; i < selRow.length; i++) {
+					    ids += selRow[i].planId + ",";
+				    }
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/ship/DayNightTrend/removeAll?planIds=" + ids,
+				        success : function(data) {
+					        if (data.code == '-1') {
+						        HdUtils.messager.info(data.message);
+						        return false;
+					        }
+					        HdUtils.messager.bottomRight(data.message);
+					        $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("hdReload");
+				        }
+				    });
+			    }
+		    });
+	    });
+	    // 刷新。
+	    $("#fresh[(${radi})]").on("click", function() {
+		    dg.datagrid("hdReload");
+	    });
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+		    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    // 		    var days = $("#days[(${radi})]").datebox("getValue");
+		    onlinquery.add("days", days);
+		    return onlinquery.build();
+	    }
+
+	    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/ship/DayNightTrend/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : false,
+	        singleSelect : true,
+	        selectOnCheck : false,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#DayWorkClassToolBar1508123307299" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ {
+	            title : '',
+	            colspan : '3'
+	        }, {
+	            title : '进出港靠离泊位计划',
+	            colspan : '3'
+	        }, {
+	            title : '出口集港计划',
+	            colspan : '5'
+	        }, {
+	            title : '进口场地计划',
+	            colspan : '5'
+	        } ], [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+	            rowspan : '2'
+	        }, {
+
+	            field : "planId",
+	            title : '主键',
+	            multiSort : true,
+	            hidden : "true",
+	            sortable : false
+	        }, {
+
+	            field : "shipTrendsId",
+	            title : '主键',
+	            multiSort : true,
+	            hidden : "true",
+	            sortable : false
+	        },{
+	            field : "cshipnam",
+	            title : '船名',
+	            multiSort : true,
+	            width : 120,
+	            align : "center",
+	            sortable : false
+	        },{
+	            field : "hc",
+	            title : '航次',
+	            multiSort : true,
+	            width : 120,
+	            align : "center",
+	            sortable : false
+	        },  {
+	            field : "jcgdt",
+	            title : '船舶进港/出港动态',
+	            multiSort : true,
+	            width : 140,
+	            align : "center",
+	            sortable : false
+	        }, {
+	        	field : "kx",
+	            title : '靠向',
+	            align : "center",
+	            width : 100,
+	            sortable : false
+	        }, {
+	            field : "bwlz",
+	            title : "泊位桩位",
+	            multiSort : true,
+	            width : 100,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "outTotalNum",
+	            title : "出口总量",
+	            width : 80,
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+	                    required : false,
+	                    validType : 'length[0,6]'
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "outCargo",
+	            title : "货类",
+	            width : 80,
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "outNum",
+	            title : "数量",
+	            width : 80,
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+	                    required : false,
+	                    validType : 'length[0,6]'
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "outAreaNeed",
+	            title : '所需场位',
+	            width : 80,
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+	                    required : false,
+	                    validType : 'length[0,4]'
+
+	                }
+	            }
+	        }, {
+
+	            field : "outAreaPlan",
+	            title : '计划场地',
+	            width : 80,
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "inTotalNum",
+	            title : "卸货总量",
+	            width : 80,
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "inCargo",
+	            title : "货类",
+	            width : 80,
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "inNum",
+	            title : "数量",
+	            width : 80,
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+	                    required : false,
+	                    validType : 'length[0,6]'
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "inAreaNeed",
+	            title : "所需场位",
+	            width : 80,
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+	                    required : false,
+	                    validType : 'length[0,4]'
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "inAreaPlan",
+	            title : '计划场地',
+	            width : 80,
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        } ] ]
+	    });
+	    $("#DayWorkClassDatagrid1508123307299" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+</script>
+</html>

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="DayWorkClassToolBar1508123307299+${radi}"
+	style="float: left">
+	<div>
+		<!-- 查询 -->
+		<span> 吞吐量统计日期：<input th:id="statDate+${radi}" name="statDate"
+		    class="easyui-datebox" data-options="required:false"
+			style="width: 120px">内外贸：<input th:id="tradeId+${radi}"
+			name="tradeId"  type="text"
+			data-options="required:false" style="width: 60px">进出口：<input
+			th:id="iEId+${radi}" name="iEId" 
+			type="text" data-options="required:false" style="width: 60px">是否上报：<input
+			th:id="checkFlag+${radi}" name="checkFlag" type="text"
+			data-options="required:false" style="width: 60px"> 
+			是否确认：<input
+			th:id="submitFlag+${radi}" name="submitFlag" type="text"
+			data-options="required:false" style="width: 60px"> 
+			<shiro:hasPermission name="webresources:login:ShipThruputRecord:query">
+			<a class="easyui-linkbutton" th:id="query+${radi}">查询</a>
+			</shiro:hasPermission>
+			<shiro:hasPermission name="webresources:login:ShipThruputRecord:refresh">
+		    <a class="easyui-linkbutton" th:id='fresh+${radi}'>刷新</a>
+		    </shiro:hasPermission>
+
+		</span>
+	</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="DayWorkClassDatagrid1508123307299+${radi}"
+	style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#DayWorkClassDatagrid1508123307299[(${radi})]");
+	    $('#tradeId[(${radi})]').combobox(HdUtils.code.scode({
+		    fieldCod : 'TRADE_ID'
+	    }, {
+		    required : false
+	    }));
+	    $('#iEId[(${radi})]').combobox(HdUtils.code.scode({
+		    fieldCod : 'I_E_ID'
+	    }, {
+		    required : false
+	    }));
+	    $('#checkFlag[(${radi})]').combobox(HdUtils.code.scode({
+		    fieldCod : 'CHECK_FLAG'
+	    }, {
+		    required : false
+	    }));
+	    $('#submitFlag[(${radi})]').combobox(HdUtils.code.scode({
+		    fieldCod : 'SUBMIT_FLAG'
+	    }, {
+		    required : false
+	    }));
+	   
+	    // 刷新。
+	    $("#fresh[(${radi})]").on("click", function() {
+		    dg.datagrid("hdReload");
+	    });
+    	//回车键触发操作
+	    $(document).keydown(function(event) {
+		    if (event.keyCode == 13) {
+			    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+				    queryParams : query(),
+			    })
+		    }
+	    })
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+		    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    var tradeId = $("#tradeId[(${radi})]").combobox('getValue');
+		    var iEId = $("#iEId[(${radi})]").combobox('getValue');
+		    var submitFlag = $("#submitFlag[(${radi})]").combobox('getValue');
+		    var checkFlag = $("#checkFlag[(${radi})]").combobox('getValue');
+		    onlinquery.add("tradeId", tradeId);
+		    onlinquery.add("iEId", iEId);
+		    onlinquery.add("submitFlag", submitFlag);
+		    onlinquery.add("checkFlag", checkFlag);
+		    return onlinquery.build();
+	    }
+
+	    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/ship/ShipThruputRecord/findQ",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#DayWorkClassToolBar1508123307299" + /*[[${radi}]]*/'',
+	        fit : true,
+	        onDblClickRow : function(rowIndex, rowData) {
+	        	var sthruputId = rowData.sthruputId;
+			    addoredit(sthruputId);
+	        },
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+
+	        }, {
+
+	            field : "sthruputId",
+	            title : '主键',
+	            hidden:true,
+	            multiSort : true,
+	            halign : "center",
+	            hidden : true,
+	            sortable : false
+	        }, {
+	            field : "shipName",
+	            title : "船名",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "voyage",
+	            title : "航次",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "conArrvTim",
+	            title : "抵口日期",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+	        , {
+	            field : "tradeId",
+	            title : "内外贸",
+	            multiSort : true,
+	            hidden:true,
+	            align : "center",
+	            sortable : false
+	        } , {
+	            field : "tradeIdStr",
+	            title : "内外贸",
+	            multiSort : true,
+	            align : "center",
+	            sortable : false
+	        } , {
+	            field : "iEIdStr",
+	            title : "进出口",
+	            multiSort : true,
+	            align : "center",
+	            sortable : false
+	        }
+	        , {
+	            field : "iEId",
+	            title : "进出口",
+	            multiSort : true,
+	            hidden:true,
+	            align : "center",
+	            sortable : false
+	        }, {
+
+	            field : "statDate",
+	            title : '吞吐量统计时间',
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.datetime,
+	            width : 120,
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "carNum",
+	            title : "过录车数",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "stdcarNum",
+	            title : "过录标车数",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "cargoWgt",
+	            title : "重量(吨)",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "dgrCargoWgt",
+	            title : "危险品重量",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "submitFlag",
+	            title : "上报标志",
+	            multiSort : true,
+	            halign : "center",
+	            formatter : function(value) {
+		            if (value != null && value != undefined) {
+			            if (value == 0) {
+				            value = "×";
+				            return value;
+			            } else {
+				            value = "√";
+				            return value;
+			            }
+		            } else {
+			            return value;
+		            }
+	            },
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "checkFlag",
+	            title : "集团确认",
+	            multiSort : true,
+	            halign : "center",
+	            formatter : function(value) {
+		            if (value != null && value != undefined) {
+			            if (value == 0) {
+				            value = "×";
+				            return value;
+			            } else {
+				            value = "√";
+				            return value;
+			            }
+		            } else {
+			            return value;
+		            }
+	            },
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+	        ] ]
+	    });
+	    $("#DayWorkClassDatagrid1508123307299" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

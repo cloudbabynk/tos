@@ -1,0 +1,168 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#ShipBillForm1507959148988");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    var shipNo=HdUtils.dialog.getValue("data").shipNo;
+	    $("input[name='shipNo']").val(shipNo); 
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+		    var isValss = $("#ShipBillForm1507959148988").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#ShipBillForm1507959148988").serializeObject();
+		    
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/ship/ShipBill/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#ShipBillDatagrid1508123309099").datagrid("hdReload");
+		        }
+		    })
+	    }
+    });
+</script>
+<form id="ShipBillForm1507959148988">
+	<table id="ShipBillTable1507959148988" style="height: 75%; width: 80%"
+		class="tableform">
+		
+		<tr>
+			<th>提单号：</th>
+			<td><input id="billNo" name="billNo"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="10" /></td>
+			<th>进出口：</th>
+			<td><input type="radio"  name="iEId" value="I"
+					 checked="checked" class='easyui-radio'>进口</input> 
+			<input type="radio" name="iEId" value="E" class='easyui-radio'>出口</input></td>
+			<th>内外贸：</th>
+			<td><input type="radio"  name="tradeId" value="2"
+					 checked="checked" class='easyui-radio'>内</input> 
+			<input type="radio" name="tradeId" value="1" class='easyui-radio'>外</input></td>
+	
+			<th>品牌：</th>
+			<td><input id="brandCod" name="brandCod"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		</tr>
+		<tr>
+			<th>车型：</th>
+			<td><input id="carTyp" name="carTyp"
+				data-options="required:false" class="easyui-validatebox" 
+				maxlength="35" /></td>
+			<th>唛头：</th>
+			<td><input id="marks" name="marks"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+			<th>总件数：</th>
+			<td><input id="pieces" name="pieces"
+				data-options="required:false" class="easyui-validatebox" 
+				maxlength="35" /></td>
+			<th>总重量：</th>
+			<td><input id="weights" name="weights"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		</tr>
+		<tr>
+			<th>体积：</th>
+			<td><input id="valumes" name="valumes"
+				data-options="required:false" class="easyui-validatebox" 
+				maxlength="35" /></td>
+			<th>车数：</th>
+			<td><input id="carNum" name="carNum"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+			<th>装货港：</th>
+			<td><input id="loadPortCod" name="loadPortCod"
+				data-options="required:false" class="easyui-validatebox" 
+				maxlength="35" /></td>
+			<th>卸货港：</th>
+			<td><input id="transPortCod" name="transPortCod"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		</tr>
+		<tr>
+			<th>目的港：</th>
+			<td><input id="discPortCod" name="discPortCod"
+				data-options="required:false" class="easyui-validatebox" 
+				maxlength="35" /></td>
+			<th>发货人代码：</th>
+			<td><input id="consignCod" name="consignCod"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+			<th>发货人名称：</th>
+			<td><input id="consignNam" name="consignNam"
+				data-options="required:false" class="easyui-validatebox" 
+				maxlength="35" /></td>
+			<th>报关单号：</th>
+			<td><input id="customBillNo" name="customBillNo"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		</tr>
+		<tr>
+			<th>收货人代码：</th>
+			<td><input id="receiveCod" name="receiveCod"
+				data-options="required:false" class="easyui-validatebox" 
+				maxlength="35" /></td>
+			<th>收货人名称：</th>
+			<td><input id="receiveNam" name="receiveNam"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+			<th>联系人：</th>
+			<td><input id="contactPerson" name="contactPerson"
+				data-options="required:false" class="easyui-validatebox" 
+				maxlength="35" /></td>
+			<th>联系人电话：</th>
+			<td><input id="contactPhone" name="contactPhone"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		</tr>
+		<tr>
+			<th>拆分前单号：</th>
+			<td><input id="splitBillNo" name="splitBillNo"
+				data-options="required:false" class="easyui-validatebox" 
+				maxlength="35" /></td>
+			<th>备注：</th>
+			<td><input id="remarks" name="remarks"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+			
+			shipNo:<input id="shipNo" name="shipNo" 
+				data-options="required:false" class="easyui-textbox"
+				maxlength="255" />
+		</tr>
+		
+	</table>
+</form>

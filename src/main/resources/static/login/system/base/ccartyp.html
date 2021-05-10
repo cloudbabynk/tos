@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<div class="easyui-layout" style="width: 100%; height: 100%;" data-options="fit:true">
+	<div data-options="region:'east',title:'车架号',split:true" style="width:400px;">
+		<div id="CCarVinToolBar1475916907" >
+			<div style="float:left;">
+				<shiro:hasPermission
+						name="webresources:login:CCarVin:add">
+					<a class="easyui-linkbutton" th:id="ccarvinadd+${radi}" iconCls="icon-add"
+					   plain="false">增加</a>
+				</shiro:hasPermission> <!--<shiro:hasPermission name="webresources:login:CCarVin:update">
+							<a class="easyui-linkbutton" th:id="ccarvinedit+${radi}" iconCls="icon-edit"
+								plain="false">编辑</a>
+						</shiro:hasPermission> <shiro:hasPermission name="webresources:login:CCarVin:delete">
+							<a class="easyui-linkbutton" th:id="ccarvindelete+${radi}"
+								iconCls="icon-remove" plain="false">删除</a>
+						</shiro:hasPermission>--> <shiro:hasPermission name="webresources:login:CCarVin:save">
+				<a class="easyui-linkbutton" th:id="ccarvinsave+${radi}" iconCls="icon-save"
+				   plain="false">保存</a>
+			</shiro:hasPermission>
+				<shiro:hasPermission name="webresources:login:CCarVin:update">
+					<a class="easyui-linkbutton" th:id="update+${radi}" iconCls="icon-save"
+					   plain="false">更新库存</a>
+				</shiro:hasPermission>
+				<input class="easyui-searchbox" style="width:100px;" th:id="CCarVinSearchbox1475916907308+${radi}" />
+			</div>
+		</div>
+		<table th:id="CCarVinDatagrid1475916907+${radi}"  ></table>
+	</div>
+	<div data-options="region:'center',title:'车型'" style="padding:5px;">
+		<div  th:id="CCarTypeToolBar1508123307500+${radi}"  style="float:left;">
+		<span> 车型：<input th:id="carTyp+${radi}" name="carTyp"
+						 placeholder="请输入车型代码" type="text" data-options="required:false"
+						 style="width: 105px">车型名称：<input th:id="carTypNam+${radi}"
+														  name="carTypNam" placeholder="请输入车型名称" type="text"
+														  data-options="required:false" style="width: 105px"> 所属品牌：<input
+				th:id="brandCod+${radi}" name="brandCod" placeholder="请输入所属品牌"
+				type="text" data-options="required:false" style="width: 105px">
+			车属类别：<input th:id="carKind+${radi}" name="carKind"
+						placeholder="请输入车属类别" type="text" data-options="required:false"
+						style="width: 105px">	车架号：<input th:id="vinNo+${radi}" name="vinNo"
+															placeholder="请输入车架号" type="text" data-options="required:false"
+															style="width: 105px">
+			<a class="easyui-linkbutton" th:id="queryFilter+${radi}">筛选计费需维护数据</a>
+			<a class="easyui-linkbutton" th:id="query+${radi}">查询</a>
+			 <a class="easyui-linkbutton" th:id='clear+${radi}'>重置</a>
+			 <shiro:hasPermission
+					 name="webresources:login:CCarTyp:add">
+				<a class="easyui-linkbutton" th:id='add+${radi}' iconCls="icon-add"
+				   plain="false">新增</a>
+			</shiro:hasPermission> <!--<shiro:hasPermission name="webresources:login:CCarTyp:update">
+				<a class="easyui-linkbutton" th:id='edit+${radi}'>编辑</a>
+
+			</shiro:hasPermission>
+			<shiro:hasPermission name="webresources:login:CCarTyp:update">
+				<a class="easyui-linkbutton" th:id='editFee+${radi}'>计费货名对照</a>
+			</shiro:hasPermission> <shiro:hasPermission name="webresources:login:CCarTyp:delete">
+				<a class="easyui-linkbutton" th:id='delete+${radi}'>删除</a>
+			</shiro:hasPermission> -->
+			<shiro:hasPermission
+					name="webresources:login:CCarTyp:check">
+				<a class="easyui-linkbutton" th:id='check+${radi}' iconCls="icon-add"
+				   plain="false">审核</a>
+			</shiro:hasPermission>
+
+            <shiro:hasPermission
+					name="webresources:login:CCarTyp:check">
+				<a class="easyui-linkbutton" th:id='cbrand+${radi}' iconCls="icon-add"
+				   plain="false">车辆品牌代码维护</a>
+			</shiro:hasPermission>
+            <shiro:hasPermission
+					name="webresources:login:CCarTyp:check">
+				<a class="easyui-linkbutton" th:id='ccarkind+${radi}' iconCls="icon-add"
+				   plain="false">车辆类别维护</a>
+			</shiro:hasPermission>
+             <shiro:hasPermission
+					 name="webresources:login:CCarTyp:check">
+				<a class="easyui-linkbutton" th:id='bigBrand+${radi}' iconCls="icon-add"
+				   plain="false">大品牌维护</a>
+			</shiro:hasPermission>
+			 <shiro:hasPermission
+					 name="webresources:login:CCarTyp:check">
+				<a class="easyui-linkbutton" th:id='hangUp+${radi}' iconCls="icon-add"
+				   plain="false">挂起</a>
+			</shiro:hasPermission>
+			<a class="easyui-linkbutton" th:id='fresh+${radi}'>刷新</a>
+
+		</span>
+		</div>
+		<table th:id="CCarTypDatagrid1508123307500+${radi}"  ></table>
+	</div>
+</div>
+
+
+脚本控制
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+	$(document).ready(function() {
+		var openFlag="close";
+		var radi = /*[[${radi}]]*/'';
+		var dg = $("#CCarTypDatagrid1508123307500[(${radi})]");
+		var dg2 = $("#CCarVinDatagrid1475916907[(${radi})]");
+		$.parser.parse($('#CCarTypToolBar1508123307500[(${radi})]'));
+
+		var codeQuery = new HdQuery();//右侧列表
+
+		$('#brandCod[(${radi})]').combobox({
+			url : '../webresources/login/base/CCarTyp/getCBrandDrop',
+			valueField : 'value',
+			textField : 'label',
+			panelHeight : 200,
+			onSelect : function(rec) {
+				return rec.value;
+			}
+		});
+		$('#checkFlag[(${radi})]').combobox(HdUtils.code.scode({
+					fieldCod : 'ACTIVE_ID'
+				}, {
+					required : false
+				})
+		);
+		$('#carKind[(${radi})]').combobox({
+			url : '../webresources/login/base/CCarTyp/getCCarKindDrop',
+			valueField : 'value',
+			textField : 'label',
+			panelHeight : 200,
+			onSelect : function(rec) {
+				return rec.value;
+			}
+		});
+// 	    $('#factoryCod[(${radi})]').combobox({
+// 	        url : '../webresources/login/base/CCarTyp/getCFactoryDrop',
+// 	        valueField : 'value',
+// 	        textField : 'label',
+// 	        panelHeight : 200,
+// 	        onSelect : function(rec) {
+// 		        return rec.value;
+// 	        }
+// 	    });
+		//筛选看到计费需要维护的数据
+		$("#queryFilter[(${radi})]").on("click", function() {
+			var queryFee=new HdQuery()
+			var vinNo =$("#vinNo[(${radi})]").val();
+			var carTyp = $("#carTyp[(${radi})]").val();
+			var carKind = $("#carKind[(${radi})]").combobox('getValue');
+			var carTypNam = $("#carTypNam[(${radi})]").val();
+			var brandCod = $("#brandCod[(${radi})]").combobox('getValue');
+			queryFee.add("carTyp", carTyp);
+			queryFee.add("carTypNam", carTypNam);
+			queryFee.add("carKind", carKind);
+			queryFee.add("vinNo", vinNo);
+			queryFee.add("brandCod", brandCod);
+			queryFee.add("feeFlag","1");
+			$("#CCarTypDatagrid1508123307500[(${radi})]").datagrid({
+				queryParams : queryFee.build(),
+			})
+		});
+		//计费编辑
+		$("#editFee[(${radi})]").on("click", function() {
+			var data = dg.datagrid("getSelected");
+			HdUtils.dialog.setValue({
+				'radi' : radi,
+				'carTypF': data.carTyp,
+				'carFeeTypNamF':data.carFeeTypNamNam,
+				'carFeeTypF':data.carFeeTyp
+			})//这个表主键就它了
+			// console.log(data.carTyp)
+			// HdUtils.dialog.setValue("carFeeTypNam",data.carFeeTypNam)
+			// HdUtils.dialog.setValue("carFeeTyp",data.carFeeTyp)
+			HdUtils.dialog.show({
+				width : 600,
+				height : 200,
+				title : '车型计费信息',
+				href : "../login/system/base/ccartypfeeform.html",
+				isSaveHandler : true
+			});
+		});
+		// buttons
+		// 增加。
+		$("#add[(${radi})]").on("click", function() {
+			addoredit("");
+		});
+		// 编辑。
+		/* $("#edit[(${radi})]").on("click", function() {
+             var data = dg.datagrid("getSelected");
+             if (data == null || data == undefined) {
+                 HdUtils.messager.info('请选择一条数据进行编辑！');
+                 return;
+             }
+             var carTyp = data.carTyp;
+             addoredit(carTyp);
+         });*/
+		function addoredit(carTyp) {
+			HdUtils.dialog.setValue({
+				'carTyp' : carTyp
+			});
+			HdUtils.dialog.setValue({
+				'radi' : radi
+			});
+			HdUtils.dialog.show({
+				width : 850,
+				height : 300,
+				title : '车型信息',
+				href : "../login/system/base/ccartypform.html",
+				isSaveHandler : true
+			});
+		}
+
+		// 车辆品牌代码。
+		$("#cbrand[(${radi})]").on("click", function() {
+			HdUtils.dialog.show({
+				width : 1300,
+				height : 700,
+				title : '车辆品牌代码',
+				href : "../webresources/login/base/CBrand/cbrand.htm",
+				isSaveHandler : true
+			});
+		});
+
+		// 车辆类别
+		$("#ccarkind[(${radi})]").on("click", function() {
+			HdUtils.dialog.show({
+				width : 1300,
+				height : 700,
+				title : '车辆类别',
+				href : "../webresources/login/base/CCarKind/ccarkind.htm",
+				isSaveHandler : true
+			});
+		});
+
+		// 挂起
+		$("#hangUp[(${radi})]").on("click", function() {
+			HdUtils.dialog.show({
+				width : 1300,
+				height : 700,
+				title : '挂起',
+				href : "../webresources/login/base/CCarTyp/ccartypinsert.htm",
+				isSaveHandler : true
+			});
+		});
+
+		// 大品牌
+		$("#bigBrand[(${radi})]").on("click", function() {
+			HdUtils.dialog.show({
+				width : 1300,
+				height : 700,
+				title : '车辆大品牌',
+				href : "../webresources/login/base/BigBrand/bigbrand.htm",
+				isSaveHandler : true
+			});
+		});
+
+		// 审核。
+		$("#check[(${radi})]").on("click", function() {
+			var selRow = $("#CCarTypDatagrid1508123307500[(${radi})]").datagrid("getChecked");
+			if (selRow.length == 0) {
+				HdUtils.messager.info('请至少选择一条数据！');
+				return false;
+			}
+			var ids = '';
+			$.messager.confirm(Resources.WB_CONFIRM, "请确认是否审核通过？", function(r) {
+				if (r) {
+					for (var i = 0; i < selRow.length; i++) {
+						ids += selRow[i].carTyp + ",";
+					}
+					HdUtils.ajax.post({
+						url : "../webresources/login/base/CCarTyp/checkAll?carTyps=" + ids,
+						success : function(data) {
+							HdUtils.messager.bottomRight(data.message);
+							$("#CCarTypDatagrid1508123307500[(${radi})]").datagrid("hdReload");
+						}
+					});
+				}
+			});
+		});
+
+		// 删除。
+		/* $("#delete[(${radi})]").on("click", function() {
+             var selRow = $("#CCarTypDatagrid1508123307500[(${radi})]").datagrid("getChecked");
+             if (selRow.length == 0) {
+                 HdUtils.messager.info('请至少选择一条数据！');
+                 return false;
+             }
+             var ids = '';
+             $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+                 if (r) {
+                     for (var i = 0; i < selRow.length; i++) {
+                         ids += selRow[i].carTyp + ",";
+                     }
+                     HdUtils.ajax.post({
+                         url : "../webresources/login/base/CCarTyp/removeAll?carTyps=" + ids,
+                         success : function(data) {
+                             HdUtils.messager.bottomRight(data.message);
+                             $("#CCarTypDatagrid1508123307500[(${radi})]").datagrid("hdReload");
+                         }
+                     });
+                 }
+             });
+         });*/
+		// 刷新。
+		$("#fresh[(${radi})]").on("click", function() {
+			dg.datagrid("hdReload");
+		});
+		// 清空。
+		$("#clear[(${radi})]").on("click", function() {
+			$("#carTyp[(${radi})]").val("");
+			$("#carTypNam[(${radi})]").val("");
+			$('#brandCod[(${radi})]').combobox('setValue', '');
+			$('#carKind[(${radi})]').combobox('setValue', '');
+			//  $('#factoryCod[(${radi})]').combobox('setValue', '');
+			$("#CCarTypDatagrid1508123307500[(${radi})]").datagrid({
+				queryParams : query(),
+			})
+		});
+		//回车键触发操作
+		$(document).keydown(function(event) {
+			if (event.keyCode == 13) {
+				$("#CCarTypDatagrid1508123307500[(${radi})]").datagrid({
+					queryParams : query(),
+				})
+			}
+		})
+		// 查询
+		$("#query[(${radi})]").on("click", function() {
+			$("#CCarTypDatagrid1508123307500[(${radi})]").datagrid({
+				queryParams : query(),
+			})
+		});
+
+
+		// 车架号查询
+		/*$("#vinNoQuery[(${radi})]").on("click", function() {
+			dg2.datagrid({
+				queryParams : codeQueryMe()
+			});
+		});*/
+
+		function query() {
+			var onlinquery = new HdQuery();
+			var vinNo =$("#vinNo[(${radi})]").val();
+			var carTyp = $("#carTyp[(${radi})]").val();
+			var carKind = $("#carKind[(${radi})]").combobox('getValue');
+			var carTypNam = $("#carTypNam[(${radi})]").val();
+			var brandCod = $("#brandCod[(${radi})]").combobox('getValue');
+			onlinquery.add("carTyp", carTyp);
+			onlinquery.add("carTypNam", carTypNam);
+			onlinquery.add("carKind", carKind);
+			onlinquery.add("vinNo", vinNo);
+			onlinquery.add("brandCod", brandCod);
+			// var factoryCod = $("#factoryCod[(${radi})]").combobox('getValue');
+			//   onlinquery.add("factoryCod", factoryCod);
+			return onlinquery.build();
+		}
+
+
+		function codeQueryMe() {
+			var selRow = $("#CCarTypDatagrid1508123307500[(${radi})]").datagrid("getChecked");
+			if (selRow.length > 0){
+				var carTypQuery =selRow[0].carTyp;
+				codeQuery.add("carTyp",carTypQuery);
+			}
+			return codeQuery.build();
+		}
+		// searchbox
+		$("#CCarVinSearchbox1475916907308[(${radi})]").searchbox({
+			prompt : "请输入...",
+			searcher : function(value, carTyp) {
+				codeQuery.set("q", value);
+				codeQuery.set("queryColumns", "carTyp,typCod");
+				dg2.datagrid({
+					queryParams : codeQueryMe()
+				});
+			}
+		});
+
+
+		// 增加。
+		$("#ccarvinadd[(${radi})]").on("click", function() {
+			var node = dg.datagrid('getSelected');
+			row = {
+				carTyp : node.carTyp,
+			};
+
+			dg2.datagrid("hdAdd", row);
+
+		});
+		// 编辑。
+		/* $("#ccarvinedit[(${radi})]").on("click", function() {
+             dg2.datagrid("hdEdit");
+         });*/
+		// 删除。
+		/* $("#ccarvindelete[(${radi})]").on("click", function() {
+             var selRow = dg2.datagrid("getChecked");
+             if (selRow.length == 0) {
+                 HdUtils.messager.info('请至少选择一条数据！');
+                 return false;
+             }
+             var ids = '';
+             $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+                 if (r) {
+                     for (var i = 0; i < selRow.length; i++) {
+                         ids += selRow[i].vinId + ",";
+                     }
+                     HdUtils.ajax.post({
+                         url : "../webresources/login/base/CCarVin/removeAll?vinIds=" + ids,
+                         success : function(data) {
+                             HdUtils.messager.bottomRight(data.message);
+                            dg2.datagrid("hdReload");
+                         }
+                     });
+                 }
+             });
+         });*/
+
+		// 保存。
+		$("#ccarvinsave[(${radi})]").on("click", function() {
+			dg2.datagrid("hdSave", {
+				url : "../webresources/login/base/CCarVin/save"
+			})
+		});
+
+		// function callback(data){
+		// 	debugger
+		// 	//let Jdata=JSON.parse(data)
+		// 	if("-1"==data.code){
+		// 		HdUtils.messager.info(data.message);
+		// 	}else {
+		// 		HdUtils.messager.bottomRight(data.message);
+		// 	}
+		//
+		// }
+		// 刷新。
+		$("#ccarvinreload[(${radi})]").on("click", function() {
+			dg2.datagrid("hdReload");
+		});
+
+		//更新库存
+		$("#update[(${radi})]").on("click", function() {
+			var checkRow=$("#CCarTypDatagrid1508123307500[(${radi})]").datagrid('getChecked');
+			if(checkRow.length<1){
+				HdUtils.messager.info('请选择左侧列表一个车型！');
+				return false;
+			}
+			var checkRow2=$("#CCarVinDatagrid1475916907[(${radi})]").datagrid('getChecked');
+			if(checkRow2.length<1){
+				HdUtils.messager.info('请选择车架号！');
+				return false;
+			}
+			var carTyp=checkRow[0].carTyp;
+			var vinNo=checkRow2[0].vinNo;
+			$.ajax({
+				url : '/webresources/login/base/CCarVin/updatePortCarTyp?carTyp=' + carTyp+ "&vinNo="+vinNo,
+				method : 'POST',
+				dataType : 'json',
+				contentType : "application/json",
+				success : function(data) {
+					if(data.code=="ok"){
+						$("#CCarVinDatagrid1475916907[(${radi})]").datagrid("load");
+						$("#CCarTypDatagrid1508123307500[(${radi})]").datagrid("reload");
+						HdUtils.messager.bottomRight("更新库存成功！");
+					}
+				}
+			});
+		});
+
+		$("#CCarTypDatagrid1508123307500[(${radi})]").datagrid({
+			striped : true,
+			url : "../webresources/login/base/CCarTyp/find",
+			queryParams : query(),
+			method : "post",
+			pagination : false,
+			singleSelect : true,
+			selectOnCheck : false,
+			checkOnSelect : true,
+			rownumbers : true,
+			pageSize : 20,
+			toolbar : "#CCarTypeToolBar1508123307500" + /*[[${radi}]]*/'',
+			fit : true,
+			onDblClickRow : function(rowIndex, rowData) {
+				var carTyp = rowData.carTyp;
+				addoredit(carTyp);
+			},
+			view: groupview,
+			groupField:'brandNam',
+			groupFormatter:function(value,rows){
+				if(value){
+					return '<input type="checkbox" onclick="OnCheckCCarTypWay(this)" helpGPVal="' + value + '" name="gpChk" /> 品牌：' + '  <span style="color:red">' + rows[0].brandNam  + '</span>';
+				}else{
+					return '<span style="color:red;">没品牌数据:</span>'+'<span style="color:red">'+rows.length+ '</span>';
+				}
+			},
+			onLoadSuccess:function(data){//若你需要页面在打开时所有分组默认是折叠状态,加上这句代码
+				if(openFlag=="close"){
+					//$('#CfsCntrPlanDatagird20171024').datagrid('collapseGroup'); //collapseGroup 折叠一个分组
+				}else{
+					$('#CCarTypDatagrid1508123307500[(${radi})]').datagrid('expandGroup'); //collapseGroup 折叠一个分组
+				}
+			},
+			onSelect : function(rowIndex, rowData) {
+				dg2.datagrid('loadData', { total: 0, rows: [] });
+				codeQuery.add("carTyp", rowData.carTyp);
+				dg2.datagrid({
+					queryParams : codeQueryMe()
+				});
+			},
+			fitColumns : true,
+			columns : [ [ {
+				field : "ck",
+				checkbox : true,
+				sortable : false,
+
+			},  {
+				field : "checkFlag",
+				title : "审核",
+				multiSort : true,
+				align : "center",
+				formatter : function(value) {
+					if (value != null && value != undefined) {
+						if (value == 0) {
+							value = "否";
+							return value;
+						} else {
+							value = "是";
+							return value;
+						}
+					} else {
+						return value;
+					}
+				},
+				sortable : false
+			}, {
+				field : "carTypNam",
+				title : "车型中文名称",
+				multiSort : true,
+				halign : "center",
+				align : "left",
+				width: 120,
+				editor : {
+					type : "validatebox",
+					options : {
+						required : false
+					}
+				},
+				sortable : false
+			},{
+				field : "brandNam",
+				title : "所属品牌",
+				multiSort : true,
+				halign : "center",
+				align : "left",
+				width: 90,
+				editor : {
+					type : "validatebox",
+					options : {
+						required : false
+					}
+				},
+				sortable : false
+			}, {
+				field : "carKindNam",
+				title : "车属类别",
+				multiSort : true,
+				halign : "center",
+				width: 90,
+				align : "left",
+				editor : {
+					type : "validatebox",
+					options : {
+						required : false
+					}
+				},
+				sortable : false
+			}, {
+				field : "carFeeTyp",
+				title : "计费类型",
+				width: 90,
+				multiSort : true,
+				halign : "center",
+				align : "left",
+				editor : {
+					type : "validatebox",
+					options : {
+						required : false
+					}
+				},
+				sortable : false
+			},{
+				field : "carFeeTypNamNam",
+				title : "计费货物名",
+				width: 120,
+				multiSort : true,
+				halign : "center",
+				align : "left",
+				editor : {
+					type : "validatebox",
+					options : {
+						required : false
+					}
+				},
+				sortable : false
+			},
+				{
+
+					field : "factoryNam",
+					title : "生产厂家",
+					multiSort : true,
+					halign : "center",
+					align : "left",
+					width: 80,
+					editor : {
+						type : "validatebox",
+						options : {
+							required : false
+						}
+					},
+					sortable : false
+				},  {
+					field : "carTypENam",
+					title : "车型英文名称",
+					width: 240,
+					multiSort : true,
+					halign : "center",
+					align : "left",
+					editor : {
+						type : "validatebox",
+						options : {
+							required : false
+						}
+					},
+					sortable : false
+				}, {
+
+					field : "carLevel",
+					title : "车辆等级",
+					multiSort : true,
+					halign : "center",
+					align : "left",
+					width: 80,
+					editor : {
+						type : "validatebox",
+						options : {
+							required : false
+						}
+					},
+					sortable : false
+				}, {
+					field : "sweptVolume",
+					title : "排量",
+					multiSort : true,
+					width: 50,
+					halign : "center",
+					align : "right",
+					editor : {
+						type : "validatebox",
+						options : {
+							required : false
+						}
+					},
+					sortable : false
+				}, {
+					field : "weights",
+					title : "重量",
+					width: 50,
+					multiSort : true,
+					halign : "center",
+					align : "right",
+					editor : {
+						type : "validatebox",
+						options : {
+							required : false
+						}
+					},
+					sortable : false
+				}, {
+					field : "volumes",
+					title : "体积",
+					width: 50,
+					multiSort : true,
+					halign : "center",
+					align : "right",
+					editor : {
+						type : "validatebox",
+						options : {
+							required : false
+						}
+					},
+					sortable : false
+				}, {
+					field : "length",
+					title : "长",
+					multiSort : true,
+					width: 50,
+					halign : "center",
+					align : "right",
+					editor : {
+						type : "validatebox",
+						options : {
+							required : false
+						}
+					},
+					sortable : false
+				}, {
+					field : "width",
+					title : "宽",
+					multiSort : true,
+					width: 50,
+					halign : "center",
+					align : "right",
+					editor : {
+						type : "validatebox",
+						options : {
+							required : false
+						}
+					},
+					sortable : false
+				}, {
+
+					field : "height",
+					title : "高",
+					width: 50,
+					multiSort : true,
+					halign : "center",
+					align : "right",
+					editor : {
+						type : "validatebox",
+						options : {
+							required : false
+						}
+					},
+					sortable : false
+				},{
+					field : "remarks",
+					title : "备注",
+					width: 50,
+					multiSort : true,
+					halign : "left",
+					editor : {
+						type : "validatebox",
+						options : {
+							required : false
+						}
+					},
+					sortable : false
+				}
+				, {
+					field : "recNam",
+					title : '<font color="red">录入员</font>',
+					multiSort : true,
+					halign : "left",
+					hidden:true,
+					editor : {
+						type : "validatebox",
+						options : {
+							required : true
+						}
+					},
+					sortable : false
+				}, {
+					field : "recTim",
+					title : '<font color="red">录入时间</font>',
+					multiSort : true,
+					halign : "left",
+					hidden:true,
+					formatter : $.hd.ezui.formatter.date,
+					width : 120,
+					editor : {
+						type : "datetimebox",
+						options : {
+							required : true
+						}
+					},
+					sortable : false
+				}, {
+
+					field : "updNam",
+					title : '<font color="red">修改人</font>',
+					multiSort : true,
+					halign : "left",
+					hidden:true,
+					editor : {
+						type : "validatebox",
+						options : {
+							required : true
+						}
+					},
+					sortable : false
+				}, {
+
+					field : "updTim",
+					title : '<font color="red">修改时间</font>',
+					multiSort : true,
+					halign : "left",
+					hidden:true,
+					formatter : $.hd.ezui.formatter.date,
+					width : 120,
+					editor : {
+						type : "datetimebox",
+						options : {
+							required : true
+						}
+					},
+					sortable : false
+				}
+
+			] ]
+		});
+		dg2.datagrid({
+			url : "../webresources/login/base/CCarVin/findvinNoByCarTyp",
+			striped : true,
+			pagination : false,
+			singleSelect : true,
+			checkOnSelect : true,
+			queryParams : codeQueryMe(),
+			selectOnCheck : false,
+			rownumbers : true,
+			pageSize : 20,
+			toolbar : "#CCarVinToolBar1475916907",
+			fit : false,
+			fitColumns:false,
+			columns : [ [
+
+				{
+					field : 'ck',
+					checkbox : true
+				}, {
+					field : "carTyp",
+					title : '车型',
+					halign : "center",
+					hidden:true,
+					width : 80,
+					editor : {
+						type : "validatebox",
+						options : {
+							required : false,
+							// validType : 'maxLength[20]'
+						}
+					}
+				}
+				, {
+					field : "typCod",
+					title : '<font color="red">型号</font>',
+					halign : "center",
+					width : 80,
+					hidden : true,
+					editor : {
+						type : "validatebox",
+						options : {
+							required : false,
+							// validType : 'maxLength[20]'
+						}
+					},
+// 	            editor : {
+// 	                type : "validatebox",
+// 	                options : {
+// 		                required : true
+// 	                //validType : [ 'isSysCodeRepeat["SysCode1Datagrid1475916907","code","CUSTOMER_CLASSIFICATION"]', 'length[1,30]' ]
+// 	                }
+// 	            },
+					sortable : true
+				}, {
+					field : "vinNo",
+					title : "车架号",
+					halign : "center",
+					width : 120,
+					editor : {
+						type : "validatebox",
+						options : {
+							required : true,
+							//  validType : 'maxLength[8]'
+						}
+					},
+					sortable : true
+				},{
+					field : "recNam",
+					title : '创建人',
+					multiSort : true,
+					halign : "center",
+					width : 120,
+					sortable : true
+				}, {
+					field : "recTim",
+					title : '创建时间',
+					formatter : $.hd.ezui.formatter.datetime,
+					multiSort : true,
+					halign : "center",
+					width : 120,
+					sortable : true
+				}, {
+					field : "updNam",
+					title : '更新人',
+					multiSort : true,
+					width : 120,
+					halign : "center",
+					sortable : true
+				}, {
+					field : "updTim",
+					title : '更新时间',
+					formatter : $.hd.ezui.formatter.datetime,
+					multiSort : true,
+					halign : "center",
+					width : 120,
+					sortable : true
+				}
+			] ],
+			onDblClickRow : function(index, data) {
+				dg2.datagrid("hdEdit");
+				dg2.datagrid('getEditor', {
+					index : index,
+					field : 'typCod'
+				}).target.prop('disabled', true);
+			}
+		});
+	});
+	//分组选中
+	function selectByGroupNocfsWay(checked, value, tableIdSelector) {
+		var groups = $(tableIdSelector).datagrid("options").view.groups;
+		//var view=$(tableIdSelector).datagrid("options").view;
+		//var view=$(tableIdSelector).datagrid("options").view.onAfterRender;
+		var rows;
+		var startRow;
+		var rowsLength;
+		for (var i = 0; i < groups.length; i++) {
+			if (groups[i].fvalue == value) {
+				rows = groups[i].rows;
+				startRow=groups[i].startRow;
+				rowsLength = groups[i].rows.length;
+				break;
+			}
+		}
+		if (checked) {
+			//for (var i = 0; i < rows.length; i++) {
+			$(tableIdSelector).datagrid("selectRow", $(tableIdSelector).datagrid("getRowIndex", rows[0]));
+			//$('#CfsCntrPlanDatagird20171024').datagrid('expandGroup',$(tableIdSelector).datagrid("getRowIndex", rows[startRow])); //collapseGroup 折叠一个分组
+			//}
+		}
+		else {
+			//for (var i = 0; i < rows.length; i++) {
+			$(tableIdSelector).datagrid("unselectRow", $(tableIdSelector).datagrid("getRowIndex", rows[0]));
+			//}
+		}
+	}
+	function OnCheckCCarTypWay(obj) {
+		var gpVal = $(obj).attr("helpGPVal");
+		var isChecked = $(obj).attr('checked') == 'checked' ? true : false;
+		selectByGroupNocfsWay(isChecked, gpVal, '#CCarTypDatagrid1508123307500[(${radi})]');
+	}
+	/*]]>*/
+</script>
+</html>

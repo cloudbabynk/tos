@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="ContractIeDocToolBar15081233020012+${radi}"
+	style="float: left">
+	<input th:id="ingateId+${radi}" name="ingateId" type="hidden">
+	<!-- 查询 -->
+	<span> 拖车牌号：<input th:id="platNo+${radi}" name="platNo"
+		type="text" data-options="required:false" style="width: 120px">
+		<a class="easyui-linkbutton" th:id='chooseCar+${radi}'>选车</a> 进门时间：<input
+		th:id="inGatTim+${radi}" class="easyui-datetimebox" name="inGatTim"
+		placeholder="请输入进门时间" data-options="required:false"
+		style="width: 120px"> <input type="radio" name="examflg"
+		value="0" checked="true"><label>板车</label> <input type="radio"
+		name="examflg" value="1"><label>自开</label> <a
+		class="easyui-linkbutton" th:id="query+${radi}">查询</a> <shiro:hasPermission
+			name="webresources:login:GateTruckContract:save">
+			<a class="easyui-linkbutton" th:id='save+${radi}'>出闸</a>
+		</shiro:hasPermission> <a class="easyui-linkbutton" th:id='clear+${radi}'>下一辆</a> 当前闸口：<input
+		th:id="gateNo+${radi}" name="gateNo" type="text"
+		data-options="required:false" style="width: 120px">
+	</span>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="ContractIeDocDatagrid1508123320012+${radi}"
+	style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(
+            function() {
+	            var radi = /*[[${radi}]]*/'';
+	            var dg = $("#ContractIeDocDatagrid1508123320012[(${radi})]");
+
+	            $('#gateNo[(${radi})]').combobox({
+	    	        url : '../webresources/login/gate/GateTruckContract/getCGateDrop',
+	    	        valueField : 'value',
+	    	        textField : 'label',
+	    	        onSelect : function(rec) {
+	    		        return rec.value;
+	    	        }
+	    	    });
+	            //选车
+	            $("#chooseCar[(${radi})]").bind("click", function() {
+		            HdUtils.selCar(callback);
+	            });
+	            function callback(data){
+	            	$("#platNo[(${radi})]").val(data.platNo);
+	            	$("#inGatTim[(${radi})]").datebox("setValue",data.inGatTim);
+	            	$("#ingateId[(${radi})]").val(data.ingateId);
+	            	
+	            }
+	            // 查询
+	            $("#query[(${radi})]").on("click", function() {
+	            	$("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid({
+	    			    queryParams : query(),
+	    		    })
+	            });
+	            function query() {
+	        	    var onlinquery = new HdQuery();
+	        	    var ingateId = $("#ingateId[(${radi})]").val();
+		        	onlinquery.add("ingateId", ingateId);
+	        	    return onlinquery.build();
+	            }
+	            // 出闸。
+	            $("#save[(${radi})]").on(
+	                    "click",
+	                    function() {
+	                    	var ingateId = $("#ingateId[(${radi})]").val();
+	                    	var gateNo = $("#gateNo[(${radi})]").combobox('getValue');
+		                    if (!ingateId) {
+			                    HdUtils.messager.info("请先选车！");
+			                    return false;
+		                    }
+		                    if(!gateNo){
+		                    	HdUtils.messager.info("请先选择闸口！")
+		                    }
+		                    dg.datagrid("hdSave", {
+			                    url : "../webresources/login/cargo/TruckWork/save?ingateId="+ ingateId
+			                    		+"&gateNo=" + gateNo
+		                    })
+	                    });
+	            // 下一车。
+	            $("#clear[(${radi})]").on("click", function() {
+		            dg.datagrid('loadData', {
+		                total : 0,
+		                rows : []
+		            });
+		            $("#platNo[(${radi})]").val("");
+		            $("#inGatTim[(${radi})]").datebox("setValue", '');
+		            $("#gateNo[(${radi})]").combobox('setValue', '')
+	            });
+
+	            $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid({
+	            	url : "../webresources/login/cargo/TruckWork/findHycz",
+	            	queryParams : query(),
+	                method : "post",
+	                pagination : true,
+	                singleSelect : true,
+	                selectOnCheck : true,
+	                checkOnSelect : true,
+	                rownumbers : true,
+	                pageSize : 20,
+	                toolbar : "#ContractIeDocToolBar15081233020012" + /*[[${radi}]]*/'',
+	                fit : true,
+	                fitColumns : false,
+	                onDblClickRow : function(rowIndex, rowData) {
+		                $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid('deleteRow', rowIndex);
+	                },
+	                columns : [ [ {
+	                    field : "ck",
+	                    checkbox : true,
+	                    sortable : false,
+	                }, {
+	                    field : "contractTyp",
+	                    title : "收/提",
+	                    multiSort : true,
+	                    align : "center",
+	                    width : 100,
+	                    sortable : false
+	                }, {
+	                    field : "contractNo",
+	                    title : '委托号',
+	                    multiSort : true,
+	                    width : 100,
+	                    align : "center",
+	                    sortable : false
+	                }, {
+	                    field : "billNo",
+	                    title : "提单号",
+	                    multiSort : true,
+	                    width : 100,
+	                    align : "center",
+	                    sortable : false
+	                }, {
+	                    field : "rfidCardNo",
+	                    title : "RFID",
+	                    multiSort : true,
+	                    width : 100,
+	                    align : "center",
+	                    sortable : false
+	                },{
+	                    field : "vinNo",
+	                    title : "车架号",
+	                    multiSort : true,
+	                    width : 100,
+	                    align : "center",
+	                    sortable : false
+	                },{
+	                    field : "brand",
+	                    title : "品牌",
+	                    multiSort : true,
+	                    width : 100,
+	                    align : "center",
+	                    sortable : false
+	                }, {
+	                    field : "carTyp",
+	                    title : "车型",
+	                    multiSort : true,
+	                    width : 100,
+	                    align : "center",
+	                    sortable : false
+	                },{
+	                    field : "consignCod",
+	                    title : "货主",
+	                    multiSort : true,
+	                    width : 100,
+	                    align : "center",
+	                    sortable : false
+	                }, {
+	                    field : "workNam",
+	                    title : "交验员",
+	                    multiSort : true,
+	                    width : 100,
+	                    align : "center",
+	                    sortable : false
+	                }, {
+	                    field : "workTim",
+	                    title : "交验时间",
+	                    multiSort : true,
+	                    width : 100,
+	                    align : "center",
+	                    sortable : false
+	                }  ] ]
+	            });
+	            $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid("hdGetColumnNames");
+            });
+    /*]]>*/
+</script>
+</html>

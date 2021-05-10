@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+</head>
+<body>
+<div >
+<img id="imageId" style="width:400px;height:400px;"/>
+</div>
+<script>
+	$(document).ready(function() {
+	    var qrcodepath = HdUtils.dialog.getValue("qrcodepath");
+	    //$("#imageId").attr("src",qrcodepath);
+	    if(qrcodepath==null||qrcodepath==""){
+	     HdUtils.messager.info("图片路径为空！");
+	    }else{
+	    var npcName=qrcodepath.substring(10,18);
+	    var img = document.getElementById("imageId");  
+	    $('#imageId').attr('src','webresources/login/contract/ContractIeDoc/IoReadImage/'+npcName);
+	    }
+	  //  img.src = 'webresources/login/contract/ContractIeDoc/IoReadImage/'+npcName; 
+    });
+</script>
+</body>
+</html>

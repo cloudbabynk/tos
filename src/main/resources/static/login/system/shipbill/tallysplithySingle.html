@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="ContractIeDocToolBar15081233020012+${radi}"
+	style="float: left;">
+	<!-- 查询 -->
+	<div th:id="zclh+${radi}" style="float: left;"></div>
+	    <shiro:hasPermission name="webresources:login:ShipBill:copy">
+		<a class="easyui-linkbutton" th:id='copy+${radi}'>复制</a>
+	    </shiro:hasPermission>
+        <shiro:hasPermission name="webresources:login:TallySplit:cancle">
+            <a class="easyui-linkbutton" th:id='cancle+${radi}'>驳回</a>
+        </shiro:hasPermission>
+        <shiro:hasPermission name="webresources:login:TallySplit:check">
+            <a class="easyui-linkbutton" th:id='check+${radi}'>审核通过</a>
+        </shiro:hasPermission>
+        &nbsp;堆存天数：<input th:id='storeDaysStart+${radi}' type="text" class="easyui-numberbox" style="width:40px">
+        -
+        <input type="text" th:id='storeDaysEnd+${radi}' class="easyui-numberbox"  style="width:40px">
+        航/陆运：<input type="text" class="easyui-combox" th:id="transportTyp+${radi}" style="width: 52px;"/>
+        <a class="easyui-linkbutton" th:id='fresh+${radi}'>查询</a>
+        &nbsp; &nbsp;
+         <shiro:hasPermission name="webresources:login:TallySplit:add">
+            <a class="easyui-linkbutton" th:id='add+${radi}'>增加</a>
+        </shiro:hasPermission>
+         <shiro:hasPermission name="webresources:login:TallySplit:add">
+            <a class="easyui-linkbutton" th:id='addCD+${radi}'>增加(舱单)</a>
+        </shiro:hasPermission>
+        <shiro:hasPermission name="webresources:login:TallySplit:update">
+            <a class="easyui-linkbutton" th:id='edit+${radi}'>编辑</a>
+        </shiro:hasPermission>
+        <shiro:hasPermission name="webresources:login:TallySplit:delete">
+            <a class="easyui-linkbutton" th:id='delete+${radi}'>删除</a>
+        </shiro:hasPermission>
+        <shiro:hasPermission name="webresources:login:TallySplit:save">
+            <a class="easyui-linkbutton" th:id='save+${radi}'>保存</a>
+        </shiro:hasPermission>
+        &nbsp; &nbsp;
+        <a class="easyui-linkbutton" th:id='mFeeInterfaceTally+${radi}'>航陆运计费上传</a> &nbsp;
+        <a class="easyui-linkbutton" th:id='billCheck+${radi}'>提单校验</a>
+        &nbsp; &nbsp;   
+        <a class="easyui-linkbutton" th:id='excel+${radi}'>导出Excel</a>
+
+
+    </div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="ContractIeDocDatagrid1508123320012+${radi}"
+	style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+    /*<![CDATA[*/
+    let queryParams = new HdQuery(); 
+    let iEId =  'SO';
+    let shipNo='';
+    let shipNam='';
+    let voyage='';
+    let workTye='';
+	   function queryTallySplithy(params){
+            queryParams = params;
+            console.log(queryParams);
+            //iEId = HdUtils.dialog.getValue("iEId");
+            console.log(iEId);
+            shipNo=params.hdQueryBuilder.hdEzuiQueryParams.others.shipNo;
+            shipNam=params.hdQueryBuilder.hdEzuiQueryParams.others.shipNam;
+            voyage=params.hdQueryBuilder.hdEzuiQueryParams.others.voyage;
+            workTyp=params.hdQueryBuilder.hdEzuiQueryParams.others.workTyp;
+            $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid({
+                queryParams :queryParams.build(),
+            });
+        }
+                 
+    $(document).ready(function() {
+        $('#transportTyp[(${radi})]').combobox(HdUtils.code.scode({
+            fieldCod: 'YW_TYP'
+        }, {
+            required: false
+        }));
+        $("#storeDaysStart[[${radi}]]").numberbox({});
+        $("#storeDaysEnd[[${radi}]]").numberbox({});
+
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#ContractIeDocDatagrid1508123320012[(${radi})]");
+        //var shipNo = HdUtils.dialog.getValue("shipNo");
+        queryParams.add("shipNo",shipNo);
+	    //var shipNam = HdUtils.dialog.getValue("shipNam");
+        //var voyage = HdUtils.dialog.getValue("voyage");
+        // buttons
+	    // 增加。
+	    $("#add[(${radi})]").on("click", function() {
+	    	shipNo=queryParams.hdQueryBuilder.hdEzuiQueryParams.others.shipNo;
+            shipNam=queryParams.hdQueryBuilder.hdEzuiQueryParams.others.shipNam;
+            voyage=queryParams.hdQueryBuilder.hdEzuiQueryParams.others.voyage;
+		    if (!shipNo) {
+		    	HdUtils.messager.info("请先选船！");
+			    return;
+		    }
+		    row = {  upId:'1',
+			        shipNo : shipNo,
+			        shipNam : shipNam,
+			        voyage : voyage,
+			        workTyp:workTyp
+		    }
+	    	dg.datagrid("hdAdd", row);
+		    let ed = dg.datagrid('getEditor',{index:0,field:'billNo'});
+            ed.target.combobox({url: `../webresources/login/work/WorkCommand/getBillNoByShipNo?shipNo=${shipNo}&workTyp=${localStorage.getItem("workTyp")}`});
+       
+	    });
+	    //增加（舱单）
+	     $("#addCD[(${radi})]").on("click", function() {
+       var CDdataSingle=findCDDataSingle();
+       console.log("增加舱单");
+       console.log(CDdataSingle);
+       if(CDdataSingle==null||CDdataSingle==''){
+       	HdUtils.messager.info("请在上方窗口选择一条舱单数据！");
+		    return;
+       }else{
+       	 for (var i = 0; i < CDdataSingle.length; i++) {
+		        row0 = { upId: '1',
+				        shipNo : shipNo,
+				        shipNam : shipNam,
+				        voyage : voyage,
+				        billNo :CDdataSingle[i].billNo,//提单号
+				        brandCod :CDdataSingle[i].brandCod,//品牌
+				        pieces : CDdataSingle[i].pieces ,//件数
+				        allWgt :CDdataSingle[i].weights,//总重
+				        allValumes:CDdataSingle[i].valumes,//总体积
+				        workTyp:workTyp,
+				        usefreightmac:'1',//陆运机力
+				        useshipworkmac:'1',//港方动力
+				        useshipworkperson:'1',//港方人力
+				        isnight:'0',//夜班作业
+				        isholiday:'0',//节假日作业
+				        ywTyp:'0'//航运
+				        
+				        
+				        
+			    }
+   	      dg.datagrid("hdAdd", row0);
+		        row1 = { upId: '1',
+				        shipNo : shipNo,
+				        shipNam : shipNam,
+				        voyage : voyage,
+				        billNo :CDdataSingle[i].billNo,//提单号
+				        brandCod :CDdataSingle[i].brandCod,//品牌
+				        pieces : CDdataSingle[i].pieces ,//件数
+				        allWgt :CDdataSingle[i].weights,//总重
+				        allValumes:CDdataSingle[i].valumes,//总体积
+				        workTyp:workTyp,
+				        usefreightmac:'1',//陆运机力
+				        useshipworkmac:'1',//港方动力
+				        useshipworkperson:'1',//港方人力
+				        isnight:'0',//夜班作业
+				        isholiday:'0',//节假日作业
+				        ywTyp:'1'//陆运
+				        
+				        
+				        
+			    }
+   	      dg.datagrid("hdAdd", row1); 
+       }
+       	 $("#save[(${radi})]").click();
+       }
+	/*     let ed = dg.datagrid('getEditor',{index:0,field:'billNo'});
+       ed.target.combobox({url: `../webresources/login/work/WorkCommand/getBillNoByShipNo?shipNo=${shipNo}&workTyp=${localStorage.getItem("workTyp")}`});
+       var rows = dg.datagrid("getSelected");
+       var index = dg.datagrid("getRowIndex", rows);
+       dg.datagrid('updateRowWhenEditing', {
+           index: index,
+           row: {
+           	 billNo :CDdata.billNo
+           }
+       });*/
+	    }); 
+	    //复制
+        $("#copy[[${radi}]]").on("click", function() {
+            let selectRow = dg.datagrid('getSelected');
+            if(selectRow){
+                if(selectRow.checkId==1){
+                    HdUtils.messager.info('已经审核的不能复制！');
+                }else{
+                    selectRow.id='';
+                    selectRow.upId= '1';
+                    //selectRow.checkId = '';
+                    selectRow.storeDays = '';
+                    selectRow.remarkTxt = '';
+                    dg.datagrid('insertRow', {index: 0, row: selectRow})
+                    .datagrid('selectRow', 0)
+                    .datagrid('beginEdit', 0);
+                    dg.datagrid("options").hdEditIndex=0;
+                    let ed = dg.datagrid('getEditor',{index:0,field:'billNo'});
+                    let oldVal = ed.target.combobox('getValue');
+                    ed.target.combobox({url: `../webresources/login/work/WorkCommand/getBillNoByShipNo?shipNo=${shipNo}&workTyp=${localStorage.getItem("workTyp")}`});
+                    ed.target.combobox('setValue',oldVal);
+                    
+                 }
+            }else{
+                HdUtils.messager.info('请选择一条数据进行复制！');
+            }
+        })
+	    // 编辑。
+	    $("#edit[(${radi})]").on("click", function() {
+		    var data = dg.datagrid("getSelected");
+		    if (data == null || data == undefined) {
+			    HdUtils.messager.info('请选择一条数据进行编辑！');
+			    return;
+		    }
+		    dg.datagrid("hdEdit");
+		    let ed = dg.datagrid('getEditor',{index:0,field:'billNo'});
+            ed.target.combobox({url: `../webresources/login/work/WorkCommand/getBillNoByShipNo?shipNo=${shipNo}&workTyp=${localStorage.getItem("workTyp")}`});
+       
+	    });
+	    // 保存。
+	    $("#save[(${radi})]").on("click", function() {
+		    dg.datagrid("hdSave", {
+			    url : "../webresources/login/shipbill/TallySplit/saveHY"
+		    });
+	    });
+	    // 删除。
+	    $("#delete[(${radi})]").on("click", function() {
+		    var selRow = $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid("getChecked");
+		    if (selRow.length == 0) {
+			    HdUtils.messager.info('请至少选择一条数据！');
+			    return false;
+		    }
+		    var ids = '';
+		    $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+			    if (r) {
+				    for (var i = 0; i < selRow.length; i++) {
+					    ids += selRow[i].id + ",";
+				    }
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/shipbill/TallySplit/removeAllHY?ids=" + ids,
+				        success : function(data) {
+					        if (data.code == '-1') {
+						        HdUtils.messager.info(data.message);
+						        return false;
+					        }
+					        HdUtils.messager.bottomRight(data.message);
+					        $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid("hdReload");
+				        }
+				    });
+			    }
+		    });
+	    });
+	    // 刷新。
+	    $("#fresh[(${radi})]").on("click", function() {
+            let onlinquery = queryParams;
+            //堆存天数
+            let storeDaysStart = $("#storeDaysStart[[${radi}]]").numberbox('getValue');
+            let storeDaysEnd = $("#storeDaysEnd[[${radi}]]").numberbox('getValue');
+            onlinquery.add("storeDaysStart",storeDaysStart);
+            onlinquery.add("storeDaysEnd",storeDaysEnd);
+            //陆运/航运
+            let ywTyp = $('#transportTyp[(${radi})]').combobox('getValue');
+            onlinquery.add("ywTyp",ywTyp);
+		    dg.datagrid({
+			   queryParams :onlinquery.build(),
+            });
+		  });
+	    // 提交。
+	    $("#submit[(${radi})]").on("click", function() {
+		    var selRow = $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid("getChecked");
+		    if (selRow.length == 0) {
+			    HdUtils.messager.info('请至少选择一条数据！');
+			    return false;
+		    }
+		    var ids = '';
+		    $.messager.confirm(Resources.WB_CONFIRM, "是否提交？", function(r) {
+			    if (r) {
+				    for (var i = 0; i < selRow.length; i++) {
+					    ids += selRow[i].id + ",";
+				    }
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/shipbill/TallySplit/submitAll?type=UP&ids=" + ids,
+				        success : function(data) {
+					        if (data.code == '-1') {
+						        HdUtils.messager.info(data.message);
+						        return false;
+					        }
+					        HdUtils.messager.bottomRight(data.message);
+					        $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid("hdReload");
+				        }
+				    });
+			    }
+		    });
+	    });
+	    // 审核通过。
+	    $("#check[(${radi})]").on("click", function() {
+		    var selRow = $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid("getChecked");
+		    if (selRow.length == 0) {
+			    HdUtils.messager.info('请至少选择一条数据！');
+			    return false;
+		    }
+		    var ids = '';
+		    $.messager.confirm(Resources.WB_CONFIRM, "是否审核通过？", function(r) {
+			    if (r) {
+				    for (var i = 0; i < selRow.length; i++) {
+					    ids += selRow[i].id + ",";
+				    }
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/shipbill/TallySplit/submitAll?type=CHECK&ids=" + ids,
+				        success : function(data) {
+					        if (data.code == '-1') {
+						        HdUtils.messager.info(data.message);
+						        return false;
+					        }
+					        HdUtils.messager.bottomRight(data.message);
+					        $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid("hdReload");
+				        }
+				    });
+			    }
+		    });
+	    });
+	    //驳回。
+	    $("#cancle[(${radi})]").on("click", function() {
+		    var selRow = $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid("getChecked");
+		    if (selRow.length == 0) {
+			    HdUtils.messager.info('请至少选择一条数据！');
+			    return false;
+		    }
+		    var ids = '';
+		    $.messager.confirm(Resources.WB_CONFIRM, "是否驳回？", function(r) {
+			    if (r) {
+				    for (var i = 0; i < selRow.length; i++) {
+					    ids += selRow[i].id + ",";
+				    }
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/shipbill/TallySplit/submitAll?type=DOWN&ids=" + ids,
+				        success : function(data) {
+					        if (data.code == '-1') {
+						        HdUtils.messager.info(data.message);
+						        return false;
+					        }
+					        HdUtils.messager.bottomRight(data.message);
+					        $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid("hdReload");
+				        }
+				    });
+			    }
+		    });
+	    });
+        
+        //导出excel
+	    $("#excel[(${radi})]").on("click", function () {
+            $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid("hdExportExcel", {
+                url: "../webresources/login/shipbill/TallySplit/exportExcel",
+                exportFileName: "计费数据审核汇总-" + new Date().format("yyyyMMddhhmmss")
+            });
+        });
+        
+        function query() {
+		    var onlinquery = new HdQuery();
+		    if (shipNo) {
+			    onlinquery.add("shipNo", shipNo);
+		    } else {
+			    onlinquery.add("shipNo", '123456789###');
+		    }
+            onlinquery.add("Type", 'HY');
+            onlinquery.add("workTyp", 'SO');
+		    return onlinquery.build();
+	    }
+
+        // 上报航陆运作业数据 
+        $("#mFeeInterfaceTally[(${radi})]").on("click", function() {
+            let ied = '';
+            if (!shipNo) {
+                    HdUtils.messager.info('请先选择一条船！');
+                    return false;
+                }
+            if("SO"==workTyp){
+                ied = 'E'
+            }else if("SI"==workTyp){
+                ied = 'I'
+            }    
+            HdUtils.dialog.setValue({
+                    'radi':radi,
+                    'shipNo' : shipNo,
+                    'iEId':ied
+                });
+                HdUtils.dialog.show({
+                    width : 1200,
+                    height :610,
+                    title : '航运陆运数据上传接口',
+                    href : "../webresources/login/shipbill/MFeeInterfaceTally/mfeeinterfacetally.htm",
+                    isSaveHandler : false
+                });
+            
+        });
+        
+        //提单校验
+        $("#billCheck[(${radi})]").on("click", function() {
+
+            HdUtils.ajax.post({
+                url : `../webresources/login/shipbill/TallySplit/billCheck?type=${iEId}&shipNo=${shipNo}` ,
+                success : function(data) {
+                    if (data.code == '-1') {
+                        HdUtils.messager.info(data.message);
+                        return false;
+                    }
+                    HdUtils.messager.bottomRight(data.message);
+                    $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid("hdReload");
+                }
+            });
+        })
+
+
+        $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/shipbill/TallySplit/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : false,
+            checkOnSelect : false,
+            showFooter:true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#ContractIeDocToolBar15081233020012" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : 'ck',
+	            checkbox : true
+	        },{
+	            field : "upId",
+	            title : "提交",
+	            multiSort : true,
+	            halign : "center",
+	            align : 'left',
+	            width : '42',
+	            formatter : function(value) {
+		            return HdUtils.code.name('UP_ID', value);
+	            },
+	            sortable : true
+	        }, {
+	            field : "checkId",
+	            title : "审核",
+	            multiSort : true,
+	            halign : "center",
+	            align : 'center',
+	            width : '42',
+	            formatter : function(value) {
+					if (value != null && value != undefined) {
+						if (value == 0) {
+							value = "×";
+							return value;
+						} else {
+							value = "√";
+							return value;
+							 }
+					} else {
+							return value;
+						}
+				},
+	            sortable : true
+	        },{
+                field : "ywTyp",
+                title : "陆运/航运",
+                halign : "center",
+                align : 'center',
+                width : '60',
+                editor : {
+	                type : "combobox",
+	                options : HdUtils.code.scode({
+		                fieldCod : 'YW_TYP'
+	                }, {
+		                required : false
+	                })
+	            },
+	            formatter : function(value) {
+		            return HdUtils.code.name('YW_TYP', value);
+	            }
+            }, /* {
+	            field : "shipNam",
+	            title : "船名",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            align : 'left',
+	            width : '120',
+	            sortable : true
+	        }, {
+	            field : "voyage",
+	            title : "航次",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            align : 'left',
+	            width : '120',
+	            sortable : true
+	        }, {
+	            field : "shipNo",
+	            title : "船号",
+	            hidden: true,
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : true
+	        }, */{
+	            field : "workTyp",
+	            title : "作业项目",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "combobox",
+	                options : HdUtils.code.scode({
+		                fieldCod : 'WORK_TYP'
+	                }, {
+		                required : false
+	                })
+	            },
+	            formatter : function(value) {
+		            return HdUtils.code.name('WORK_TYP', value);
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : true
+	        }, {
+	            field : "billNo",
+	            title : "提单号",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "combobox",
+	                options : {
+                        //url: `../webresources/login/work/WorkCommand/getBillNoByShipNo?shipNo=123456#&workTyp=SO`,
+                        url: `../webresources/login/work/WorkCommand/getBillNoByShipNo?shipNo=${shipNo}&workTyp=${localStorage.getItem("workTyp")}`,
+                        valueField: 'value',
+                        textField: 'label',
+                        //textField:'text',
+                        panelHeight: 200,
+                        onSelect: function (rec) {
+                            return rec.value;
+                        },
+                        filter: function(q, row){
+                            var opts = $(this).combobox('options');
+                            return row[opts.textField].includes(q);
+                        },
+                        onHidePanel: function () {
+                            
+                        }
+	                }
+	            },
+	            align : 'left',
+	            width : '120',
+	            sortable : true
+	        }, {
+	            field : "carTypCod",
+	            formatter:function(value,rowInfo){
+	            	return rowInfo.carTypNam
+	            },
+	            title : '中文货名',
+	            multiSort : true,
+	            width : '80',
+	            halign : "center",
+	            align : 'left',
+	            editor : {
+	                type : "combobox",
+	                options : {
+	                    url : '../webresources/login/ship/BillSplit/getCCarTypNamDrop1',
+	                    valueField : 'value',
+	                    textField : 'label',
+	                    panelHeight : 120,
+	                    panelWidth : 120,
+	                    onSelect : function(rec) {
+		                    var row = $('#ContractIeDocDatagrid1508123320012[(${radi})]').datagrid('getSelected');
+		                    var rowIndex = $('#ContractIeDocDatagrid1508123320012[(${radi})]').datagrid('getRowIndex', row);//获取行号 
+		                    
+		                    
+		                    var target2 = $('#ContractIeDocDatagrid1508123320012[(${radi})]').datagrid('getEditor', {
+		                        'index' : rowIndex,
+		                        'field' : 'brandCod'
+		                    }).target;
+
+		                    target2.combobox('clear'); //清除原来的数据 
+		                    $.ajax({
+		                        url : "../webresources/login/ship/BillSplit/getBrandCodDropLd?carTyp=" + rec.value,
+		                        dataType : "json",
+		                        success : function(data) {
+			                        target2.combobox('setValue', data[0].value);
+		                        }
+		                    })
+		                     //row.carTypCod=rec.value;
+	                    }
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "brandCod",
+	            formatter:function(value,rowInfo){
+	            	return rowInfo.brandNam
+	            },
+	            title : "品牌",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "combobox",
+	                options : {
+	                    url : '../webresources/login/base/CCarTyp/getCBrandDrop',
+	                    valueField : 'value',
+	                    textField : 'label',
+	                    panelHeight : 120,
+	                    panelWidth : 80,
+	                    onSelect : function(rec) {
+		                    return rec.value;
+	                    }
+	                }
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : true
+	        },{
+	            field : "pieces",
+	            title : "计费件数",
+	            multiSort : true,
+	            halign : "center",
+	            align : 'right',
+	            width : '80',
+	            //要限制输入的最大数，请修改max
+	            editor : {
+	                type : "numberbox",
+	                options : {
+	                    required : false,
+	                    precision : 0,
+	                    max : "9999999999.999",
+	                    groupSeparator : ','
+	                }
+	            },
+	            sortable : true
+	        },{
+	            field : "allWgt",
+	            title : "重量",
+	            multiSort : true,
+	            halign : "center",
+	            formatter : function(value) {
+		            return HdUtils.formatter.precisionCommon(value, 0);
+	            },
+	            align : 'right',
+	            width : '80',
+	            editor : {
+	                type : "numberbox",
+	                options : {
+	                    required : false,
+	                    precision : 0,
+	                    max : "9999999999.999",
+	                    groupSeparator : ','
+	                }
+	            },
+	            sortable : true
+	        },{
+	            field : "allValumes",
+	            title : "体积",
+	            multiSort : true,
+	            halign : "center",
+	            formatter : function(value) {
+		            return HdUtils.formatter.precisionCommon(value, 0);
+	            },
+	            align : 'right',
+	            width : '80',
+	            editor : {
+	                type : "numberbox",
+	                options : {
+	                    required : false,
+	                    precision : 0,
+	                    max : "9999999999.999",
+	                    groupSeparator : ','
+	                }
+	            },
+	            sortable : true
+	        }, /*  {
+	            field : "billNo",
+	            title : "提单号",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : true
+	        },  */
+	   /*  {
+	            field : "billCheckId",
+	            title : "提单校验",
+	            multiSort : true,
+	            halign : "center",
+	            align : 'left',
+	            width : '80',
+	            sortable : true,
+	            formatter : function(value) {
+					if (value != null && value != undefined) {
+						if (value == 0) {
+							value = "×";
+							return value;
+						} else {
+							value = "√";
+							return value;
+							 }
+					} else {
+							return value;
+						}
+				}
+	        },  */{
+	            field : "inDte",
+	            title : "进场日期",
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.date,
+	            width : 120,
+	            align : 'center',
+	            editor : {
+	                type : "datebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : true
+	        }, {
+	            field : "outDte",
+	            title : "出场日期",
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.date,
+	            width : 120,
+	            align : 'center',
+	            editor : {
+	                type : "datebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : true
+	        }, {
+	            field : "storeDays",
+	            title : "计费天数",
+	            multiSort : true,
+	            halign : "center",
+	            formatter : function(value,row,index) {
+                    let std = 0;
+                    if(row.outDte && row.inDte){
+                        std = (new Date(row.outDte).getTime()-new Date(row.inDte).getTime())/(24*60*60*1000);
+                        return std.toFixed(0);
+                    }else{
+                        return '';
+                    }
+		           
+	            },
+	            width : 80,
+	            align : 'right',
+	            sortable : true
+	        }, {
+	            field : "overLengthId",
+	            title : "超长",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "combobox",
+	                options : HdUtils.code.scode({
+		                fieldCod : 'CUSTOM_ID'
+	                }, {
+		                required : false
+	                })
+	            },
+	            formatter : function(value) {
+					if (value != null && value != undefined) {
+						if (value == 0) {
+							value = "×";
+							return value;
+						} else {
+							value = "√";
+							return value;
+							 }
+					} else {
+							return value;
+						}
+				},
+	            align : 'center',
+	            width : '32',
+	            sortable : true
+	        },{
+	            field : "length",
+	            title : "长度",
+	            multiSort : true,
+	            halign : "center",
+	            formatter : function(value) {
+		            return HdUtils.formatter.precisionCommon(value, 0);
+	            },
+	            align : 'right',
+	            width : '80',
+	            //要限制输入的最大数，请修改max
+	            editor : {
+	                type : "numberbox",
+	                options : {
+	                    required : false,
+	                    precision : 0,
+	                    max : "9999999999.999",
+	                    groupSeparator : ','
+	                }
+	            },
+	            sortable : true
+	        },  /* {
+	            field : "workTim",
+	            title : "作业时间",
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.date,
+	            width : 180,
+	            align : 'center',
+	            editor : {
+	                type : "datebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : true
+	        },  {
+	            field : "pieceWgt",
+	            title : "单车重量",
+	            multiSort : true,
+	            halign : "center",
+	            formatter : function(value) {
+		            return HdUtils.formatter.precisionCommon(value, 0);
+	            },
+	            align : 'right',
+	            width : '80',
+	            editor : {
+	                type : "numberbox",
+	                options : {
+	                    required : false,
+	                    precision : 0,
+	                    max : "9999999999.999",
+	                    groupSeparator : ','
+	                }
+	            },
+	            sortable : true
+	        }, {
+	            field : "flow",
+	            title : '流向',
+	            width : 80,
+	            multiSort : true,
+	            align : "left",
+	            halign : "center",
+	            editor : {
+                    type: 'combogrid',
+                    options: HdUtils.code.cPort({
+                        parentId : "#ContractIeDocDatagrid1508123320012[(${radi})]",
+                        fieldMapping: { flow: 'CODE' },
+                        required: false
+                    })
+                },
+                formatter:function(val,row,index){
+                    if(!row){
+                        return val;
+                    }else{
+                        return row.flowNam;
+                    }
+                },
+	            sortable : false
+	        }, {
+	            field : "pieceValume",
+	            title : "件体积",
+	            multiSort : true,
+	            halign : "center",
+	            formatter : function(value) {
+		            return HdUtils.formatter.precisionCommon(value, 0);
+	            },
+	            align : 'right',
+	            width : '80',
+	            editor : {
+	                type : "numberbox",
+	                options : {
+	                    required : false,
+	                    precision : 0,
+	                    max : "9999999999.999",
+	                    groupSeparator : ','
+	                }
+	            },
+	            sortable : true
+	        },   */{
+	            field : "useshipworkmac",
+	            title : "装卸船机力",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "combobox",
+	                options : HdUtils.code.scode({
+		                fieldCod : 'CUSTOM_ID'
+	                }, {
+		                required : false
+	                })
+	            },
+	            formatter : function(value) {
+					if (value != null && value != undefined) {
+						if (value == 0) {
+							value = "×";
+							return value;
+						} else {
+							value = "√";
+							return value;
+							 }
+					} else {
+							return value;
+						}
+				},
+	            align : 'left',
+	            width : '80',
+	            sortable : true
+	        }, {
+	            field : "useshipworkperson",
+	            title : "装卸船人力",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "combobox",
+	                options : HdUtils.code.scode({
+		                fieldCod : 'CUSTOM_ID'
+	                }, {
+		                required : false
+	                })
+	            },
+	            formatter : function(value) {
+					if (value != null && value != undefined) {
+						if (value == 0) {
+							value = "×";
+							return value;
+						} else {
+							value = "√";
+							return value;
+							 }
+					} else {
+							return value;
+						}
+				},
+	            align : 'left',
+	            width : '80',
+	            sortable : true
+	        }, {
+	            field : "isnight",
+	            title : "夜班标志",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "combobox",
+	                options : HdUtils.code.scode({
+		                fieldCod : 'CUSTOM_ID'
+	                }, {
+		                required : false
+	                })
+	            },
+	            formatter : function(value) {
+					if (value != null && value != undefined) {
+						if (value == 0) {
+							value = "×";
+							return value;
+						} else {
+							value = "√";
+							return value;
+							 }
+					} else {
+							return value;
+						}
+				},
+	            align : 'left',
+	            width : '80',
+	            sortable : true
+	        }, {
+	            field : "isholiday",
+	            title : "节假日标志",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "combobox",
+	                options : HdUtils.code.scode({
+		                fieldCod : 'CUSTOM_ID'
+	                }, {
+		                required : false
+	                })
+	            },
+	            formatter : function(value) {
+					if (value != null && value != undefined) {
+						if (value == 0) {
+							value = "×";
+							return value;
+						} else {
+							value = "√";
+							return value;
+							 }
+					} else {
+							return value;
+						}
+				},
+	            align : 'left',
+	            width : '80',
+	            sortable : true
+	        },{
+	            field : "usefreightmac",
+	            title : "陆运机力",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "combobox",
+	                options : HdUtils.code.scode({
+		                fieldCod : 'CUSTOM_ID'
+	                }, {
+		                required : false
+	                })
+	            },
+	            formatter : function(value) {
+					if (value != null && value != undefined) {
+						if (value == 0) {
+							value = "×";
+							return value;
+						} else {
+							value = "√";
+							return value;
+							 }
+					} else {
+							return value;
+						}
+				},
+	            align : 'left',
+	            width : '80',
+	            sortable : true
+	        }, /* {
+	            field : "remarkTxt",
+	            title : "备注",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            align : 'left',
+	            width : '80',
+	            sortable : true
+	        },  */{
+	            field : "id",
+	            title : '',
+	            hidden: true,
+	            multiSort : true,
+	            halign : "center",
+	            align : 'left',
+	            width : '80',
+	            sortable : true
+            }] ],
+            onLoadSuccess:function(){
+                const selectRows = $('#ContractIeDocDatagrid1508123320012[(${radi})]').datagrid('getRows');
+                let piecesTotal = 0;
+                for (row of selectRows) {
+                    piecesTotal += Number.parseInt(!row.pieces ? '0' : row.pieces);
+                }
+                $('#ContractIeDocDatagrid1508123320012[(${radi})]').datagrid('reloadFooter', [
+                    {
+                        pieces: `<span class="subtotal">${piecesTotal}</span>`
+                    }
+                ]);
+            }
+	    });
+       
+        $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

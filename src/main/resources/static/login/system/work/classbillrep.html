@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+</head>
+<body>
+<iframe id="classbill" style="width:100%;height:100%;"> </iframe>	
+<script>
+	$(document).ready(function() {
+		var classbillNo=HdUtils.dialog.getValue("classbillNo");	
+		var shipNo=HdUtils.dialog.getValue("shipNo");	
+		var sql=" where a.ship_no = b.ship_no and a.ship_no="+shipNo+" and a.classbill_no in ("+classbillNo+")";
+		var src='http://10.163.204.56:8090/show/?fileid=b9622eddc8e244b18ca0d65f6516be1b&rpttoken=333&sql='+sql; 
+		$("#classbill").attr('src',src); 
+	});
+</script>
+</body>
+</html>

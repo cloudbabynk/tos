@@ -1,0 +1,174 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#CBizCarForm1507959148710");
+	    var bizcarNo = HdUtils.dialog.getValue("bizcarNo");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    if (bizcarNo) {
+	    	$("#bizcarNo").attr("readonly",true);
+	    } else {
+	    	$("#bizcarNo").attr("readonly",false);
+	    }
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/base/CBizcar/findone?bizcarNo=" + bizcarNo,
+	        success : function(data) {
+		        $("#CBizCarForm1507959148710").form("loadData", data);
+	        }
+	    })
+	      
+	    $('#carProp').combobox(HdUtils.code.scode({
+	                 fieldCod : 'CAR_PROP'
+	           }, {
+	                 required : false
+	           })
+	           );
+
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+		    var isValss = $("#CBizCarForm1507959148710").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#CBizCarForm1507959148710").serializeObject();
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/base/CBizcar/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#CBizCarDatagrid1508123301002" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+    });
+    function findCod() {
+	    var bizcarNoValue = $("#bizcarNo").val();
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/base/CBizcar/findCBizcar?bizcarNo=" + bizcarNoValue,
+	        success : function(data) {
+		        if (data.code == "-1") {
+			        $('#bizcarNo').val("");
+			        HdUtils.messager.bottomRight(data.message);
+			        $('#bizcarNo').focus();
+			        return false;
+		        }
+	        }
+	    });
+    }
+    function myclick(value) {
+    	var name = $(value).attr("name").substring(0, 4);
+	    if ($(value).is(':checked')) {
+		    $("input[name^=" + name + "]").each(function() {
+			    $(this).attr("readonly", false);
+		    })
+	    }else{
+	    	$("input[name^=" + name + "]").each(function() {
+	    		$(this).val("");
+			    $(this).attr("readonly", true);
+		    })
+	    }
+    }
+</script>
+<form id="CBizCarForm1507959148710">
+	<table id="CBizCarTable1507959148710" style="height: 75%; width: 80%"
+		class="tableform">
+		<tr>
+			<th>许可证号：</th>
+			<td><input id="bizcarNo" name="bizcarNo" onchange="findCod();"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="10" /></td>
+			<th>牌号：</th>
+			<td><input id="platNo" name="platNo"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="10" /></td>
+			<th>品牌：</th>
+			<td><input id="factroy" name="factroy" 
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="30" /></td>
+			<th>车型：</th>
+			<td><input id="carTyp" name="carTyp" 
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="15" /></td>
+		</tr>
+			<tr>
+			<th>车辆性质：</th>
+			<td><input id="carProp" name="carProp"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="10" /></td>
+			<th>车身颜色：</th>
+			<td><input id="carColor" name="carColor" 
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="10" /></td>
+			<th>司机姓名：</th>
+			<td><input id="driverNam" name="driverNam"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="10" /></td>
+			<th>联系人：</th>
+			<td><input id="relationNam" name="relationNam" 
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="15" /></td>
+		</tr>
+			<tr>
+			<th>电话：</th>
+			<td><input id="telephon" name="telephon"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="20" /></td>
+			<th>手机：</th>
+			<td><input id="mobileTele" name="mobileTele" 
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="20" /></td>
+			<th>禁行标志：</th>
+			<td><input id="forbidId" name="forbidId" onclick="myclick(this)"
+				data-options="required:false" type="checkbox" value='1'
+				maxlength="10" /></td>
+			<th>禁行内容：</th>
+			<td><input id="forbidTxt" name="forbidTxt" readonly="readonly"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="100" /></td>
+		</tr>
+		
+		<tr>
+           <th>制造日期：</th>
+			<td><input id="inDate" name="inDate"
+				data-options="required:false" class="easyui-datebox"
+				maxlength="10" /></td>
+            <th>公司名称：</th>
+			<td><input id="corpNam" name="corpNam" 
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="100" /></td>
+			<th>备注：</th>
+			<td colspan='5'><input id="remarks" name="remarks" style="width:100%"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		</tr>
+	</table>
+</form>

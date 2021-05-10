@@ -1,0 +1,125 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script src="../js/colpick.js"></script>
+<link rel="stylesheet" href="../css/colpick.css"/>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#CBrandForm1507959148645");
+	    var brandCod = HdUtils.dialog.getValue("brandCod");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    if (brandCod) {
+		    $("#brandCod").attr("readonly", true);
+	    } else {
+		    $("#brandCod").attr("readonly", false);
+	    }
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/base/CBrand/findone?brandCod=" + brandCod,
+	        success : function(data) {
+		        $("#CBrandForm1507959148645").form("loadData", data);
+	        }
+	    })
+
+	    $('#factoryCod').combobox({
+	        url : '../webresources/login/base/CBrand/getCFactoryDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+		    var isValss = $("#CBrandForm1507959148645").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#CBrandForm1507959148645").serializeObject();
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/base/CBrand/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#DayWorkClassDatagrid1508123307299" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+    });
+    function findCod() {
+	    var brandEname = $("#brandEname").val();
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/base/CBrand/findCBrand?brandEname=" + brandEname,
+	        success : function(data) {
+		        if (data.code == "-1") {
+			        $('#brandEname').val("");
+			        HdUtils.messager.bottomRight(data.message);
+			        $('#brandEname').focus();
+			        return false;
+		        }
+	        }
+	    });
+    }
+</script>
+<form id="CBrandForm1507959148645">
+	<input id="checkFlag" name="checkFlag" hidden="true"> <input
+		id="brandCod" name="brandCod" hidden="true">
+	<table id="CBrandTable1507959148645" style="height: 75%; width: 80%"
+		class="tableform">
+		<tr>
+			<th>品牌英文名称：</th>
+			<td><input id="brandEname" name="brandEname" onchange="findCod();"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="20" /></td>
+			<th>品牌中文名称：</th>
+			<td><input id="brandNam" name="brandNam"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="20" /></td>
+			<th>生产厂家：</th>
+			<td><input id="factoryCod" name="factoryCod"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="35" /></td>
+		</tr>
+		<tr>
+<!-- 			<th>颜色：</th> -->
+<!-- 			<td><input id="colourSet" name="colourSet"  -->
+<!-- 				data-options="required:false" class="easyui-validatebox" -->
+<!-- 				maxlength="255" /><p id="picker" ></p></td> -->
+			<th>品牌简称：</th>
+			<td><input id="brandShort" name="brandShort"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="255" /></td>
+			<th>备注：</th>
+			<td><input id="remarks" name="remarks"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		</tr>
+	</table>
+</form>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+
+<input th:id="Type+${radi}" th:value='${Type}' type="hidden" />
+<!-- 工具栏 -->
+
+<!-- Datagrid -->
+<table th:id="DayWorkClassDatagrid1508123307299+${radi}"
+	style="height: 100%"></table>
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#DayWorkClassDatagrid1508123307299[(${radi})]");
+	    var Type = $("#Type[(${radi})]").val();
+	    var cargoradi = HdUtils.dialog.getValue("cargoradi");
+	    var ingateId = HdUtils.dialog.getValue("ingateId");
+	    // buttons
+	    // 编辑。
+	    $("#edit[(${radi})]").on("click", function() {
+		    var data = dg.datagrid("getSelected");
+		    if (data == null || data == undefined) {
+			    HdUtils.messager.info('请选择一条数据进行编辑！');
+			    return;
+		    }
+		    var damCod = data.damCod;
+		    addoredit(damCod);
+	    });
+	    function addoredit(damCod) {
+		    HdUtils.dialog.setValue({
+			    'damCod' : damCod
+		    });
+		    HdUtils.dialog.setValue({
+			    'radi' : radi
+		    });
+		    HdUtils.dialog.show({
+		        width : 500,
+		        height : 200,
+		        title : '残损信息',
+		        href : "../login/system/base/cdamageform.html",
+		        isSaveHandler : true
+		    });
+	    }
+	    // 删除。
+	    $("#delete[(${radi})]").on("click", function() {
+		    var selRow = $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("getChecked");
+		    if (selRow.length == 0) {
+			    HdUtils.messager.info('请至少选择一条数据！');
+			    return false;
+		    }
+		    var ids = '';
+		    $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+			    if (r) {
+				    for (var i = 0; i < selRow.length; i++) {
+					    ids += selRow[i].damCod + ",";
+				    }
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/base/CDamage/removeAll?damCods=" + ids,
+				        success : function(data) {
+					        HdUtils.messager.bottomRight(data.message);
+					        $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("hdReload");
+				        }
+				    });
+			    }
+		    });
+	    });
+	    // 刷新。
+	    $("#fresh[(${radi})]").on("click", function() {
+		    dg.datagrid("hdReload");
+	    });
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+		    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    onlinquery.add("Type", Type);
+		    onlinquery.add("ingateId", ingateId);
+		    return onlinquery.build();
+	    }
+
+	    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/gate/GateTruckContract/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#DayWorkClassToolBar1508123307299" + /*[[${radi}]]*/'',
+	        fit : true,
+	        onSelect(rowIndex,rowData){
+	           	 HdUtils.dialog.setValue({
+	           		'ingateId' : rowData.ingateId,
+	           		'contractNo' : rowData.contractNo,
+	           		'billNo' : rowData.billNo,
+	           		'brandCod' : rowData.brandCod,
+	           		'shipNo' : rowData.shipNo,
+	           		'carTyp' : rowData.carTyp,
+	           		'carKind' : rowData.carKind,
+	           		'shipNam' : rowData.shipNam,
+	           		'tranPortCod' : rowData.tranPortCod,
+	           		'flow' : rowData.flow,
+	           		'voyage' : rowData.voyage,
+	           		'dockCod' : rowData.dockCod,
+	           		'factoryCod' : rowData.factoryCod
+	        	 });
+	           	$('#cargoId' + cargoradi).layout('panel', 'south').panel('refresh');
+		    },
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+	        }, {
+	            field : "id",
+	            multiSort : true,
+	            hidden : true,
+	            sortable : false
+	        }, {
+	            field : "shipNam",
+	            title : "船名",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+	            field : "voyage",
+	            title : "航次",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+	            field : "contractNo",
+	            title : "委托号",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "billNo",
+	            title : "提单号",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        },{
+	            field : "brandNam",
+	            title : "品牌",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        },{
+	            field : "carKindNam",
+	            title : "车类",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        },{
+	            field : "factoryNam",
+	            title : "生产厂家",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        },{
+
+	            field : "consignNam",
+	            title : "货代",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        },{
+
+	            field : "flow",
+	            title : "流向",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        },{
+	            field : "planNum",
+	            title : "计划车数",
+	            multiSort : true,
+	            width : 100,
+	            align : "center",
+	            sortable : false
+	        }/* ,{
+	            field : "workNum",
+	            title : "作业车数",
+	            multiSort : true,
+	            width : 100,
+	            align : "center",
+	            sortable : false
+	        } */
+
+	        ] ]
+	    });
+	    $("#DayWorkClassDatagrid1508123307299" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

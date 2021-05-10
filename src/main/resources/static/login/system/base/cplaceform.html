@@ -1,0 +1,137 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#CPlaceForm1507959148711");
+	    var placCod = HdUtils.dialog.getValue("placCod");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    if (placCod) {
+	    	$("#placCod").attr("readonly",true);
+	    } else {
+	    	$("#placCod").attr("readonly",false);
+	    }
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/base/CPlace/findone?placCod=" + placCod,
+	        success : function(data) {
+		        $("#CPlaceForm1507959148711").form("loadData", data);
+	        }
+	    })
+	    $('#areaNam').combobox({
+	        url : '../webresources/login/base/CPlace/getCAreaDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 'auto',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        },
+	        onChange : function(n, o) {
+		        $("#areaCod").val(n);
+	        }
+
+	    });
+
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+		    var isValss = $("#CPlaceForm1507959148711").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#CPlaceForm1507959148711").serializeObject();
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/base/CPlace/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#CPlaceDatagrid1508123301001" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+    });
+    function findCod() {
+	    var placCodValue = $("#placCod").val();
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/base/CPlace/findCPlace?placCod=" + placCodValue,
+	        success : function(data) {
+		        if (data.code == "-1") {
+			        $('#placCod').val("");
+			        HdUtils.messager.bottomRight(data.message);
+			        $('#placCod').focus();
+			        return false;
+		        }
+	        }
+	    });
+    }
+</script>
+<form id="CPlaceForm1507959148711">
+	<input id="recTim" name="recTim" hidden="true"> <input
+		id="recNam" name="recNam" hidden="true">
+	<table id="CPlaceTable1507959148645" style="height: 75%; width: 80%"
+		class="tableform">
+		<tr>
+			<th>地点代码：</th>
+			<td><input id="placCod" name="placCod" onchange="findCod();"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="10" /></td>
+			<th>地点简称：</th>
+			<td><input id="placShort" name="placShort"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="10" /></td>
+		</tr>
+		<tr>
+			<th>地点名称：</th>
+			<td><input id="placNam" name="placNam"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="255" /></td>
+			<th>距离：</th>
+			<td><input id="distince" name="distince"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="10" /></td>
+		</tr>
+		<tr>
+			<th>区域名称：</th>
+			<td><input id="areaNam" name="areaNam"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+			<th>区域代码：</th>
+			<td><input id="areaCod" name="areaCod"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="10" /></td>
+		</tr>
+		<tr>
+			<th>备注：</th>
+			<td><input id="remarkTxt" name="remarkTxt"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="10" /></td>
+		</tr>
+
+	</table>
+</form>

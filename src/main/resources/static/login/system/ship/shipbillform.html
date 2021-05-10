@@ -1,0 +1,345 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#ShipBillForm1507959148988");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    var shipNo = HdUtils.dialog.getValue("data").shipNo;
+	    var iEId = HdUtils.dialog.getValue("data").iEId;
+	    var tradeId = HdUtils.dialog.getValue("data").tradeId;
+	    $("input[name='shipNo']").val(shipNo);
+	    $("input[name='tradeId']").val(tradeId);
+	    var shipbillId = HdUtils.dialog.getValue("shipbillId");
+	    if (shipbillId) {
+		    $("#shipbillId").attr("readonly", true);
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/ship/ShipBill/findone?shipbillId=" + shipbillId,
+		        success : function(data) {
+				    var ydRecId=data.ydRecId;
+				    if(ydRecId=="1"){
+				    	$("#ydTim").datetimebox({disabled: true });
+				    }
+			        $("#ShipBillForm1507959148988").form("loadData", data);
+				    $("input[name='ydRecId']:checked").attr("disabled",true);
+		        }
+		    })
+	    } else {
+		    $("#shipbillId").attr("readonly", false);
+	    }
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+		    var isValss = $("#ShipBillForm1507959148988").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    $("input[name='ydRecId']:checked").attr("disabled",false); 
+		    var ydId=$("input[name='ydId']:checked").val();
+		    HdUtils.ajax.post({
+	    		    url : "../webresources/login/ship/ShipPlanSend/procYunDi?ydId="+shipNo,
+	  		        success : function(data) {
+	  			        if (data.code == '0') {
+	  				        HdUtils.messager.info("该船没有IMO号，无法发送运抵!");
+	  				        return false;
+	  			        }
+	  		        }
+	  		    });
+		    var formdata = $("#ShipBillForm1507959148988").serializeObject();
+		    formdata.iEId = iEId;
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/ship/ShipBill/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#ShipBillDatagrid1508123309099" + radi).datagrid("hdReload");
+		        }
+		    }) 
+	    }
+	    $('#brandCod').combobox({
+	        url : '../webresources/login/base/CCarTyp/getCBrandDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 120,
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $('#carTyp').combobox({
+	        url : '../webresources/login/ship/BillCar/getCCarTypDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 120,
+	        required : false,
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $('#loadPortCod').combobox({
+	        url : '../webresources/login/base/CPort/getCPortDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 120,
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $('#tranPortCod').combobox({
+	        url : '../webresources/login/base/CPort/getCPortDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 120,
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $('#discPortCod').combobox({
+	        url : '../webresources/login/base/CPort/getCPortDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 120,
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $('#consignNam').combobox({
+	        url : '../webresources/login/base/CClientCod/getCClientCodDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 120,
+	        onSelect : function(rec) {
+		        return rec.value;
+	        },
+	        onChange : function(n, o) {
+		        $("#consignCod").val(n);
+	        }
+	    });
+	    $('#receiveNam').combobox({
+	        url : '../webresources/login/base/CClientCod/getCClientCodDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 120,
+	        onSelect : function(rec) {
+		        return rec.value;
+	        },
+	        onChange : function(n, o) {
+		        $("#receiveCod").val(n);
+	        }
+	    });
+	    $('#dockCod').combobox({
+	        url : '../webresources/login/contract/ContractIeDoc/getCDock',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 'auto',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $('#workTyp').combobox(HdUtils.code.scode({
+		    fieldCod : 'M_WORK_TYP'
+	    }, {
+		    required : false
+	    }));
+	    $('#exitCustomId').combobox(HdUtils.code.scode({
+		    fieldCod : 'EXIT_CUSTOM_ID'
+	    }, {
+		    required : false
+	    }));
+	  
+    });
+</script>
+<form id="ShipBillForm1507959148988">
+	<table id="ShipBillTable1507959148988" style="height: 75%; width: 80%"
+		class="tableform">
+		<input id="shipbillId" name="shipbillId" hidden="true"
+			class="easyui-validatebox" maxlength="24" />
+		<input class="easyui-validatebox" id="tradeId" name="tradeId"
+			hidden="true" />
+		<input id="splitBillNo" name="splitBillNo" hidden="true" 
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="24" />
+		<tr>
+			<th>提单号：</th>
+			<td><input id="billNo" name="billNo"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="24" /></td>
+			<!-- <th>进出口：</th>
+			<td><input type="radio"  name="iEId" value="I"
+					 checked="checked" class='easyui-radio'>进口</input> 
+			<input type="radio" name="iEId" value="E" class='easyui-radio'>出口</input></td> -->
+			<th>货名：</th>
+			<td><input id="cargoNam" name="cargoNam"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="24" /></td>
+			<th>退关标志：</th>
+			<td><input type="radio" name="exitCustomId" value="0"
+				checked="checked" class='easyui-radio'>未退</input> <input type="radio"
+				name="exitCustomId" value="1" class='easyui-radio'>已退</input></td>
+			<!-- <th>内外贸：</th> -->
+			<!--<td><input type="radio"  name="tradeId" value="2" -->
+			<!--checked="checked" class='easyui-radio'>内</input>  -->
+			<!--<input type="radio" name="tradeId" value="1" class='easyui-radio'>外</input></td> -->
+		</tr>
+		<tr>
+
+			<th>品牌：</th>
+			<td><input id="brandCod" name="brandCod"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+			<th>车型：</th>
+			<td><input id="carTyp" name="carTyp"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="35" /></td>
+			<th>唛头：</th>
+			<td><input id="marks" name="marks" data-options="required:false"
+				class="easyui-validatebox" maxlength="16" /></td>
+		</tr>
+		<tr>
+			<th>总件数：</th>
+			<td><input id="pieces" name="pieces"
+				data-options="min:0,max:999999,precision:0" class="easyui-numberbox"
+				maxlength="" /></td>
+			<th>总重量：</th>
+			<td><input id="weights" name="weights"
+				data-options="min:0,max:99999999,precision:3"
+				class="easyui-numberbox" maxlength="255" /></td>
+			<th>总体积：</th>
+			<td><input id="valumes" name="valumes"
+				data-options="min:0,max:99999999,precision:3"
+				class="easyui-numberbox" maxlength="35" /></td>
+		</tr>
+		<tr>
+			<th>装货港：</th>
+			<td><input id="loadPortCod" name="loadPortCod"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="35" /></td>
+			<th>卸货港：</th>
+			<td><input id="tranPortCod" name="tranPortCod"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+			<th>目的港：</th>
+			<td><input id="discPortCod" name="discPortCod"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="35" /></td>
+
+		</tr>
+		<tr>
+			<th>发货人名称：</th>
+			<td><input id="consignNam" name="consignNam"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="35" /></td>
+			<!-- 			<th>发货人代码：</th> -->
+			<input id="consignCod" name="consignCod" hidden="true"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" />
+			<th>收货人名称：</th>
+			<td><input id="receiveNam" name="receiveNam"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+			<!-- 			<th>收货人代码：</th> -->
+			<input id="receiveCod" name="receiveCod" hidden="true"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="35" />
+			<th>报关单号：</th>
+			<td><input id="customBillNo" name="customBillNo"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="24" /></td>
+		</tr>
+		<tr>
+			<th>联系人：</th>
+			<td><input id="contactPerson" name="contactPerson"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="10" /></td>
+			<th>联系人电话：</th>
+			<td><input id="contactPhone" name="contactPhone"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="15" /></td>
+			<th>发送回执标志：</th>
+			<td><input type="radio" name="sendFlag" value="1"
+				class='easyui-radio'>已发</input> <input type="radio" name="sendFlag"
+				value="0" checked="checked" class='easyui-radio'>未发</input></td>
+		</tr>
+		<tr>
+			<th>海关放行时间：</th>
+			<td><input id="releaseTim" name="releaseTim"
+				data-options="required:false" class="easyui-datetimebox"
+				maxlength="35" /></td>
+			<th>核碰时间：</th>
+			<td><input id="checkTim" name="checkTim"
+				data-options="required:false" class="easyui-datetimebox"
+				maxlength="255" /></td>
+			<th>业务类型：</th>
+			<td><input id="workTyp" name="workTyp"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="35" /></td>
+
+		</tr>
+		<tr>
+			<th>备注：</th>
+			<td colspan="3"><input id="remarks" name="remarks"
+				data-options="required:false" class="easyui-validatebox"
+				style="width: 95%" maxlength="50" /></td>
+			<th>作业公司：</th>
+			<td><input id="dockCod" name="dockCod" data-options="required:false"
+			    class="easyui-validatebox"
+				maxlength="35" />
+			</td>
+			<!-- 			<th>车数：</th> -->
+			<input id="carNum" name="carNum" hidden="true"
+				data-options="min:0,max:100000,precision:0" class="easyui-numberbox"
+				maxlength="255" />
+			<!-- shipNo: -->
+			<input id="shipNo" name="shipNo" hidden="false"
+				data-options="required:false" class="easyui-textbox" maxlength="255" />
+			<!-- shipBillId: -->
+			<input id="shipBillId" name="shipBillId"
+				data-options="required:false" class="easyui-textbox" hidden="true"
+				maxlength="255" />
+			<input id="confirmId" name="confirmId" data-options="required:false"
+				class="easyui-textbox" hidden="true" maxlength="255" />
+		</tr>
+		<tr>
+			<th>运抵标志：</th>
+			<td><input type="radio" name="ydId" value="0"
+				checked="checked" class='easyui-radio'>否</input> 
+				<input type="radio"	name="ydId" value="1"
+				 class='easyui-radio'>是</input></td>
+			<th>运抵时间：</th>
+			<td><input id="ydTim" name="ydTim"
+				data-options="required:false" class="easyui-datetimebox" 
+				maxlength="35" /></td>
+			 <th>运抵回执：</th>
+			<td><input type="radio" name="ydRecId" value="0" 
+				 class='easyui-radio'>否</input> 
+				<input type="radio"	name="ydRecId" value="1" 
+				 class='easyui-radio'>是</input></td> 
+		</tr>
+	</table>
+</form>

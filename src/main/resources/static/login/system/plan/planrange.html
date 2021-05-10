@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="PlanRangeToolBar1508123301002+${radi}" style="float: left">
+	<div>
+		<a class="easyui-linkbutton" th:id="planRangedit+${radi}" iconCls="icon-edit" plain="false">编辑</a>
+		<a class="easyui-linkbutton" th:id="planRangedel+${radi}" iconCls="icon-del" plain="false">刪除</a>
+		<a class="easyui-linkbutton" th:id="planRangsave+${radi}" iconCls="icon-save" plain="false">保存</a>
+	</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="PlanRangeDatagrid1508123301002+${radi}" style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    console.log("radi3:"+radi);
+	    var dg = $("#PlanRangeDatagrid1508123301002[(${radi})]");
+	    // buttons
+        HdUtils.dialog.setValue({
+		    'radiplanrange' : radi
+	    });
+	    var planGroupNo = HdUtils.dialog.getValue('planGroupNo');
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    if(planGroupNo)
+		    onlinquery.add("planGroupNo", planGroupNo.toString());
+		    return onlinquery.build();
+	    }
+	 	// 编辑
+	    $("#planRangedit[(${radi})]").on("click", function() {
+	    	dg.datagrid("hdEdit");
+	    });
+	    $("#planRangedel[(${radi})]").on("click", function() {
+		    var selRow = dg.datagrid("getChecked");
+		    if (selRow.length == 0) {
+			    HdUtils.messager.info('请至少选择一条数据！');
+			    return false;
+		    }
+		    var ids = '';
+		    $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+			    if (r) {
+				    for (var i = 0; i < selRow.length; i++) {
+					    ids += selRow[i].planRangeNo + ",";
+				    }
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/plan/PlanRange/removeAll?planIds=" + ids,
+				        success : function(data) {
+					        if (data.code == '-1') {
+						        HdUtils.messager.info(data.message);
+						        return false;
+					        }
+					        HdUtils.messager.bottomRight(data.message);
+					        dg.datagrid("hdReload");
+				        }
+				    });
+			    }
+		    });
+	    });
+	    
+	    
+	 	// 保存
+	    $("#planRangsave[(${radi})]").on("click", function() {
+	    	dg.datagrid("hdSave", {
+			    url : "../webresources/login/plan/PlanRange/save"
+		    });
+	    });
+	 	
+	 	
+	 	
+
+	    $("#PlanRangeDatagrid1508123301002[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/plan/PlanRange/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : false,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#PlanRangeToolBar1508123301002" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        onLoadSuccess : function(data) {
+		        $("a[name='active']").linkbutton({
+		            text : '激活',
+		            plain : true,
+		            iconCls : 'icon-add'
+		        });
+	        },
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false
+	        }, {
+
+	            field : "planGroupNo",
+	            title : '计划组号',
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        }, {
+
+	            field : "cyAreaNo",
+	            title : "场号",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        }, {
+
+	            field : "planNum",
+	            title : "车数",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "activeId",
+	            title : "激活标志",
+	            multiSort : true,
+	            halign : "center",
+	            formatter : function(value) {
+		            if (value != null && value != undefined) {
+			            if (value == 0) {
+				            value = "×";
+				            return value;
+			            } else {
+				            value = "√";
+				            return value;
+			            }
+		            } else {
+			            return value;
+		            }
+	            },
+	            sortable : false
+	        }, {
+	            field : 'active',
+	            title : '激活',
+	            align : 'center',
+	            width : $(this).width() * 0.1,
+	            formatter : function(value, row, index) {
+		            var str = '<a name="active" onclick="active(' + index + ')" class="easyui-linkbutton" ></a>';
+		            return str;
+	            }
+	        }
+	        ] ]
+	    });
+	    $("#PlanRangeDatagrid1508123301002" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    function active(index) {
+	    $('#PlanRangeDatagrid1508123301002[(${radi})]').datagrid('selectRow', index);
+	    var row = $('#PlanRangeDatagrid1508123301002[(${radi})]').datagrid('getSelected');
+	    if (row) {
+	    	   var PlanRange = new Object();
+	    	   PlanRange.planRangeNo = row.planRangeNo;
+	    	   PlanRange.planGroupNo = row.planGroupNo;
+	    	   PlanRange.seqNo = row.seqNo;
+	    	   PlanRange.planNum=row.planNum;
+	    	   PlanRange.cyAreaNo = row.cyAreaNo;
+	    	   PlanRange.activeId=row.activeId;
+	            HdUtils.ajax.post({
+                   url : "../webresources/login/plan/PlanRange/active",
+                   data : PlanRange,
+                   success : function(data) {
+                        if (data.code == '-1') {
+	                        HdUtils.messager.info(data.message);
+	                        return false;
+                        }
+                   }
+               })   
+	    }
+    };
+    /*]]>*/
+</script>
+</html>

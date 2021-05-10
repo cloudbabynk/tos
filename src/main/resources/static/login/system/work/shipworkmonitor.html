@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+#xc{display:inline;float:left;}
+#unloadwork{
+margin-left: 50px;
+float:left;
+}
+</style>
+<body>
+<span style="margin:5px;"><a class="easyui-linkbutton" th:id='refresh+${radi}'>刷新</a></span>
+<div id="cc" class="easyui-layout" style="width:100%;height:100%">
+    <div data-options="region:'west',split:true "
+     style="width: 280px; padding: 10px;">
+    <div class="easyui-panel" title="航次信息">
+     <input th:id="shipNo+${radi}" name="shipNo" class="easyui-validatebox"	maxlength="20"  hidden="true"/>
+    <table class="tableform">
+     <tr>
+			<th><a class="easyui-linkbutton" th:id='chooseShip+${radi}'>选船</a>&nbsp;&nbsp;船名：</th>
+			<td><input th:id="cShipNam+${radi}" name="cShipNam" class="easyui-validatebox"	maxlength="10" /></td>
+	</tr>
+	<tr>
+			<th>进口航次：</th>
+			<td><input th:id="ivoyage+${radi}" name="ivoyage" class="easyui-validatebox"	maxlength="10" /></td>
+	</tr>
+	<tr>
+			<th>出口航次：</th>
+			<td><input th:id="evoyage+${radi}" name="evoyage" class="easyui-validatebox"	maxlength="10" /></td>
+	</tr>
+	<tr>
+			<th>到港时间：</th>
+			<td><input th:id="toPortTim+${radi}" name="toPortTim" class="easyui-datetimebox"/></td>
+	</tr>
+	<tr>
+			<th>离港时间：</th>
+			<td><input th:id="etdLeavTim+${radi}" name="etdLeavTim" class="easyui-datetimebox"/></td>
+	</tr>
+    </table>
+    </div>
+    <div class="easyui-panel" title="进口">
+     <table class="tableform" >
+    <tr>
+			<th>作业开始时间：</th>
+			<td><input th:id="discBegTim+${radi}" name="discBegTim" class="easyui-datetimebox"	maxlength="10" /></td>
+	</tr>
+	 <tr>
+			<th>作业完工时间：</th>
+			<td><input th:id="discEndTim+${radi}" name="discEndTim" class="easyui-datetimebox"	maxlength="10" /></td>
+	</tr>
+	</table>
+    </div>
+     <div class="easyui-panel" title="出口">
+     <table class="tableform">
+    <tr>
+			<th>作业开始时间：</th>
+			<td><input th:id="loadBegTim+${radi}" name="loadBegTim" class="easyui-datetimebox"	maxlength="10" /></td>
+	</tr>
+	 <tr>
+			<th>作业完工时间：</th>
+			<td><input th:id="loadEndTim+${radi}" name="loadEndTim" class="easyui-datetimebox"	maxlength="10" /></td>
+	</tr>
+	</table>
+    </div>
+      <div class="easyui-panel" title="效率">
+     <table   class="tableform">
+    <tr>
+			<th>卸船效率：</th>
+			<td><input th:id="unloadRate+${radi}" name="unloadRate" class="easyui-validatebox"	maxlength="10" /></td>
+	</tr>
+	 <tr>
+			<th>装船效率：</th>
+			<td><input th:id="loadRate+${radi}" name="loadRate" class="easyui-validatebox"	maxlength="10" /></td>
+	</tr>
+	</table>
+    </div>
+    </div>
+    <div data-options="region:'center'" >
+    <div id="dd" class="easyui-layout" style="width:100%;height:100%">
+    <div data-options="region:'north',title:'卸船作业情况',split:true" style="height:250px">
+    <div id="wrapPanel" style="float:left;">
+    <div id="xc" style="width:220px;height:230px"  class="easyui-panel" title="卸船">
+    <table style="float:left;width:150px;" class="tableform">
+    <tr>
+    <th>卸船计划：</th>
+    <td><input id="discCharge" name="discCharge" class="easyui-validatebox"	maxlength="10" readonly="readonly"/></td>
+    </tr>
+     <tr>
+    <th>船舶作业：</th>
+    <td><input id="shipWork" name="shipWork" class="easyui-validatebox"	maxlength="10" readonly="readonly"/></td>
+    </tr>
+     <tr>
+    <th>堆场作业：</th>
+    <td><input id="cyWork" name="cyWork" class="easyui-validatebox"	maxlength="10" readonly="readonly"/></td>
+    </tr>
+     <tr>
+    <th>未卸船作业：</th>
+    <td><input id="notDisc" name="notDisc" class="easyui-validatebox"	maxlength="10" readonly="readonly"/></td>
+    </tr>
+    <tr><th><a id="iKg" name="iKg" class="easyui-linkbutton">进口开工</a></th>
+    <td><a id="iWc" name="iWc" class="easyui-linkbutton">进口完船</a></td>
+    </tr>
+    </table>
+	</div>
+	</div>
+    <div id="unloadwork"  style="float:left;width: 500px; height: 220px;"></div>
+    
+    </div>
+    <div data-options="region:'center',title:'装船作业情况'" style="width: 500px; height:250px">
+    <div id="wrapZc" style="float:left;">
+    <div id="zc" style="width:220px;height:230px"  class="easyui-panel" title="装船">
+     <table style="float:left;width:150px;" class="tableform">
+    <tr>
+    <th>装船计划：</th>
+    <td><input id="loadPlan" name="loadPlan" class="easyui-validatebox"	maxlength="10" readonly="readonly"/></td>
+    </tr>
+     <tr>
+    <th>船舶作业：</th>
+    <td><input id="shipWork2" name="shipWork2" class="easyui-validatebox"	maxlength="10" readonly="readonly"/></td>
+    </tr>
+     <tr>
+    <th>堆场作业：</th>
+    <td><input id="cyWork2" name="cyWork2" class="easyui-validatebox"	maxlength="10" readonly="readonly"/></td>
+    </tr>
+     <tr>
+    <th>未装船作业：</th>
+    <td><input id="notLoad" name="notLoad" class="easyui-validatebox"	maxlength="10" readonly="readonly"/></td>
+    </tr>
+    <tr>
+    <th><a id="eKg" name="eKg" class="easyui-linkbutton">出口开工</a></th>
+    <td><a id="eWc" name="eWc" class="easyui-linkbutton">出口完船</a></td>
+    </tr>
+    </table>
+    </div>
+    </div>
+    <div id="loadwork"  style="float:left;width: 500px; height: 250px;"></div>
+    </div>
+    </div>
+    </div>
+</div>
+	<script type="text/javascript" th:inline="javascript">
+		$(document).ready(function() {
+			 var radi = /*[[${radi}]]*/'';
+			 var shipNo;
+			  // 刷新
+	          $("#refresh[(${radi})]").on("click", function() {
+	        	  findData(shipNo);
+	          });
+			  $("#chooseShip[(${radi})]").bind("click", function() {
+		            HdUtils.selShip(callback);
+		        });
+			  
+			    function callback(data){
+		        	$("#cShipNam[(${radi})]").val(data.cShipNam);
+		        	$("#shipNo[(${radi})]").val(data.shipNo);
+		            shipNo=$("#shipNo[(${radi})]").val();
+		        	$("#ivoyage[(${radi})]").val(data.ivoyage);
+		        	$("#evoyage[(${radi})]").val(data.evoyage);
+		        	$("#toPortTim[(${radi})]").datetimebox("setValue",data.toPortTim);
+		        	$("#etdLeavTim[(${radi})]").datetimebox("setValue",data.etdLeavTim);
+		        	$("#discBegTim[(${radi})]").datetimebox("setValue",data.discBegTim);
+		        	$("#discEndTim[(${radi})]").datetimebox("setValue",data.discEndTim);
+		        	$("#loadBegTim[(${radi})]").datetimebox("setValue",data.loadBegTim);
+		        	$("#loadEndTim[(${radi})]").datetimebox("setValue",data.loadEndTim);
+		        	$("#dockCod[(${radi})]").val(data.dockCod);
+					findData(shipNo);
+		        }
+			function findData(shipNo){
+				HdUtils.ajax.post({
+			        url : "../webresources/login/work/WorkCommand/findWorking?shipNo=" + shipNo,
+			        success : function(data) {
+			        	var json={"name":["装船计划","船舶作业","堆场作业","未完船作业"],"data":[data[0],data[1],data[2],data[3]]};
+			        	var json2={"name":["卸船计划","船舶作业","堆场作业","未卸船作业"],"data":[data[5],data[6],data[7],data[8]]};
+			        	$("#loadPlan").val(data[0]);
+			        	$("#shipWork2").val(data[1]);
+			        	$("#cyWork2").val(data[2]);
+			        	$("#notLoad").val(data[3]);
+			        	
+			        	$("#discCharge").val(data[5]);
+			        	$("#shipWork").val(data[6]);
+			        	$("#cyWork").val(data[7]);
+			        	$("#notDisc").val(data[8]);
+			        	var myChart = echarts.init(document.getElementById('loadwork'));
+			        	var myChart2 = echarts.init(document.getElementById('unloadwork'));
+			                myChart.setOption({
+			                    tooltip: {
+			            	           trigger: 'axis',
+			            	           axisPointer: {
+			            	               type: 'shadow'
+			            	           }
+			            	       },
+			            	    
+			            	       grid: {
+			            	           left: '3%',
+			            	           right: '4%',
+			            	           bottom: '3%',
+			            	           containLabel: true
+			            	       },
+			                    legend:{
+			                        data:['装船进度']
+			                    },
+			                    xAxis: {
+			            	           type: 'value',
+			            	           boundaryGap: [0, 0.03]
+			            	       },
+			            	       yAxis: {
+			            	           type: 'category',
+			            	           data: ['装船计划','船舶作业','堆场作业','未完船作业']
+			            	       },
+			                    series:[
+			                        {
+			                            name:'装船进度',
+			                            type:'bar',
+			                            barWidth:'30',
+			                            itemStyle:{  
+			                                normal:{color:'#7093DB',   //柱状颜色
+			                                    label : {
+			                                        show : true,  //柱头数字
+			                                        position : 'right',
+			                                        textStyle : {
+			                                            fontSize : '20',
+			                                            fontFamily : '微软雅黑',
+			                                            fontWeight : 'bold'
+			                                        }
+			                                    }
+			                                } 
+			                            },
+			                            data:json.data
+			                        }
+			                    ]
+			                })   
+			                   myChart2.setOption({
+			                    tooltip: {
+			            	           trigger: 'axis',
+			            	           axisPointer: {
+			            	               type: 'shadow'
+			            	           }
+			            	       },
+			            	    
+			            	       grid: {
+			            	           left: '3%',
+			            	           right: '4%',
+			            	           bottom: '3%',
+			            	           containLabel: true
+			            	       },
+			                    legend:{
+			                        data:['卸船进度']
+			                    },
+			                    xAxis: {
+			            	           type: 'value',
+			            	           boundaryGap: [0, 0.03]
+			            	       },
+			            	       yAxis: {
+			            	           type: 'category',
+			            	           data: ['卸船计划','船舶作业','堆场作业','未卸船作业']
+			            	       },
+			                    series:[
+			                        {
+			                            name:'卸船进度',
+			                            type:'bar',
+			                            barWidth:'30',
+			                            itemStyle:{  
+			                                normal:{color:'#7093DB',   //柱状颜色
+			                                    label : {
+			                                        show : true,  //柱头数字
+			                                        position : 'right',
+			                                        textStyle : {
+			                                            fontSize : '20',
+			                                            fontFamily : '微软雅黑',
+			                                            fontWeight : 'bold'
+			                                        }
+			                                    }
+			                                } 
+			                            },
+			                            data:json2.data
+			                        }
+			                    ]
+			                })  
+				        if (data.code == "-1") {
+					        HdUtils.messager.bottomRight(data.message);
+					        return false;
+				        }
+			        }
+			    });
+			}
+			// 进口完船
+		    $("#iWc").on("click", function() {
+			    $.messager.confirm('确定','确定要进口完船？', function(r) {
+				    if (r) {
+					    HdUtils.ajax.post({
+					        url : "../webresources/login/work/WorkCommand/jkWanChuan?shipNo=" + shipNo,
+					        success : function(data) {
+						        HdUtils.messager.bottomRight(data.message);
+					        }
+					    });
+				    }
+			    });
+		    });	 
+		 // 出口开工
+		    $("#eKg").on("click", function() {
+			    $.messager.confirm('确定','出口开工?', function(r) {
+				    if (r) {
+				    	   var date = new Date();
+						    formdata = {
+						        "workQueueNo" : "SO" + "-" + $("#shipNo[(${radi})]").val(),
+						        "workTyp" : "SO",
+						        "shipNo" : $("#shipNo[(${radi})]").val(),
+						        "contractNo" : "",
+						        "truckNo" : "",
+						        "recNam" : "admin",
+						        "recTim" : date
+						    };
+						    HdUtils.ajax.post({
+						        url : "../webresources/login/work/WorkQueue/generatewq2",
+						        data : formdata,
+						        success : function(data) {
+							        if (data.key == '-1') {
+								        HdUtils.messager.info(data.message);
+								        return false;
+							        }
+							        HdUtils.messager.bottomRight('作业队列生成成功');
+						        }
+						    })
+				    }
+			    });
+		    });	  
+			// 出口完船
+		    $("#eWc").on("click", function() {
+			    $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+				    if (r) {
+					    HdUtils.ajax.post({
+					        url : "../webresources/login/work/WorkCommand/ckWanChuan?shipNo=" + shipNo,
+					        success : function(data) {
+						        HdUtils.messager.bottomRight(data.message);
+					        }
+					    });
+				    }
+			    });
+		    });	    	    
+			  var myChart = echarts.init(document.getElementById('loadwork')); 
+			  var myChart2 = echarts.init(document.getElementById('unloadwork')); 
+			    option2 = {
+					       tooltip: {
+					           trigger: 'axis',
+					           axisPointer: {
+					               type: 'shadow'
+					           }
+					       },
+					    
+					       grid: {
+					           left: '3%',
+					           right: '4%',
+					           bottom: '3%',
+					           containLabel: true
+					       },
+					       xAxis: {
+					           type: 'value',
+					           boundaryGap: [0, 0.01]
+					       },
+					       yAxis: {
+					           type: 'category',
+					           barwidth:'30',
+					           data: ['卸船计划','船舶作业','堆场作业','未卸船作业']
+					       },
+					       series: [
+					           {
+					               type: 'bar',
+					               data: [0, 0, 0,0,0]
+					           }
+					       ]
+					   };	
+					   myChart2.setOption(option2);
+			    option = {
+			       tooltip: {
+			           trigger: 'axis',
+			           axisPointer: {
+			               type: 'shadow'
+			           }
+			       },
+			    
+			       grid: {
+			           left: '3%',
+			           right: '4%',
+			           bottom: '3%',
+			           containLabel: true
+			       },
+			       xAxis: {
+			           type: 'value',
+			           boundaryGap: [0, 0.01]
+			       },
+			       yAxis: {
+			           type: 'category',
+			           barwidth:'30',
+			           data: ['装船计划','船舶作业','堆场作业','未装船作业']
+			       },
+			       series: [
+			           {
+			               type: 'bar',
+			               data: [0, 0, 0,0,0]
+			           }
+			       ]
+			   };	
+			   myChart.setOption(option);	
+		})
+	</script>
+</body>
+</html>

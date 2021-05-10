@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- <script language="javascript" type="text/javascript" src="../js/LodopFuncs.js"></script> -->
+<style type="text/css">
+.subtotal {
+	font-weight: bold;
+} /*合计单元格样式*/
+</style>
+<!-- 工具栏 -->
+<div th:id="BillSplitToolBar1508123301002+${radi}" style="float: left">
+	<div>
+		<input th:id="iEId+${radi}" th:value='${iEId}' type="hidden" /> <input
+			th:id="tradeId+${radi}" th:value='${tradeId}' type="hidden" />
+		<shiro:hasPermission name="webresources:login:BillSplit:delete">
+			<a class="easyui-linkbutton" th:id='delete+${radi}'>删除</a>
+		</shiro:hasPermission>
+		<shiro:hasPermission name="webresources:login:BillSplit:edit">
+			<a class="easyui-linkbutton" th:id='edit+${radi}'>编辑</a>
+		</shiro:hasPermission>
+		<shiro:hasPermission name="webresources:login:BillSplit:save">
+			<a class="easyui-linkbutton" th:id='save+${radi}'>保存</a>
+		</shiro:hasPermission>
+		<shiro:hasPermission name="webresources:login:BillSplit:refresh">
+			<a class="easyui-linkbutton" th:id='refresh+${radi}'>刷新</a>
+		</shiro:hasPermission>
+		<shiro:hasPermission name="webresources:login:BillSplit:copy">
+			<a class="easyui-linkbutton" th:id='copy+${radi}'>复制</a>
+		</shiro:hasPermission>
+		<shiro:hasPermission name="webresources:login:BillSplit:upbillsplit">
+			<a class="easyui-linkbutton" th:id='upbillsplit+${radi}'>陆运审核</a>
+		</shiro:hasPermission>
+		<shiro:hasPermission name="webresources:login:BillSplit:upbillsplithy">
+			<a class="easyui-linkbutton" th:id='upbillsplithy+${radi}'>航运审核</a>
+		</shiro:hasPermission>
+		<shiro:hasPermission
+			name="webresources:login:BillSplit:cancleupbillsplit">
+			<a class="easyui-linkbutton" th:id='cancleupbillsplit+${radi}'>取消陆运审核</a>
+		</shiro:hasPermission>
+		<shiro:hasPermission
+			name="webresources:login:BillSplit:cancleupbillsplithy">
+			<a class="easyui-linkbutton" th:id='cancleupbillsplithy+${radi}'>取消航运审核</a>
+		</shiro:hasPermission>
+		<shiro:hasPermission name="webresources:login:BillSplit:taoda">
+			<a class="easyui-linkbutton" th:id='taoda+${radi}'>提货单凭证</a>
+		</shiro:hasPermission>
+	</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="BillSplitDatagrid1508123301002+${radi}" style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+    	var recNam;
+    	  $.get('/login/PrivilegeController/getLoginAccount?t=11&s='+Math.random(), function(data) {
+    		recNam=data.name;  
+    	  })
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#BillSplitDatagrid1508123301002[(${radi})]");
+	    // buttons
+	    HdUtils.dialog.setValue({
+		    'radibillsplit' : radi
+	    });
+	    var shipbillId = HdUtils.dialog.getValue('shipbillId');
+	    var shipNo = HdUtils.dialog.getValue('shipNo');
+	    var iEId = HdUtils.dialog.getValue('iEId');
+	    var voyage=HdUtils.dialog.getValue('voyage');
+	    var dockCod=HdUtils.dialog.getValue('dockCod');
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    if (shipbillId) onlinquery.add("shipbillId", shipbillId);
+		    if (shipNo) onlinquery.add("shipNo", shipNo);
+		    if (iEId) onlinquery.add("iEId", iEId);
+		    return onlinquery.build();
+	    }
+	    //删除。
+	    $("#delete[(${radi})]").on("click", function() {
+		    var selRow = $("#BillSplitDatagrid1508123301002[(${radi})]").datagrid('getChecked');
+		    if (selRow.length == 0) {
+			    HdUtils.messager.info('请至少选择一条数据！');
+			    return false;
+		    }
+		    var billspId = '';
+		    $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+			    if (r) {
+				    for (var i = 0; i < selRow.length; i++) {
+					    billspId += selRow[i].billspId + ",";
+				    }
+				    billspId = billspId.substring(0, billspId.length - 1);
+
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/ship/BillSplit/removeAll?billspId=" + billspId,
+				        success : function(data) {
+					        HdUtils.messager.bottomRight(data.message);
+					        $("#BillSplitDatagrid1508123301002[(${radi})]").datagrid("hdReload");
+					        refreshBill();
+				        }
+				    });
+			    }
+		    });
+	    });
+	    // 编辑。
+	    $("#edit[(${radi})]").on("click", function() {
+		    var data = dg.datagrid("getSelected");
+		    if (data == null || data == undefined) {
+			    HdUtils.messager.info('请选择一条数据进行编辑！');
+			    return;
+		    }
+/* 		    if(data.sendFlag=='1'||data.hySendFlag =='1'){
+		    	 HdUtils.messager.info('已审核不能修改!');
+				    return;	
+		    } */
+		    dg.datagrid("hdEdit");
+	    });
+	    // 复制
+	    $("#copy[(${radi})]").on("click", function() {
+		    var dataRow = $('#BillSplitDatagrid1508123301002[(${radi})]').datagrid("getSelected");
+		    if(dataRow){
+			    var copyRow={};
+			    $.extend(true,copyRow,dataRow );
+			    var uuid = guid();
+			    copyRow.billspId = uuid;
+		    	//$('#BillSplitDatagrid1508123301002[(${radi})]').datagrid('endEdit',0);
+			    
+		    	$('#BillSplitDatagrid1508123301002[(${radi})]').datagrid('insertRow',{
+		    		index: 0,	// index start with 0
+		    		row: copyRow
+		    	});
+		    	$('#BillSplitDatagrid1508123301002[(${radi})]').datagrid('beginEdit',0);
+		    	$('#BillSplitDatagrid1508123301002[(${radi})]').datagrid('selectRow',0);
+		    	
+		    	
+		    } else {
+			    HdUtils.messager.info('请选择行！');
+		    }
+	    });
+	    // Generate four random hex digits.  
+	    function S4() {
+		    return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+	    };
+	    // Generate a pseudo-GUID by concatenating random hexadecimal.  
+	    function guid() {
+		    return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
+	    };
+	    // 刷新。
+	    $("#refresh[(${radi})]").on("click", function() {
+		    dg.datagrid("hdReload");
+	    });
+	    // 保存。
+	    $("#save[(${radi})]").on("click", function() {
+	    	var  rows=$('#BillSplitDatagrid1508123301002[(${radi})]').datagrid("getRows");
+	    	for(var i=0;i<rows.length;i++){
+	    		$('#BillSplitDatagrid1508123301002[(${radi})]').datagrid("endEdit", i); 
+	    	}
+ 		    dg.datagrid("hdSave", {
+			    url : "../webresources/login/ship/BillSplit/save",
+			    callback:function(){
+			    	refreshBill();
+			    }
+		    }); 
+	    });
+        function refreshBill(){
+        	 var radibill = HdUtils.dialog.getValue('radibill');
+			 $("#ShipBillDatagrid1508123309099"+radibill).datagrid("hdReload");	
+        }
+	    //套打
+	     $("#taoda[(${radi})]").on("click", function() {
+	    	var dataRow=dg.datagrid("getChecked");
+	   		    var billspId = "";
+	   		    var weights=0;
+	   		    var volumes=0;
+	   		    var p=0;
+	   			var shipNo;
+		    	var cShipNam;
+ 				for (var i = 0; i < dataRow.length; i++) {
+				    billspId = dataRow[0].billspId;
+				    shipNo=dataRow[0].shipNo;
+			    	cShipNam=dataRow[0].cShipNam;
+			    	p+=dataRow[i].pieces;
+				    weights+=dataRow[i].weights;
+				    volumes+=dataRow[i].volumes;
+				 }
+	   			if(billspId==null||billspId==""||billspId==undefined){
+	   			       HdUtils.messager.info('请选择一条数据！');	
+	   			}else{	
+		   		    HdUtils.dialog.setValue({
+		   			    'shipNo' : shipNo,
+		   			    'billspId' : billspId,
+		   			    'recNam':recNam,
+		   			    'radi':radi,
+		   			    'cShipNam':cShipNam,
+		   			    'voyage':voyage,
+		   			    'pieces':p,
+		   			    'weights':weights,
+		   			    'volumes':volumes.toFixed(3)
+		   		    });
+		   		    HdUtils.dialog.show({
+		   		        width : 850,
+		   		        height :180,
+		   		        title : '提货单',
+		   		        href : "../login/system/ship/jkthdtaoda.html",
+		   		        isSaveHandler : false
+		   		    });
+	   		    }
+		}); 
+	    function getTime2Time(time2, time1) {
+		    time1 = Date.parse(time1) / 1000;
+		    time2 = Date.parse(time2) / 1000;
+		    var time_ = time1 - time2;
+		    return (time_ / (3600 * 24));
+	    };
+	    // 上报陆运数据
+	    $("#upbillsplit[(${radi})]").on("click", function() {
+		    var dataRow = dg.datagrid("getChecked");
+		    if (dataRow.length == 0) {
+			    HdUtils.messager.info('请至少选择一条数据！');
+			    return false;
+		    }
+		    var billspId = "";
+		    for (var i = 0; i < dataRow.length; i++) {
+		    	  //审核的时候,不含退关的
+		    	if(dataRow[i].exitCustomId=='1'){
+		    		i++;
+		    		}else{
+		    	 billspId += dataRow[i].billspId + ",";
+		    	}
+		    }
+		    billspId = billspId.substring(0, billspId.length - 1);
+	        HdUtils.dialog.setValue({
+   			    'radi':radi,
+	        	'shipNo' : shipNo,
+	        	'dockCod':dockCod,
+   			    'billspId':billspId
+   		    });
+   		    HdUtils.dialog.show({
+   		        width : 200,
+   		        height :180,
+   		        title : '选码头',
+   		        href : "../login/system/ship/choosedock.html",
+   		        isSaveHandler : true
+   		    });
+	    });
+	    // 上报航陆运作业数据 
+      $("#mFeeInterfaceTally[(${radi})]").on("click", function() {
+    	  if (!shipNo) {
+			    HdUtils.messager.info('请先选择一条船！');
+			    return false;
+		    }
+    	  HdUtils.dialog.setValue({
+   			    'radi':radi,
+	        	'shipNo' : shipNo,
+	        	'iEId':iEId
+   		    });
+   		    HdUtils.dialog.show({
+   		        width : 1200,
+   		        height :610,
+   		        title : '作业数据上传接口',
+   		        href : "../webresources/login/shipbill/MFeeInterfaceTally/mfeeinterfacetally.htm",
+   		        isSaveHandler : false
+   		    });
+    	  
+      });
+	    // 上报航运数据
+	    $("#upbillsplithy[(${radi})]").on("click", function() {
+		  var  dataRow = dg.datagrid("getChecked");
+		    var billspId = "";
+			    for (var i = 0; i < dataRow.length; i++) {
+			    	//审核时，不含退关的
+			    	if(dataRow[i].exitCustomId=='1'){
+			    		i++;
+			    	}else{
+			    		billspId += dataRow[i].billspId + ",";
+			    	}
+			    }
+			    billspId = billspId.substring(0, billspId.length - 1);
+		        HdUtils.dialog.setValue({
+	   			    'radi':radi,
+		        	'shipNo' : shipNo,
+		        	'dockCod':dockCod,
+	   			    'billspId':billspId
+	   		    });
+	   		    HdUtils.dialog.show({
+	   		        width : 200,
+	   		        height :180,
+	   		        title : '选码头',
+	   		        href : "../login/system/ship/choosedock2.html",
+	   		        isSaveHandler : true
+	   		    });
+	    });
+	    // 取消上报陆运数据
+	    $("#cancleupbillsplit[(${radi})]").on("click", function() {
+	    	var  dataRow = dg.datagrid("getSelected");
+	    	  if (dataRow.sendFlag!=1) {
+				    HdUtils.messager.info('请选择一条已审核数据！');
+				    return false;
+			    }
+                var billspId=dataRow.billspId;
+			    HdUtils.ajax.post({
+			        url : "../webresources/login/ship/BillSplit/cancleupbillsplit?billspId=" + billspId,
+			        success : function(data) {
+				        HdUtils.messager.bottomRight(data.message);
+				        $("#BillSplitDatagrid1508123301002[(${radi})]").datagrid("hdReload");
+			        }
+			    });    
+	    });
+	    $("#cancleupbillsplithy[(${radi})]").on("click", function() {
+	    	 var dataRow = dg.datagrid("getSelected");
+	    	 if (dataRow.hySendFlag!=1) {
+				    HdUtils.messager.info('请选择一条已审核数据！');
+				    return false;
+			    }
+                var billspId=dataRow.billspId;
+			    HdUtils.ajax.post({
+			        url : "../webresources/login/ship/BillSplit/cancleupbillsplithy?billspId=" + billspId,
+			        success : function(data) {
+				        HdUtils.messager.bottomRight(data.message);
+				        $("#BillSplitDatagrid1508123301002[(${radi})]").datagrid("hdReload");
+			        }
+			    });    
+	    });
+	       //指定列求和
+    	 function compute(colName) {
+    	      var rows = $('#BillSplitDatagrid1508123301002[(${radi})]').datagrid('getRows');
+    	      var total = 0;
+    	      for (var i = 0; i < rows.length; i++) {
+    		    if(rows[i][colName]!=undefined)
+    	        total += parseFloat(rows[i][colName]);
+    	      }
+    	      return total.toFixed(3);
+    	}
+	    function computew(colName) {
+	    	      var rows = $('#BillSplitDatagrid1508123301002[(${radi})]').datagrid('getRows');
+	    	      var total = 0;
+	    	      for (var i = 0; i < rows.length; i++) {
+	    		    if(rows[i][colName]!=undefined)
+	    	        total += parseFloat(rows[i][colName]);
+	    	      }
+	    	      return total.toFixed(3);
+	    }
+	     function computez(colName) {
+	    	      var rows = $('#BillSplitDatagrid1508123301002[(${radi})]').datagrid('getRows');
+	    	      var total = 0;
+	    	      for (var i = 0; i < rows.length; i++) {
+	    		   if(rows[i][colName]!=undefined)
+	    	        total += parseFloat(rows[i][colName]);
+	    	      }
+	    	      return total;
+	    }
+	    $("#BillSplitDatagrid1508123301002[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/ship/BillSplit/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : false,
+	        singleSelect : true,
+	        selectOnCheck : false,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        showFooter:true,
+	        pageSize : 20,
+	        toolbar : "#BillSplitToolBar1508123301002" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        onLoadSuccess() {
+        	    //添加“合计”列
+        		$('#BillSplitDatagrid1508123301002[(${radi})]').datagrid('reloadFooter',[
+        			{
+       	        	       billNo: '<span class="subtotal">合计</span>',
+       	        	       pieces: '<span class="subtotal">' + computez("pieces") + '</span>',
+       	        	       weights: '<span class="subtotal">' + computew("weights") + '</span>',
+       	        	       volumes: '<span class="subtotal">' + compute("volumes") + '</span>'
+		        	}
+		        ]);
+	        },
+	        onDblClickRow : function(rowIndex, rowData) {
+        	  $("#BillSplitDatagrid1508123301002[(${radi})]").datagrid("selectRow",rowIndex);
+              var data = $("#BillSplitDatagrid1508123301002[(${radi})]").datagrid("getSelected");
+			    if (data == null || data == undefined) {
+				    HdUtils.messager.info('请选择一条数据进行编辑！');
+				    return;
+			    }
+/* 			    if(data.sendFlag=='1'||data.hySendFlag =='1'){
+			    	 HdUtils.messager.info('已审核不能修改!');
+					    return;	
+			    } */
+	        	dg.datagrid("hdEdit");
+	        },
+	        frozenColumns : [ [  {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+
+	        },{
+	        	field : "billNo",
+	            title : '提单号',
+	            width : 150,
+	            multiSort : true,
+	            align : "center",
+	            sortable : true
+	        }
+	        ] ],
+	        columns : [ [ {
+
+	            field : "carTyp",
+	            formatter:function(value,rowInfo){
+	            	return rowInfo.carTypNam
+	            },
+	            title : '中文货名',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "combobox",
+	                options : {
+	                    url : '../webresources/login/ship/BillSplit/getCCarTypNamDrop',
+	                    valueField : 'value',
+	                    textField : 'label',
+	                    panelHeight : 120,
+	                    panelWidth : 120,
+	                    onSelect : function(rec) {
+		                    var row = $('#BillSplitDatagrid1508123301002[(${radi})]').datagrid('getSelected');
+		                    var rowIndex = $('#BillSplitDatagrid1508123301002[(${radi})]').datagrid('getRowIndex', row);//获取行号 
+		                    
+		                    var target5 = $('#BillSplitDatagrid1508123301002[(${radi})]').datagrid('getEditor', {
+		                        'index' : rowIndex,
+		                        'field' : 'cargoNam'
+		                    }).target;
+		                    var target6 = $('#BillSplitDatagrid1508123301002[(${radi})]').datagrid('getEditor', {
+		                        'index' : rowIndex,
+		                        'field' : 'carTyp'
+		                    }).target;  
+		                    
+		                    var target2 = $('#BillSplitDatagrid1508123301002[(${radi})]').datagrid('getEditor', {
+		                        'index' : rowIndex,
+		                        'field' : 'brandCod'
+		                    }).target;
+		                    var target3 = $('#BillSplitDatagrid1508123301002[(${radi})]').datagrid('getEditor', {
+		                        'index' : rowIndex,
+		                        'field' : 'carFeeTyp'
+		                    }).target;
+		                    var target4 = $('#BillSplitDatagrid1508123301002[(${radi})]').datagrid('getEditor', {
+		                        'index' : rowIndex,
+		                        'field' : 'carKindNam'
+		                    }).target;
+
+		                     target2.combobox('clear'); //清除原来的数据 
+		                    $.ajax({
+		                        url : "../webresources/login/ship/BillSplit/getBrandCodDropLd?carTyp=" + rec.value,
+		                        dataType : "json",
+		                        success : function(data) {
+			                        target2.combobox('setValue', data[0].value);
+		                        }
+		                    })
+		                     target3.combobox('clear'); //清除原来的数据 
+		                    $.ajax({
+		                        url : "../webresources/login/ship/BillSplit/getCarFeeTypDropLd?carTyp=" + rec.value,
+		                        dataType : "json",
+		                        success : function(data) {
+			                        target3.combobox('setValue', data[0].value);
+			                        if(target3.combobox('getValue')=="05"){
+			                        	 var sd = $('#BillSplitDatagrid1508123301002[(${radi})]');
+						                    var rowData = sd.datagrid('getSelected');
+						                    var rowIndex = sd.datagrid('getRowIndex', rowData);
+						                    var ed = sd.datagrid('getEditor', {
+						                        index : rowIndex,
+						                        field : 'pieces'
+						                    });
+						                    $(ed.target).val("1");	
+			                        }
+		                        }
+		                    })
+		                     target4.combobox('clear'); //清除原来的数据 
+		                    $.ajax({
+		                        url : "../webresources/login/ship/BillSplit/getCarKindDropLd?carTyp=" + rec.value,
+		                        dataType : "json",
+		                        success : function(data) {
+			                        target4.combobox('setValue', data[0].value);
+		                        }
+		                    });
+		                     target5.val(target6.combobox('getText'));
+		                     target6.val(rec.value);
+		                     row.carTyp=rec.value;
+		                     row.carTypNam=rec.label;
+	                    }
+	                }
+	            },
+	            sortable : false
+	        },  {
+
+	            field : "cargoNam",
+	            title : '货名',
+ 	            hidden:true,
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+	            field : "brandCod",
+	            formatter:function(value,rowInfo){
+	            	return rowInfo.brandNam
+	            },
+	            title : '品   牌',
+	            multiSort : true,
+	            halign : "center",
+	            hidden : false,
+	            editor : {
+	                type : "combobox",
+	                options : {
+	                    url : '../webresources/login/base/CCarTyp/getCBrandDrop',
+	                    valueField : 'value',
+	                    textField : 'label',
+	                    panelHeight : 120,
+	                    panelWidth : 80,
+	                    onSelect : function(rec) {
+		                    return rec.value;
+	                    }
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "carFeeTyp",
+	            title : '计费类型',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "combobox",
+	                options : HdUtils.code.scode({
+		                fieldCod : 'CAR_FEE_TYP'
+	                }, {
+		                required : true,
+		                onSelect : function(rec) {
+		                	if(rec.code=="05"){
+		                		 var sd = $('#BillSplitDatagrid1508123301002[(${radi})]');
+				                    var rowData = sd.datagrid('getSelected');
+				                    var rowIndex = sd.datagrid('getRowIndex', rowData);
+				                    var ed = sd.datagrid('getEditor', {
+				                        index : rowIndex,
+				                        field : 'pieces'
+				                    });
+				                    $(ed.target).val("1");
+		                	}
+		                    rec.value;
+	                    }
+	                })
+	            },
+	            formatter : function(value) {
+		            return HdUtils.code.name('CAR_FEE_TYP', value);
+	            },
+	            sortable : false
+	        }, {
+	        	field : "pieces",
+	            title : '计费件数',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "numberbox",
+	                options : {
+	                    required : false,
+	                    onChange : function(newValue, oldValue) {
+		                    if (oldValue > 0) {
+			                    var sd = $('#BillSplitDatagrid1508123301002[(${radi})]');
+			                    var rowData = sd.datagrid('getSelected');
+			                    var rowIndex = sd.datagrid('getRowIndex', rowData);
+			                    var ed = sd.datagrid('getEditor', {
+			                        index : rowIndex,
+			                        field : 'weights'
+			                    });
+			                    var ed2 = sd.datagrid('getEditor', {
+			                        index : rowIndex,
+			                        field : 'volumes'
+			                    });
+			                    var cha = oldValue/newValue;
+			                    var preweight = $(ed.target).val();
+			                    var prevolume = $(ed2.target).val();
+			                    var nweight = preweight/cha;
+			                    var nvolume = prevolume/cha;
+			                    $("#BillSplitDatagrid1508123301002[(${radi})]").datagrid('updateRowWhenEditing', {
+			                        index : rowIndex,
+			                        row : {
+				                        weights : nweight
+			                        }
+			                    });
+			                    $("#BillSplitDatagrid1508123301002[(${radi})]").datagrid('updateRowWhenEditing', {
+			                        index : rowIndex,
+			                        row : {
+				                        volumes : nvolume
+			                        }
+			                    });
+
+		                    }
+	                    }
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "weights",
+	            title : "重量",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "volumes",
+	            title : "体积",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },  {
+	            field : "inCyTim",
+	            title : '进场时间',
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.date,
+	            editor : {
+	                type : "datebox",
+	                options : {
+	                    onChange : function(newValue, oldValue) {
+			                var sd = $('#BillSplitDatagrid1508123301002[(${radi})]');
+			                var rowData = sd.datagrid('getSelected');
+			                var rowIndex = sd.datagrid('getRowIndex', rowData);
+			                var ed = sd.datagrid('getEditor', {
+			                    index : rowIndex,
+			                    field : 'outCyTim'
+			                });
+			                if(ed==null) return;
+			                var begtim = $(ed.target).datebox('getValue');
+			                if (begtim != null && begtim != "" && newValue > begtim) {
+				                $.messager.alert('提示', '进场时间不能大于离场时间', "info");
+			                }
+			                if (begtim != null && begtim != "") {
+				                var date1 = new Date(begtim);
+				                var date2 = new Date(newValue);
+				                var total = getTime2Time(date2, date1); //天数
+				                //  var hour = parseFloat((total/(60*60)).toFixed(2));
+				                if($('#iEId[(${radi})]').val()=='I'){
+					                if(total<3){
+					                total=0;	
+					                $("#BillSplitDatagrid1508123301002[(${radi})]").datagrid('updateRowWhenEditing', {
+					                    index : rowIndex,
+					                    row : {
+						                    duringDays : total
+					                    }
+					                });
+					                }else{
+					                	  total=total-3;	
+							                $("#BillSplitDatagrid1508123301002[(${radi})]").datagrid('updateRowWhenEditing', {
+							                    index : rowIndex,
+							                    row : {
+								                    duringDays : total
+							                    }
+							                });	
+					                }
+				                }else{
+				                	  $("#BillSplitDatagrid1508123301002[(${radi})]").datagrid('updateRowWhenEditing', {
+						                    index : rowIndex,
+						                    row : {
+							                    duringDays : total
+						                    }
+						                });		
+				                }
+			                }
+		                },
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "outCyTim",
+	            title : '离场时间',
+	            multiSort : true,
+	            formatter : $.hd.ezui.formatter.date,
+	            editor : {
+	                type : 'datebox',
+	                options : {
+		                onChange : function(newValue, oldValue) { 
+			                var sd = $('#BillSplitDatagrid1508123301002[(${radi})]');
+			                var rowData = sd.datagrid('getSelected');
+			                var rowIndex = sd.datagrid('getRowIndex', rowData);
+			                var ed = sd.datagrid('getEditor', {
+			                    index : rowIndex,
+			                    field : 'inCyTim'
+			                });
+			                if(ed==null) return;
+			                var begtim = $(ed.target).datebox('getValue');
+			                if (begtim != null && begtim != "" && newValue < begtim) {
+				                $.messager.alert('提示', '进场时间不能大于离场时间', "info");
+			                }
+			                if (begtim != null && begtim != "") {
+				                var date1 = new Date(begtim);
+				                var date2 = new Date(newValue);
+				                var total = getTime2Time(date1, date2); //天数
+				                if($('#iEId[(${radi})]').val()=='I'){
+					                if(total<3){
+					                total=0;	
+					                $("#BillSplitDatagrid1508123301002[(${radi})]").datagrid('updateRowWhenEditing', {
+					                    index : rowIndex,
+					                    row : {
+						                    duringDays : total
+					                    }
+					                });
+					                }else{
+					                	  total=total-3;	
+							                $("#BillSplitDatagrid1508123301002[(${radi})]").datagrid('updateRowWhenEditing', {
+							                    index : rowIndex,
+							                    row : {
+								                    duringDays : total
+							                    }
+							                });	
+					                }
+				                }else{
+				                	  $("#BillSplitDatagrid1508123301002[(${radi})]").datagrid('updateRowWhenEditing', {
+						                    index : rowIndex,
+						                    row : {
+							                    duringDays : total
+						                    }
+						                });		
+				                }
+			                }
+		                },
+	                }
+	            },
+	            halign : "center",
+	            sortable : false
+	        }, {
+
+	            field : "carKindNam",
+	            title : '车          型',
+	            multiSort : true,
+	            width : '70',
+	            hidden : true,
+	            halign : "center",
+	            editor : {
+	                type : "combobox",
+	                options : {
+	                    url : '../webresources/login/ship/BillSplit/getCCarKindDrop',
+	                    valueField : 'value',
+	                    textField : 'label',
+	                    panelHeight : 120,
+	                    panelWidth : 100,
+	                    onSelect : function(rec) {
+		                    return rec.value;
+	                    }
+	                }
+	            },
+	            required : true,
+	            sortable : false
+	        }, {
+
+	            field : "duringDays",
+	            title : '计费天数',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },   {
+	        	field : "lengthOverId",
+	            title : "超长标志",
+	            multiSort : true,
+	            align : "center",
+	            editor : $.hd.ezui.editor.checkbox,
+	            formatter : $.hd.ezui.formatter.checkbox2,
+	            sortable : false
+	        }, {
+	            field : "length",
+	            title : "长度",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },   {
+	        	field : "useShipworkMac",
+	            title : "装卸船机力",
+	            multiSort : true,
+	            align : "center",
+	            editor : $.hd.ezui.editor.checkbox,
+	            formatter : $.hd.ezui.formatter.checkbox2,
+	            sortable : false
+	        } ,  {
+	            field : "useShipworkPerson",
+	            title : "装卸船人力",
+	            multiSort : true,
+	            align : "center",
+	            editor : $.hd.ezui.editor.checkbox,
+	            formatter : $.hd.ezui.formatter.checkbox2,
+	            sortable : false
+	        } ,   {
+	            field : "isNight",
+	            title : "夜班标志",
+	            multiSort : true,
+	            align : "center",
+	            editor : $.hd.ezui.editor.checkbox,
+ 	            formatter : $.hd.ezui.formatter.checkbox2,
+	            sortable : false
+	        }, {
+	            field : "isHoliday",
+	            title : "节假日标志",
+	            multiSort : true,
+	            align : "center",
+	            editor : $.hd.ezui.editor.checkbox,
+	            formatter : $.hd.ezui.formatter.checkbox2,
+	            sortable : false
+	        }, {
+	            field : "useFreightMac",
+	            title : "陆运机力",
+	            multiSort : true,
+	            align : "center",
+	            editor : $.hd.ezui.editor.checkbox,
+	            formatter : $.hd.ezui.formatter.checkbox2,
+	            sortable : false
+	        }, {
+	            field : "shipworkNam",
+	            title : "装卸船审核人",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        }, {
+	            field : "shipworkTim",
+	            title : "装卸船审核时间",
+	            multiSort : true,
+	            halign : "center"
+	            },
+	            {
+	            field : "freightNam",
+	            title : "陆运审核人",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        }, {
+	            field : "freightTim",
+	            title : "陆运审核时间",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        }, {
+	            field : "sendFlag",
+	            title : "陆运",
+	            multiSort : true,
+	            formatter : function(value) {
+		            if (value != null && value != undefined) {
+			            if (value == 0) {
+				            value = "×";
+				            return value;
+			            } else {
+				            value = "√";
+				            return value;
+			            }
+		            } else {
+			            return value;
+		            }
+	            },
+	            sortable : false
+	        }, {
+	            field : "hySendFlag",
+	            title : "航运",
+	            multiSort : true,
+	            formatter : function(value) {
+		            if (value != null && value != undefined) {
+			            if (value == 0) {
+				            value = "×";
+				            return value;
+			            } else {
+				            value = "√";
+				            return value;
+			            }
+		            } else {
+			            return value;
+		            }
+	            },
+	            sortable : false
+	        }, {
+	            field : "printTim",
+	            title : "打票时间",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	       },  {
+	               field : "exitCustomId",
+	               title : "退关标志",
+	               multiSort : true,
+	               halign : "center",
+	               formatter : $.hd.ezui.formatter.checkbox2,
+	               sortable : false
+	           }
+	        ]]
+	    });
+    });
+    /*]]>*/
+</script>
+</html>

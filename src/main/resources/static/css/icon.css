@@ -1,0 +1,267 @@
+.hd-layout-button-down {
+    background: url('default/images/layout_arrows.png') no-repeat -16px 0;
+}
+a.l-btn span span.hd-layout-button-down{
+    background: transparent;
+}
+.icon-blank{
+    background:url('icons/blank.gif') no-repeat center center;
+}
+a.l-btn span span.icon-blank{
+    background: transparent;
+}
+.icon-add{
+    background:url('icons/edit_add.png') no-repeat center center;
+}
+a.l-btn span span.icon-add{
+    background: transparent;
+}
+.icon-edit{
+    background:url('icons/pencil.png') no-repeat center center;
+}
+a.l-btn span span.icon-edit{
+    background: transparent;
+}
+.icon-remove{
+    background:url('icons/edit_remove.png') no-repeat center center;
+}
+a.l-btn span span.icon-remove{
+    background: transparent;
+}
+.icon-save{
+    background:url('icons/filesave.png') no-repeat center center;
+}
+a.l-btn span span.icon-save{
+    background: transparent;
+}
+.icon-cut{
+    background:url('icons/cut.png') no-repeat center center;
+}
+a.l-btn span span.icon-cut{
+    background: transparent;
+}
+.icon-copy{ background:url('icons/copy.png') no-repeat center center;
+}
+a.l-btn span span.icon-copy{
+    background: transparent;
+}
+.icon-ok{
+    background:url('icons/ok.png') no-repeat center center;
+}
+a.l-btn span span.icon-ok{
+    background: transparent;
+}
+.icon-no{
+    background:url('icons/no.png') no-repeat center center;
+}
+a.l-btn span span.icon-no{
+    background: transparent;
+}
+.icon-cancel{
+    background:url('icons/cancel.png') no-repeat center center;
+}
+a.l-btn span span.icon-cancel{
+    background: transparent;
+}
+.icon-reload{
+    background:url('icons/reload.png') no-repeat center center;
+}
+a.l-btn span span.icon-reload{
+    background: transparent;
+}
+.icon-search{
+    background:url('icons/search.png') no-repeat center center;
+}
+a.l-btn span span.icon-search{
+    background: transparent;
+}
+.icon-downtmp{
+    background:url('icons/downtmp.png') no-repeat center center;
+}
+a.l-btn span span.icon-downtmp{
+    background: transparent;
+}
+.icon-expexcel{
+    background:url('icons/expexcel.png') no-repeat center center;
+}
+a.l-btn span span.icon-expexcel{
+    background: transparent;
+}
+.icon-toport{
+    background:url('icons/toport.png') no-repeat center center;
+}
+a.l-btn span span.icon-toport{
+    background: transparent;
+}
+.icon-print{
+    background:url('icons/print.png') no-repeat center center;
+}
+a.l-btn span span.icon-print{
+    background: transparent;
+}
+.icon-help{
+    background:url('icons/help.png') no-repeat center center;
+}
+.icon-home{
+    background:url('icons/home.png') no-repeat center center;
+}
+a.l-btn span span.icon-help{
+    background: transparent;
+}
+.icon-undo{
+    background:url('icons/undo.png') no-repeat center center;
+}
+a.l-btn span span.icon-undo{
+    background: transparent;
+}
+.icon-impfrom{
+    background:url('icons/come.png') no-repeat center center;
+}
+a.l-btn span span.icon-impfrom{
+    background: transparent;
+}
+
+.icon-redo{
+    background:url('icons/redo.png') no-repeat center center;
+}
+a.l-btn span span.icon-redo{
+    background: transparent;
+}
+.icon-back{
+    background:url('icons/back.png') no-repeat center center;
+}
+a.l-btn span span.icon-back{
+    background: transparent;
+}
+.icon-sum{
+    background:url('icons/sum.png') no-repeat center center;
+}
+a.l-btn span span.icon-sum{
+    background: transparent;
+}
+.icon-tip{
+    background:url('icons/tip.png') no-repeat center center;
+}
+a.l-btn span span.icon-tip{
+    background: transparent;
+}
+.icon-check {
+	background: url('icons/check.png') no-repeat center center;margin-right: 1px;
+}
+a.l-btn span span.icon-check{
+    background: transparent;
+}
+.icon-doc{
+    background:url('icons/document.png') no-repeat center center;
+}
+a.l-btn span span.icon-doc{
+    background: transparent;
+}
+.icon-folder{
+    background:url('icons/treefolder.png') no-repeat center center;
+}
+a.l-btn span span.icon-folder{
+    background: transparent;
+}
+/*自主添加图标部分*/
+
+/*船舶的靠*/
+.icon-berthing{ background:url('icons/berthing.png') no-repeat center center;}
+
+/*船舶的离*/
+.icon-departing{ background:url('icons/departing.png') no-repeat center center;}
+
+/*船舶的移*/
+.icon-changing{ background:url('icons/changing.png') no-repeat center center;}
+
+/*选船*/
+.icon-selectship{ background:url('icons/selectship.png') no-repeat center center;}
+
+/*抵锚*/
+.icon-dropanchor{ background:url('icons/dropanchor.png') no-repeat center center;}
+
+/*系解缆*/
+.icon-mooringUnmooring{ background:url('icons/mooring.png') no-repeat center center;}
+
+
+/*小图标样式*/
+
+/*复制*/
+.icon-mini-copy{ background:url('icons/mini_copy.png') no-repeat center center; margin-right:1px;}
+
+/*增加*/
+.icon-mini-add{ background:url('icons/mini_add.png') no-repeat center center; margin-right:1px;}
+
+/*删除*/
+.icon-mini-remove{ background:url('icons/mini_remove.png') no-repeat center center;margin-right:1px;}
+
+/*编辑*/
+.icon-mini-edit{ background:url('icons/mini_edit.png') no-repeat center center;margin-right:1px;}
+
+/*保存*/
+.icon-mini-save{ background:url('icons/mini_filesave.png') no-repeat center center;margin-right:1px;}
+
+/*确认*/
+.icon-mini-ok{ background:url('icons/mini_ok.png') no-repeat center center;margin-right:1px;}
+
+/*取消*/
+.icon-mini-cancel{ background:url('icons/mini_cancel.png') no-repeat center center;margin-right:1px;}
+
+/*打印*/
+.icon-mini-print{ background:url('icons/mini_print.png') no-repeat center center;margin-right:1px;}
+
+/*刷新*/
+.icon-mini-refresh{ background:url('icons/mini_refresh.png') no-repeat center center;margin-right:1px;}
+
+/*停止*/
+.icon-mini-stop {
+	background: url('icons/mini_stop.png') no-repeat center center;	margin-right: 1px;
+}
+/*剪切*/
+.icon-mini-cut {
+    background: url('icons/mini_cut.png') no-repeat center center; margin-right: 1px;
+}
+
+.icon-mini-redo {
+    background: url('icons/mini_redo.png') no-repeat center center; margin-right: 1px;
+}
+
+.icon-mini-expexcel{
+    background:url('icons/mini_expexcel.png') no-repeat center center;margin-right: 1px;
+}
+
+.icon-mini-back {
+	background: url('icons/mini_back.png') no-repeat center center;margin-right: 1px;
+}
+
+.icon-mini-sum {
+	background: url('icons/mini_sum.png') no-repeat center center;margin-right: 1px;
+}
+
+.icon-mini-tip {
+	background: url('icons/mini_tip.png') no-repeat center center;margin-right: 1px;
+}
+
+.icon-mini-check {
+	background: url('icons/mini_check.png') no-repeat center center;margin-right: 1px;
+}
+.icon_append {
+	background: url('icons/add.png') no-repeat center center;margin-right: 1px;
+}
+.icon_delect{
+    background: url('icons/delete.png') no-repeat center center;margin-right: 1px;
+}
+.icon_edit{
+    background: url('icons/edit.png') no-repeat center center;margin-right: 1px;
+}
+.icon_ok{
+    background: url('icons/ok.png') no-repeat center center;margin-right: 1px;
+}
+.icon_recover{
+    background: url('icons/recover.png') no-repeat center center;margin-right: 1px;
+}
+.icon_transfer{
+    background: url('icons/transfer.png') no-repeat center center;margin-right: 1px;
+}
+
+

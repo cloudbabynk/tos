@@ -1,0 +1,84 @@
+/* CSS Document */
+@charset "utf-8";
+.body {
+	font-size:14px;
+	line-height:150%;
+/* 	color:#494949; */
+	margin:0px;
+	font-family:"寰蒋闆呴粦",Arial, Helvetica, sans-serif;
+	scrollbar-base-color: #A8CBF1;
+	scrollbar-face-color: #DFF4FD;
+	scrollbar-track-color: #FFFFFF;
+	scrollbar-arrow-color: #A8CBF1;
+	scrollbar-3dlight-color: #A8CBF1;
+	scrollbar-highlight-color: #FFFFFF;
+	scrollbar-shadow-color: #FFFFFF;
+	scrollbar-darkshadow-color: #A8CBF1;
+	margin-left:auto;
+	margin-right:auto;
+	padding:20px 10px;
+}
+html,.body{height:155%; min-height:0px; background:url(../../../images/indexBg.jpg) no-repeat; background-size:cover;}
+ul {
+	font-size:13px;
+	line-height:150%;
+	margin:0;
+	list-style-type:none;
+}
+li {
+	font-size:13px;
+	line-height:150%;
+	margin:0px;
+}
+p {
+	font-size:13px;
+	line-height:200%;
+	margin:0;
+}
+img {
+	border:0;
+	vertical-align:middle;
+}
+a:link {
+/* 	color:#3f3f3f; */
+	text-decoration:none;
+}
+a:visited {
+/* 	color: #3f3f3f; */
+	text-decoration:none;
+}
+a:hover {
+	color:#109bf2;
+	text-decoration:underline;
+}
+a:active {
+	color:#3f3f3f;
+	text-decoration:underline;
+}
+
+/*鍩烘湰鏍囩鏍峰紡*/
+td, font, span, option, label, a, ul, li {
+	/*font-size:14px;
+	line-height:25px;*/
+	margin:0px;
+	padding:0px;
+}
+
+/*宸﹀垪*/
+.div-left{width:32%; margin-right:1%; float:left; min-height:500px; height:auto !important;}
+.div-weather{width:98%; min-height:200px; height:auto !important; float:left; background-color:rgba(22,65,134,0.3); border-radius:10px;margin-bottom:10px;}
+.num{ width:100%;}
+.height100{min-height:100px !important; height:auto !important;}
+.height300{min-height:300px !important; height:auto !important;}
+/*涓棿鍒�*/
+.div-center{width:34%; margin-right:1%; float:left; min-height:500px; height:auto !important;}
+.div-num-48{width:48%; margin-right:2%; min-height:200px; height:auto !important; float:left; background-color:rgba(22,65,134,0.3); border-radius:10px; margin-bottom:10px;}
+.div-num-100{width:98%; min-height:200px; height:auto !important; float:left; background-color:rgba(22,65,134,0.3); border-radius:10px;margin-bottom:10px;}
+.div-num-48 .right{margin-right:0px !important;}
+.div-num-title{ width:100%; float:left; text-align:center; font-size:15px; font-weight:bold; height:30px; line-height:30px; color:#57f5f8; border-bottom:2px solid #57f5f8;}
+.div-num-con{width:100%; float:left; text-align:center; margin:0px;}
+
+
+/*鍙冲垪*/
+.div-right{width:32%; float:right; min-height:500px; height:auto !important;}
+.div-cd{width:100%; min-height:200px; height:auto !important; float:left;}

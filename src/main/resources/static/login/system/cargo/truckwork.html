@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="ContractIeDocToolBar15081233020012+${radi}"
+	style="float: left;">
+	<!-- 查询 -->
+	<input th:id="Type+${radi}" th:value='${Type}' type="hidden" />
+	<div th:id="jglh+${radi}" style="float: left;">
+		班组：<input th:id="lhbz+${radi}" name="lhbz" type="text" 	data-options="required:false" style="width: 120px">理货员：<input th:id="workNam+${radi}" name="workNam" type="text"
+			data-options="required:false" style="width: 120px"><input
+			id="lengthOverId" name="lengthOverId" type="checkbox" value="1"
+			style="width: 20px" data-options="required:false"
+			class="easyui-validatebox" maxlength="1" />超长<input id="widthOverId"
+			name="widthOverId" type="checkbox" value="1" style="width: 20px"
+			data-options="required:false" class="easyui-validatebox"
+			maxlength="1" />超宽<input id="useMachId" name="useMachId"
+			type="checkbox" value="1" style="width: 20px"
+			data-options="required:false" class="easyui-validatebox"
+			maxlength="1" />港方动力<input id="useWorkerId" name="useWorkerId"
+			type="checkbox" value="1" style="width: 20px"
+			data-options="required:false" class="easyui-validatebox"
+			maxlength="1" />港方 人力
+		<shiro:hasPermission name="webresources:login:TruckWork:saveJglh">
+			<a class="easyui-linkbutton" th:id="saveJglh+${radi}">集港理货</a>
+		</shiro:hasPermission>
+	</div>
+	<div th:id="sglh+${radi}" style="float: left;">
+	班组：<input th:id="slhbz+${radi}" name="lhbz" type="text"
+			data-options="required:false" style="width: 120px">理货员：<input th:id="sworkNam+${radi}" name="workNam" type="text"
+			data-options="required:false" style="width: 120px">理货时间<input th:id="inCyTim+${radi}" name="inCyTim" required="required"
+				class="easyui-datetimebox" />班次：<input th:id="workRunCod+${radi}" name="workRunCod" type="text"
+			data-options="required:false" style="width: 120px"><input th:id="useMachId+${radi}" name="useMachId"
+			type="checkbox" style="width: 20px" 
+			maxlength="1" />疏港机力
+		<shiro:hasPermission name="webresources:login:TruckWork:saveSglh">
+			<a class="easyui-linkbutton" th:id="saveSglh+${radi}">疏港理货</a>
+		</shiro:hasPermission>
+		<a	class="easyui-linkbutton" th:id='plsght+${radi}' iconCls="icon-add" plain="false">删除</a> 
+	</div>
+	<div th:id="JGLH+${radi}">
+		<!-- 查询 -->
+			<shiro:hasPermission name="webresources:login:GateTruckContract:pllh">
+			<a	class="easyui-linkbutton" th:id='pllh+${radi}' iconCls="icon-add" plain="false">集港理货</a> 
+			</shiro:hasPermission>
+		    <a	class="easyui-linkbutton" th:id='upload+${radi}' iconCls="icon-add" plain="false">上传excel</a> 
+			<a	class="easyui-linkbutton" th:id='pllhht+${radi}' iconCls="icon-add" plain="false">删除</a> 
+	</div>
+</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="ContractIeDocDatagrid1508123320012+${radi}"
+	style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(
+            function() {
+	            var radi = /*[[${radi}]]*/'';
+	            var dg = $("#ContractIeDocDatagrid1508123320012[(${radi})]");
+	            var type = $("#Type[(${radi})]").val();
+	            var recId;
+	            HdUtils.dialog.setValue({
+	    		    'truckworkRadi' : radi
+	    	    });
+	            if (type == 'SG' || type == 'NMPLSG' || type == 'WMPLSG') {
+		            $('#jglh[(${radi})]').hide();
+		            $('#JGLH[(${radi})]').hide();
+	            }else if(type == 'NMPLJG' || type == 'WMPLJG'){
+	            	$('#jglh[(${radi})]').hide();
+	            	$('#sglh[(${radi})]').hide();
+	            }else if(type == 'JG'){
+	            	$('#sglh[(${radi})]').hide();
+	            	$('#JGLH[(${radi})]').hide();
+	            }
+	            var ingateId = HdUtils.dialog.getValue("ingateId");
+	            var carTyp = HdUtils.dialog.getValue("carTyp");
+	            var billNo = HdUtils.dialog.getValue("billNo");
+	            var dockCod = HdUtils.dialog.getValue("dockCod");
+	            var shipNo = HdUtils.dialog.getValue("shipNo");
+	            var contractNo = HdUtils.dialog.getValue("contractNo");
+	            var shipNam = HdUtils.dialog.getValue("shipNam");
+	            var voyage = HdUtils.dialog.getValue("voyage");
+	            var cargoradi = HdUtils.dialog.getValue("cargoradi");
+	            var tranPortCod = HdUtils.dialog.getValue("tranPortCod");
+	            var flow = HdUtils.dialog.getValue("flow");
+	            var days = Date.prototype.dateAdd(0, "yyyy-MM-dd 00:00");
+	    	    $("#inCyTim[(${radi})]").val(days);
+	    	    //转栈单位
+	    	    $('#transCorp[(${radi})]').combobox(HdUtils.code.scode({
+	    		    fieldCod : 'TRANS_DW'
+	    	    }, {
+	    		    required : false
+	    	    }));
+	            $('#lhbz[(${radi})]').combobox({
+	    	        url : '../webresources/login/base/CWorkClass/getCWorkClass',
+	    	        valueField : 'value',
+	    	        textField : 'label',
+	    	        panelHeight:120,
+	    	        required : true,
+	    	        onSelect : function(rec) {
+	    	        	$('#workNam[(${radi})]').combobox({
+	    	    	        url : '../webresources/login/base/CEmployee/getCEmployee?classNo=' + rec.value,
+	    	    	        valueField : 'value',
+	    	    	        textField : 'label',
+	    	    	        panelHeight:120,
+	    	    	        required : true,
+	    	    	        onSelect : function(rec) {
+	    	    	        	return rec.value;
+	    	    	        }
+	    	    	    });
+	    	        	return rec.value;
+	    	        }
+	    	    });
+	            $('#workNam[(${radi})]').combobox({
+	    	        url : '../webresources/login/base/CEmployee/getCEmployee',
+	    	        valueField : 'value',
+	    	        textField : 'label',
+	    	        panelHeight:120,
+	    	        required : true,
+	    	        onSelect : function(rec) {
+	    	        	return rec.value;
+	    	        }
+	    	    });
+	            $('#workRunCod[(${radi})]').combobox({
+	    	        url : '../webresources/login/damage/MDeliveryRecord/getClassRunDrop',
+	    	        valueField : 'value',
+	    	        textField : 'label',
+	    	        panelHeight : 'auto',
+	    	        required : true,
+	    	        onSelect : function(rec) {
+	    		        var a = $('#inCyTim[(${radi})]').datetimebox("getValue").substring(0,10);
+	    	        	if (rec.value == 1){
+	    		        	$('#inCyTim[(${radi})]').datetimebox({
+	    		        		required : false,
+	    		        		value : a + ' 09:00',
+	    		        		onShowPanel:function(){
+	    		        			$(this).datetimebox("spinner").timespinner("setValue",a + "09:00:00");
+	    		        		}
+	    		        	});
+	    		        } else if(rec.value == 2){
+	    		        	$('#inCyTim[(${radi})]').datetimebox({
+	    		        		required : false,
+	    		        		value : a + ' 21:00',
+	    		        		onShowPanel:function(){
+	    		        			$(this).datetimebox("spinner").timespinner("setValue",a + "21:00:00");
+	    		        		}
+	    		        	});
+	    		        }
+	    		        return rec.value;
+	    	        }
+	    	    });
+	            $('#slhbz[(${radi})]').combobox({
+	    	        url : '../webresources/login/base/CWorkClass/getCWorkClass',
+	    	        valueField : 'value',
+	    	        textField : 'label',
+	    	        panelHeight:120,
+	    	        required : true,
+	    	        onSelect : function(rec) {
+	    	        	$('#sworkNam[(${radi})]').combobox({
+	    	    	        url : '../webresources/login/base/CEmployee/getCEmployee?classNo=' + rec.value,
+	    	    	        valueField : 'value',
+	    	    	        textField : 'label',
+	    	    	        panelHeight:120,
+	    	    	        required : true,
+	    	    	        onSelect : function(rec) {
+	    	    	        	return rec.value;
+	    	    	        }
+	    	    	    });
+	    	        	return rec.value;
+	    	        }
+	    	    });
+	            $.get('/login/PrivilegeController/getLoginAccount?t=11&s='+Math.random(), function(data) {
+	    	  		recId = data.account; 
+	    	  		HdUtils.ajax.post({
+	            		url : "../webresources/login/base/CEmployee/findCemployee?sysUserNam="+ recId,
+	            		success : function(data1) {
+	        		        if (!data1) {
+	        			        return false;
+	        		        }
+	        		        $('#workNam[(${radi})]').combobox('setValue', data1.empNo);
+	        		        $('#lhbz[(${radi})]').combobox('setValue', data1.classNo);
+	            		}
+	            	})
+	    	  	  })
+	            function query() {
+	    		    var onlinquery = new HdQuery();
+	    		    if(contractNo){
+	    		    	onlinquery.add("contractNo", contractNo);
+	    		    }
+	    		    onlinquery.add("type", type);
+	    		    return onlinquery.build();
+	    	    }
+	            // 批量集港理货
+	    	    $("#pllh[(${radi})]").on("click", function() {
+	    	    	if(!ingateId){
+	    	    		HdUtils.messager.info("请先选择集港委托信息");
+	                    return false;
+	    	    	}
+	    	    	HdUtils.dialog.setValue({
+	              		 'recId' : recId,
+	              		'cargoradi' : cargoradi,
+	              		'ingateId' : ingateId,
+	              		'shipNo' : shipNo,
+	              		'contractNo' : contractNo,
+	              		'billNo' : billNo,
+	              		'carTyp' : carTyp,
+	              		'type' : type,
+	              		'shipNam' : shipNam,
+	              		'voyage' : voyage,
+	              		'flow' : flow,
+	              		'tranPortCod' : tranPortCod,
+	              		'dockCod' : dockCod
+	           	     });
+	    	    	if (type == 'NMPLJG'){
+	    	    		HdUtils.dialog.show({
+		    		        width : 800,
+		    		        height : 300,
+		    		        title : '批量集港理货',
+		    		        href : "../login/system/work/nmjgpllh.html",
+		    		        isSaveHandler : true
+		    		    });
+	    	    	} else if (type == 'WMPLJG'){
+	    	    		HdUtils.dialog.show({
+		    		        width : 800,
+		    		        height : 300,
+		    		        title : '批量集港理货',
+		    		        href : "../login/system/work/wmjgpllh.html",
+		    		        isSaveHandler : true
+		    		    });
+	    	    	}
+	              	
+	    	    });
+	    	    // 批量集港理货回退
+	    	    $("#pllhht[(${radi})]").on("click", function() {
+	    	    	var data = dg.datagrid("getSelected");
+	    		    if (data == null || data == undefined) {
+	    			    HdUtils.messager.info('请选择一条数据进行删除！');
+	    			    return;
+	    		    }
+	    		    var cargo = new Object();
+	    		    cargo.shipNo = data.shipNo;
+	    		    cargo.contractNo = data.contractNo;
+	    		    cargo.iEId = data.iEId;
+	    		    cargo.billNo = data.billNo;
+	    		    cargo.tradeId = data.tradeId;
+	    		    cargo.brandCod = data.brandCod;
+	    		    cargo.carTyp = data.carTyp;
+	    		    cargo.inCyNam = data.workNam;
+	    		    cargo.inCyTim = data.workTim;
+	    		    cargo.rcsl = data.rksl;
+	    		    HdUtils.ajax.post({
+	    		        url : "../webresources/login/work/WorkCommandRollback/cargoBack?type=" + type,
+	    		        data : cargo,
+	    		        success : function(data) {
+	    			        if (data.key == '-1') {
+	    				        HdUtils.messager.info(data.message);
+	    				        return false;
+	    			        }
+	    			        HdUtils.messager.bottomRight('操作成功', '保存操作');
+	    			        $('#shipdynamic259' + cargoradi).layout('panel', 'east').panel('refresh');
+	    			        $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid("hdReload");
+	    		        }
+	    		    })
+	    	    });
+	    	    // 批量疏港理货回退
+	    	    $("#plsght[(${radi})]").on("click", function() {
+	    	    	var data = dg.datagrid("getSelected");
+	    		    if (data == null || data == undefined) {
+	    			    HdUtils.messager.info('请选择一条数据进行删除！');
+	    			    return;
+	    		    }
+	    		    var cargo = new Object();
+	    		    cargo.shipNo = data.shipNo;
+	    		    cargo.contractNo = data.contractNo;
+	    		    cargo.iEId = data.iEId;
+	    		    cargo.billNo = data.billNo;
+	    		    cargo.tradeId = data.tradeId;
+	    		    cargo.brandCod = data.brandCod;
+	    		    cargo.carTyp = data.carTyp;
+	    		    cargo.inCyNam = data.workNam;
+	    		    cargo.inCyTim = data.workTim;
+	    		    cargo.rcsl = data.rksl;
+	    		    HdUtils.ajax.post({
+	    		        url : "../webresources/login/work/WorkCommandRollback/cargoBack?type=" + type,
+	    		        data : cargo,
+	    		        success : function(data) {
+	    			        if (data.key == '-1') {
+	    				        HdUtils.messager.info(data.message);
+	    				        return false;
+	    			        }
+	    			        HdUtils.messager.bottomRight('操作成功', '保存操作');
+	    			        $('#shipdynamic259' + cargoradi).layout('panel', 'east').panel('refresh');
+	    			        $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid("hdReload");
+	    		        }
+	    		    })
+	    	    });
+	    	    var empNo;
+	    	    $.get('/login/PrivilegeController/getLoginAccount?t=11&s='+Math.random(), function(data) {
+	    	  		recId = data.account; 
+	    	  		HdUtils.ajax.post({
+	            		url : "../webresources/login/base/CEmployee/findCemployee?sysUserNam="+ recId,
+	            		success : function(data1) {
+	        		        if (!data1) {
+	        			        return false;
+	        		        }
+	        		        empNo = data1.empNo;
+	            		}
+	            	})
+	    	  	  }) 
+	    	    // 上传。
+	    	    $("#upload[(${radi})]").on("click", function() {
+	    	    	HdUtils.nmjgupload({
+	    	    		mutiple : false,
+	    	            isReadOnly : false,
+	    	            ingateId : ingateId,
+	    	            contractNo : contractNo,
+	    	            inCyNam : empNo,
+	    	        });
+	    	    });
+	            // 集港理货
+	            $("#saveJglh[(${radi})]").on(
+	                    "click",
+	                    function() {
+		                    if (!ingateId) {
+			                    HdUtils.messager.info("请先选择集团委托信息");
+			                    return false;
+		                    }
+		                    $.each($("input[type=checkbox]:not(:checked)"), function() {
+			                    $(this).attr("checked", "checked");
+			                    $(this).val("0");
+		                    });
+		                    var lengthOverId = $("#lengthOverId").val();
+		                    var widthOverId = $("#widthOverId").val();
+		                    var useMachId = $("#useMachId").val();
+		                    var useWorkerId = $("#useWorkerId").val();
+		                    workNam = $("#workNam[(${radi})]").combobox('getValue');
+		                    if (!workNam) {
+			                    HdUtils.messager.info("请选择理货员");
+			                    return false;
+		                    }
+		                    if (type == 'JG') {
+		                    	cyPlac = $("#cyPlac[(${radi})]").val();
+			                    rfidCardNo = $("#rfidCardNo[(${radi})]").val();
+			                    vinNo = $("#vinNo[(${radi})]").val();
+			                    if (!cyPlac) {
+				                    HdUtils.messager.info("请输入入场位置！");
+				                    return false;
+			                    }
+			                    if (!rfidCardNo) {
+				                    HdUtils.messager.info("请输入RFID！");
+				                    return false;
+			                    }
+			                    if (!vinNo) {
+				                    HdUtils.messager.info("请输入车架号！");
+				                    return false;
+			                    }
+			                    if (!ingateId) {
+				                    HdUtils.messager.info("请先选择集团委托信息！");
+				                    return false;
+			                    }
+			                    if (!contractNo) {
+				                    HdUtils.messager.info("请先选择集团委托信息！");
+				                    return false;
+			                    }
+			                    var truckwork = new Object();
+			                    truckwork.ingateId = ingateId;
+			                    truckwork.workNam = workNam;
+			                    truckwork.rfidCardNo = rfidCardNo;
+			                    truckwork.vinNo = vinNo;
+			                    truckwork.contractNo = contractNo;
+			                    truckwork.billNo = billNo;
+			                    truckwork.cyPlac = cyPlac;
+			                    HdUtils.ajax.post({
+			                        url : "../webresources/login/cargo/TruckWork/saveone?driver=" + driver + "&lengthOverId="
+			                                + lengthOverId + "&widthOverId=" + widthOverId + "&useMachId=" + useMachId + "#useWorkerId=" + useWorkerId,
+			                        data : truckwork,
+			                        success : function(data) {
+				                        if (data.code == '-1') {
+					                        HdUtils.messager.info(data.message);
+					                        return false;
+				                        }
+				                        HdUtils.messager.bottomRight('保存成功', '保存操作');
+				                        $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid("hdReload");
+			                        }
+			                    })
+		                    } 
+	                    });
+	            //疏港理货
+	            $("#saveSglh[(${radi})]").on(
+	                    "click",
+	                    function() {
+	                    	workNam = $("#sworkNam[(${radi})]").combobox('getValue');
+	                    	inCyTim = $("#inCyTim[(${radi})]").datebox("getValue");
+		                    if (!workNam) {
+			                    HdUtils.messager.info("请选择理货员");
+			                    return false;
+		                    }
+		                    if (!ingateId) {
+			                    HdUtils.messager.info("请先选择疏港委托信息！");
+			                    return false;
+		                    }
+		                    if($("#useMachId[(${radi})]").is(":checked")){
+		    	            	$("#useMachId[(${radi})]").val("1");
+		    	        	}else{
+		    	        		$("#useMachId[(${radi})]").val("0");
+		    	        	}
+		                    
+		                    var useMachId = $("#useMachId[(${radi})]").val();
+	                    	HdUtils.dialog.setValue({
+	                        	'contractNo' : contractNo,
+	                        	'cargoradi' : cargoradi,
+	                        	'billNo' : billNo,
+	                        	'shipNo' : shipNo,
+	                        	'workNam' : workNam,
+	                        	'ingateId' : ingateId,
+	                        	'radi' : radi,
+	                        	'inCyTim' : inCyTim,
+	                        	'useMachId' : useMachId,
+	                        	'recId' : recId
+	                        });
+	                        HdUtils.dialog.show({
+	                            width : 750,
+	                            height : 380,
+	                            title : '场地车辆',
+	                            href : "../login/system/cargo/sglhform.html",
+	                            isSaveHandler : true
+	                        });
+	                    });
+                    
+	            $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid({
+	                striped : true,
+	                url : "../webresources/login/cargo/TruckWork/findJglh",
+	                queryParams : query(),
+	                method : "post",
+	                pagination : true,
+	                singleSelect : true,
+	                selectOnCheck : true,
+	                checkOnSelect : true,
+	                rownumbers : true,
+	                pageSize : 20,
+	                toolbar : "#ContractIeDocToolBar15081233020012" + /*[[${radi}]]*/'',
+	                fit : true,
+	                fitColumns : false,
+	                columns : [ [ {
+	                    field : "ck",
+	                    checkbox : true,
+	                    sortable : false,
+	                }, {
+	                    field : "shipNam",
+	                    title : "船名",
+	                    multiSort : true,
+	                    align : "center",
+	                    width : 100,
+	                    sortable : false
+	                }, {
+	                    field : "voyage",
+	                    title : "航次",
+	                    multiSort : true,
+	                    align : "center",
+	                    width : 100,
+	                    sortable : false
+	                }, {
+	                    field : "billNo",
+	                    title : '提单号',
+	                    multiSort : true,
+	                    width : 120,
+	                    align : "center",
+	                    sortable : false
+	                }, {
+	                    field : "brandNam",
+	                    title : "品牌",
+	                    multiSort : true,
+	                    width : 100,
+	                    align : "center",
+	                    sortable : false
+	                }, {
+	                    field : "carTypNam",
+	                    title : "车型",
+	                    multiSort : true,
+	                    width : 150,
+	                    align : "center",
+	                    sortable : false
+	                }, {
+	                    field : "cyAreaNo",
+	                    title : "堆场",
+	                    multiSort : true,
+	                    width : 100,
+	                    align : "center",
+	                    sortable : false
+	                },
+	                /*[# th:if="${Type}=='WMPLSG'"]*/
+	    	        {
+	    	           
+	                	field : "rksl",
+	                    title : "出库数量",
+	                    multiSort : true,
+	                    width : 100,
+	                    align : "center",
+	                    sortable : false
+	    	        },
+	    	        /*[/]*/
+	    	        /*[# th:if="${Type}=='NMPLSG'"]*/
+	    	        {
+	    	           
+	                	field : "rksl",
+	                    title : "出库数量",
+	                    multiSort : true,
+	                    width : 100,
+	                    align : "center",
+	                    sortable : false
+	    	        },
+	    	        /*[/]*/
+	    	        /*[# th:if="${Type}=='NMPLJG'"]*/
+	                {
+	                    field : "rksl",
+	                    title : "入库数量",
+	                    multiSort : true,
+	                    width : 100,
+	                    align : "center",
+	                    sortable : false
+	                }, 
+	                /*[/]*/
+	                /*[# th:if="${Type}== 'WMPLJG'"]*/
+	                {
+	                    field : "rksl",
+	                    title : "入库数量",
+	                    multiSort : true,
+	                    width : 100,
+	                    align : "center",
+	                    sortable : false
+	                }, {
+	                    field : "cyRemarks",
+	                    title : "场地备注",
+	                    multiSort : true,
+	                    width : 100,
+	                    align : "center",
+	                    sortable : false
+	                }, 
+	                /*[/]*/
+	                {
+	                    field : "workNamNam",
+	                    title : "理货员",
+	                    multiSort : true,
+	                    width : 100,
+	                    align : "center",
+	                    sortable : false
+	                }, {
+	                    field : "workTim",
+	                    title : "理货时间",
+	                    multiSort : true,
+	                    width : 120,
+	                    align : "center",
+	                    sortable : false
+	                } ] ]
+	            });
+	            $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid("hdGetColumnNames");
+            });
+    /*]]>*/
+</script>
+</html>

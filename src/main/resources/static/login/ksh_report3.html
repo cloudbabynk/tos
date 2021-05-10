@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- <title>天津港环球滚装可视化</title> -->
+	<script type="text/javascript" src="../js/jquery.min.js"></script>
+	<script src="../js/echarts/echarts.min.js"></script>
+	<script type="text/javascript" src="../js/echarts/dist/echarts.js"></script>
+	<script src="../js/marquee/jquery.marquee.min.js"></script>
+</head>
+<style>
+    th,td {
+        padding: 5px;
+        text-align: center;
+    }
+    .index2_bottom1_table {
+	    color: #ffffff;
+	    font-size:20px;
+	    padding-top:10px;
+	}
+</style>
+<div class="body">
+<link rel="stylesheet" type="text/css" href="../../../css/wer2.css">
+	<div class="div-left">
+		<div class="div-num-100">
+			<div class="div-num-title"  style="font-size:30px">内贸船公司作业数</div>
+			<div class="div-num-con" id="nmcgszys"
+				style="width: 100%; height: 500px;"></div>
+		</div>
+		<div class="div-num-100">
+			<div class="div-num-title"  style="font-size:30px">环球滚装品牌占比</div>
+			<div class="div-num-con" style="width: 100%; height: 500px;"
+				id="hqppzb"></div>
+		</div>
+	</div>
+	<div class="div-right">
+		<div class="div-num-100">
+			<div class="div-num-title"  style="font-size:30px">外贸船公司作业数</div>
+			<div class="div-num-con" style="width: 100%; height: 500px;"
+				id="wmcgszys"></div>
+		</div>
+		<div class="div-num-100">
+			<div class="div-num-title"  style="font-size:30px">环球滚装场地占用率</div>
+			<div class="div-num-con" style="width: 100%; height: 500px;"
+				id="hqcdzyl"></div>
+		</div>
+		
+	</div>
+</div>
+<script>
+	 var rolllinkk=document.getElementById('rolllinkk');
+	 var rolllinkk1=document.getElementById('rolllinkk1');
+	 var rolllinkk2=document.getElementById('rolllinkk2');
+	 $(document).ready(function() {
+	 	findEachartsData();
+	 	getKCData();
+	})
+function findEachartsData(){
+	//内外贸、进口车作业数
+    $.ajax({
+        url : "../webresources/login/ship/BillSplit/findDashboard?type=FD",
+        success : function(data) {
+
+	        //外贸船公司
+	        var wmcgsName = new Array();
+	        var wmcgsNum = new Array();
+	        var m = 0;
+	        for ( var key in data[5]) {
+		        wmcgsName[m] = key;
+		        wmcgsNum[m] = data[5][key];
+		        m++;
+	        }
+
+	        //内贸船公司
+	        var nmcgsName = new Array();
+	        var nmcgsNum = new Array();
+	        var n = 0;
+	        for ( var key in data[4]) {
+		        nmcgsName[n] = key;
+		        nmcgsNum[n] = data[4][key];
+		        n++;
+	        }
+
+	        //环球利用率
+	        var hqzylName = new Array();
+	        var hqzylNum = new Array();
+	        var f = 0;
+	        for ( var key in data[6]) {
+		        hqzylName[f] = key;
+		        hqzylNum[f] = data[6][key];
+		        f++;
+	        }
+
+	        //滚装利用率
+	        var gzzylName = new Array();
+	        var gzzylNum = new Array();
+	        var v = 0;
+	        for ( var key in data[7]) {
+		        gzzylName[v] = key;
+		        gzzylNum[v] = data[7][key];
+		        v++;
+	        }
+
+	        //内贸船公司作业数
+	        var nmcgszys = echarts.init(document.getElementById('nmcgszys'));
+	        nmcgszys.setOption({
+	            calculable : true,
+	            series : [ {
+	                name : '访问来源',
+	                type : 'pie',
+	                radius : [ '0', '60%' ],
+	                selectedOffset : '10',
+	                center : [ '50%', '50%' ],
+	                itemStyle : {
+	                    normal : {
+                            label : {
+	                            show : true,
+	                            formatter : "{b}\n{c}({d}%)",
+	                            textStyle : {
+			                    	fontSize : 20
+				                },
+	                        },
+	                        labelLine : {
+	                            show : true,
+	                            length : 50
+	                        }
+	                    },
+	                },
+	                data : [ {
+	                    value : nmcgsNum[0],
+	                    name : nmcgsName[0]
+	                }, {
+	                    value : nmcgsNum[1],
+	                    name : nmcgsName[1]
+	                }, {
+	                    value : nmcgsNum[2],
+	                    name : nmcgsName[2]
+	                }, {
+	                    value : nmcgsNum[3],
+	                    name : nmcgsName[3]
+	                } ]
+	            } ]
+	        })
+	        //外贸船公司作业数
+	        var wmcgszys = echarts.init(document.getElementById('wmcgszys'));
+	        wmcgszys.setOption({
+	            calculable : true,
+	            series : [ {
+	                name : '访问来源',
+	                type : 'pie',
+	                radius : [ '0', '60%' ],
+	                center : [ '50%', '50%' ],
+	                itemStyle : {
+	                    normal : {
+                            label : {
+	                            show : true,
+	                            formatter : "{b}\n{c}({d}%)",
+	                            textStyle : {
+			                    	fontSize : 20
+				                },
+	                        },
+	                        labelLine : {
+	                            show : true,
+	                            length : 50
+	                        }
+	                    },
+	                },
+	                data : [ {
+	                    value : wmcgsNum[0],
+	                    name : wmcgsName[0]
+	                }, {
+	                    value : wmcgsNum[1],
+	                    name : wmcgsName[1]
+	                }, {
+	                    value : wmcgsNum[2],
+	                    name : wmcgsName[2]
+	                }, {
+	                    value : wmcgsNum[3],
+	                    name : wmcgsName[3]
+	                }, {
+	                    value : wmcgsNum[4],
+	                    name : wmcgsName[4]
+	                } ]
+	            } ]
+	        })
+
+	        var labelTop = {
+		        normal : {
+		            label : {
+		                show : true,
+		                position : 'center',
+		                formatter : '{b}',
+		                textStyle : {
+			                baseline : 'bottom'
+		                }
+		            },
+		            labelLine : {
+			            show : false
+		            }
+		        }
+	        };
+	        var labelFromatterHq = {
+		        normal : {
+			        label : {
+			            formatter : function(params) {
+				            var hqPer = hqzylNum[1] / (hqzylNum[1] + hqzylNum[0]) * 100;
+				            return hqPer.toFixed(2) + '%'
+			            },
+			            textStyle : {
+			            	baseline : 'top',
+				            fontSize : 20
+			            }
+			        }
+		        },
+	        };
+	        var labelFromatterGz = {
+		        normal : {
+			        label : {
+			            formatter : function(params) {
+				            var gzPer = gzzylNum[1] / (gzzylNum[1] + gzzylNum[0]) * 100;
+				            return gzPer.toFixed(2) + '%'
+			            },
+			            textStyle : {
+				            baseline : 'top',
+				            fontSize : 20
+			            }
+			        }
+		        },
+	        };
+	        var labelBottom = {
+	            normal : {
+	                color : '#ccc',
+	                label : {
+	                    show : true,
+	                    position : 'center'
+	                },
+	                labelLine : {
+		                show : false
+	                }
+	            },
+	            emphasis : {
+		            color : 'rgba(0,0,0,0)'
+	            }
+	        };
+	        //环球产地占用率
+	        var hqcdzyl = echarts.init(document.getElementById('hqcdzyl'));
+	        hqcdzyl.setOption({
+	            legend : {
+	                x : 'center',
+	                y : '120%',
+	                textStyle : {
+		                color : '#6495ED',
+	                },
+	                data : [ hqzylName[1], gzzylName[1] ]
+	            },
+	            series : [ {
+	                type : 'pie',
+	                center : [ '25%', '50%' ],
+	                radius : [ 100, 150 ],
+	                x : '0%', // for funnel
+	                itemStyle : labelFromatterHq,
+	                data : [ {
+	                    name : hqzylName[0],
+	                    value : hqzylNum[0],
+	                    itemStyle : labelBottom
+	                }, {
+	                    name : hqzylName[1],
+	                    value : hqzylNum[1],
+	                    itemStyle : labelTop
+	                } ]
+	            }, {
+	                type : 'pie',
+	                center : [ '75%', '50%' ],
+	                radius : [ 100, 150 ],
+	                x : '20%', // for funnel
+	                itemStyle : labelFromatterGz,
+	                data : [ {
+	                    name : gzzylName[0],
+	                    value : gzzylNum[0],
+	                    itemStyle : labelBottom
+	                }, {
+	                    name : gzzylName[1],
+	                    value : gzzylNum[1],
+	                    itemStyle : labelTop
+	                } ]
+	            } ]
+	        })
+        }
+    });
+}
+        
+function getKCData(){
+	$.ajax({
+		url: "../webresources/login/cargo/PortCar/findZCGroup",
+		type:"POST",
+		dataType: "json",
+		success:function(data){
+			showPPZB(data);
+		}
+     });
+ }
+ 
+ function showPPZB(data){
+	 var hqppzb = echarts.init(document.getElementById('hqppzb'));
+	 hqppzb.setOption({
+		    tooltip : {
+		        trigger: 'item',
+		        formatter: "{a} <br/>{b} : {c} ({d}%)"
+		    },
+		    legend: {
+		        x : 'center',
+		        y : '90%',
+		        data:data.legend,
+		        textStyle:{
+		        	fontSize: 18,
+		        	color:'#ffffff'
+		        }
+		    },
+		    calculable : true,
+		    series : [
+		        {
+		            name:'环球',
+		            type:'pie',
+		            radius : [20, 110],
+		            center : ['25%', '50%'],
+		            itemStyle : {
+	                    normal : {
+                            label : {
+	                            show : true,
+	                            formatter : "{b}\n{d}%",
+	                            textStyle : {
+			                    	fontSize : 20
+				                },
+	                        },
+	                        labelLine : {
+	                            show : true,
+	                            length : 30
+	                        }
+	                    },
+	                },
+		            roseType : 'radius',
+		            data:data.hq
+		        },
+		        {
+		            name:'滚装',
+		            type:'pie',
+		            radius : [30, 110],
+		            center : ['75%', '50%'],
+		            itemStyle : {
+	                    normal : {
+                            label : {
+	                            show : true,
+	                            formatter : "{b}\n{d}%",
+	                            textStyle : {
+			                    	fontSize : 20
+				                },
+	                        },
+	                        labelLine : {
+	                            show : true,
+	                            length : 30
+	                        }
+	                    },
+	                },
+		            roseType : 'area',
+		            data:data.gz
+		        }
+		    ]
+     })
+ }
+       
+function Marquee1() {
+    if (rolllinkk2.offsetTop - rolllinkk.scrollTop <= 0) //
+        rolllinkk.scrollTop -= rolllinkk1.offsetHeight //
+    else {
+        rolllinkk.scrollTop++
+    }
+}
+       </script>
+</html>

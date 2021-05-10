@@ -1,0 +1,116 @@
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta
+	content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+	name="viewport" />
+<meta charset="UTF-8" />
+
+<link rel="stylesheet" type="text/css"
+	th:href="@{/css/themes/metro-white/easyui.css}" />
+
+<link rel="stylesheet" type="text/css"
+	th:href="@{/css/huadong/hdStyle.css}" />
+<link rel="stylesheet" type="text/css"
+	th:href="@{/css/huadong/hdNewStyle.css}" />
+<!-- <link rel="stylesheet" type="text/css"
+	th:href="@{/css/huadong/hdMain.css}" /> -->
+<link rel="stylesheet" type="text/css" th:href="@{/css/themes/icon.css}" />
+<link rel="stylesheet" type="text/css"
+	th:href="@{/css/huadong/hdNewStyle.css}" />
+<link rel="shortcut icon" type="image/x-icon"
+	th:href="@{/images/favicon.ico}" />
+<script type="text/javascript" th:src="@{/js/jquery.min.js}"></script>
+<script th:src="@{/js/jquery.cycle.all.min.js}"></script>
+<script th:src="@{/js/jquery.jcarousel.min.js}"></script>
+<script th:src="@{/js/jquery.easyui.min.js}"></script>
+<script th:src="@{/js/datagrid-groupview.js}"></script> 
+<script th:src="@{/js/plugins/jquery.international.js}"></script>
+<script type="text/javascript" th:src="@{/js/highcharts.js}"></script>
+<script type="text/javascript" th:src="@{/js/jquery.json-2.4.js}"></script>
+<script type="text/javascript"th:src="@{/js/jquery-migrate-1.2.1.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/LodopFuncs.js}"></script>
+<script type="text/javascript" th:src="@{/js/datagrid-bufferview.js}"></script>
+
+<!-- 百度统计 -->
+<script>
+// 	var _hmt = _hmt || [];
+//     (function() {
+// 	    var hm = document.createElement("script");
+// 	    hm.src = "https://hm.baidu.com/hm.js?2ddd70b9ed582b28b734c28d3f8b5b81";
+// 	    var s = document.getElementsByTagName("script")[0];
+// 	    s.parentNode.insertBefore(hm, s);
+//     })();
+</script>
+<script type="text/javascript">
+	$.hd = $.hd || {};
+    $.fn.form.methods.defaultSubmit = $.fn.form.methods.submit || function() {
+    };
+</script>
+<!-- END: 在公司idev库之前执行 -->
+<script th:src="@{/js/hdEzuiEx_js/ezui.ex.tabs.js}"></script>
+<script th:src="@{/js/hdEzuiEx_js/ezui.ex.combo.js}"></script>
+<script th:src="@{/js/hdEzuiEx_js/ezui.ex.datagrid.js}"></script>
+<script th:src="@{/js/hdEzuiEx_js/ezui.ex.form.js}"></script>
+<script th:src="@{/js/hdEzuiEx_js/ezui.ex.datebox.js}"></script>
+<script th:src="@{/js/hdEzuiEx_js/ezui.ex.datetimebox.js}"></script>
+<script th:src="@{/js/hdEzuiEx_js/ezui.ex.combogrid.js}"></script>
+<script th:src="@{/js/hdEzuiEx_js/ezui.ex.treegrid.js}"></script>
+<script th:src="@{/js/hdEzuiEx_js/HdObject.js}"></script>
+<script th:src="@{/js/hdEzuiEx_js/HdConditions.js}"></script>
+<script th:src="@{/js/hdUtils/HdUtils.js}"></script>
+
+<script th:src="@{/js/hdUtils/commonUtils.js}"></script>
+<script th:src="@{/js/hdUtils/comutil.js}"></script>
+<script th:src="@{/js/hdEzuiEx_js/HdEzuiQueryParams.js}"></script>
+<script th:src="@{/js/hdEzuiEx_js/ezuiCode.js}" type="text/javascript"></script>
+<script th:src="@{/js/hdEzuiEx_js/ezuiComboGridCode.js}"
+	type="text/javascript"></script>
+<script type="text/javascript" th:src="@{/js/hdEzuiEx_js/extension.js}"></script>
+<script type="text/javascript" th:src="@{/js/huadong/main.js}"></script>
+
+<script type="text/javascript" th:src="@{/js/huadong/hdMenu.js}"></script>
+<!-- 下拉 -->
+<script type="text/javascript"
+	th:src="@{/js/hdDropList/comboDropListBase.js}"></script>
+<!-- BEGIN: 国际化 -->
+<script type="text/javascript"
+	th:src="@{/js/jquery.i18n.properties-min-1.0.9.js}"></script>
+<script id="language2" th:src="@{/js/hdEzuiEx_js/ezuiEx-lang-zh.js}"></script>
+<script id="language" th:src="@{/i18n/locale/easyui-lang-zh.js}"
+	type="text/javascript"></script>
+<link rel="stylesheet" type="text/css" th:href="@{/css/colorpicker.css}" />
+<script th:src="@{/js/colorpicker.js}" type="text/javascript"></script>
+<script type="text/javascript" src="../js/echarts/dist/echarts.js"></script>
+<script th:src="@{/js/My97DatePicker/WdatePicker.js}"></script>
+<!--      <link rel="stylesheet" th:href="@{//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css"> -->
+<!-- END: 国际化 -->
+<!--BEGIN:地图  -->
+<link rel="stylesheet" type="text/css" th:href="@{/css/ol/ol.css}" />
+<script th:inline="javascript">
+	//127.0.0.1:8080这样的
+    var _path = /*[[${#httpServletRequest.getServerName()+":"+ #httpServletRequest.getServerPort()}]]*/'';//获取当前路径
+    function keepsession() {
+    	$.ajax({
+    		url:"../PrivilegeController/sessionReset",
+    		
+    	});
+        window.setTimeout("keepsession()", 600000); //每隔900秒调用一下本身   
+    }
+    keepsession();
+</script>
+<script type="text/javascript" th:src="@{/js/huadong/websocket.js}"></script>
+<script type="text/javascript" th:src="@{/js/hotkeys/hotkeys.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/hotkeys/HdHotKeys.js}"></script>
+<script type="text/javascript" th:src="@{/js/hdUtils/hdAppendUitl.js}"></script>
+<style>
+input[readonly] {
+	background-color: #ccc;
+}
+</style>
+<div id="gridTitlemenu" class="easyui-menu"
+	style="width: 30px; display: none;">
+	<!--放置一个隐藏的菜单Div-->
+	<div id="grid_dis_Setting">展示设置</div>
+	<div id="grid_high_Query">即席查询</div>
+</div>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+</head>
+<body>
+	<form id="ChooseInOutCyTimForm1507959148710">
+		<table id="InOutCyTim1507959148710" style="height: 75%; width: 80%"
+			class="tableform">
+			<tr>
+				<td>
+					出入库日期：<input id="inoutcytim" name="inoutcytim" class="easyui-datebox" >
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<input type="radio" name="portflg" value="TI" checked="true"><label>集港</label>
+					<input type="radio" name="portflg" value="TO"><label>疏港</label>
+				</td>
+			</tr>
+		</table>
+	</form>
+	<script>
+	$(document).ready(function() {
+		var shipNo = HdUtils.dialog.getValue('shipNo');
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+	    	var inoutcytim=$("#inoutcytim").datebox("getValue");
+	    	var portTyp = $("input[name='portflg']:checked").val();
+	        HdUtils.ajax.post({
+		        url : "../webresources/login/cargo/PortCar/statisticCountJs?inoutcytim=" + inoutcytim + "&portTyp=" + portTyp,
+		        success : function(data) {
+		        	HdUtils.dialog.close();
+// 			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        HdUtils.messager.bottomRight(data.message);
+		        }
+		    });	
+	    }
+	})
+	</script>
+</body>
+</html>

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="DayWorkClassToolBar1551851699299+${radi}"
+	style="float: left">
+	<div>
+		<!-- 查询 -->
+		<span> 丰田港口名：<input th:id="vcPortName+${radi}" name="vcPortName"
+			placeholder="请输入港口名称" type="text" data-options="required:false"
+			style="width: 120px">
+			<a class="easyui-linkbutton" th:id="query+${radi}">查询</a> <a
+			class="easyui-linkbutton" th:id='clear+${radi}'>重置</a> 
+			<shiro:hasPermission name="webresources:login:CCarKind:add">
+				<a class="easyui-linkbutton" th:id='add+${radi}' iconCls="icon-add" 
+				plain="false">新增</a>
+			</shiro:hasPermission> 
+			<shiro:hasPermission name="webresources:login:CCarKind:update">
+				<a class="easyui-linkbutton" th:id='edit+${radi}'>编辑</a>
+			</shiro:hasPermission> 
+			<shiro:hasPermission name="webresources:login:CCarKind:delete">
+				<a class="easyui-linkbutton" th:id='delete+${radi}'>删除</a>
+			</shiro:hasPermission>  <a class="easyui-linkbutton" th:id='fresh+${radi}'>刷新</a>
+
+		</span>
+	</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="DayWorkClassDatagrid1551851699299+${radi}"
+	style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#DayWorkClassDatagrid1551851699299[(${radi})]");
+	    $('#checkFlag[(${radi})]').combobox(HdUtils.code.scode({
+		    fieldCod : 'ACTIVE_ID'
+	    }, {
+		    required : false
+	    }));
+	    // buttons
+	    // 增加。
+	    $("#add[(${radi})]").on("click", function() {
+		    addoredit("","add");
+	    });
+	    // 编辑。
+	    $("#edit[(${radi})]").on("click", function() {
+		    var data = dg.datagrid("getSelected");
+		    if (data == null || data == undefined) {
+			    HdUtils.messager.info('请选择一条数据进行编辑！');
+			    return;
+		    }
+		    var portFtId = data.portFtId;
+		    addoredit(portFtId,"edit");
+	    });
+	    function addoredit(portFtId,typ) {
+	    	if(typ == "add"){
+	    		
+	    	}
+	    	if(typ == "edit"){
+	    		if (portFtId == "" || portFtId == undefined || portFtId == null) {
+			    } else {   
+			    	var data = dg.datagrid("getSelected");
+			    	var vcPortId = data.vcPortId;
+				    var vcPortName = data.vcPortName;
+				    var portId = data.portId;
+			    	
+			    	HdUtils.dialog.setValue({
+			    		'vcPortId' : vcPortId,
+				    	'vcPortName' : vcPortName,
+				    	'portId' : portId,
+				    	'portFtId' : portFtId
+				    });
+			    }
+	    	}
+		    
+// 		    HdUtils.dialog.setValue({
+// 			    'portFtId' : portFtId
+// 		    });
+		    HdUtils.dialog.setValue({
+			    'typ' : typ
+		    });
+		    HdUtils.dialog.setValue({
+			    'radi' : radi
+		    });
+		    HdUtils.dialog.show({
+		        width : 850,
+		        height : 300,
+		        title : '船舶信息对应',
+		        href : "../login/system/base/cportftform.html",
+		        isSaveHandler : true
+		    });
+	    }
+	    // 删除。
+	    $("#delete[(${radi})]").on("click", function() {
+		    var selRow = $("#DayWorkClassDatagrid1551851699299[(${radi})]").datagrid("getChecked");
+		    if (selRow.length == 0) {
+			    HdUtils.messager.info('请至少选择一条数据！');
+			    return false;
+		    }
+		    var ids = '';
+		    $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+			    if (r) {
+				    for (var i = 0; i < selRow.length; i++) {
+					    ids += selRow[i].portFtId + ",";
+				    }
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/ship/CPortFt/removeAll?portFtId=" + ids,
+				        success : function(data) {
+					        HdUtils.messager.bottomRight(data.message);
+					        $("#DayWorkClassDatagrid1551851699299[(${radi})]").datagrid("hdReload");
+				        }
+				    });
+			    }
+		    });
+	    });
+	    // 刷新。
+	    $("#fresh[(${radi})]").on("click", function() {
+		    dg.datagrid("hdReload");
+	    });
+	    // 清空。
+	    $("#clear[(${radi})]").on("click", function() {
+		    $("#vcPortName[(${radi})]").val("");
+		    $("#DayWorkClassDatagrid1551851699299[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+	    //回车键触发操作
+	    $(document).keydown(function(event) {
+		    if (event.keyCode == 13) {
+			    $("#DayWorkClassDatagrid1551851699299[(${radi})]").datagrid({
+				    queryParams : query(),
+			    })
+		    }
+	    })
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+		    $("#DayWorkClassDatagrid1551851699299[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    var vcPortName = $("#vcPortName[(${radi})]").val();
+		    onlinquery.add("vcPortName", vcPortName);
+		    return onlinquery.build();
+	    }
+
+	    $("#DayWorkClassDatagrid1551851699299[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/ship/CPortFt/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : false,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#DayWorkClassToolBar1551851699299" + /*[[${radi}]]*/'',
+	        fit : true,
+// 	        onDblClickRow : function(rowIndex, rowData) {
+// 			    var shipDataFtId = rowData.shipDataFtId;
+// 			    addoredit(shipDataFtId,"edit");
+// 	        },
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+
+	        }, {
+
+	            field : "portFtId",
+	            title : '主键',
+	            multiSort : true,
+	            align : "center",
+	            hidden : true,
+	            sortable : false
+	        }, {
+	            field : "vcPortId",  
+	            title : "丰田港口ID",
+	            multiSort : true,
+	            align : "center",
+	            sortable : false 
+	        }, {
+	            field : "vcPortName",
+	            title : "丰田港口名",
+	            multiSort : true,
+	            align : "center",
+	            sortable : false
+	        }, {
+
+	            field : "portId",
+	            title : "系统港口",
+	            multiSort : true,
+	            hidden : true,
+	            align : "center",
+	            sortable : false
+	        }, {
+
+	            field : "cPortNam",
+	            title : "系统港口",
+	            multiSort : true,
+	            align : "center",
+	            sortable : false
+	        }, {
+
+	            field : "recNam",
+	            title : '<font color="red">录入员</font>',
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "recTim",
+	            title : '<font color="red">录入时间</font>',
+	            multiSort : true,
+	            align : "center",
+	            formatter : $.hd.ezui.formatter.date,
+	            width : 120,
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "updNam",
+	            title : '<font color="red">修改人</font>',
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "updTim",
+	            title : '<font color="red">修改时间</font>',
+	            multiSort : true,
+	            align : "center",
+	            formatter : $.hd.ezui.formatter.date,
+	            width : 120,
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }
+
+	        ] ]
+	    });
+	    $("#DayWorkClassDatagrid1551851699299" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

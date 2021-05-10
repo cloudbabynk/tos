@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<body>
+	<div style="float: left">
+		入库日期：<input th:id="recTim+${radi}" name="recTim" style="width: 120px" />&nbsp;&nbsp;&nbsp;&nbsp;
+		进出口：<select id="dangerliquid_ieId" class="easyui-combobox"
+			style="width: 80px;">
+			<option value="All">全部</option>
+			<option value="I">进口</option>
+			<option value="E">出口</option>
+		</select> &nbsp;&nbsp;&nbsp;&nbsp; <a class="easyui-linkbutton"
+			th:id="report+${radi}">报表</a>
+	</div>
+	<iframe th:id="dangerliquid+${radi}" style="width: 100%; height: 100%;">
+	</iframe>
+	<script>
+		$(document).ready(function() {
+			$('#recTim[(${radi})]').combobox({
+		        url : '../webresources/login/ship/AnnualWorkPlan/getYearDrop',
+		        valueField : 'value',
+		        textField : 'label',
+		        panelHeight : 120,
+		        required : false,
+		    });
+			$("#report[(${radi})]").on("click", function() {
+		        var recTim =  $("#recTim[(${radi})]").combobox('getValue');
+		        var ieId = $("#dangerliquid_ieId").combobox("getValue");
+		        if (ieId == 'All') {
+			        ieId = encodeURI(" and I_E_ID in ('I','E') ");
+		        } else {
+			        ieId = encodeURI(" and I_E_ID='" + ieId + "' ");
+		        }
+		        recTim = new Date(recTim).format('yyyy');
+		        var src = 'http://10.163.204.56:8090/show/?fileid=20c06c99da2a44a79ab1b14f38f058fc&rpttoken=333&recTim=' + recTim + '&ieId=' + ieId;
+		        $("#dangerliquid[(${radi})]").attr('src', src);
+	        });
+        });
+	</script>
+</body>
+</html>

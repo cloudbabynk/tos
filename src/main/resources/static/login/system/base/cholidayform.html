@@ -1,0 +1,124 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+.tableform tr {
+	height: 30px;
+}
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#CHolidayForm1507959148916");
+	    var hId = HdUtils.dialog.getValue("hId");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    if (hId) {
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/base/CHoliday/findone?hId=" + hId,
+		        success : function(data) {
+			        $("#CHolidayForm1507959148916").form("loadData", data);
+		        }
+		    })
+		    //    document.getElementById("hId").readOnly = true;
+	    } else {
+		    //    document.getElementById("hId").readOnly = false;
+	    }
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+		    var isValss = $("#CHolidayForm1507959148916").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#CHolidayForm1507959148916").serializeObject();
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/base/CHoliday/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#CHolidayDatagrid1508123309005" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+    }
+    );
+</script>
+<script type="text/javascript">
+	function getYear() {
+	    var dte = $("#chooseDte").datebox('getValue');
+	    var date = new Date(Date.parse(dte.replace(/-/g, "/")));
+	    var y = date.getFullYear();
+	    var m = date.getMonth() + 1;
+	    var d = date.getDate();
+	    var week = date.getDay();
+	    $('#holidayYear').val(y);
+	    $('#holidayMonth').val(m);
+	    $('#holidayDay').val(d);
+	    $('#holidayWeek').val(week);
+    }
+</script>
+<form id="CHolidayForm1507959148916">
+	<table id="CHolidayTable1507959148916" style="height: 75%; width: 80%"
+		class="tableform">
+		<input id="hId" name="hId" data-options="required:false"
+			class="easyui-validatebox" maxlength="10" hidden="true" />
+		<tr>
+			<th>请选择日期：</th>
+			<td><input id="chooseDte" name="chooseDte"
+				data-options="required:false,onSelect:getYear"
+				class="easyui-datebox" maxlength="10" /></td>
+		</tr>
+		<tr>
+			<th>年度：</th>
+			<td><input id="holidayYear" name="holidayYear" type="text"
+				maxlength="10" /></td>
+			<th>月份：</th>
+			<td><input id="holidayMonth" name="holidayMonth" type="text"
+				maxlength="10" /></td>
+		</tr>
+		<tr>
+			<th>日期：</th>
+			<td><input id="holidayDay" name="holidayDay" type="text"
+				maxlength="10" /></td>
+			<th>星期几：</th>
+			<td><input id="holidayWeek" name="holidayWeek" type="text"
+				maxlength="10" /></td>
+		</tr>
+		<tr>
+			<th>节日(1):</th>
+			<td>Yes:<input id="holidayId" name="holidayId"
+				data-options="required:true" type="radio" maxlength="10" value='1' />
+				No:<input id="holidayId" name="holidayId"
+				data-options="required:true" type="radio" checked="true" value='0'
+				maxlength="10" /></td>
+			<th>假日(1)：</th>
+			<td>Yes:<input id="weekendId" name="weekendId"
+				data-options="required:true" type="radio" value='1' maxlength="10" />
+				No:<input id="weekendId" name="weekendId"
+				data-options="required:true" type="radio" checked="true" value='0'
+				maxlength="10" /></td>
+		</tr>
+		<tr>
+			<th>实际日期：</th>
+			<td><input id="actDate" name="actDate"
+				data-options="required:false" class="easyui-datebox" maxlength="10" /></td>
+		</tr>
+	</table>
+</form>

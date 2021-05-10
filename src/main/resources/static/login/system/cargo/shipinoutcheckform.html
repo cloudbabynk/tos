@@ -1,0 +1,96 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#ShipInOutCheckForm1507959148645");
+	    var shipNo = HdUtils.dialog.getValue("shipNo");
+	    var type = HdUtils.dialog.getValue("type");
+	    var checkId = HdUtils.dialog.getValue("checkId");
+// 	    $("#checkId").val(checkId);
+	    if(checkId){
+	    	HdUtils.ajax.post({
+		        url : "../webresources/login/cargo/ShipInOutCheck/findone?checkId=" + checkId,
+		        success : function(data) {
+			        $("#ShipInOutCheckForm1507959148645").form("loadData", data);
+		        }
+		    })
+	    } else {
+	    	$("#workTyp").val(type);
+		    $("#shipNo").val(shipNo);
+	    }
+	    var radi = HdUtils.dialog.getValue("radi");
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+		    var isValss = $("#ShipInOutCheckForm1507959148645").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#ShipInOutCheckForm1507959148645").serializeObject();
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/cargo/ShipInOutCheck/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight(data.message);
+// 			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#DayWorkClassDatagrid1508123307299" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+    });
+	
+	 $('#vcPort').combobox({
+		 url : "../webresources/login/cargo/ShipInOutCheck/getCPortFt",
+	        valueField : 'value',
+	        textField : 'label',
+	        required : true,
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+    });
+</script>
+<form id="ShipInOutCheckForm1507959148645">
+<input id="clientCod" name="clientCod" hidden="true"/>
+	<table id="CClientCodTable1507959148645"
+		style="height: 75%; width: 80%" class="tableform">
+		<tr>
+			<th>车架号：</th>
+			<td><input id="vcVinNo" name="vcVinNo"
+				data-options="required:true" class="easyui-validatebox" style="width:130px;" /></td>
+			<th>港口：</th>
+			<td><input id="vcPort" name="vcPort"
+				data-options="required:false" class="easyui-validatebox"  /></td>
+		</tr>
+	</table>
+	<input id="workTyp" name="workTyp" type="hidden" />
+	<input id="shipNo" name="shipNo" type="hidden" />
+	<input id="checkId" name="checkId" type="hidden" />
+</form>

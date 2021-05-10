@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+	<meta charset="UTF-8" />
+<div class="easyui-layout" style="width: 100%; height: 100%;" data-options="fit:true">
+	<div data-options="region:'center'" style="height: 100%; width: 100%">
+	   	<div id="tallyDiffenerceToolBarTwo12"style="float: left; position: relative;">
+			<div>
+			    <input type="radio" name="radio152972107" checked="checked" value="0" style="margin-top:-2px;" >未确认 &nbsp;
+                <input type="radio" name="radio152972107" value="1" style="margin-top:-2px;">已确认&nbsp;
+                &nbsp; &nbsp;船名：<input id="cShipNam152972107" name="cShipNam" type="text" data-options="required:false"
+                    readonly='readonly' style="width: 120px">
+                &nbsp;进/出口航次：<input id="voyage152972107" type="text" data-options="required:false" style="width: 80px"
+                    readonly='readonly' />
+                &nbsp;<a class="easyui-linkbutton" id="queryShip152972107">选船</a>
+				车架号：<input id="VinNoSearch" name="VinNoSearch" style="width:115px"/>
+			    <a class="easyui-linkbutton blue-btn-blue" id="searchNoBillNo" iconCls="icon-search" plain="false">查询</a>
+			    <a class="easyui-linkbutton blue-btn-blue" id="excelTallyData"  plain="false">导入理货数据</a>
+			</div>
+		</div>
+		<table id="devNum20180422211" style="height: 100%;width:100%"></table>
+	</div>
+</div>
+<script type="text/javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+    	var dg2 = $("#devNum20180422211");
+        var shipNo=HdUtils.dialog.getValue('shipNo');
+        
+        //选船回调
+        let callback = (data) => {
+            shipNo = data.shipNo;
+            $("#cShipNam152972107").val(data.cShipNam);
+            $("#voyage152972107").val(`${data.ivoyage}/${data.evoyage}`);
+            HdUtils.dialog.setValue({
+                'shipNo': shipNo,
+            });
+        }
+
+        //选船按钮
+        $("#queryShip152972107").on("click", function () {
+            HdUtils.selTypShip(callback, null);
+        });
+
+
+	    $("#searchNoBillNo").on("click", function() {
+	    	var builder = new HdQuery();
+	    	var radioVal = $("input[name='radio152972107']:checked").val();
+	    	builder.add("VinNo",$("#VinNoSearch").val());
+	    	builder.add("confirmId",radioVal);
+	    	builder.add("shipNo",shipNo);
+	    	dg2.datagrid("load",builder.build());
+	    });
+	    $("#excelTallyData").on("click", function() {
+	    	if (!shipNo) {
+			    HdUtils.messager.info("请在右侧选择一条船！");
+			    return;
+		    }
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/base/MBillVin/antiBill?shipNo=" + shipNo,
+		        success : function(data) {
+			       HdUtils.messager.bottomRight("操作成功!");
+		        }
+		    }); 
+	    });
+	    var builder2 = new HdQuery();
+	    builder2.add("shipNo",shipNo);
+	    builder2.add("confirmId",'0');
+	    dg2.datagrid({
+	    	url : "../webresources/login/base/MBillVin/noBillNo",
+	        striped : true,
+	        queryParams: builder2.build(),
+	        pagination : true,
+	        singleSelect : true,
+	        checkOnSelect : true,
+	        selectOnCheck : false,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#tallyDiffenerceToolBarTwo12",
+	        autoLoad:true,
+	        fit : true,
+	        columns : [ [ {
+	            field : "vinNo",
+	            title : '车架号',
+	            multiSort : true,
+	            halign : "center",
+	            width : 180,
+	            sortable : true
+	        }, {
+	            field : "namNo",
+	            title : '船名-航次',
+	            multiSort : true,
+	            halign : "center",
+	            width : 180,
+	            sortable : true
+	        },
+	        {
+	            field : "confirmId",
+	            title : '是否确认',
+	            multiSort : true,
+	            halign : "center",
+	            width : 180,
+	            formatter: function (value,row,index) {
+	                if (value =="0")
+	                  return "未确认";
+	                else{
+	                  return "已确认";
+	                }
+	            },
+	            sortable : true
+	        }
+	        ] ]
+        });
+    });
+ </script>
+
+

@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="DayWorkClassToolBar1508123307299+${radi}"
+	style="float: left">
+	<div>
+		<!-- 查询 -->
+		<span> 船名：<input th:id="cShipNam+${radi}" name="cShipNam"
+			placeholder="请输入船名" type="text" data-options="required:false"
+			style="width: 100px">航次：<input th:id="ivoyage+${radi}"
+			name="ivoyage" placeholder="请输入航次" type="text"
+			data-options="required:false" style="width: 100px"><a
+			class="easyui-linkbutton" th:id="query+${radi}">选船</a> <a
+			class="easyui-linkbutton" th:id='clear+${radi}'>重置</a> <a
+			class="easyui-linkbutton" th:id="zpzc+${radi}">整票装船</a> <a
+			class="easyui-linkbutton" th:id="hgfx+${radi}">查询海关放行</a>
+			<a class="easyui-linkbutton" th:id="refresh+${radi}">刷新</a>
+			<input
+			th:id="shipNo+${radi}" name="shipNo" type="hidden"> <input
+			th:id="Type+${radi}" th:value='${Type}' type="hidden" />
+		</span>
+
+	</div>
+
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="DayWorkClassDatagrid1508123307299+${radi}"
+	style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#DayWorkClassDatagrid1508123307299[(${radi})]");
+	    var type = $("#Type[(${radi})]").val();
+	    var cargoradi = HdUtils.dialog.getValue("cargoradi");
+	    var url;
+	    var recNam;
+		$.get('/login/PrivilegeController/getLoginAccount?t=11&s=' + Math.random(), function(data) {
+			    recNam = data.name;
+		    });
+	    if(type == 'XC'){
+	    	$("#pllhid[(${radi})]").hide();
+	    	$("#zpzc[(${radi})]").hide();
+	    	$("#hgfx[(${radi})]").hide();
+	    	$("#upload[(${radi})]").hide();
+	    	url = "../webresources/login/work/WorkQueue/find";
+	    }else if(type == 'WMPLXC'){
+	    	$("#zpzc[(${radi})]").hide();
+	    	$("#upload[(${radi})]").hide();
+	    	$("#hgfx[(${radi})]").hide();
+	    	url = "../webresources/login/work/WorkQueue/find";
+	    }else if(type == 'NMPLXC'){
+	    	$("#zpzc[(${radi})]").hide();
+	    	$("#upload[(${radi})]").hide();
+	    	$("#hgfx[(${radi})]").hide();
+	    	url = "../webresources/login/work/WorkQueue/find";
+	    }else if(type == 'ZC'){
+	    	$("#pllhid[(${radi})]").hide();
+	    	$("#zpzc[(${radi})]").hide();
+	    	$("#upload[(${radi})]").hide();
+	    	$("#hgfx[(${radi})]").hide();
+	    	url = "../webresources/login/work/WorkQueue/findZclh";
+	    }else if( type == 'NMPLZC'){
+	    	$("#pllhid[(${radi})]").hide();
+	    	$("#hgfx[(${radi})]").hide();
+	    	url = "../webresources/login/work/WorkQueue/findZclh";
+	    }else if(type == 'WMPLZC' ){
+	    	$("#pllhid[(${radi})]").hide();
+	    	$("#zpzc[(${radi})]").hide();
+	    	$("#upload[(${radi})]").hide();
+	    	url = "../webresources/login/work/WorkQueue/findZclh";
+	    }else if(type == 'PLTZ'){
+	    	$("#pllhid[(${radi})]").hide();
+	    	$("#zpzc[(${radi})]").hide();
+	    	$("#upload[(${radi})]").hide();
+	    	$("#hgfx[(${radi})]").hide();
+	    	url = "../webresources/login/work/WorkQueue/findZclh";
+	    }
+    	// 重置。
+	    $("#clear[(${radi})]").on("click", function() {
+	    	$("#cShipNam[(${radi})]").val("");
+	    	$("#ivoyage[(${radi})]").val("");
+	    	$("#shipNo[(${radi})]").val("");
+	    	$("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+
+	    //刷新
+		$("#refresh[(${radi})]").on("click", function() {
+			$("#cargoId" + cargoradi).layout('panel', 'south').panel('refresh');
+
+		});
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+	    	HdUtils.selTypShip(callback,type);
+	    });
+	    // 整票装船理货
+	    $("#zpzc[(${radi})]").on("click", function() {
+	    	var selRow = dg.datagrid("getChecked");
+            if (selRow.length == 0) {
+	            HdUtils.messager.info('请至少选择一条数据！');
+	            return false;
+            }
+            var billNos = "";
+            for (var i = 0; i < selRow.length; i++) {
+            	billNos += selRow[i].billNo + ",";
+            }
+            HdUtils.dialog.setValue({
+          		 'billNos' : billNos
+       	    });
+            $('#shipdynamic259' + cargoradi).layout('panel', 'east').panel('refresh')
+	    });
+
+		function computez(colName) {
+			var rows = $('#DayWorkClassDatagrid1508123307299[(${radi})]').datagrid('getRows');
+			var total = 0;
+			for (var i = 0; i < rows.length; i++) {
+				if(rows[i][colName]!=undefined)
+					total += parseFloat(rows[i][colName]);
+			}
+			return total;
+		}
+	    // 查询海关放行信息
+	    $("#hgfx[(${radi})]").on("click", function() {
+	        var dataRow = dg.datagrid("getSelected");
+	        if (dataRow.length == 0) {
+ 			    HdUtils.messager.info('请至少选择一条数据！');
+ 			    return false;
+ 		    }
+            var billNo=dataRow.billNo;
+	        var shipNo=dataRow.shipNo;
+		    HdUtils.ajax.post({
+	            url : "../webresources/login/ship/ShipBill/getcustominfo?shipNo=" + shipNo+"&billNo="+billNo,
+	            success : function(data) {
+	            	dg.datagrid("hdReload");
+	            }
+	        });
+//             $('#shipdynamic259' + cargoradi).layout('panel', 'center').panel('refresh')
+	    });
+	    // 上传。
+	    var empNo;
+	    $.get('/login/PrivilegeController/getLoginAccount?t=11&s='+Math.random(), function(data) {
+	  		recId = data.account; 
+	  		HdUtils.ajax.post({
+        		url : "../webresources/login/base/CEmployee/findCemployee?sysUserNam="+ recId,
+        		success : function(data1) {
+    		        if (!data1) {
+    			        return false;
+    		        }
+    		        empNo = data1.empNo;
+        		}
+        	})
+	  	  }) 
+	    $("#upload[(${radi})]").on("click", function() {
+	    	var shipNo = $("#shipNo[(${radi})]").val();
+	    	if (!shipNo){
+	    		HdUtils.messager.info('请先选船！');
+	            return false;
+	    	}
+	    	HdUtils.nmzcupload({
+	    		mutiple : false,
+	            isReadOnly : false,
+	            shipNo : shipNo,
+	            inCyNam : empNo,
+	        });
+	    });
+
+	    function callback(data){
+        	$("#cShipNam[(${radi})]").val(data.cShipNam);
+        	if (type == 'WMPLXC' ||type == 'NMPLXC'){
+        		$("#ivoyage[(${radi})]").val(data.ivoyage);
+        	}else if (type == 'WMPLZC' ||type == 'NMPLZC'){
+        		$("#ivoyage[(${radi})]").val(data.evoyage);
+        	}else if (type == 'PLTZ'){
+        		$("#ivoyage[(${radi})]").val(data.ivoyage);
+        	}
+        	$("#shipNo[(${radi})]").val(data.shipNo);
+        	var date = new Date();
+        	var workTyp;
+        	if (type == 'WMPLXC'){
+        		workTyp = "SI";
+        		formdata = {
+        		        "workQueueNo" : workTyp + "-" + data.shipNo,
+        		        "workTyp" : workTyp,
+        		        "shipNo" : data.shipNo,
+        		        "contractNo" : "",
+        		        "truckNo" : "",
+        		        "recNam" : recNam,
+        		        "recTim" : date
+        		    };
+        		HdUtils.ajax.post({
+    		        url : "../webresources/login/work/WorkQueue/generatewq",
+    		        data : formdata,
+    		        success : function(data) {
+    		        	 if (data.key == '-1') {
+    		        		 return false;
+    				        }
+    		        	HdUtils.messager.bottomRight('作业队列生成成功');
+    		        }
+    		    });
+        	}else if (type == 'WMPLZC' ||　type == 'NMPLZC'){
+        		workTyp = "SO";
+        		formdata = {
+        		        "workQueueNo" : workTyp + "-" + data.shipNo,
+        		        "workTyp" : workTyp,
+        		        "shipNo" : data.shipNo,
+        		        "contractNo" : "",
+        		        "truckNo" : "",
+        		        "recNam" : recNam,
+        		        "recTim" : date
+        		    };
+        		HdUtils.ajax.post({
+    		        url : "../webresources/login/work/WorkQueue/generatewq2",
+    		        data : formdata,
+    		        success : function(data) {
+    		        	 if (data.key == '-1') {
+    		        		 return false;
+    				        }
+    		        	HdUtils.messager.bottomRight('作业队列生成成功');
+    		        }
+    		    });
+        	}else if (type == 'PLTZ'){
+        		workTyp = "TZ";
+        		formdata = {
+        		        "workQueueNo" : workTyp + "-" + data.shipNo,
+        		        "workTyp" : workTyp,
+        		        "shipNo" : data.shipNo,
+        		        "contractNo" : "",
+        		        "truckNo" : "",
+        		        "recNam" : recNam,
+        		        "recTim" : date
+        		    };
+        		HdUtils.ajax.post({
+    		        url : "../webresources/login/work/WorkQueue/generatewq3",
+    		        data : formdata,
+    		        success : function(data) {
+    		        	 if (data.key == '-1') {
+    		        		 return false;
+    				        }
+    		        	HdUtils.messager.bottomRight('作业队列生成成功');
+    		        }
+    		    });
+        	}
+		    
+		    
+		    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+		    HdUtils.dialog.setValue({
+	           		 'shipNo' : data.shipNo
+	        	 });
+        	$("#cargoId" + cargoradi).layout('panel', 'south').panel('refresh');
+
+        }
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    var shipNo = $("#shipNo[(${radi})]").val();
+		    if(!shipNo){
+		    	shipNo = HdUtils.dialog.getValue("shipNo");
+		    }
+		    onlinquery.add("shipNo", shipNo);
+		    onlinquery.add("type", type);
+		    return onlinquery.build();
+	    }
+
+		function compute(colName) {
+			var rows = $('#DayWorkClassDatagrid1508123307299[(${radi})]').datagrid('getRows');
+			var total = 0;
+			for (var i = 0; i < rows.length; i++) {
+				if(rows[i][colName]!=undefined)
+						total += parseFloat(rows[i][colName]);
+					/*total += 1;*/
+			}
+			return total;
+			//return total.toFixed(3);
+		}
+
+	    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+	        striped : true,
+	        url : url,
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : false,
+	        checkOnSelect : false,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#DayWorkClassToolBar1508123307299" + /*[[${radi}]]*/'',
+	        fit : true,
+			showFooter:true,
+	        onSelect(rowIndex,rowData){
+	        	if (rowData.sffx == '否' && type == 'WMPLZC'){
+	        		HdUtils.messager.info('请先确认海关已经放行，点击查询海关放行信息！');
+		            return false;
+	        	}
+	        	HdUtils.dialog.setValue({
+	           		 'billNo' : rowData.billNo
+	        	 });
+	        	HdUtils.dialog.setValue({
+	           		 'shipNo' : rowData.shipNo
+	        	 });
+	        	HdUtils.dialog.setValue({
+	           		 'unTallyNum' : rowData.unTallyNum
+	        	 });
+	        	HdUtils.dialog.setValue({
+	           		 'workqueueRadi' : radi
+	        	 });
+	        	HdUtils.dialog.setValue({
+	           		 'brandCod' : rowData.brandCod
+	        	 });
+	        	HdUtils.dialog.setValue({
+	           		 'dockCod' : rowData.dockCod
+	        	 });
+	        	HdUtils.dialog.setValue({
+	           		 'carTyp' : rowData.carTyp
+	        	 });
+	        	HdUtils.dialog.setValue({
+	           		 'carKind' : rowData.carKind
+	        	 });
+	        	$("#shipdynamic259" + cargoradi).layout('panel', 'east').panel('refresh');
+	        	//$("#cargoId" + cargoradi).layout('panel', 'south').panel('refresh');
+		    },
+			onLoadSuccess(){
+				$('#DayWorkClassDatagrid1508123307299[(${radi})]').datagrid('appendRow', {
+					remarks: '<span class="subtotal">合计</span>',
+				//	planNum: '<span class="subtotal">' + computez("planNum") + '</span>',
+					unTallyNum: '<span class="subtotal">' + computez("unTallyNum") + '</span>'
+				});
+			},
+	        fitColumns : false,
+			onLoadSuccess() {
+				//添加“合计”列
+				$('#DayWorkClassDatagrid1508123307299[(${radi})]').datagrid('reloadFooter',[
+					{
+						planNum: '<span class="subtotal">合计</span>',
+						unTallyNum: '<span class="subtotal">' + compute("unTallyNum") + '</span>',
+					}
+				]);
+			},
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+
+	        }, 
+	        {
+	            field : "billNo",
+	            title : "提单号",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },  
+	        /*[# th:if="${Type}=='WMPLXC'"]*/
+            {
+                field : "brandNam",
+                title : "品牌",
+                multiSort : true,
+                width : 100,
+                align : "center",
+                sortable : false
+            },
+            {
+                field : "remarks",
+                title : "备注",
+                multiSort : true,
+                width : 100,
+                align : "center",
+                sortable : false
+            },
+            /*[/]*/
+            /*[# th:if="${Type}!='WMPLZC'"]*/
+	        {
+
+	            field : "planNum",
+	            title : '总件数',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        },  {
+
+					field : "tallyNum",
+					title : '已理件数',
+					multiSort : true,
+					halign : "center",
+					editor : {
+						type : "validatebox",
+						options : {
+							required : true
+						}
+					},
+					sortable : false
+				},{
+
+	            field : "unTallyNum",
+	            title : '未理件数',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        },
+	        /*[/]*/
+	        /*[# th:if="${Type}=='WMPLZC'"]*/
+	        {
+
+	            field : "carTypNam",
+	            title : '货名',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        },
+	       /* {
+
+	            field : "unTallyNum",
+	            title : '总件数',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        },*/
+	        {
+
+	            field : "sffx",
+	            title : '是否放行',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+					field : "planNum",
+					title : '总件数',
+					multiSort : true,
+					halign : "center",
+					editor : {
+						type : "validatebox",
+						options : {
+							required : true
+						}
+					},
+					sortable : false
+				},  {
+
+					field : "tallyNum",
+					title : '已理件数',
+					multiSort : true,
+					halign : "center",
+					editor : {
+						type : "validatebox",
+						options : {
+							required : true
+						}
+					},
+					sortable : false
+				},{
+
+					field : "unTallyNum",
+					title : '未理件数',
+					multiSort : true,
+					halign : "center",
+					editor : {
+						type : "validatebox",
+						options : {
+							required : true
+						}
+					},
+					sortable : false
+				},
+	        /*[/]*/
+	        ] ]
+	    });
+	    $("#DayWorkClassDatagrid1508123307299" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

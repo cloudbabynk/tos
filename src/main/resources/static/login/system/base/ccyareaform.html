@@ -1,0 +1,126 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#CCyArea1507959148645");
+	    var cyAreaNo = HdUtils.dialog.getValue("cyAreaNo");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    if (cyAreaNo) {
+	    	$("#cyAreaNo").attr("readonly",true);
+	    } else {
+	    	$("#cyAreaNo").attr("readonly",false);
+	    }
+	    $('#dockCod').combobox({
+	        url : '../webresources/login/contract/ContractIeDoc/getCDock',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 'auto',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/base/CCyArea/findCCyArea?cyAreaNo=" + cyAreaNo,
+	        success : function(data) {
+		        $("#CCyArea1507959148645").form("loadData", data);
+	        }
+	    })
+	    
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+		    var isValss = $("#CCyArea1507959148645").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#CCyArea1507959148645").serializeObject();
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/base/CCyArea/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#CAreaDatagrid1508123301002" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+    });
+	function findCod(){
+    	var damCodValue = $("#damCod").val();
+    	HdUtils.ajax.post({
+			url : "../webresources/login/base/CDamage/findCDamage?damCod=" + damCodValue,
+			success : function(data) {
+				if (data.code == "-1") {
+					$('#damCod').val("");
+					HdUtils.messager.bottomRight(data.message);
+					$('#damCod').focus();
+			        return false;
+				}
+			}
+		});
+    }
+</script>
+<form id="CCyArea1507959148645">
+<input id='cyTyp' name="cyTyp" hidden="true">
+<input id='lockId' name="lockId" hidden="true">
+	<table id="CCyArea1507959148645" style="height: 75%; width: 80%"
+		class="tableform">
+		<tr>
+			<th>场号名称：</th>
+			<td><input id="cyAreaNo" name="cyAreaNo" onchange="findCod();"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="10" /></td>
+			<th>场号简称：</th>
+			<td><input id="scheme" name="scheme"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="10" /></td>
+		</tr>
+		<tr>
+			<th>行数：</th>
+			<td><input id="rowNum" name="rowNum"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="3" /></td>
+			<th>列数：</th>
+			<td><input id="bayNum" name="bayNum"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="4" /></td>
+		</tr>
+		<tr>
+			<th>码头：</th>
+			<td><input id="dockCod" name="dockCod"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="35" /></td>
+			<th>中文名称：</th>
+			<td><input id="cyAreaNam" name="cyAreaNam"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		</tr>
+	</table>
+</form>

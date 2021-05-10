@@ -1,0 +1,233 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>通用码头生产运营管理平台</title>
+<link rel="stylesheet" type="text/css" href="../css/themes/icon.css"/>
+<link rel="stylesheet" type="text/css" href="../css/themes/gray/easyui.css"/>
+<link href="css/default.css" rel="stylesheet" type="text/css" />
+
+
+<script src="../js/jquery.min.js"></script>
+<script type="text/javascript" src="../js/jquery-migrate-1.2.1.min.js"></script>
+<script type="text/javascript" src="../js/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="../js/locale/easyui-lang-zh_CN.js"></script>
+</head>
+
+<body>
+<div class="gtos-header-top">
+  <div class="gtos-header-top-nav"><span>客户热线：<font>400-8888999</font></span><!--<a href="#">用户登录</a><a href="#">加入收藏</a>--></div>
+</div>
+<div class="gtos-header-con">
+  <div class="gtos-header-logo"><img src="images/logo.gif" width="324" height="85" /></div>
+  <div class="gtos-header-right">
+    <ul>
+      <li class="gtos-first-li"><a href="login.html">GTOS首页</a></li>
+      <li><a href="second.html">在线视频</a></li>
+      <li><a href="third.html">技术支持</a></li>
+      <li><a href="forth.html">关于华东</a></li>
+<!--      <li><a href="fifth.html">关于港航部</a></li>-->
+    </ul>
+  </div>
+</div>
+<div class="gtos-con">
+  <div class="gtos-con-banner">
+    <ul>
+      <li><input name="account" type="text" class="user-input" id="name"/></li>
+      <li><input name="password" type="password" class="key-input" id="password"/></li>
+      <li><input name="validateCode" type="text" class="yzm-input" id="validateCode"/>
+      <div id="imageCode" style="width:90px; height:25px; background:url(#) no-repeat -10px -5px; float:left;" title="点击更换"/></li>
+      <li><input type="button" name="button" id="loginButton" class="login-button" value="登录" onclick="_submitForm();"/></li>
+    </ul>
+  </div>
+</div>
+<!--<div class="gtos-icons">
+  <div class="gtos-icon-hover">
+    <ul>
+      <li class="gtos-li-01"><a href="#">作业管理</a></li>
+      <li class="gtos-li-02"><a href="#">商务管理</a></li>
+      <li class="gtos-li-03"><a href="#">堆场管理</a></li>
+      <li class="gtos-li-04"><a href="#">交接管理</a></li>
+      <li class="gtos-li-05"><a href="second.html">船舶管理管理</a></li>
+      <li class="gtos-li-06"><a href="#">网上大厅</a></li>
+    </ul>
+  </div>
+</div>-->
+<!--<div class="gtos-bottom-back"><img src="images/gtos-border-112.gif" width="10" height="7" /></div>-->    
+<div class="gtos-nav">
+  <div class="gtos-nav-left">
+    <h2>视频教程</h2>
+    <div class="gtos-nav-l-box"><a href="#">网上大厅</a><a href="second.html">船舶管理</a><a href="#">商务管理</a><a href="#">作业管理</a><a href="#">堆场管理</a><a href="#">交接管理</a><a href="#">手持理货</a><a href="#">微信平台</a><a href="#">地磅管理</a><a href="#">闸口管理</a><a href="#">GIS管理</a><a href="#">更多视频</a></div>
+  </div>
+  <div class="gtos-nav-con">
+    <h2>系统地址二维码</h2>
+    <div class="gtos-nav-c-box"><img src="images/wx-img.jpg" width="99" height="99" />
+        <p style="font-weight:700;line-height:28px;font-family:'微软雅黑';">扫一扫获取系统地址</p>
+    </div>
+  </div>
+  <div class="gtos-nav-right">
+    <h2>免费下载</h2>
+    <div class="gtos-nav-r-box">
+      <div class="gtos-rb"><img src="images/xz-button.gif" width="130" height="33" /></div>
+      <div class="gtos-rt"><img src="images/wx-img.jpg" width="99" height="99" /></div>
+    </div>
+  </div>
+</div>
+<div class="gtos-1000-top5">
+  <div class="gtos-top5-title"><img src="images/gtos-top5.gif" width="238" height="29" /></div>
+  <div class="gtos-top5-list">
+    <ul>
+      <li>
+        <div class="gtos-top5-img"><img src="images/gtos-top5-01.gif" width="111" height="112" /></div>
+        <div class="gtos-top5-text">丰富的行业经验</div>
+      </li>
+      <li>
+        <div class="gtos-top5-img"><img src="images/gtos-top5-02.gif" width="111" height="112" /></div>
+        <div class="gtos-top5-text">成熟的项目管理</div>
+      </li>
+      <li>
+        <div class="gtos-top5-img"><img src="images/gtos-top5-03.gif" width="111" height="112" /></div>
+        <div class="gtos-top5-text">严格的质量保证</div>
+      </li>
+      <li>
+        <div class="gtos-top5-img"><img src="images/gtos-top5-04.gif" width="111" height="112" /></div>
+        <div class="gtos-top5-text">便捷的售后服务</div>
+      </li>
+    </ul>
+  </div>
+</div>
+<div class="footer">
+    <div class="footerLink">
+      <div class="footerLinkSpan">
+        <div class="footerLinkSpanTitle">新手上路</div>
+        <div class="footerLinkSpanCon">
+          <ul>
+            <li><a href="#">视频教程</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footerLinkSpan">
+        <div class="footerLinkSpanTitle">关于我们</div>
+        <div class="footerLinkSpanCon">
+          <ul>
+            <li><a href="second.html">港航部简介</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footerLinkSpan">
+        <div class="footerLinkSpanTitle">技术支持</div>
+        <div class="footerLinkSpanCon">
+          <ul>
+            <li><a href="#">联系我们</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footerLinkSpan">
+        <div class="footerLinkSpanTitle">知识中心</div>
+        <div class="footerLinkSpanCon">
+          <ul>
+            <li></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footerLinkSpan" style="float:right;">
+        <img src="images/wxPic.jpg" align="middle" />
+        <div class="footerLinkSpanWx">扫一扫关注<br />GTOS</div>
+      </div>
+    </div>
+    <div class="footerInfo">
+      Copyright 2010-2012 All Rights Reserved<br />
+      版权所有：烟台华东电子软件技术有限公司
+    </div>
+</div>
+<script type="text/javascript">
+            //更新验证码
+            function changeRandomImg(){
+                $('#imageCode').css("background", "url(../webresources/normal/PrivilegeResource/getValidateCode?t=" + Math.random()+")no-repeat -10px -5px ");
+            }
+            //登录按钮的动作 
+            function _submitForm() {
+                 // 跳转到主页面。
+                 $.ajax({
+                     url: "../webresources/normal/PrivilegeResource/doLogin?t=" + Math.random(),
+                     contentType: "application/json",
+                     dataType: "json",
+                     type: "GET",
+                     data: {"name": $("#name").val(), "password": $("#password").val(), "validateCode": $("#validateCode").val()},
+                     success: function(data) {
+                         showErrorOrJump(data);
+                     }, 
+                      error: function(data){
+                         $.messager.alert('警告',"服务器报错，信息："+$.toJSON(data),'error',function() {
+                            changeRandomImg();
+                            // $('#imageCode').attr("src", "../webresources/normal/PrivilegeResource/getValidateCode?t=" + Math.random());
+                         });
+                     }
+                 });
+             }
+             
+             function showErrorOrJump(data){
+                var wkspaceUri="./main";  //FXQ为保持兼容，使用原有主页布局 "/login/main.html";
+                if (data.success) {//成功登录
+                        if (data.messageCode!="success") {//有点问题，需要提示
+                           $.messager.alert('警告', data.message, 'warning', function() {
+                               window.location.href = wkspaceUri;
+                           });
+                        } else {
+                            window.location.href = wkspaceUri;
+                        }
+                     } else {
+                         $.messager.alert('错误', data.message, 'error', function() {
+                            if (data.messageCode=='wrongValidateCode') {
+                               changeRandomImg();
+                               $('#validateCode').focus();
+                            } else if (data.messageCode=='unknowUser'||data.messageCode.indexOf('account')==0) {
+                               changeRandomImg();
+                               $('#name').focus();
+                            } else if (data.messageCode=='wrongPassword') {
+                               changeRandomImg();
+                               $('#password').focus();
+                            }
+                         });
+                     }     
+//                     else {//账户、密码或验证码错误
+//                                $.messager.alert('警告', '账户、密码或验证码错误!');
+//                                $("#login").form("validate");
+//                            }
+             }
+        $(document).ready(function(){
+            changeRandomImg();
+            $("#imageCode").click(function() {
+                changeRandomImg();
+            });
+
+            $("#name").focus();
+            $("#validateCode").keydown(function(e) {
+                if (e.keyCode == 13) {
+                    _submitForm();
+                }
+            });
+            // 判断浏览器版本。
+           if ($.browser.msie && $.browser.version < 9) {
+               $("#tip").html('<font color="red">浏览器版本过低</font>，<a href="download/chrome_installer_30.exe">请下载Chrome</a>。');
+           }
+           var userAgentStr = navigator.userAgent;
+           if (userAgentStr) {
+                var currentBrowser = "Other Browser";
+                if ($.browser.msie) {
+                    currentBrowser = "IE " + $.browser.version;
+                } else if ($.browser.safari) {
+                    currentBrowser = "Safari " + $.browser.version;
+                } else if ($.browser.mozilla) {
+                    currentBrowser = "Mozilla " + $.browser.version;
+                } else if ($.browser.opera) {
+                    currentBrowser = "Opera " + $.browser.version;
+                } else if ($.browser.chrome) {
+                    currentBrowser = "Chrome " + $.browser.version;
+                }
+                $("#currentBrowser").html(currentBrowser);
+            }
+        });
+    </script>
+</body>
+</html>

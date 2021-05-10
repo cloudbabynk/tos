@@ -1,0 +1,14 @@
+<div style="width:100%;height: 100%">
+
+	    <iframe id="gisGzModuleShow"  frameborder="no" border="0" scrolling="no" border="0" marginwidth="0" marginheight="0"
+	             style="border:0px none;z-index: 1;width:100%;height:100%;"     >
+	    </iframe>
+	    <input type="hidden" id="accountGz">
+</div>
+
+<script type="text/javascript">
+	    $(document).ready(function() {
+	    	$("#accountGz").val($.main.loginOper.account);
+	        document.getElementById('gisGzModuleShow').src= "/login/system/map/mapGzShow.html";
+	    });
+	</script>

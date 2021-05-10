@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<div class="easyui-layout" data-options="fit:true"
+	style="height: 100%; width: 100%">
+	<div
+		data-options="region:'west',split:true,tools:reload5436,title:'船期预报'"
+		style="width: 280px; padding: 10px;">
+		<input class="easyui-searchbox"
+			data-options="searcher:searchShip,prompt:'搜索船舶'"
+			th:id="searchText+${radi}" style="width: 200px; height: 20px;"
+			name="search"></input>
+		<ul th:id="ShipStatusTree123+${radi}"></ul>
+	</div>
+	<div data-options="region:'center'" style="height: 100%; width: 100%">
+		<!-- 工具栏 -->
+		<div th:id="DayWorkClassToolBar1508123307299+${radi}"
+			style="float: left; position: relative;">
+			<div>
+				<!-- 查询 -->
+				日期：<input th:id="workDate+${radi}" name="workDate"
+					class="easyui-datebox" style="width: 120px"
+					data-options="required:false" /> 贸易性质：<input
+					th:id="workTyp+${radi}" name="workTyp" style="width: 120px"
+					data-options="required:false" /><a class="easyui-linkbutton"
+					th:id="query+${radi}">查询</a>
+				<shiro:hasPermission name="webresources:login:MfWork:add">
+					<a class="easyui-linkbutton" th:id='add+${radi}' iconCls="icon-add"
+						plain="false">新增</a>
+				</shiro:hasPermission>
+				<shiro:hasPermission name="webresources:login:MfWork:update">
+					<a class="easyui-linkbutton" th:id='edit+${radi}'>编辑</a>
+				</shiro:hasPermission>
+				<shiro:hasPermission name="webresources:login:MfWork:delete">
+					<a class="easyui-linkbutton" th:id='delete+${radi}'>删除</a>
+				</shiro:hasPermission>
+				<shiro:hasPermission name="webresources:login:MfWork:save">
+					<a class="easyui-linkbutton" th:id='save+${radi}'>保存</a>
+				</shiro:hasPermission>
+				<a class="easyui-linkbutton" th:id='report+${radi}'>报表</a> <a
+					class="easyui-linkbutton" th:id='fresh+${radi}'>刷新</a>
+			</div>
+		</div>
+		<table th:id="DayWorkClassDatagrid1508123307299+${radi}"
+			style="height: 100%"></table>
+	</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	var reload5436 = [ {
+        iconCls : 'icon-reload',
+        handler : function() {
+	        $('#ShipStatusTree123[(${radi})]').tree('reload');
+        }
+    } ];
+    var searchShip = function() {
+	    var parentNode = $('#ShipStatusTree123[(${radi})]').tree('getRoots'); //得到tree顶级node  
+	    var searchCon = $("input[name='search']").val();
+	    /* alert("parentNode="+parentNode); 
+	    alert("searchCon="+searchCon); */
+	    var children;
+	    for (var i = 0; i < parentNode.length; i++) { //循环顶级 node   
+		    children = $('#ShipStatusTree123[(${radi})]').tree('getChildren', parentNode[i].target);//获取顶级node下所有子节点   
+		    if (children) { //如果有子节点   
+			    for (var j = 0; j < children.length; j++) { //循环所有子节点   
+				    //if($('#ul_tree_dept').tree('isLeaf',children[j].target)){ //判断子级是否为叶子节点,即不是父节点   
+				    if (children[j].text.indexOf(searchCon) >= 0 || children[j].id.indexOf(searchCon) >= 0) { //判断节点text是否包含搜索文本                       
+					    expandParent(children[j]); //设置此节点所有父级展开   
+					    selectNode(children[j]); //设置此节点为选择状态   
+
+					    return;
+				    }
+				    //}   
+			    }
+		    } else {
+			    if (parentNode[i].text.indexOf(searchCon) || children[j].id.indexOf(searchCon) >= 0 >= 0) {
+				    expandParent(parentNode[i]);
+				    selectNode(parentNode[i]);
+				    return;
+			    }
+		    }
+	    }
+    }
+    function selectNode(node) {
+	    $('#ShipStatusTree123[(${radi})]').tree('select', node.target);
+	    $('#ShipStatusTree123[(${radi})]').tree('scrollTo', node.target);
+    };
+
+    function expandParent(node) {
+	    var parent = node;
+	    var t = true;
+	    do {
+		    parent = $('#ShipStatusTree123[(${radi})]').tree('getParent', parent.target); //获取此节点父节点   
+		    if (parent) { //如果存在   
+			    t = true;
+			    $('#ShipStatusTree123[(${radi})]').tree('expand', parent.target);
+		    } else {
+			    t = false;
+		    }
+	    } while (t);
+    };
+    $(document).ready(function() {
+	    $("#dispatchDte[(${radi})]").val(Date.prototype.dateAdd(0, "yyyy-MM-dd"));
+	    $.parser.parse($('#DayWorkClassToolBar1508123307299[(${radi})]'));
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#DayWorkClassDatagrid1508123307299[(${radi})]");
+	    var shipNo;
+
+	    $('#workTyp[(${radi})]').combobox(HdUtils.code.scode({
+		    fieldCod : 'WORK_TYP'
+	    }, {
+		    required : false
+	    }));
+
+	    $('#ShipStatusTree123[(${radi})]').tree({
+	        method : "get",
+	        url : "../webresources/login/ship/Ship/gentree",
+	        onClick : treeclick
+	    });
+	    function treeclick(node) {
+		    shipNo = node.id;
+		    dockCod = node.obj.dockCod;
+		    cShipName = node.obj.cShipName;
+		    HdUtils.dialog.setValue({
+			    'shipNo' : shipNo
+		    });
+		    $('#DayWorkClassDatagrid1508123307299[(${radi})]').datagrid({
+			    queryParams : query(),
+		    });
+	    }
+	    // buttons
+	    // 增加。
+	    $("#add[(${radi})]").on("click", function() {
+		    dg.datagrid("hdAdd");
+	    });
+	    //报表
+	    $("#report[(${radi})]").on("click", function() {
+	    	if (!shipNO){
+	    		HdUtils.messager.info('请先选择一条船！');
+			    return;
+	    	}
+	    	var workDate = $("#workDate[(${radi})]").datebox("getValue");
+		    if (!workDate) {
+			    HdUtils.messager.info('请选择日期！');
+			    return;
+		    }
+	    	var workTyp = $("#workTyp[(${radi})]").combobox('getValue');
+		    if (!workTyp) {
+			    HdUtils.messager.info('请选择贸易性质！');
+			    return;
+		    }
+		    HdUtils.dialog.setValue({
+		        'shipNo' : shipNo,
+		        'workDate' : workDate,
+		        'workTyp' : workTyp
+		    });
+		    HdUtils.dialog.show({
+		        width : 850,
+		        height : 650,
+		        title : '杂作业装卸情况说明',
+		        href : "../login/system/ship/mfworkrep.html",
+		        isSaveHandler : false
+		    });
+	    });
+	    // 编辑。
+	    $("#edit[(${radi})]").on("click", function() {
+		    var data = dg.datagrid("getSelected");
+		    if (data == null || data == undefined) {
+			    HdUtils.messager.info('请选择一条数据进行编辑！');
+			    return;
+		    }
+		    dg.datagrid("hdEdit");
+	    });
+	    // 保存。
+	    $("#save[(${radi})]").on("click", function() {
+		    dg.datagrid("hdSave", {
+			    url : "../webresources/login/ship/MfWork/save?shipNo=" + shipNo
+
+		    });
+	    });
+	    // 删除。
+	    $("#delete[(${radi})]").on("click", function() {
+		    var selRow = $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("getChecked");
+		    if (selRow.length == 0) {
+			    HdUtils.messager.info('请至少选择一条数据！');
+			    return false;
+		    }
+		    var ids = '';
+		    $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+			    if (r) {
+				    for (var i = 0; i < selRow.length; i++) {
+					    ids += selRow[i].id + ",";
+				    }
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/ship/MfWork/removeAll?ids=" + ids,
+				        success : function(data) {
+					        if (data.code == '-1') {
+						        HdUtils.messager.info(data.message);
+						        return false;
+					        }
+					        HdUtils.messager.bottomRight(data.message);
+					        $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("hdReload");
+				        }
+				    });
+			    }
+		    });
+	    });
+	    // 刷新。
+	    $("#fresh[(${radi})]").on("click", function() {
+		    dg.datagrid("hdReload");
+	    });
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+		    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    var workDate = $("#workDate[(${radi})]").datebox("getValue");
+		    var workTyp = $("#workTyp[(${radi})]").combobox('getValue');
+		    onlinquery.add("workDate", workDate);
+		    onlinquery.add("shipNo", shipNo);
+		    onlinquery.add("workTyp", workTyp);
+		    return onlinquery.build();
+	    }
+
+	    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/ship/MfWork/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : false,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#DayWorkClassToolBar1508123307299" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+	        }, {
+	            field : "id",
+	            title : '主键',
+	            multiSort : true,
+	            hidden : "true",
+	            sortable : false
+	        }, {
+	            field : "workDate",
+	            title : '日期',
+	            multiSort : true,
+	            width : 100,
+	            align : "center",
+	            formatter : $.hd.ezui.formatter.date,
+	            editor : {
+	                type : "datebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            // 	            hidden : true,
+	            sortable : false
+	        }, {
+	            field : "workTyp",
+	            title : '贸易性质',
+	            multiSort : true,
+	            width : 60,
+	            align : "center",
+	            editor : {
+	                type : "combobox",
+	                options : HdUtils.code.scode({
+		                fieldCod : 'WORK_TYP'
+	                }, {
+		                required : false
+	                })
+	            },
+	            formatter : function(value) {
+		            return HdUtils.code.name('WORK_TYP', value);
+	            },
+	            sortable : false
+	        }, {
+	            field : "mafeiNo",
+	            title : '马菲/平板号',
+	            width : 80,
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "workSize",
+	            title : '尺码',
+	            width : 60,
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "cargoNum",
+	            title : '货物件数',
+	            width : 60,
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "teamNo",
+	            title : '摞号',
+	            width : 60,
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "type",
+	            title : '类型',
+	            width : 60,
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "recNam",
+	            title : '<font color="red">录入员</font>',
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        }, {
+
+	            field : "recTim",
+	            title : '<font color="red">录入时间</font>',
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.datetime,
+	            width : 120,
+	            sortable : false
+	        }, {
+
+	            field : "updNam",
+	            title : '<font color="red">修改人</font>',
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        }, {
+
+	            field : "updTim",
+	            title : '<font color="red">修改时间</font>',
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.datetime,
+	            width : 120,
+	            sortable : false
+	        }
+
+	        ] ]
+	    });
+	    $("#DayWorkClassDatagrid1508123307299" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+</script>
+</html>

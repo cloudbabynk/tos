@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<link rel="stylesheet" type="text/css" href="http://10.163.204.56:8085/css/easyui.css" />
+<link rel="stylesheet" type="text/css" href="http://10.163.204.56:8085/css/huadong/hdMain.css" />
+<link rel="stylesheet" type="text/css" href="http://10.163.204.56:8085/css/huadong/main.css" />
+<link rel="stylesheet" type="text/css" href="http://10.163.204.56:8085/css/huadong/themes_133.css" />
+<link rel="stylesheet" type="text/css" href="http://10.163.204.56:8085/css/huadong/themes.css" />
+
+<script src="http://10.163.204.56:8085/js/jquery.min.js"></script>
+<script src="http://10.163.204.56:8085/js/jquery.jcarousel.min.js"></script>
+<script src="http://10.163.204.56:8085/js/jquery.cycle.all.min.js"></script>
+<script src="http://10.163.204.56:8085/js/jquery.min.js"></script>
+<script src="http://10.163.204.56:8085/js/jquery.easyui.min.js"></script>
+<script src="http://10.163.204.56:8085/js/ezui.ex.form.js"></script>
+<script src="http://10.163.204.56:8085/js/ezui.ex.datebox.js"></script>
+<script src="http://10.163.204.56:8085/js/easyui-lang-zh_CN.js"></script>
+<script src="http://10.163.204.56:8085/js/zrender/dist/zrender.js"></script>
+<div class="easyui-layout" data-options="fit:true"
+	style="height: 100%; width: 100%">
+
+	<div data-options="region:'center',split:true"
+		style="width: 100%; height: 100%;">
+		<div style="width: 990px;height: 60px;position: fixed;background-color:white;z-index:9999">
+		<div style="margin-left: 30px;">
+			计划日期：<input id="startdate" class="easyui-datebox"
+				style="width: 120px;" /> <label id="plday">至&nbsp;&nbsp;<input
+				id="enddate" class="easyui-datebox" style="width: 120px;" /></label>
+			<button id="makeberthplan">查询</button>
+			<br />
+		</div>
+		<div class="banner" style="width: 920px;height: 30px;position: fixed;margin-left:70px;margin-top:0px;z-index:9999">
+		     <img width="920" height="45" src="http://10.163.204.56:8085/js/zrender/image/berth.png">
+		</div>
+		</div>
+		<div id="mainx"
+			style="width: 1000px; height: 1000px; padding: 10px; margin: 10px;">
+		</div>
+	</div>
+	<div
+		data-options="region:'east',split:true,tools:[{iconCls:'icon-reload',handler:function(){$('#ShipStatusTree123').tree('reload');}
+        }],title:'船期预报'"
+		style="width: 210px; padding: 3px;">
+		<ul id="ShipStatusTree123"></ul>
+	</div>
+</div>
+
+<script type="text/javascript">
+	var main = document.getElementById('mainx');
+    // 初始化zrender
+    var zr = zrender.init(main);
+    var dd;//横轴泊位
+    var dt;//纵轴时间
+    var ls;//矩形坐标
+    var photo;//图片坐标 宽 高
+    var text;//文字内容
+    var type;//预报 沽口 泊位  离泊  离港
+    var sl;//线条坐标
+    var width = zr.getWidth();
+    var height = zr.getHeight();
+    var day;
+    var startdate;
+    var enddate;
+    var daySum;
+    
+    //树节点点击事件
+    function treeclick(node) {
+	    type = node.userId;
+	    var shipNo = node.id;
+	    HdUtils.dialog.setValue({
+	        type666 : type,
+	        daySum : daySum,
+	        width666 : width,
+	        height666 : height,
+	        date111 : startdate,
+	        date222 : enddate,
+	        shipNo : shipNo
+	    });
+	    HdUtils.dialog.show({
+	        width : 450,
+	        height : 260,
+	        title : '动态计划',
+	        href : "../login/system/ship/shipberth.html",
+	        isSaveHandler : true
+	    });
+    }
+    $(function() {
+	    $('#ShipStatusTree123').tree({
+	        method : "get",
+	        url : "http://10.163.204.56:8085/webresources/nologin/contract/ContractIeDoc/gentree",
+	        onClick : treeclick
+	    });
+	    
+	    startdate = Date.prototype.dateAdd(0, "yyyy-MM-dd");
+	    enddate = Date.prototype.dateAdd(5, "yyyy-MM-dd");
+	    $("#startdate").datebox("setValue", startdate);
+	    $("#enddate").datebox("setValue", enddate);
+// 	    $("#startdate").val(startdate);
+// 	    $("#enddate").val(enddate);
+	    daySum = (new Date(enddate) - new Date(startdate))/(1000*60*60*24);// 天数
+	    findAxis(startdate, width, height, daySum);//此方法显示横纵坐标轴
+	    showberths(startdate, enddate, width, height, daySum);
+    })
+    //获取横纵坐标
+    function findAxis(startdate, width, height, daySum) {
+	    zr.clear();
+	    var url = 'http://10.163.204.56:8085/webresources/nologin/contract/ContractIeDoc/findAxis?width=' + width + "&height=" + height + "&daySum=" + daySum + "&startdate=" + startdate;
+	    $.ajax({
+	        url : url,
+	        dataType : "json",
+	        success : function(res) {
+		        var data = res;
+		        dd = data.result;
+		        dt = data.times;
+		        var g1 = getData();
+		        g1.scale = [ 0.92, 0.92 ];
+		        zr.add(g1);
+		        zr.refresh();
+	        }
+	    });
+    }
+    //此方法是点击查询按钮显示当前日期下的所有泊位图 
+    function showberths(startdate, enddate, width, height, daySum) {
+	    zr.clear();
+	    var url ='http://10.163.204.56:8085/webresources/nologin/contract/ContractIeDoc/showBerths?startdate=' + startdate + "&enddate=" + enddate + "&width=" + width + "&height=" + height
+	                    + "&daySum=" + daySum;
+	    $.ajax({
+	        url : url,
+	        dataType : "json",
+	        success : function(res) {
+		        var data = res;
+		        var lt = data.list;
+		        var g1 = getData();
+		        g1.scale = [ 0.92, 0.92 ];
+		        for (var i = 0; i < lt.length; i++) {
+			        getBerth(lt[i], g1);
+		        }
+		        g1.scale = [ 0.92, 0.92 ];
+		        zr.add(g1);
+		        zr.refresh();
+	        }
+	    });
+    }
+    $("#makeberthplan").on("click", function() {
+	    startdate = $("#startdate").datebox("getValue");
+	    enddate = $("#enddate").datebox("getValue");
+	    daySum = (new Date(enddate) - new Date(startdate))/(1000 * 60 * 60 * 24);
+	    findAxis(startdate, width, height, daySum);//此方法显示横纵坐标轴
+	    showberths(startdate, enddate, width, height, daySum);
+    });
+    //查找多日的纵坐标 
+    function findDaysdata(ptim, startdate, enddate, height) {
+	    $.ajax({
+	                url : 'http://10.163.204.56:8085/webresources/nologin/contract/ContractIeDoc/getBerthTim?ptim=' + ptim + "&startdate=" + startdate + "&enddate=" + enddate + "&height="
+	                        + height,
+	                dataType : "json",
+	                success : function(res) {
+		                var data = res;
+		                dt = data.times;
+		                day = data.days;
+		                var g1 = getData();
+		                g1.scale = [ 0.92, 0.92 ];
+		                zr.add(g1);
+		                zr.refresh();
+	                }
+	            });
+    }
+    function mGetDate(year, month) {
+	    var d = new Date(year, month, 0);
+	    return d.getDate();
+    }
+    //获取后一天的日期
+    function querytomorrow(cte) {
+	    var d = string2date(cte);
+	    var dte = d.getDate() + 1;
+	    var year = d.getFullYear();
+	    var month = d.getMonth() + 1;
+	    var day = d.getDate().toString();
+	    var da = mGetDate(year, month);
+	    if (day == da && month == "12") {
+		    var dd = mGetDate(year + 1, 0);
+		    var mm = "01";
+		    var ds = "01";
+		    var contractDte = year + 1 + "-" + mm + "-" + ds;
+	    } else if (day == da) {
+		    var mm = parseInt(month) + 1;
+		    var ds = "01";
+		    if (mm < 10) mm = 0 + mm.toString();
+		    var contractDte = year + "-" + mm + "-" + ds;
+	    } else {
+		    var mm = parseInt(month);
+		    if (mm < 10) mm = 0 + mm.toString();
+		    day = parseInt(day) + 1;
+		    if (day < 10) day = 0 + day.toString();
+		    var contractDte = year + "-" + mm + "-" + day;
+	    }
+	    return contractDte;
+    }
+    function string2date(str) {
+	    return new Date(Date.parse(str));
+    }
+    function dateToString2(cte) {
+	    var d = string2date(cte);
+	    var dte = d.getDate();
+	    var year = d.getFullYear();
+	    var month = d.getMonth() + 1;
+	    var day = (d.getDate() + 1).toString();
+	    if (month.length == 1) {
+		    month = "0" + month;
+	    }
+	    if (day.length == 1) {
+		    day = "0" + day;
+	    }
+	    var dateTime = year + "-" + month + "-" + day;
+	    return dateTime;
+    }
+    function norightclick(e) {
+	    if (window.Event) {
+		    if (event.button == 2 || event.button == 3) {
+			    event.cancelBubble = true
+			    event.returnValue = false;
+			    return false;
+		    }
+	    }
+
+    }
+    //实现十字一换行
+    function changeHs(a){
+	    a = a.replace(/\n/g,'');//去掉原来的换行符
+    	a = a.split('');//将字符串换成数组
+    	for(var i=0;i<a.length;i++){
+    		for(var j=0;j<10;j++){
+    			if(j == 9){
+    				a.splice(i+1,0,'\n');
+    			}
+    			i++;
+    		}
+    	}
+    	return a.join('');
+    }
+    //初始化图形
+    function getBerth(obj, g) {
+	    var berthtext = obj.text;
+	    var remarks = obj.remarks;
+	    remarks = changeHs(remarks);
+	    var stat = obj.shipStat;
+	    var flag = obj.flag;
+	    var berthWay = obj.berthWay;
+	    var shape;
+	    if (flag == '2500') {
+	    	 if (berthWay == 'R') {
+	 		    shape = 'gunzhuangR.png';
+	 	    } else {
+	 		    shape = 'gunzhuangL.png';
+	 	    }
+	    }else if (flag == '2800') {
+	    	 if (berthWay == 'R') {
+	 		    shape = 'youchuanR.png';
+	 	    } else {
+	 		    shape = 'youchuanL.png';
+	 	    }
+	    }else {
+	    	 if (berthWay == 'R') {
+	 		    shape = 'elseR.png';
+	 	    } else  {
+	 		    shape = 'elseL.png';
+	 	    }
+	    }
+	    var ls = obj.shape;
+	    var photo = obj.image;
+	    var shipNo = obj.shipNo;
+	    var shipVisitId = obj.shipVisitId;
+	    var berthWay = obj.berthWay;
+	    var shipLongNum = obj.shipLongNum;
+	    var rect = new zrender.Rect({
+	        shape : {
+	            x : photo.x,
+	            y : photo.y,
+	            width : photo.width,
+	            height : photo.height,
+	        },
+	        style : {
+	        	text : '{one|' + berthtext + '}\n{two|' + remarks + '}',
+	            textPosition : 'top',
+	            textVerticalAlign : 'right',
+	            fill : '#bfc2ff',
+	            textFill : "#51526a",
+	            textLineHeight : 20,
+	            textOffset : [0,photo.height/5],
+	            rich : {
+	                one : {
+	                    fontsize : 30,
+	                    textFill : "#51526a",
+	                },
+	                two : {
+	                    fontsize : 30,
+	                    textFill : "#51526a",
+	                }
+	            },
+	            stroke : '#1C1C1C',
+	        },
+// 	        onclick : function(params) {
+// 		        HdUtils.dialog.setValue({
+// 		            type666 : type,
+// 		            daySum : daySum,
+// 		            width666 : width,
+// 		            height666 : height,
+// 		            date111 : startdate,
+// 		            date222 : enddate,
+// 		            shipLongNum : shipLongNum,
+// 		            shipNo : shipNo,
+// 		            shipVisitId : shipVisitId
+// 		        });
+// 		        HdUtils.dialog.show({
+// 		            width : 600,
+// 		            height : 300,
+// 		            title : '泊位计划',
+// 		            href : "../login/system/ship/shipberth.html",
+// 		            isSaveHandler : true
+// 		        });
+// 	        },
+	    });
+	    rect.on('contextmenu', function(e) {
+		    norightclick(e)
+		    HdUtils.dialog.setValue({
+		        shipNo : shipNo,
+		        shipLongNum : shipLongNum
+		    });
+		    HdUtils.dialog.show({
+		        width : 600,
+		        height : 300,
+		        title : '详细信息',
+		        href : "../login/system/ship/shipberthdetail.html",
+		        isSaveHandler : false
+		    });
+	    });
+	    g.add(rect);
+	    var image = new zrender.Image({
+	        style : {
+	            image : 'http://10.163.204.56:8085/js/zrender/image/' + shape,
+	            x : photo.x,
+	            y : photo.y,
+	            width : photo.width,
+	            height : photo.height/5,
+	        },
+// 	        onclick : function(params) {
+// 		        HdUtils.dialog.setValue({
+// 		            type666 : type,
+// 		            daySum : daySum,
+// 		            width666 : width,
+// 		            height666 : height,
+// 		            date111 : startdate,
+// 		            date222 : enddate,
+// 		            shipLongNum : shipLongNum,
+// 		            shipNo : shipNo
+// 		        });
+// 		        HdUtils.dialog.show({
+// 		            width : 600,
+// 		            height : 300,
+// 		            title : '泊位计划',
+// 		            href : "../login/system/ship/shipberth.html",
+// 		            isSaveHandler : true
+// 		        });
+// 	        },
+
+	    });
+	    image.on('contextmenu', function(e) {
+		    norightclick(e)
+		    HdUtils.dialog.setValue({
+		        shipNo : shipNo,
+		        shipLongNum : shipLongNum
+		    });
+		    HdUtils.dialog.show({
+		        width : 600,
+		        height : 300,
+		        title : '详细信息',
+		        href : "../login/system/ship/shipberthdetail.html",
+		        isSaveHandler : false
+		    });
+	    });
+	    g.add(image);
+    }
+    function getData() {
+	    var heightRatio = zr.getHeight() / 1000;
+	    var widthRatio = zr.getWidth() / 1000;
+	    var aa = zr.getHeight();
+	    var bb = zr.getWidth();
+	    var g = new zrender.Group({
+		    position : [ 50, 50 ],
+	    });
+	    var rect_max = new zrender.Rect({
+	        shape : {
+	            x : 0,
+	            y : 0,
+	            width : 1000 * widthRatio,
+	            height : 1000 * heightRatio,
+	        },
+	        style : {
+	            fill : '#bfc2ff',
+	            stroke : '#000000',
+	        }
+	    });
+	    g.add(rect_max);
+	    var add = 0;
+	    var mark = 0;
+	    if (dd) {
+		    for (var i = 0; i < dd.length; i++) {//竖线
+			    add += dd[i].rate;
+			    var nam = dd[i].name;
+			    var ln = new zrender.Line({
+			        shape : {
+			            x1 : (add) * 1000 * widthRatio,
+			            y1 : 1000 * heightRatio,
+			            x2 : (add) * 1000 * widthRatio,
+			            y2 : 0
+			        },
+			        style : {
+			            lineWidth : 0.2,
+			            lineDash : [ 1, 5 ],
+			            textPosition : 'top',
+			            textVerticalAlign : 'bottom',
+			            textOffset : [ 0, 6 ],
+			            stroke : '#CD0000',
+			            fontSize : 15
+			        }
+			    });
+			    g.add(ln);
+		    }
+	    }
+	    var hours = 12;
+	    if (dt) {
+		    for (var j = 0; j < dt.length; j++) {//横线
+			    var now = dt[j].tim;
+			    var date;
+			    var jxczb;
+			    if (now == "01" && j < 10) {
+				    date = startdate
+				    var rect = new zrender.Rect({
+				        shape : {
+				            x : -50,
+				            y : 0,
+				            width : 20,
+				            height : 4 * aa / (daySum * hours),
+				        },
+				        style : {
+				            text : date.substr(date.length - 2),
+				            textPosition : 'inside',
+				            textVerticalAlign : 'right',
+				            fill : '#fff',
+				            stroke : '#272cff',
+				        }
+				    });
+				    jxczb = j * aa / (daySum * hours);
+			    } else if (now == "01" && dt.length - j > 8) {
+				    date = querytomorrow(date);
+				    var rect = new zrender.Rect({
+				        shape : {
+				            x : -50,
+				            y : jxczb,
+				            width : 20,
+				            height : hours * aa / (daySum * hours),
+				        },
+				        style : {
+				            text : date.substr(date.length - 2),
+				            textPosition : 'inside',
+				            textVerticalAlign : 'right',
+				            fill : '#fff',
+				            stroke : '#272cff',
+				        }
+				    });
+				    jxczb = j * aa / (daySum * hours);
+			    } else if (now == "17" && dt.length - j < 2) {
+				    date = querytomorrow(date)
+				    var rect = new zrender.Rect({
+				        shape : {
+				            x : -50,
+				            y : jxczb,
+				            width : 20,
+				            height : 8 * aa / (daySum * hours),
+				        },
+				        style : {
+				            text : date.substr(date.length - 2),
+				            textPosition : 'inside',
+				            textVerticalAlign : 'right',
+				            fill : '#fff',
+				            stroke : '#272cff',
+				        }
+				    });
+				    jxczb = j * aa / (daySum * hours);
+			    }
+			    g.add(rect);
+			    var le = new zrender.Line({
+			        shape : {
+			            x1 : 0,
+			            y1 : j * aa / (daySum * hours),
+			            x2 : 1000 * widthRatio,
+			            y2 : j * aa / (daySum * hours)
+			        },
+			        style : {
+			            lineWidth : 0.2,
+			            lineDash : [ 1, 5 ],
+			            textPosition : 'left',
+			            textAlign : 'left',
+			            textOffset : [ -15, 0 ],
+			            fontSize : 15,
+			            text : now,
+			            stroke : '#CD0000',
+			            zlevel : 10
+			        }
+			    });
+
+			    g.add(le);
+		    }
+	    }
+	    return g;
+    }
+    
+    Date.prototype.dateAdd = function(day, format) {   
+    	      var now = new Date();
+    	      var time = now.getTime() + 1000*60*60*24*day;
+    	      var date =  new Date(time).format(format);
+    	      return date
+    }   
+    Date.prototype.format = function(format) {
+        var o = {
+            "M+": this.getMonth() + 1, // month
+            "d+": this.getDate(), // day
+            "h+": this.getHours(), // hour
+            "m+": this.getMinutes(), // minute
+            "s+": this.getSeconds(), // second
+            "q+": Math.floor((this.getMonth() + 3) / 3), // quarter
+            "S": this.getMilliseconds() // millisecond
+        };
+        if (/(y+)/.test(format)) {
+            format = format.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+        }
+        for (var k in o) {
+            if (new RegExp("(" + k + ")").test(format)) {
+                format = format.replace(RegExp.$1, RegExp.$1.length === 1 ? o[k] : ("00" + o[k]).substr(("" + o[k]).length));
+            }
+        }
+        return format;
+    };
+    
+    
+</script>
+
+</html>
+

@@ -1,0 +1,101 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#CPortForm1507959148645");
+	    var portId = HdUtils.dialog.getValue("portId");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/base/CPort/findone?portId=" + portId,
+	        success : function(data) {
+		        $("#CPortForm1507959148645").form("loadData", data);
+	        }
+	    })
+	    $('#portClass').combobox(HdUtils.code.scode({
+		    fieldCod : 'PORT_TYP'
+	    }, {
+		    required : false
+	    }));
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+		    var isValss = $("#CPortForm1507959148645").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#CPortForm1507959148645").serializeObject();
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/base/CPort/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#DayWorkClassDatagrid1508123307299" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+    });
+</script>
+<form id="CPortForm1507959148645">
+    <input id="portId" name="portId" hidden="true">
+	<table id="CPortTable1507959148645" style="height: 75%; width: 80%"
+		class="tableform">
+		<tr>
+			<th>港口代码：</th>
+			<td><input id="portCod" name="portCod"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="10" /></td>
+			<th>港口简称：</th>
+			<td><input id="portShort" name="portShort"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="10" /></td>
+		</tr>
+		<tr>
+			<th>港口中文名称：</th>
+			<td><input id="cPortNam" name="cPortNam"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="10" /></td>
+			<th>港口英文名称：</th>
+			<td><input id="ePortNam" name="ePortNam"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="10" /></td>
+		</tr>
+		<tr>
+			<th>港口类别：</th>
+			<td><input id="portClass" name="portClass"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="10" /></td>
+			<th>区域：</th>
+			<td><input id="countryCod" name="countryCod"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="10" /></td>
+		</tr>
+	</table>
+</form>

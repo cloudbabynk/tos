@@ -1,0 +1,109 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var shipNo = HdUtils.dialog.getValue("shipNo");
+	    if(shipNo){
+	    	$("#shipNo").val(shipNo);
+	    }
+	    var radi = HdUtils.dialog.getValue("radi");
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/ship/Ship/findone?shipNo=" + shipNo,
+	        success : function(data) {
+		        $("#shipNetWgt").val(data.shipNetWgt);
+	        }
+	    })
+	    //作业码头
+	    $('#jkmt').combobox({
+	        url : '../webresources/login/ship/CShipData/getCDockDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    //作业码头
+	    $('#ckmt').combobox({
+	        url : '../webresources/login/ship/CShipData/getCDockDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+		    var isValss = $("#ShipForm1507959148645787").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#ShipForm1507959148645787").serializeObject();
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/ship/Ship/saveSbjf",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.code == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#DayWorkClassDatagrid1508123307299" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+
+    });
+</script>
+<form id="ShipForm1507959148645787">
+<input id="shipNo" name="shipNo" type="hidden"/>
+	<table id="ShipTable1507959148645" style="height: 75%; width: 80%"
+		class="tableform">
+		<tr>
+			<th>进口：</th>
+			<td><input id="jkhc" name="jkhc" type="checkbox" value="1"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="1" /></td>
+			<th>卸船作业码头：</th>
+			<td><input id="jkmt" name="jkmt" /></td>
+		</tr>
+		<tr>
+		    <th>出口：</th>
+			<td><input id="ckhc" name="ckhc" type="checkbox" value="1"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="1" /></td>
+			<th>装船作业码头：</th>
+			<td><input id="ckmt" name="ckmt" /></td>
+		</tr>
+		<tr>
+		    <th>净吨：</th>
+			<td><input id="shipNetWgt" name="shipNetWgt" required="required"
+				data-options="min:0,max:1000000,precision:0"
+				 style="text-align: right; width: 100px;" /></td>
+		</tr>
+	</table>
+</form>

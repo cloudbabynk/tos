@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="DayWorkClassToolBar1508123307299+${radi}"
+	style="float: left">
+	<div>
+		<!-- 查询 -->
+		<span> 工班日期：<input th:id="workDte+${radi}" name="workDte"
+			 data-options="required:false" class="easyui-datebox"
+			style="width: 120px">班次：<input th:id="workRunCod+${radi}"
+			name="workRunCod"  data-options="required:false" style="width: 120px"> <a
+			class="easyui-linkbutton" th:id="query+${radi}">查询</a> 
+			<a
+			class="easyui-linkbutton" th:id='clear+${radi}'>重置</a>
+			<shiro:hasPermission name="webresources:login:WorkBill:add">
+			<a	class="easyui-linkbutton" th:id='add+${radi}' iconCls="icon-add" plain="false">新增</a> 
+			</shiro:hasPermission>
+			<shiro:hasPermission name="webresources:login:WorkBill:update">
+			<a
+			class="easyui-linkbutton" th:id='edit+${radi}'>编辑</a> 
+			</shiro:hasPermission>
+			<shiro:hasPermission name="webresources:login:WorkBill:delete">
+			<a
+			class="easyui-linkbutton" th:id='delete+${radi}'>删除</a>
+			</shiro:hasPermission>
+			<shiro:hasPermission name="webresources:login:WorkBill:upload">
+			<a
+			class="easyui-linkbutton" th:id='upload+${radi}'>上报集团</a>
+			</shiro:hasPermission> <a
+			class="easyui-linkbutton" th:id='fresh+${radi}'>刷新</a>
+			
+		</span>
+	</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="DayWorkClassDatagrid1508123307299+${radi}"
+	style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+    	$("#workDte[(${radi})]").val(Date.prototype.dateAdd(0, "yyyy-MM-dd"));
+	    $.parser.parse($('#DayWorkClassToolBar1508123307299[(${radi})]'));
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#DayWorkClassDatagrid1508123307299[(${radi})]");
+	    
+	    $('#workRunCod[(${radi})]').combobox({
+	        url : '../webresources/login/damage/MDeliveryRecord/getClassRunDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 'auto',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    var workDte;
+	    var workRunCod;
+	    // buttons
+	    // 增加。
+	    $("#add[(${radi})]").on("click", function() {
+	    	workDte = $("#workDte[(${radi})]").datebox("getValue");
+	    	if(!workDte){
+	    		HdUtils.messager.info('请先选择时间！');
+			    return;
+	    	}
+	    	workRunCod = $("#workRunCod[(${radi})]").combobox('getValue');
+	    	if(!workRunCod){
+	    		HdUtils.messager.info('请先选择班次！');
+			    return;
+	    	}
+	    	addoredit("");
+	    });
+	    // 编辑。
+	    $("#edit[(${radi})]").on("click", function() {
+	    	var data = dg.datagrid("getSelected");
+		    if (data == null || data == undefined) {
+			    HdUtils.messager.info('请选择一条数据进行编辑！');
+			    return;
+		    }
+		    var workbillNo = data.workbillNo;
+		    addoredit(workbillNo);
+	    });
+	    function addoredit(workbillNo) {
+		    HdUtils.dialog.setValue({
+			    'workbillNo' : workbillNo
+		    });
+		    HdUtils.dialog.setValue({
+			    'workDte' : workDte
+		    });
+		    HdUtils.dialog.setValue({
+			    'workRunCod' : workRunCod
+		    });
+		    HdUtils.dialog.setValue({
+			    'radi' : radi
+		    });
+		    HdUtils.dialog.show({
+		        width : 800,
+		        height : 400,
+		        title : '调度配工信息',
+		        href : "../login/system/work/workbillform.html",
+		        isSaveHandler : true
+		    });
+	    }
+	    // 删除。
+	    $("#delete[(${radi})]").on("click", function() {
+	    	 var selRow = $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("getChecked");
+	            if (selRow.length == 0) {
+		            HdUtils.messager.info('请至少选择一条数据！');
+		            return false;
+	            }
+	            var ids = '';
+	            $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+		            if (r) {
+			            for (var i = 0; i < selRow.length; i++) {
+				            ids += selRow[i].workbillNo + ",";
+			            }
+			            HdUtils.ajax.post({
+			                url : "../webresources/login/work/WorkBill/removeAll?workbillNos=" + ids,
+			                success : function(data) {
+				                HdUtils.messager.bottomRight(data.message);
+				                $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("hdReload");
+			                }
+			            });
+		            }
+	            });
+	    });
+	    // 刷新。
+	    $("#fresh[(${radi})]").on("click", function() {
+		    dg.datagrid("hdReload");
+	    });
+    	// 清空。
+	    $("#clear[(${radi})]").on("click", function() {
+	    	$("#damCod[(${radi})]").val("");
+	    	$("#damNam[(${radi})]").val("");
+	    	$("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+	    // 上报集团
+	    $("#upload[(${radi})]").on("click", function() {
+	    	var selRow = dg.datagrid("getChecked");
+            if (selRow.length == 0) {
+	            HdUtils.messager.info('请至少选择一条数据！');
+	            return false;
+            }
+		    var ids = '';
+		    $.messager.confirm("上报", "确认上报?", function(r) {
+			    if (r) {
+			    	for (var i = 0; i < selRow.length; i++) {
+					    ids += selRow[i].workbillNo + ",";
+				    }
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/work/WorkBill/uploadWorkBills?workbillNos=" + ids,
+				        success : function(data) {
+					        HdUtils.messager.bottomRight(data.message);
+					        $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("hdReload");
+				        }
+				    });
+			    }
+		    });
+	    });
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+		    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    workDte = $("#workDte[(${radi})]").datebox("getValue");
+		    onlinquery.add("workDte", workDte);
+		    onlinquery.add("workRunCod", workRunCod);
+		    return onlinquery.build();
+	    }
+	    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/work/WorkBill/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : false,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#DayWorkClassToolBar1508123307299" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+	        }, {
+	            field : "workbillNo",
+	            title : '作业票号',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "workDte",
+	            title : "日期",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "workRunCodNam",
+	            title : "班次",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "worktimeNum",
+	            title : "工时",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "fDirector",
+	            title : '指导员1',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "sDirector",
+	            title : '指导员2',
+	            multiSort : true,
+	            halign : "center",
+	            width : 120,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "machTxt",
+	            title : '机械安排',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "planNum",
+	            title : '计划件数',
+	            multiSort : true,
+	            halign : "center",
+	            width : 120,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "planWeight",
+	            title : '计划吨数',
+	            multiSort : true,
+	            halign : "center",
+	            width : 120,
+	            formatter:function(val,rowData,rowIndex){
+	                if(val!=null)
+	                    return val.toFixed(3);
+	            },
+	            sortable : false
+	        },{
+
+	            field : "workCarNum",
+	            title : '完成轿车数',
+	            multiSort : true,
+	            halign : "center",
+	            width : 120,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "workTruckNum",
+	            title : '完成大车数',
+	            multiSort : true,
+	            halign : "center",
+	            width : 120,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "workBulkNum",
+	            title : '完成设备数',
+	            multiSort : true,
+	            halign : "center",
+	            width : 120,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "workBulkWeight",
+	            title : '完成油品吨数',
+	            multiSort : true,
+	            halign : "center",
+	            width : 120,
+	            formatter:function(val,rowData,rowIndex){
+	                if(val!=null)
+	                    return val.toFixed(3);
+	            },
+	            sortable : false
+	        },  {
+
+	            field : "tallyNum",
+	            title : '理货员',
+	            multiSort : true,
+	            halign : "center",
+	            width : 120,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "driverNum",
+	            title : '司机',
+	            multiSort : true,
+	            halign : "center",
+	            width : 120,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "workTyp",
+	            title : '作业类型',
+	            multiSort : true,
+	            halign : "center",
+	            width : 120,
+	            editor : {
+	                type : "combobox",
+	                options : HdUtils.code.scode({
+		                	fieldCod : 'WORK_TYP'
+		                },{
+		                	required : true
+		                })
+	            },
+	            formatter : function(value){
+	            	return HdUtils.code.name('WORK_TYP',value);
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "shipNam",
+	            title : '船名',
+	            multiSort : true,
+	            halign : "center",
+	            width : 120,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "voyage",
+	            title : '航次',
+	            multiSort : true,
+	            halign : "center",
+	            width : 120,
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "contractNo",
+	            title : '委托号',
+	            multiSort : true,
+	            halign : "center",
+	            width : 120,
+	            sortable : false
+	        }, {
+
+	            field : "driverBillConf",
+	            title : '司机票确认',
+	            multiSort : true,
+	            halign : "center",
+	            formatter : function(value) {
+		            if (value != null && value != undefined) {
+			            if (value == "1") {
+				            value = "√";
+				            return value;
+			            } else {
+				            value = "×";
+				            return value;
+			            }
+		            } else {
+			            return value;
+		            }
+	            },
+	            width : 120,
+	            sortable : false
+	        }, {
+
+	            field : "tallyBillConf",
+	            title : '理货员作业票确认',
+	            multiSort : true,
+	            halign : "center",
+	            formatter : function(value) {
+		            if (value != null && value != undefined) {
+			            if (value == "1") {
+				            value = "√";
+				            return value;
+			            } else {
+				            value = "×";
+				            return value;
+			            }
+		            } else {
+			            return value;
+		            }
+	            },
+	            width : 120,
+	            sortable : false
+	        }, {
+
+	            field : "machBillConf",
+	            title : '机械作业票确认',
+	            multiSort : true,
+	            halign : "center",
+	            formatter : function(value) {
+		            if (value != null && value != undefined) {
+			            if (value == "1") {
+				            value = "√";
+				            return value;
+			            } else {
+				            value = "×";
+				            return value;
+			            }
+		            } else {
+			            return value;
+		            }
+	            },
+	            width : 120,
+	            sortable : false
+	        }, {
+
+	            field : "checkId",
+	            title : '审核标志',
+	            multiSort : true,
+	            formatter : function(value) {
+		            if (value != null && value != undefined) {
+			            if (value == "1") {
+				            value = "√";
+				            return value;
+			            } else {
+				            value = "×";
+				            return value;
+			            }
+		            } else {
+			            return value;
+		            }
+	            },
+	            halign : "center",
+	            width : 120,
+	            sortable : false
+	        }, {
+
+	            field : "checkerMan",
+	            title : '审核人',
+	            multiSort : true,
+	            halign : "center",
+	            width : 120,
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }
+
+	        ] ]
+	    });
+	    $("#DayWorkClassDatagrid1508123307299" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

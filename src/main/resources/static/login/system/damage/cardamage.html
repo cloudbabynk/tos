@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="CarDamageToolBar1508123301002+${radi}" style="float: left">
+	<div style="float: left">
+		<!-- 查询 -->
+		<span> 车辆流水号：<input th:id="portCarNo+${radi}" name="portCarNo"
+		   type="text" data-options="required:false"
+			style="width: 120px">车架号：<input th:id="vinNo+${radi}"
+			name="vinNo" type="text"
+			data-options="required:false" style="width: 120px">
+			残损代码：<input th:id="damCod+${radi}"
+			name="damCod" type="text"
+			data-options="required:false" style="width: 120px">
+		             残损范围：<input th:id="damArea+${radi}"
+			name="damCod" type="text"
+			data-options="required:false" style="width: 120px">
+			  残损等级：<input th:id="damLevel+${radi}"
+			name="damLevel" type="text"
+			data-options="required:false" style="width: 120px">
+			 <a
+			class="easyui-linkbutton" th:id="query+${radi}">查询</a> 
+			<a class="easyui-linkbutton" th:id='clear+${radi}'>重置</a>
+			<a class="easyui-linkbutton" th:id='choosePortCar+${radi}'>选车</a>
+		</span>
+	</div>
+	<div style="float: left">
+			<shiro:hasPermission
+				name="webresources:login:CarDamage:add">
+				<a class="easyui-linkbutton" th:id='add+${radi}' iconCls="icon-add"
+					plain="false">新增</a>
+			</shiro:hasPermission> <shiro:hasPermission name="webresources:login:CarDamage:update">
+				<a class="easyui-linkbutton" th:id='edit+${radi}'>编辑</a>
+			</shiro:hasPermission> <shiro:hasPermission name="webresources:login:CarDamage:delete">
+				<a class="easyui-linkbutton" th:id='delete+${radi}'>删除</a>
+			</shiro:hasPermission> <a class="easyui-linkbutton" th:id='fresh+${radi}'>刷新</a>
+		    <input id="vinNo"
+			name="vinNo" type="text" hidden="true"
+			data-options="required:false" style="width: 120px">
+			<input id="portCarNo"
+			name="portCarNo" type="text"  hidden="true"
+			data-options="required:false" style="width: 120px">
+		
+	</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="CarDamageDatagrid1508123301002+${radi}" style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#CarDamageDatagrid1508123301002[(${radi})]");
+	    var vinNo;
+	    var portCarNo;
+	    // buttons
+	    //选在港车辆
+	    $("#choosePortCar[(${radi})]").on("click", function() {
+            HdUtils.selPortCar(callback);
+        });
+	    function callback(data){
+        	$("#vinNo").val(data.vinNo);
+        	vinNo=$("#vinNo").val();
+        	$("#portCarNo").val(data.portCarNo);
+            portCarNo=$("#portCarNo").val();
+        }
+	    $('#damCod[(${radi})]').combobox({
+	        url : '../webresources/login/damage/CarDamage/getCDamageCodDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 'auto',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $('#damLevel[(${radi})]').combobox({
+	        url : '../webresources/login/damage/CarDamage/getCDamgLevelDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 'auto',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $('#damArea[(${radi})]').combobox({
+	        url : '../webresources/login/damage/CarDamage/getCDamgAreaDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 'auto',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    // 增加。
+	    $("#add[(${radi})]").on("click", function() {
+		    addoredit("");
+	    });
+	    // 编辑。
+	    $("#edit[(${radi})]").on("click", function() {
+		    var data = dg.datagrid("getSelected");
+		    if (data == null || data == undefined) {
+			    HdUtils.messager.info('请选择一条数据进行编辑！');
+			    return;
+		    }
+		    var cardamagId = data.cardamagId;
+		    addoredit(cardamagId);
+	    });
+	    function addoredit(cardamagId) {
+		    HdUtils.dialog.setValue({
+			    'cardamagId' : cardamagId
+		    });
+		    HdUtils.dialog.setValue({
+			    'radi' : radi,
+			    'vinNo' : vinNo,
+			    'portCarNo' : portCarNo
+		    });
+		    HdUtils.dialog.show({
+		        width : 600,
+		        height : 260,
+		        title : '残损信息',
+		        href : "../login/system/damage/cardamageform.html",
+		        isSaveHandler : true
+		    });
+	    }
+	    // 删除。
+	    $("#delete[(${radi})]").on("click", function() {
+		    var selRow = $("#CarDamageDatagrid1508123301002[(${radi})]").datagrid("getChecked");
+		    if (selRow.length == 0) {
+			    HdUtils.messager.info('请至少选择一条数据！');
+			    return false;
+		    }
+		    var ids = '';
+		    $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+			    if (r) {
+				    for (var i = 0; i < selRow.length; i++) {
+					    ids += selRow[i].cardamagId + ",";
+				    }
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/damage/CarDamage/removeAll?cardamagIds=" + ids,
+				        success : function(data) {
+					        HdUtils.messager.bottomRight(data.message);
+					        $("#CarDamageDatagrid1508123301002[(${radi})]").datagrid("hdReload");
+				        }
+				    });
+			    }
+		    });
+	    });
+	    // 刷新。
+	    $("#fresh[(${radi})]").on("click", function() {
+		    dg.datagrid("hdReload");
+	    });
+	    // 清空。
+	    $("#clear[(${radi})]").on("click", function() {
+	       $("#portCarNo[(${radi})]").val("");
+	       $("#vinNo[(${radi})]").val("");
+	       $("#damCod[(${radi})]").val("");
+	       $("#damArea[(${radi})]").val("");
+	       $("#damLevel[(${radi})]").val("");
+	       $("#CarDamageDatagrid1508123301002[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	      });
+
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+		    $("#CarDamageDatagrid1508123301002[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    var portCarNo = $("#portCarNo[(${radi})]").val();
+		    var vinNo = $("#vinNo[(${radi})]").val();
+		    var damCod = $("#damCod[(${radi})]").combobox('getValue');
+		    var damArea = $("#damArea[(${radi})]").combobox('getValue');
+		    var damLevel = $("#damLevel[(${radi})]").combobox('getValue');
+		    onlinquery.add("portCarNo", portCarNo);
+		    onlinquery.add("vinNo", vinNo);
+		    onlinquery.add("damCod", damCod);
+		    onlinquery.add("damArea", damArea);
+		    onlinquery.add("damLevel", damLevel);
+		    return onlinquery.build();
+	    }
+
+	    $("#CarDamageDatagrid1508123301002[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/damage/CarDamage/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#CarDamageToolBar1508123301002" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+
+	        },{
+	            field : "vinNo",
+	            title : "车架号",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "portCarNo",
+	            title : '车辆流水号',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "damCod",
+	            title : "残损代码",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "damArea",
+	            title : "残损范围",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "damLevel",
+	            title : "残损等级",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "incharge",
+	            title : "责任方",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "combobox",
+	                options : HdUtils.code.scode({
+		                	fieldCod : 'INCHARGE'
+		                },{
+		                	required : true
+		                })
+	            },
+	            formatter : function(value){
+	            	return HdUtils.code.name('INCHARGE',value);
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "regPost",
+	            title : "登记岗位",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+	        
+	        , {
+
+	            field : "recNam",
+	            title : '<font color="red">录入员</font>',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "recTim",
+	            title : '<font color="red">录入时间</font>',
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.date,
+	            width : 120,
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "updNam",
+	            title : '<font color="red">修改人</font>',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "updTim",
+	            title : '<font color="red">修改时间</font>',
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.date,
+	            width : 120,
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }
+
+	        ] ]
+	    });
+	    $("#CarDamageDatagrid1508123301002" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

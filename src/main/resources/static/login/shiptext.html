@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div class="easyui-layout" style="width: 100%; height: 100%;">
+	<!-- 工具栏 结束 -->
+	<!-- Datagrid -->
+	<table th:id="ShipTextDatagrid1507540739357+${radi}"
+		style="height: 100%"></table>
+</div>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+
+	    $("#ShipTextDatagrid1507540739357[(${radi})]").hddatagrid({
+	        striped : true,
+	        url : "../webresources/login/citos/ship/ShipText/find",
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        sortOrder : 'asc',
+            sortName : 'shiptime',
+	        toolbar : "#ShipTextToolBar1507540739357[(${radi})]",
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ {
+
+	            field : "shipid",
+	            title : '主键',
+	            multiSort : true,
+	            halign : "center",
+	            hidden : true,
+	            sortable : false
+	        }, {
+
+	            field : "shipnam",
+	            title : "船名",
+	            multiSort : true,
+	            halign : "center",
+	            width : 90,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "shipvo",
+	            title : "航次",
+	            multiSort : true,
+	            width : 90,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "shipberth",
+	            title : "泊位",
+	            width : 80,
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "shiptime",
+	            title : "到港时间",
+	            multiSort : true,
+	            halign : "center",
+	            width : 120,
+	            formatter : $.hd.ezui.formatter.datetime,
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "shipstatus",
+	            title : "整船作业进度",
+	            multiSort : true,
+	            width : 180,
+	            halign : "center",
+	            formatter : progressFormatter,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+
+	        ] ]
+	    });
+	    $("#ShipTextDatagrid1507540739357").datagrid("hdGetColumnNames");
+    });
+    function progressFormatter(value, row, index) {
+	    htmlstr = '<div class="easyui-progressbar progressbar easyui-fluid" style="width: 100%; height: 12px;">'
+
+	    + '<div class="progressbar-value" style="width: 100%; height: 12px; line-height: 12px;"> '
+
+	    + '<div class="progressbar-text" style="width: '+value+'; height: 12px; line-height: 12px;">' + value + '</div>'
+
+	    + '</div>'
+
+	    + '</div>';
+
+	    return htmlstr;
+
+    }
+
+    /*]]>*/
+</script>
+</html>
+

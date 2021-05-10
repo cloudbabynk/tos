@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="MoveCarPlanToolBar1508123301002+${radi}" style="float: left">
+	<div>
+		<!-- 查询 -->
+		<span> 计划场位：<input th:id="planPlac+${radi}" name="planPlac"
+			class="easyui-validatebox" data-options="required:false"
+			style="width: 120px">捣场方式：<input th:id="moveWay+${radi}"
+			name="moveWay" class="easyui-validatebox"
+			data-options="required:false" style="width: 120px">
+			作业码头：<input th:id="dockCod+${radi}"
+			name="dockCod" class="easyui-validatebox"
+			data-options="required:false" style="width: 120px">
+			 <a class="easyui-linkbutton" th:id="query+${radi}">查询</a> 
+			<a class="easyui-linkbutton" th:id='clear+${radi}'>重置</a>
+			 <shiro:hasPermission name="webresources:login:MoveCarPlan:delete">
+				<a class="easyui-linkbutton" th:id='delete+${radi}'>删除</a>
+			</shiro:hasPermission> <a class="easyui-linkbutton" th:id='fresh+${radi}'>刷新</a>
+		    
+		</span>
+	</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="MoveCarPlanDatagrid1508123301002+${radi}" style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#MoveCarPlanDatagrid1508123301002[(${radi})]");
+	    // buttons
+	   $('#moveWay[(${radi})]').combobox(HdUtils.code.scode({
+		    fieldCod : 'MOVE_WAY'
+	    }, {
+		    required : false
+	    })
+	    );
+	   $('#dockCod[(${radi})]').combobox({
+	        url : '../webresources/login/contract/ContractIeDoc/getCDock',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 'auto',
+	        required:'true',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    // 删除。
+	    $("#delete[(${radi})]").on("click", function() {
+		    var selRow = $("#MoveCarPlanDatagrid1508123301002[(${radi})]").datagrid("getChecked");
+		    if (selRow.length == 0) {
+			    HdUtils.messager.info('请至少选择一条数据！');
+			    return false;
+		    }
+		    var ids = '';
+		    $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+			    if (r) {
+				    for (var i = 0; i < selRow.length; i++) {
+					    ids += selRow[i].moveplanId + ",";
+				    }
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/work/MoveCarPlan/removeAll?moveplanIds=" + ids,
+				        success : function(data) {
+					        HdUtils.messager.bottomRight(data.message);
+					        $("#MoveCarPlanDatagrid1508123301002[(${radi})]").datagrid("hdReload");
+				        }
+				    });
+			    }
+		    });
+	    });
+	    // 刷新。
+	    $("#fresh[(${radi})]").on("click", function() {
+		    dg.datagrid("hdReload");
+	    });
+	    // 清空。
+	    $("#clear[(${radi})]").on("click", function() {
+	       $("#planPlac[(${radi})]").val("");
+	       $("#dockCod[(${radi})]").combobox('setValue',"");
+	       $("#moveWay[(${radi})]").combobox('setValue',"");
+	       $("#MoveCarPlanDatagrid1508123301002[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	      });
+
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+		    $("#MoveCarPlanDatagrid1508123301002[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    var planPlac = $("#planPlac[(${radi})]").val();
+		    var dockCod = $("#dockCod[(${radi})]").combobox('getValue');
+		    var moveWay = $("#moveWay[(${radi})]").combobox('getValue');
+		    onlinquery.add("planPlac", planPlac);
+		    onlinquery.add("dockCod", dockCod);
+		    onlinquery.add("moveWay", moveWay); 
+		    return onlinquery.build();
+	    }
+
+	    $("#MoveCarPlanDatagrid1508123301002[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/work/MoveCarPlan/findB",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#MoveCarPlanToolBar1508123301002" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+
+	        }, {
+
+	            field : "movePlanNo",
+	            title : '计划号',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "moveWay",
+	            title : "捣场方式",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            formatter:function(value){
+	            	if(value=='0'){
+	            		value="捣场";
+	            		return value;
+	            	}else if(value=='1'){
+	            		value="查验捣场";
+	            		return value;
+	            	}else if(value=='2'){
+	            		value="商检捣场";
+	            		return value;
+	            	}
+	            },
+	            sortable : false
+	        }
+	        , {
+	            field : "portCarNo",
+	            title : "车辆流水号",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        } , {
+	            field : "oldPlac",
+	            title : "原车位",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        } , {
+	            field : "planPlac",
+	            title : "计划车位",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "sendId",
+	            title : "指令发送标志",
+	            multiSort : true,
+	            halign : "center",
+	            formatter : function(value) {
+		            if (value != null && value != undefined) {
+			            if (value == 0) {
+				            value = "×";
+				            return value;
+			            } else {
+				            value = "√";
+				            return value;
+			            }
+		            } else {
+			            return value;
+		            }
+	            },
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "finishedId",
+	            title : "完成标志",
+	            multiSort : true,
+	            halign : "center",
+	            formatter : function(value) {
+		            if (value != null && value != undefined) {
+			            if (value == 0) {
+				            value = "×";
+				            return value;
+			            } else {
+				            value = "√";
+				            return value;
+			            }
+		            } else {
+			            return value;
+		            }
+	            },
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "dockCod",
+	            title : "作业码头",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "remarks",
+	            title : "备注",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "recNam",
+	            title : '<font color="red">录入员</font>',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "recTim",
+	            title : '<font color="red">录入时间</font>',
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.date,
+	            width : 120,
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "updNam",
+	            title : '<font color="red">修改人</font>',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "updTim",
+	            title : '<font color="red">修改时间</font>',
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.date,
+	            width : 120,
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }
+
+	        ] ]
+	    });
+	    $("#MoveCarPlanDatagrid1508123301002" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

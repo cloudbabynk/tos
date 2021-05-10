@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+		<div th:id="xieShipToolBar+${radi}" style="float: left;text-align: left;">
+			<input th:id="Type+${radi}" th:value='${Type}' type="hidden" /> 
+			<input th:id="empNo+${radi}" th:value='${empNo}' type="hidden" />
+			<input th:id="classNo+${radi}" th:value='${classNo}' type="hidden" />
+			<span>
+				班组：<input th:id="slhbz+${radi}" name="lhbz" type="text" data-options="required:false" style="width: 100px">
+				理货员：<input th:id="inCyNam+${radi}" name="inCyNam" type="text" data-options="required:false" style="width: 100px">
+				<input th:id="useMachId+${radi}" name="useMachId" type="checkbox" 	style="width: 20px" maxlength="1" />
+				港方动力<input th:id="useWorkerId+${radi}" name="useWorkerId" type="checkbox" 	style="width: 20px" checked="checked" data-options="required:false" class="easyui-validatebox"	maxlength="1" />
+				港方人力 <input th:id="nightId+${radi}" name="nightId" type="checkbox" style="width: 20px" data-options="required:false" class="easyui-validatebox" maxlength="1" />
+				夜班标志 <input th:id="holidayId+${radi}" name="holidayId" type="checkbox" style="width: 20px" data-options="required:false" class="easyui-validatebox" maxlength="1" />
+				节假日标志 <br>班次：<input th:id="workRunCod+${radi}" name="workRunCod" type="text" data-options="required:false" style="width: 80px">
+				装船时间： <input th:id="outCyTim+${radi}" name="outCyTim" required="required" class="easyui-datetimebox" />
+				装船数量：<input th:id="rcsl+${radi}" name="rcsl" type="text" data-options="required:false" style="width: 80px">
+				备注：<input th:id="remarks+${radi}" name="remarks" type="text" data-options="required:false" style="width: 80px"> 
+				<shiro:hasPermission name="webresources:login:PortCar:save">
+					<a class="easyui-linkbutton" th:id="save+${radi}">装船</a>
+				</shiro:hasPermission>
+				 <a class="easyui-linkbutton" th:id='chooseShip+${radi}'  plain="false">选装载船</a> 
+				<br>
+				船名：<input th:id="cShipNam+${radi}" name="cShipNam" placeholder="请输入船名" type="text" data-options="required:false" style="width:100px"/>
+				航次：<input th:id="ivoyage+${radi}" name="ivoyage" placeholder="请输入航次"  type="text" data-options="required:false" style="width: 100px"/>
+				品牌：<input th:id="brandCod+${radi}" name="brandCod" type="text" data-options="required:false" style="width: 80px">
+				车型：<input th:id="carTyp+${radi}" name="carTyp" placeholder="请输入车型代码" type="text" data-options="required:false" style="width: 80px">
+				堆场：<input th:id="cyAreaNo+${radi}" name="cyAreaNo" type="text" data-options="required:false" style="width: 80px">
+				入库日期：<input th:id="inCyTim+${radi}" name="inCyTim" data-options="required:false" class="easyui-datebox" style="width: 100px">
+				<a class="easyui-linkbutton" th:id="query+${radi}">查询</a> 
+				<a class="easyui-linkbutton" th:id='clear+${radi}'>重置</a>
+			</span>
+		</div>
+		<table th:id="xieShipDatagrid+${radi}" style="height: 100%"></table>
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#xieShipDatagrid[(${radi})]");
+	    $.parser.parse($('#xieShipToolBar[(${radi})]'));
+	    var type = $("#Type[(${radi})]").val();
+	    var empNo = $("#empNo[(${radi})]").val();
+	    var classNo = $("#classNo[(${radi})]").val();
+	    var days = Date.prototype.dateAdd(0, "yyyy-MM-dd");
+	    
+	    $('#brandCod[(${radi})]').combobox({
+	        url : '../webresources/login/ship/BillCar/getCBrandDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight:120,
+	        required : false,
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $('#inCyNam[(${radi})]').combobox({
+	        url : '../webresources/login/base/CEmployee/getCEmployee',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 120,
+	        required : true,
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $('#carTyp[(${radi})]').combobox({
+	        url : '../webresources/login/ship/BillCar/getCCarTypDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 'auto',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $('#cyAreaNo[(${radi})]').combobox({
+	        url : '../webresources/login/base/CCyArea/getCCyAreaDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight:'200',
+	        onSelect : function(rec) {
+	        	return rec.value;
+	        }
+	    });
+	    $('#workRunCod[(${radi})]').combobox({
+	        url : '../webresources/login/damage/MDeliveryRecord/getClassRunDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 'auto',
+	        required : true,
+	        onSelect : function(rec) {
+		        var a = $('#outCyTim[(${radi})]').datetimebox("getValue").substring(0, 10);
+		        if (rec.value == 1) {
+			        $('#outCyTim[(${radi})]').datetimebox({
+			            required : false,
+			            value : a + ' 09:00',
+			            onShowPanel : function() {
+				            $(this).datetimebox("spinner").timespinner("setValue", a + "09:00:00");
+			            }
+			        });
+		        } else if (rec.value == 2) {
+			        $('#outCyTim[(${radi})]').datetimebox({
+			            required : false,
+			            value : a + ' 21:00',
+			            onShowPanel : function() {
+				            $(this).datetimebox("spinner").timespinner("setValue", a + "21:00:00");
+			            }
+			        });
+		        }
+		        return rec.value;
+	        }
+	    });
+	    $('#slhbz[(${radi})]').combobox({
+	        url : '../webresources/login/base/CWorkClass/getCWorkClass',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 120,
+	        required : true,
+	        onSelect : function(rec) {
+		        $('#inCyNam[(${radi})]').combobox({
+		            url : '../webresources/login/base/CEmployee/getCEmployee?classNo=' + rec.value,
+		            valueField : 'value',
+		            textField : 'label',
+		            panelHeight : 120,
+		            required : true,
+		            onSelect : function(rec) {
+			            return rec.value;
+		            }
+		        });
+		        return rec.value;
+	        }
+	    });
+	    $('#inCyNam[(${radi})]').combobox('setValue', empNo);
+        $('#slhbz[(${radi})]').combobox('setValue', classNo);
+        var myDate = new Date();
+	    var h=myDate.getHours();
+	    if (h <= 8 || h>=20){
+	    	$('#workRunCod[(${radi})]').combobox('setValue', '2');
+	    	$('#outCyTim[(${radi})]').datetimebox({
+	            required : false,
+	            value : days + ' 21:00',
+	            onShowPanel : function() {
+		            $(this).datetimebox("spinner").timespinner("setValue", days + "21:00:00");
+	            }
+	        });
+	    } else {
+	    	$('#workRunCod[(${radi})]').combobox('setValue', '1');
+	    	$('#outCyTim[(${radi})]').datetimebox({
+	            required : false,
+	            value : days + ' 09:00',
+	            onShowPanel : function() {
+		            $(this).datetimebox("spinner").timespinner("setValue", days + "09:00:00");
+	            }
+	        });
+	    }
+
+	    //装船shipNo
+	    var newShipNo = HdUtils.dialog.getValue("shipNo");
+	    //卸船shipNo 
+	    var shipNo;
+	    var dockCod = HdUtils.dialog.getValue("dockCod");
+
+	    var inCyNam;
+	    var driver;
+	    var cyPlac;
+	    var rfidCardNo;
+	    var vinNo;
+	    var contractNo;
+	    
+	    //选转载船
+	    $("#chooseShip[(${radi})]").on("click", function() {
+	    	HdUtils.selTypShip(callback,'NM');
+	    });
+	    
+	    function callback(data){
+        	$("#cShipNam[(${radi})]").val(data.cShipNam);
+        	$("#ivoyage[(${radi})]").val(data.ivoyage);
+        	shipNo = data.shipNo;
+		    $("#xieShipDatagrid[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+        }
+	    
+	    
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+		    $("#xieShipDatagrid[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    if(shipNo){
+		    	onlinquery.add("shipNo", shipNo);
+		    }
+		    onlinquery.add("type", "XCPZ");
+		    var date = $("#inCyTim[(${radi})]").datebox("getValue");
+		    var carTyp = $("#carTyp[(${radi})]").combobox('getValue');
+		    var brandCod = $("#brandCod[(${radi})]").combobox('getValue');
+		    var cyAreaNo = $("#cyAreaNo[(${radi})]").combobox('getValue');
+		    onlinquery.add("inCyTim", date);
+		    onlinquery.add("carTyp", carTyp);
+		    onlinquery.add("cyAreaNo", cyAreaNo);
+		    onlinquery.add("brandCod", brandCod);
+		    return onlinquery.build();
+	    }
+
+	    // 理货回退
+	    $("#plxcht[(${radi})]").on("click", function() {
+		    var data = dg.datagrid("getSelected");
+		    if (data == null || data == undefined) {
+			    HdUtils.messager.info('请选择一条数据进行删除！');
+			    return;
+		    }
+		    var cargo = new Object();
+		    cargo.shipNo = data.shipNo;
+		    cargo.carTyp = data.carTyp;
+		    cargo.brandCod = data.brandCod;
+		    cargo.inCyTim = data.inCyTim
+		    cargo.tradeId = "1";
+		    cargo.iEId = "I";
+		    cargo.rcsl = data.rksl;
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/work/WorkCommandRollback/cargoBack?type=" + type,
+		        data : cargo,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.messager.bottomRight('操作成功', '保存操作');
+			        $("#xieShipDatagrid[(${radi})]").datagrid("hdReload");
+		        }
+		    })
+	    });
+
+
+	    $("#upload[(${radi})]").on("click", function() {
+		    if (!shipNo) {
+			    HdUtils.messager.info('请先选船！');
+			    return false;
+		    }
+		    HdUtils.nmzcupload({
+		        mutiple : false,
+		        isReadOnly : false,
+		        shipNo : shipNo,
+		        inCyNam : empNo,
+		    });
+	    });
+	    // 装船理货
+	    $("#save[(${radi})]").on("click", function() {
+		    var data = dg.datagrid("getSelected");
+		    if (data == null || data == undefined) {
+			    HdUtils.messager.info('请先选择一条数据！');
+			    return;
+		    }
+		    var rcsl = $("#rcsl[(${radi})]").val();
+		    if (!rcsl) {
+			    HdUtils.messager.info('装船数量不能为空！');
+			    return;
+		    }
+		    if (rcsl > data.rcsl) {
+			    HdUtils.messager.info('装船数量不应大于剩余数量！');
+			    return;
+		    }
+		    var ids = '';
+		    if ($("#useMachId[(${radi})]").is(":checked")) {
+			    $("#useMachId[(${radi})]").val("1");
+		    } else {
+			    $("#useMachId[(${radi})]").val("0");
+		    }
+		    if ($("#useWorkerId[(${radi})]").is(":checked")) {
+			    $("#useWorkerId[(${radi})]").val("1");
+		    } else {
+			    $("#useWorkerId[(${radi})]").val("0");
+		    }
+		    if ($("#nightId[(${radi})]").is(":checked")) {
+			    $("#nightId[(${radi})]").val("1");
+		    } else {
+			    $("#nightId[(${radi})]").val("0");
+		    }
+		    if ($("#holidayId[(${radi})]").is(":checked")) {
+			    $("#holidayId[(${radi})]").val("1");
+		    } else {
+			    $("#holidayId[(${radi})]").val("0");
+		    }
+		    var cargoInfo = new Object();
+		    cargoInfo.shipNo = data.shipNo;
+		    if (!newShipNo){
+		    	HdUtils.messager.info('请先选择要装的船！');
+			    return false;
+		    }
+		    cargoInfo.newShipNo = newShipNo;
+		    cargoInfo.contractNo = contractNo;
+		    cargoInfo.useMachId = $("#useMachId[(${radi})]").val();
+		    cargoInfo.useWorkerId = $("#useWorkerId[(${radi})]").val();
+		    cargoInfo.nightId = $("#nightId[(${radi})]").val();
+		    cargoInfo.holidayId = $("#holidayId[(${radi})]").val();
+		    cargoInfo.remarks = $("#remarks[(${radi})]").val();
+		    cargoInfo.outCyTim = $("#outCyTim[(${radi})]").datebox("getValue");
+		    cargoInfo.rcsl = rcsl;
+		    cargoInfo.carTyp = data.carTyp;
+		    cargoInfo.cyAreaNo = data.cyAreaNo;
+		    cargoInfo.tranPortCod = data.tranPortCod
+
+		    inCyNam = $("#inCyNam[(${radi})]").combobox('getValue');
+		    if (!inCyNam) {
+			    HdUtils.messager.info("请选择理货员");
+			    return false;
+		    }
+		    cargoInfo.inCyNam = inCyNam;
+
+		    //装船理货
+		    $.messager.confirm(Resources.WB_CONFIRM, "请确认是否理货？", function(r) {
+			    if (r) {
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/work/WorkCommand/saveNmzclh?type=XCPZ",
+				        data : cargoInfo,
+				        success : function(data) {
+					        if (data.code == '-1') {
+						        HdUtils.messager.info(data.message);
+						        return false;
+					        }
+					        HdUtils.messager.bottomRight('保存成功', '保存操作');
+					        dg.datagrid("hdReload");
+				        }
+				    })
+			    }
+		    });
+	    });
+
+	    $("#xieShipDatagrid[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/base/CCyArea/findCzzc",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        onSelect(rowIndex,rowData){
+	        	if (rowData.rksl != null){
+	        		$("#rcsl[(${radi})]").val(rowData.rksl);
+	        	}
+	        },
+	        toolbar : "#xieShipToolBar" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+	        }, {
+	            field : "cShipNam",
+	            title : '船名',
+	            multiSort : true,
+	            halign : "center",
+	            align : "left",
+	            width : 80,
+	            sortable : false
+	        }, {
+	            field : "voyage",
+	            title : '航次',
+	            multiSort : true,
+	            halign : "center",
+	            align : "left",
+	            width : 100,
+	            sortable : false
+	        }, {
+	            field : "cyAreaNam",
+	            title : '堆场名称',
+	            multiSort : true,
+	            halign : "center",
+	            align : "left",
+	            width : 80,
+	            sortable : false
+	        }, {
+	            field : "iEId",
+	            title : '进出口',
+	            multiSort : true,
+	            width : 80,
+	            halign : "center",
+	            align : "left",
+	            editor : {
+	                type : "combobox",
+	                options : HdUtils.code.scode({
+		                fieldCod : 'I_E_ID'
+	                }, {
+		                required : false
+	                })
+	            },
+	            formatter : function(value) {
+		            return HdUtils.code.name('I_E_ID', value);
+	            },
+	            sortable : false
+	        }, {
+	            field : "tradeId",
+	            title : '内外贸',
+	            width : 80,
+	            multiSort : true,
+	            halign : "center",
+	            align : "left",
+	            editor : {
+	                type : "combobox",
+	                options : HdUtils.code.scode({
+		                fieldCod : 'TRADE_ID'
+	                }, {
+		                required : false
+	                })
+	            },
+	            formatter : function(value) {
+		            return HdUtils.code.name('TRADE_ID', value);
+	            },
+	            sortable : false
+	        }, {
+	            field : "brandNam",
+	            title : "品牌",
+	            multiSort : true,
+	            width : 60,
+	            halign : "center",
+	            align : "left",
+	            sortable : false
+	        }, {
+	            field : "carKindNam",
+	            title : "车类",
+	            multiSort : true,
+	            width : 60,
+	            halign : "center",
+	            align : "left",
+	            sortable : false
+	        }, {
+	            field : "carTypNam",
+	            title : "车型",
+	            multiSort : true,
+	            width : 100,
+	            halign : "center",
+	            align : "left",
+	            sortable : false
+	        }, {
+	            field : "inCyTim",
+	            title : "入库时间",
+	            multiSort : true,
+	            width : 100,
+	            halign : "center",
+	            align : "left",
+	            formatter : $.hd.ezui.formatter.date,
+	            sortable : false
+	        }, {
+	            field : "rksl",
+	            title : "剩余数量",
+	            multiSort : true,
+	            width : 60,
+	            align : "center",
+	            sortable : false
+	        } ] ]
+	    });
+    });
+</script>
+</html>

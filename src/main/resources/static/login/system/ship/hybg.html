@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<div class="easyui-layout" data-options="fit:true"
+	style="height: 100%; width: 100%">
+	<div
+		data-options="region:'west',split:true,tools:reload5436,title:'船期预报'"
+		style="width: 280px; padding: 10px;">
+		<input class="easyui-searchbox"
+			data-options="searcher:searchShip,prompt:'搜索船舶'"
+			th:id="searchText+${radi}" style="width: 200px; height: 20px;"
+			name="search"></input>
+		<ul th:id="ShipStatusTree123+${radi}"></ul>
+	</div>
+	<div data-options="region:'center'" style="height: 100%; width: 100%">
+		<!-- 工具栏 -->
+		<div th:id="DayWorkClassToolBar1508123307299+${radi}"
+			style="float: left; position: relative;">
+			<div>
+				<!-- 查询 -->
+			流向：<input th:id="tranPortCod+${radi}"
+			name="tranPortCod"  data-options="required:false" style="width: 120px">
+			品牌：<input th:id="brandCod+${radi}"
+			name="brandCod"  data-options="required:false" style="width: 120px">
+			 <a	class="easyui-linkbutton" th:id="query+${radi}">报表</a>
+			</div>
+		</div>
+		<iframe th:id="zcqrs+${radi}" style="width:100%;height:100%;"> </iframe>	
+	</div>
+</div>		
+		
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+/*<![CDATA[*/
+var reload5436 = [ {
+    iconCls : 'icon-reload',
+    handler : function() {
+        $('#ShipStatusTree123[(${radi})]').tree('reload');
+    }
+} ];
+var searchShip = function() {
+    var parentNode = $('#ShipStatusTree123[(${radi})]').tree('getRoots'); //得到tree顶级node  
+    var searchCon = $("input[name='search']").val();
+    /* alert("parentNode="+parentNode); 
+    alert("searchCon="+searchCon); */
+    var children;
+    for (var i = 0; i < parentNode.length; i++) { //循环顶级 node   
+	    children = $('#ShipStatusTree123[(${radi})]').tree('getChildren', parentNode[i].target);//获取顶级node下所有子节点   
+	    if (children) { //如果有子节点   
+		    for (var j = 0; j < children.length; j++) { //循环所有子节点   
+			    //if($('#ul_tree_dept').tree('isLeaf',children[j].target)){ //判断子级是否为叶子节点,即不是父节点   
+			    if (children[j].text.indexOf(searchCon) >= 0 || children[j].id.indexOf(searchCon) >= 0) { //判断节点text是否包含搜索文本                       
+				    expandParent(children[j]); //设置此节点所有父级展开   
+				    selectNode(children[j]); //设置此节点为选择状态   
+
+				    return;
+			    }
+			    //}   
+		    }
+	    } else {
+		    if (parentNode[i].text.indexOf(searchCon) || children[j].id.indexOf(searchCon) >= 0 >= 0) {
+			    expandParent(parentNode[i]);
+			    selectNode(parentNode[i]);
+			    return;
+		    }
+	    }
+    }
+}
+function selectNode(node) {
+    $('#ShipStatusTree123[(${radi})]').tree('select', node.target);
+    $('#ShipStatusTree123[(${radi})]').tree('scrollTo', node.target);
+};
+
+function expandParent(node) {
+    var parent = node;
+    var t = true;
+    do {
+	    parent = $('#ShipStatusTree123[(${radi})]').tree('getParent', parent.target); //获取此节点父节点   
+	    if (parent) { //如果存在   
+		    t = true;
+		    $('#ShipStatusTree123[(${radi})]').tree('expand', parent.target);
+	    } else {
+		    t = false;
+	    }
+    } while (t);
+};
+	$(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var shipNo;
+	    //班次
+	    $('#tranPortCod[(${radi})]').combobox(HdUtils.code.scode({
+		    fieldCod : 'NM_FLOW_AREA'
+	    }, {
+		    required : false,
+		    multiple:true
+	    }));
+	    $('#brandCod[(${radi})]').combobox({
+	        url : '../webresources/login/ship/BillCar/getCBrandDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 120,
+	        required : false,
+	    });
+	    $('#ShipStatusTree123[(${radi})]').tree({
+	        method : "get",
+	        url : "../webresources/login/ship/Ship/gentree",
+	        onClick : treeclick
+	    });
+	    function treeclick(node) {
+		    shipNo = node.id;
+		    dockCod = node.obj.dockCod;
+		    cShipName = node.obj.cShipName;
+	    }
+	    
+	    // 查询
+	    $("#query[(${radi})]").on("click", function(){
+	    	if (!shipNo){
+	    		HdUtils.messager.info('请先选择一条船！');
+	    		return false;
+	    	}
+	    	var tranPortCod = $("#tranPortCod[(${radi})]").combobox('getValues');
+	    	var brandCod = $("#brandCod[(${radi})]").combobox('getValues');
+	    	if (!tranPortCod){
+	    		return false;
+	    	}
+ 	    	tranPortCod="'"+tranPortCod.toString().replace(/,/g,"','")+"'";
+ 	    	tranPortCod=encodeURI("in("+tranPortCod+")");
+	    	var src='http://10.163.204.56:8090/show/?fileid=de80db9009b442fca23162d91f50fce8&rpttoken=333&shipNo='+shipNo+'&tranPortCod='+tranPortCod+'&brandCod='+brandCod;
+		    $("#zcqrs[(${radi})]").attr('src',src);  
+	    });
+	});
+
+	/*]]>*/
+</script>
+</html>

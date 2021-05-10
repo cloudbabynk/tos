@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<div class="easyui-layout" style="width: 100%; height: 100%;" data-options="fit:true"
+	th:id="shipdynamic299+${radi}">
+	<div th:id="loadshiphtml1+${radi}"
+		data-options="region:'center',split:true,title:'集团',href:'../webresources/login/ship/ShipTrend/shiptrendjt.htm'"
+		style="width: 100%; height: 100%;"></div>
+	<div th:id="loadshiphtml2+${radi}"
+		data-options="region:'west',split:true,title:'公司',href:'../webresources/login/ship/ShipTrend/shiptrendgs.htm'"
+		style="width: 600px; height: 100%;" >
+	</div>
+</div>
+<script type="text/javascript" th:inline="javascript">
+/*<![CDATA[*/
+$(document).ready(function() {
+    var radi = /*[[${radi}]]*/'';
+    HdUtils.dialog.setValue({
+	    'shipTrendradi' : radi
+    });
+    });
+</script>
+</html>

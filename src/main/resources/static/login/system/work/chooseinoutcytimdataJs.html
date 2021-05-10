@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+
+<form id="StatisticCountForm1507959149305">
+<!-- 	<span>出入库日期：<input id="inouttim" name="inouttim" -->
+<!-- 	    class="easyui-datebox" -->
+<!-- 		data-options="required:false" style="width: 80px"> <a -->
+<!-- 		class="easyui-linkbutton" id="query">查询</a> -->
+<!-- 	</span> -->
+	<table id="StatisticCount150795914930512" style="height: 550px;"></table>
+</form>
+<script>
+	$(document).ready(function() {
+		
+		HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+		
+		function saveHandler() {
+	        HdUtils.ajax.post({
+	        	dataType: "text",
+		        url : "../webresources/login/cargo/PortCar/sendStatisticCountJs",
+		        success : function(data) {
+		        	if(data=="success"){
+			        	HdUtils.messager.bottomRight("上传成功！");
+		        	}else{
+		            	HdUtils.messager.bottomRight("上传失败！");	
+		        	}
+		        }
+		    });	
+	    }
+
+	    $("#StatisticCount150795914930512").datagrid({
+	        url : "../webresources/login/work/StatisticCount/findScJs",
+// 	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : false,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        fit : false,
+	        onDblClickRow : function() {
+	        	getSelStatisticCountId();
+		    },
+		    onLoadSuccess : function(data) {
+                //默认全选
+                $('#StatisticCount1507959149305').datagrid('selectAll');
+//                 for (var i = 0; i < data.rows.length; i++) {
+// 	                var oneRow = (data.rows)[i];
+// 	                if (oneRow.checked) {
+// 	                	$(this).datagrid('checkRow', i);
+		                
+// 	                }
+//                 }
+            },
+	        fitColumns : false,
+	        columns : [ [ 
+	        	{
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+
+	        }, 
+	        {
+
+	            field : "ioyardid",
+	            title : '主键',
+	            multiSort : true,
+	            align : "center",
+	            hidden : true,
+	            sortable : false
+	        },
+	        {
+
+	            field : "shipname",
+	            title : '船名',
+	            multiSort : true,
+	            hidden : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "voyage",
+	            title : "航次",
+	            hidden : true,
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "tradeFlagNam",
+	            title : "内外贸",
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "tradeflag",
+	            title : "内外贸",
+	            multiSort : true,
+	            align : "center",
+	            hidden:true,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "ieNam",
+	            title : "进出口",
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "ieflag",
+	            title : "进出口",
+	            multiSort : true,
+	            hidden:true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "ioyardflag",
+	            title : "出/入",
+	            multiSort : true,
+	            align : "center",
+	            hidden:true,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "ioyardflagNam",
+	            title : "出/入",
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+	        	field : "billNo",
+	            title : "提单",
+	            multiSort : true,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "cargoid",
+	            title : "货运单证ID",
+	            hidden : true,
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "ioyarddate",
+	            title : "进出库日期",
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "yardcode",
+	            title : "场区",
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "forwarderCode",
+	            title : "货代",
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "brandcode",
+	            title : "品牌",
+	            hidden : true,
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "brandNam",
+	            title : "品牌",
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+	        , {
+
+	            field : "cargonum",
+	            title : "件数",
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "teamOrgnNam",
+	            title : "作业公司",
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }  , {
+
+	            field : "teamorgnid",
+	            title : "作业公司",
+	            multiSort : true,
+	            hidden:true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }  ] ]
+	    });
+	    $("#StatisticCount150795914930512").datagrid("hdGetColumnNames");
+    });
+   
+</script>
+</html>

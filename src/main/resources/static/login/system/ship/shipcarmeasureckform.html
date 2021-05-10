@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8" />
+<script>
+
+function chooseShip() {
+    HdUtils.selShip(callback);
+}
+function callback(data) {
+    $("#shipNam[(${radi})]").val(data.cShipNam);
+    $("#voyage[(${radi})]").val(data.ivoyage + '/' + data.evoyage);
+    $("#shipNo[(${radi})]").val(data.shipNo);
+    if ($("#shipNo[(${radi})]").val() != null && $("#shipNo[(${radi})]").val() != "") {
+    	comBillNo()
+    } else {
+	    $('#billNo[(${radi})]').validatebox({
+		    required : true
+	    });
+	    $('#billNo[(${radi})]').val("");
+	    $('#carTyp[(${radi})]').val("");
+    }
+}
+function comBillNo(){
+	$("#billNo[(${radi})]").removeAttr("readonly");
+	$('#billNo[(${radi})]').combobox({
+	        url : '../webresources/login/ship/ShipBill/getShipBillByShip?shipNo=' + $("#shipNo[(${radi})]").val()+"&iEId=E",
+	        valueField : 'billNo',
+	        textField : 'billNo',
+	        mode : 'remote',
+	        panelHeight : '100',
+	        panelWidth : '100',
+	        required : false,
+	        editable : false,
+	        onHidePanel : function() {
+	        },
+	        onSelect : function(rec) {
+		        return rec.billNo;
+	        }
+	    });
+   }
+   $(document).ready(function() {
+	   $('#carTyp[(${radi})]').combobox({
+	        url : '../webresources/login/contract/ContractIeDoc/getCCarTyp',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight:120,
+	        required : false,
+	        onSelect : function(rec) {
+	        	return rec.value;
+	        }
+	    });
+	   $('#consignCod[(${radi})]').combobox({
+	        url : '../webresources/login/contract/ContractIeDoc/getCClientCodDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        mode : 'remote',
+	        panelHeight : 100,
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	   
+        HdUtils.i18n();
+        var formData={};//页面无需写hidden
+        var formObject=$("#ShipCarMeasureForm[(${radi})]");
+        HdUtils.ajax.post({
+	        url : "../webresources/login/ship/ShipCarMeasure/findone?id=[(${id})]" ,
+	        success : function(data) {
+	        	formData=data;
+	        	formObject.form("loadData", data);
+	        }
+	    })	    
+        HdUtils.dialog.setValue({saveHandler: saveHandler});
+        function saveHandler() {
+            if (!formObject.form("validate")) {
+                return;
+            }
+            var formdata = formObject.serializeObject();
+//             formdata.iEId=$("input[name='iEId'][checked]").val()
+        	HdUtils.ajax.post({
+                url: "../webresources/login/ship/ShipCarMeasure/saveone",
+                data:formdata, 
+                success: function (data) {               
+                	if (data.key == '-1') {
+                	    HdUtils.messager.info(i18n(data.message));
+    					return false;
+    				}
+                	HdUtils.dialog.close();
+                	HdUtils.messager.bottomRight(data.message);
+                	var radi = HdUtils.dialog.getValue("radi");
+                	$("#ShipCarMeasureDatagrid"+radi).datagrid("hdReload");
+                }
+            });
+        }
+   });
+  
+</script>
+<form th:id="ShipCarMeasureForm+${radi}">
+    <table th:id="ShipCarMeasureTable+${radi}" style="height: 75%; width: 80%" class="tableform">
+    <input th:id="iEId+${radi}" name="iEId" hidden="true"/>
+    <input th:id="queueId+${radi}" name="queueId" hidden="true"/>
+         <tr>
+             <th  hidden="true"> shipNo： </th>
+             <td  hidden="true"><input th:id="shipNo+${radi}" name="shipNo" data-options="required:false" class="easyui-validatebox" maxlength="40"   hidden="true"/></td>
+             <td  hidden="true"><input th:id="id+${radi}" name="id"/></td>
+             <th> 船名： </th>
+             <td><input th:id="shipNam+${radi}" name="shipNam" data-options="required:false" class="easyui-validatebox" maxlength="100"  readonly="readonly" style="width: 70px;"/>
+              <a href="javascript:void(0)" onclick="chooseShip()">选船</a></td>
+             <th> 航次： </th>
+             <td><input th:id="voyage+${radi}" name="voyage" data-options="required:false" class="easyui-validatebox" maxlength="20"  readonly="readonly"  /></td>  
+<!--               <th> 进出口： </th> -->
+<!--              <td ><input type="radio" id="iEId+${radi}" name="iEId" value="I" class="easyui-validatebox" checked="checked">进口</input>  -->
+<!-- 				  <input type="radio" id="iEId+${radi}" name="iEId" value="E" class="easyui-validatebox">出口</input> -->
+<!-- 			</td>        -->
+         </tr>
+         <tr>
+             <th> 提单号： </th>
+             <td><input th:id="billNo+${radi}" name="billNo" data-options="required:false"  readonly="readonly"/></td>
+             <th> 车名： </th>
+             <td><input th:id="carTyp+${radi}" name="carTyp" data-options="required:false"/></td>
+             <th> 型号： </th>
+             <td><input th:id="carTypVersion+${radi}" name="carTypVersion" data-options="required:false"/></td>
+         </tr>
+         <tr>
+             <th> 原长： </th>
+             <td><input th:id="oldCarLength+${radi}" name="oldCarLength" data-options="required:false"   class="easyui-numberbox"  /></td>
+             <th> 原宽： </th>
+             <td><input th:id="oldCarWidth+${radi}" name="oldCarWidth" data-options="required:false"   class="easyui-numberbox"  /></td>
+             <th> 原高： </th>
+             <td><input th:id="oldCarHighth+${radi}" name="oldCarHighth" data-options="required:false"   class="easyui-numberbox"  /></td>
+         </tr>
+         <tr>            
+             <th> 新长： </th>
+             <td><input th:id="newCarLength+${radi}" name="newCarLength" data-options="required:false"   class="easyui-numberbox"  /></td>
+             <th> 新宽： </th>
+             <td><input th:id="newCarWidth+${radi}" name="newCarWidth" data-options="required:false"   class="easyui-numberbox"  /></td>
+             <th> 新高： </th>
+             <td><input th:id="newCarHighth+${radi}" name="newCarHighth" data-options="required:false"   class="easyui-numberbox"  /></td>     
+         </tr>
+         <tr>            
+             <th> 车架号： </th>
+             <td><input th:id="carVin+${radi}" name="carVin" data-options="required:false" /></td>
+             <th> 重量： </th>
+             <td><input th:id="carWeight+${radi}" name="carWeight" data-options="required:false"   class="easyui-numberbox"  /></td> 
+             <th> 货代： </th>
+             <td><input th:id="consignCod+${radi}" name="consignCod" data-options="required:false" /></td>    
+         </tr>
+         <tr>
+             <th> 备注： </th>
+             <td colspan="5"><input th:id="remarkTxt+${radi}" name="remarkTxt" data-options="required:false"  class="easyui-validatebox" maxlength="200" style="width: 100%" /></td>
+     	</tr>
+    </table>
+</form>
+</html>

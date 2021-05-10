@@ -1,0 +1,35 @@
+.item-header {
+    background: #DADADA;
+    margin: 3px;
+    font-size: 13px;
+    font-weight: bold;
+    padding: 3px;
+}
+.item-content {
+    background:#fcefa1;
+    padding: 3px;
+    margin: 3px;
+}
+.datagrid-body .datagrid-editable .datagrid-editable-input {
+	font-size: 12px;
+}
+.numberbox-f {
+	font-size: 12px;
+	text-align: right;
+}
+.validatebox-text {
+	font-size: 12px;
+}
+textarea {
+	font-size: 12px;
+}
+fieldset {
+	border:1px solid #d3d3d3;
+}
+legend {
+	font-weight:bold;
+}
+/*add by jason @ 2013-11-05*/
+.hd-layout-button-down {
+    background: url('images/layout_arrows.png') no-repeat -16px 0;
+}

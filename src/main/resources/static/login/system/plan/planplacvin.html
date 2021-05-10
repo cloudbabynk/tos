@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="PlanPlacVinToolBar1508123301002+${radi}" style="float: left">
+	<div>
+	<a class="easyui-linkbutton" th:id='chooseCCyArea+${radi}'  style="margin-left:5px;float:left;">选场地</a>
+	</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="PlanPlacVinDatagrid1508123301002+${radi}" style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    console.log("radi:"+radi);
+	    var dg = $("#PlanPlacVinDatagrid1508123301002[(${radi})]");
+	    // buttons
+        HdUtils.dialog.setValue({
+		    'radivin' : radi
+	    });
+	    var planGroupNo = HdUtils.dialog.getValue('planGroupNo');
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    if(planGroupNo)
+		    onlinquery.add("planGroupNo", planGroupNo);
+		    return onlinquery.build();
+	    }
+
+	    // 选场地
+        $("#chooseCCyArea[(${radi})]").on("click", function() {
+        	chooseCCyArea("");
+        });
+        function chooseCCyArea() {
+        	
+	        var dataRow = $("#PlanPlacVinDatagrid1508123301002[(${radi})]").datagrid("getSelected");
+	        var planGroupNo = dataRow.planGroupNo;
+	        var vinNo=dataRow.vinNo;
+	        if (planGroupNo == null || planGroupNo == '') {
+		        HdUtils.messager.info('请先选择计划号！');
+	        } else {
+	        	 HdUtils.dialog.setValue({
+		 	  		    'radi' : radi
+		 	  	    });
+		        HdUtils.dialog.show({
+		            width : 900,
+		            height : 500,
+		            title : '场地信息',
+		            href : "../login/system/plan/chooseccyarearow.html",
+		            isSaveHandler : true
+		        });
+		        HdUtils.dialog.setValue({
+			        data : {
+			        	'planGroupNo' : planGroupNo,
+			        	'radi':radi,
+			        	'vinNo':vinNo
+			        }
+		        });
+	        };
+        }
+	    $("#PlanPlacVinDatagrid1508123301002[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/plan/PlanPlacVin/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        multiSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#PlanPlacVinToolBar1508123301002" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+
+	        }, {
+	            field : "vinNo",
+	            title : '车架号',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "cyAreaNo",
+	            title : "场地号",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "cyRowNo",
+	            title : "车道号",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+	        ] ]
+	    });
+	    $("#PlanPlacVinDatagrid1508123301002" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

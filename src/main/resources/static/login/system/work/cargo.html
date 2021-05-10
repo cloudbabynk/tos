@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<input th:id="Type+${radi}" th:value='${Type}' type="hidden" />
+<div class="easyui-layout" style="width: 100%; height: 100%;" data-options="fit:true" th:id="cargoId+${radi}">
+    <div th:id="loadhtml1+${radi}" data-options="region:'south',split:true" style="width: 100%; height: 250px;"></div>
+    <div data-options="region:'center'">
+        <div class="easyui-layout" data-options="fit:true" th:id="shipdynamic259+${radi}">
+            <div th:id="loadhtml2+${radi}" data-options="region:'center',fit:true" style="width: 100%; height: 100%;">
+            </div>
+            <div th:id="loadhtml3+${radi}" data-options="region:'east',split:true" style="width: 750px; height: 100%">
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" th:inline="javascript">
+    /*<![CDATA[*/
+    $(document).ready(function () {
+        var radi = /*[[${radi}]]*/'';
+        var type = $("#Type[(${radi})]").val();
+        HdUtils.dialog.setValue({
+            'cyAreaNo': "",
+            'shipNo': "",
+            'billNo': "",
+            'contractNo': "",
+            'ingateId': "",
+            'cargoradi': radi,
+        })
+        if (type == 'XC' || type == 'NMPLXC' || type == 'WMPLXC') {
+            $('#loadhtml1[(${radi})]').attr('title', '已理货车辆信息');
+            $('#loadhtml1[(${radi})]').attr('href', '../webresources/login/cargo/TruckWork/truckworkall.htm?Type=' + type);
+           // $('#loadhtml1[(${radi})]').attr('href', '../webresources/login/work/WorkCommand/workcommand.htm?Type=' + type);
+
+            $('#loadhtml2[(${radi})]').attr('title', '队列信息');
+            $('#loadhtml2[(${radi})]').attr('href', '../webresources/login/work/WorkQueue/workqueue.htm?Type=' + type);
+
+            $('#loadhtml3[(${radi})]').attr('title', '舱单车辆信息');
+            $('#loadhtml3[(${radi})]').attr('href', '../webresources/login/ship/BillCar/billcar.htm?Type=' + type);
+        }
+        if (type == 'ZC' || type == 'NMPLZC' || type == 'WMPLZC' || type == 'PLTZ') {
+            $('#loadhtml1[(${radi})]').attr('title', '已理货车辆信息');
+            $('#loadhtml1[(${radi})]').attr('href', '../webresources/login/cargo/TruckWork/truckworkall.htm?Type=' + type);
+
+            $('#loadhtml2[(${radi})]').attr('title', '队列信息');
+            $('#loadhtml2[(${radi})]').attr('href', '../webresources/login/work/WorkQueue/workqueue.htm?Type=' + type);
+
+            $('#loadhtml3[(${radi})]').attr('title', '场地车辆信息');
+            $('#loadhtml3[(${radi})]').attr('href', '../webresources/login/cargo/PortCar/portcar.htm?Type=' + type);
+        }
+        if (type == 'JG' || type == 'NMPLJG' || type == 'WMPLJG' || type == 'SG' || type == 'NMPLSG' || type == 'WMPLSG') {
+            $('#loadhtml1[(${radi})]').attr('title', '已理货车辆信息');
+            $('#loadhtml1[(${radi})]').attr('href', '../webresources/login/cargo/TruckWork/truckworkall.htm?Type=' + type);
+
+            $('#loadhtml2[(${radi})]').attr('title', '拖车信息');
+            $('#loadhtml2[(${radi})]').attr('href', '../webresources/login/gate/GateTruck/gatetruck.htm?Type=' + type);
+
+            $('#loadhtml3[(${radi})]').attr('href', '../webresources/login/gate/GateTruckContract/gatetruckcontract.htm?Type=' + type);
+
+            if (type == 'JG' || type == 'NMPLJG' || type == 'WMPLJG') {
+                $('#loadhtml3[(${radi})]').attr('title', '集港委托信息');
+            } else {
+                $('#loadhtml3[(${radi})]').attr('title', '疏港委托信息');
+            }
+
+           /*  if (type == 'NMPLSG') {
+                $('#loadhtml1[(${radi})]').attr('title', '车辆信息');
+                $('#loadhtml1[(${radi})]').attr('href', '../webresources/login/cargo/TruckWork/nmsg.htm?Type=' + type);
+            } */
+
+        }
+    });
+</script>
+
+</html>

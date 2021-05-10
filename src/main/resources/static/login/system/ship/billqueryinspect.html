@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8" />
+<div class="easyui-layout" data-options="fit:true"
+	style="height: 100%; width: 100%">
+	<div
+		data-options="region:'west',split:true,tools:reload5436,title:'船期预报'"
+		style="width: 280px; padding: 10px;">
+		<input class="easyui-searchbox"
+			data-options="searcher:searchShip,prompt:'搜索船舶'"
+			th:id="searchText+${radi}" style="width: 200px; height: 20px;"
+			name="search"></input>
+		<ul th:id="ShipStatusTree123+${radi}"></ul>
+	</div>
+	<div data-options="region:'center'" style="height: 100%; width: 100%">
+		<!-- 工具栏 -->
+		<div th:id="ShipCarMeasureToolBar+${radi}" style="float: left; position: relative;">
+			<div>
+				<!-- 查询 -->
+				提单号：<input th:id="billNo+${radi}" name="billNo" style="width: 120px" data-options="required:false" /> 
+				 轿运车牌号：<input th:id="brandCod+${radi}" name="brandCod" style="width: 100px" data-options="required:false" />
+				进闸时间：<input th:id="inCyTim+${radi}" name="inCyTim" class="easyui-datebox"style="width: 165px" data-options="required:false" />
+				出闸时间：<input th:id="outCyTim+${radi}" name="outCyTim" class="easyui-datebox"style="width: 165px" data-options="required:false" />
+				<a class="easyui-linkbutton" th:id="query+${radi}" plain="false">查询</a>
+				
+				
+				 
+			</div>
+		</div>
+		<table th:id="ShipCarMeasureDatagrid +${radi}" style="height: 100%"></table>
+	</div>
+</div>
+<!-- 脚本控制 -->
+<script type="text/javascript">
+/*<![CDATA[*/
+	var reload5436 = [ {
+        iconCls : 'icon-reload',
+        handler : function() {
+	        $('#ShipStatusTree123[(${radi})]').tree('reload');
+        }
+    } ];
+    var searchShip = function() {
+	    var parentNode = $('#ShipStatusTree123[(${radi})]').tree('getRoots'); //得到tree顶级node  
+	    var searchCon = $("input[name='search']").val();
+	    /* alert("parentNode="+parentNode); 
+	    alert("searchCon="+searchCon); */
+	    var children;
+	    for (var i = 0; i < parentNode.length; i++) { //循环顶级 node   
+		    children = $('#ShipStatusTree123[(${radi})]').tree('getChildren', parentNode[i].target);//获取顶级node下所有子节点   
+		    if (children) { //如果有子节点   
+			    for (var j = 0; j < children.length; j++) { //循环所有子节点   
+				    //if($('#ul_tree_dept').tree('isLeaf',children[j].target)){ //判断子级是否为叶子节点,即不是父节点   
+				    if (children[j].text.indexOf(searchCon) >= 0 || children[j].id.indexOf(searchCon) >= 0) { //判断节点text是否包含搜索文本                       
+					    expandParent(children[j]); //设置此节点所有父级展开   
+					    selectNode(children[j]); //设置此节点为选择状态   
+
+					    return;
+				    }
+				    //}   
+			    }
+		    } else {
+			    if (parentNode[i].text.indexOf(searchCon) || children[j].id.indexOf(searchCon) >= 0 >= 0) {
+				    expandParent(parentNode[i]);
+				    selectNode(parentNode[i]);
+				    return;
+			    }
+		    }
+	    }
+    }
+    function selectNode(node) {
+	    $('#ShipStatusTree123[(${radi})]').tree('select', node.target);
+	    $('#ShipStatusTree123[(${radi})]').tree('scrollTo', node.target);
+    };
+
+    function expandParent(node) {
+	    var parent = node;
+	    var t = true;
+	    do {
+		    parent = $('#ShipStatusTree123[(${radi})]').tree('getParent', parent.target); //获取此节点父节点   
+		    if (parent) { //如果存在   
+			    t = true;
+			    $('#ShipStatusTree123[(${radi})]').tree('expand', parent.target);
+		    } else {
+			    t = false;
+		    }
+	    } while (t);
+    };
+    function detail(index){  
+    	$('#ShipCarMeasureDatagrid[(${radi})]').datagrid('selectRow',index);// 关键在这里  
+        var row = $('#ShipCarMeasureDatagrid[(${radi})]').datagrid('getSelected'); 
+        HdUtils.dialog.setValue({
+        	data : {
+        		billNo : row.billNo
+	        }
+    	});
+    	HdUtils.dialog.show({
+    	    width : 750,
+    	    height : 380,
+    	    title : '进出门明细',
+    	    href : "../login/system/ship/accessdetails.html",
+    	    isSaveHandler : false
+    	});
+    }  
+    $(document).ready(function() {
+	    var shipNo = "";
+	    $.parser.parse($('#ShipCarMeasureToolBar[(${radi})]'));
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#ShipCarMeasureDatagrid[(${radi})]");
+	    $('#ShipStatusTree123[(${radi})]').tree({
+	        method : "get",
+	        url : "../webresources/login/ship/Ship/gentree",
+	        onClick : treeclick
+	    });
+	    function treeclick(node) {
+		    shipNo = node.id;
+		    $("#ShipCarMeasureDatagrid[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    }
+	    $('#tradeId[(${radi})]').combobox(HdUtils.code.scode({
+		    fieldCod : 'TRADE_ID'
+	    }, {
+		    required : false
+	    }));
+	    $('#iEId[(${radi})]').combobox(HdUtils.code.scode({
+		    fieldCod : 'I_E_ID'
+	    }, {
+		    required : false
+	    }));
+	    //品牌下拉
+	    $('#brandCod[(${radi})]').combobox({
+	        url : '../webresources/login/base/CCarTyp/getCBrandDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 500,
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    //var consignCod = $("#consignCod[(${radi})]").combobox('getValue');
+		    var inCyTim = $("#inCyTim[(${radi})]").datebox("getValue");
+		    var outCyTim = $("#outCyTim[(${radi})]").datebox("getValue");
+		    var billNo = $("#billNo[(${radi})]").val();
+		    var brandCod = $("#brandCod[(${radi})]").combobox('getValue');
+		    onlinquery.add("shipNo", shipNo);
+		    onlinquery.add("inCyTim", inCyTim);
+		    onlinquery.add("outCyTim", outCyTim);
+		    onlinquery.add("billNo", billNo);
+		    onlinquery.add("brandCod", brandCod);
+		    return onlinquery.build();
+	    }
+	    $("#query[(${radi})]").on("click", function() {
+	    	$("#ShipCarMeasureDatagrid[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+	    
+	    $("#ShipCarMeasureDatagrid[(${radi})]").hddatagrid({
+	        striped : true,
+	        url : "../webresources/login/ship/BillSplit/findInspect",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : false,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#ShipCarMeasureToolBar[(${radi})]",
+	        fit : true,
+	        fitColumns : false,
+	        onDblClickRow : function(rowIndex, rowData) {	        	
+	        	formEdit(rowData.id)
+	        },
+	        columns : [ [{
+
+	            field : "id",
+	            title : '',
+	            multiSort : true,
+	            halign : "center",
+	            sortable : true,
+	            hidden : true
+	        }, {
+
+	            field : "shipNo",
+	            title : "",
+	            multiSort : true,
+	            halign : "center",
+	            hidden : true,
+	            sortable : true
+	        }, {
+
+                field : "billNo",
+                title : '提单号',
+                multiSort : true,
+                halign : "center",
+                sortable : true
+            }, {
+
+                field : "tradeId",
+                title : '内外贸',
+                multiSort : true,
+                halign : "center",
+                formatter : function(value) {
+	                return HdUtils.code.name('TRADE_ID', value);
+                },
+                sortable : false
+            }, {
+
+                field : "iEId",
+                title : '进出口',
+                multiSort : true,
+                halign : "center",
+                formatter : function(value) {
+	                return HdUtils.code.name('I_E_ID', value);
+                },
+                sortable : false
+            }, {
+                field : "brandNam",
+                title : '运输车数',
+                multiSort : true,
+                halign : "center",
+                sortable : false
+            },{
+	            field : "inCyTim",
+	            title : '进闸时间',
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.date,
+	            sortable : false
+	        }, {
+	            field : "outCyTim",
+	            title : '出闸时间',
+	            multiSort : true,
+	            formatter : $.hd.ezui.formatter.date,
+	            halign : "center",
+	            sortable : false
+	        }] ]
+	    });
+    });
+    /*]]>*/
+</script>
+</html>

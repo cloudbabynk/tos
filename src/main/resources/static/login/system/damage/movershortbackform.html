@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<style type="text/css">
+.tf {
+	margin: 10px auto;
+}
+
+.tf tr {
+	height: 20px;
+}
+
+.tf th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tf td {
+	text-align: left;
+	width: 80px;
+}
+
+.tf input {
+	text-align: left;
+}
+</style>
+<!-- 工具栏 -->
+<div th:id="PortCarToolBar1508123309089+${radi}" style="float: left">
+	<div>
+		<table class="tf">
+			<tr>
+				<th>提单号：</th>
+				<td><input id="billno" name="billno" class='easyui-validatebox'
+					data-options="required:false" style="width: 80px;"></td>
+				<th>大驾号：</th>
+				<td><input id="vinno" name="vinno" class='easyui-validatebox'
+					data-options="required:false" style="width: 80px;"></td>
+				<th>品牌：</th>
+				<td><input id="brandcod" name="brandcod"
+					class='easyui-validatebox' data-options="required:false"
+					style="width: 80px;"></td>
+				<th></th>
+				<td></td>
+			</tr>
+			<tr>
+				<th>RFID号：</th>
+				<td><input id="rfidcardno" name="rfidcardno"
+					class='easyui-validatebox' data-options="required:false"
+					style="width: 80px;"></td>
+				<th>流水号：</th>
+				<td><input id="portcarno" name="portcarno"
+					class='easyui-validatebox' data-options="required:false"
+					style="width: 80px;"></td>
+				<th>车型：</th>
+				<td><input id="cartyp" name="cartyp" class='easyui-validatebox'
+					data-options="required:false" style="width: 80px;"></td>
+				<th></th>
+				<td><a class="easyui-linkbutton" id="query">查询</a></td>
+			</tr>
+		</table>
+	</div>
+	<!-- Datagrid -->
+	<table id="BillCarDatagrid1508123309089"
+		style="width: 650px; height: 300px;"></table>
+</div>
+<!-- 工具栏 结束 -->
+
+<form id="MOverShortBackForm1508123309089">
+	<input id="overshortId" name="overshortId" hidden="true"> <input
+		id="shipNo" name="shipNo" hidden="true" data-options="required:false"
+		class="easyui-validatebox" maxlength="10" /> <input id="billNo"
+		name="billNo" hidden="true" data-options="required:false"
+		class="easyui-validatebox" maxlength="10" /> <input id="iEId"
+		name="iEId" data-options="required:false" hidden="true"
+		class="easyui-validatebox" maxlength="10" /> <input id="portCarNo"
+		name="portCarNo" hidden="true" data-options="required:false"
+		class="easyui-validatebox" maxlength="10" /> <input id="rfidCardNo"
+		name="rfidCardNo" hidden="true" data-options="required:false"
+		class="easyui-validatebox" maxlength="10" /> <input id="vinNo"
+		name="vinNo" data-options="required:false" hidden="true"
+		class="easyui-validatebox" maxlength="10" /> <input id="brandCod"
+		name="brandCod" hidden="true" data-options="required:false"
+		class="easyui-validatebox" maxlength="10" />
+	<table id="MOverShortBackTable1508123309089">
+		<tr>
+			<th>短、溢卸：</th>
+			<td><input id="missId" name="missId" class='easyui-validatebox'
+				data-options="required:false"></td>
+			<th><span id="billTxt" hidden="true"></span></th>
+			<td><span id="billd" hidden="true"><input id="bill"
+					name="bill" class='easyui-validatebox'
+					data-options="required:false"></span></td>
+			<th><span id="vinTxt" hidden="true"></span></th>
+			<td><span id="vind" hidden="true"><input id="vin"
+					name="vin" class='easyui-validatebox' data-options="required:false"></span></td>
+			<th>备注：</th>
+			<td><input id="remarks" name="remarks"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		</tr>
+		<!-- 		<tr> -->
+		<!-- 								<th>shipNo：</th> -->
+		<!-- 			<td><input id="shipNo" name="shipNo" hidden="true" -->
+		<!-- 				data-options="required:false" class="easyui-validatebox" -->
+		<!-- 				maxlength="10" /></td> -->
+		<!-- 								<th>billNo：</th> -->
+		<!-- 			<td><input id="billNo" name="billNo" hidden="true" -->
+		<!-- 				data-options="required:false" class="easyui-validatebox" -->
+		<!-- 				maxlength="10" /></td> -->
+		<!-- 								<th>iEId：</th> -->
+		<!-- 			<td><input id="iEId" name="iEId" data-options="required:false" -->
+		<!-- 				hidden="true" class="easyui-validatebox" maxlength="10" /></td> -->
+		<!-- 		</tr> -->
+		<!-- 		<tr> -->
+		<!-- 								<th>portCarNo：</th> -->
+		<!-- 			<td><input id="portCarNo" name="portCarNo" hidden="true" -->
+		<!-- 				data-options="required:false" class="easyui-validatebox" -->
+		<!-- 				maxlength="10" /></td> -->
+		<!-- 								<th>rfidCardNo：</th> -->
+		<!-- 			<td><input id="rfidCardNo" name="rfidCardNo" hidden="true" -->
+		<!-- 				data-options="required:false" class="easyui-validatebox" -->
+		<!-- 				maxlength="10" /></td> -->
+		<!-- 								<th>vinNo：</th> -->
+		<!-- 			<td><input id="vinNo" name="vinNo" data-options="required:false" -->
+		<!-- 				hidden="true" class="easyui-validatebox" maxlength="10" /></td> -->
+		<!-- 		</tr> -->
+		<!-- 		<tr> -->
+		<!-- 								<th>brandCod：</th> -->
+		<!-- 			<td><input id="brandCod" name="brandCod" hidden="true" -->
+		<!-- 				data-options="required:false" class="easyui-validatebox" -->
+		<!-- 				maxlength="10" /></td> -->
+		<!-- 		</tr> -->
+	</table>
+</form>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	$(document).ready(function() {
+	    var dg = $("#BillCarDatagrid1508123309089");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    var shipNo = HdUtils.dialog.getValue("shipNo");
+	    var tradeId = HdUtils.dialog.getValue("tradeId");
+	    var billNo;
+	    var vinNo;
+	    var iEId;
+	    var portCarNo;
+	    var rfidCardNo;
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    $('#missId').combobox(HdUtils.code.scode({
+		    fieldCod : 'MISS_ID'
+	    }, {
+	        required : false,
+	        onSelect : function(rec) {
+		        if (rec.code == "2") {
+			        document.getElementById("billTxt").style.display = "block"//显示
+			        document.getElementById("billd").style.display = "block"//显示
+			        $("#billTxt").text("提单：");
+			        $("#bill").val("*");
+			        document.getElementById("vinTxt").style.display = "block"//显示
+			        document.getElementById("vind").style.display = "block"//显示
+			        $("#vinTxt").text("车架号：");
+		        }
+	        }
+	    }));
+	    $('#brandcod').combobox({
+	        url : '../webresources/login/contract/ContractIeDoc/getCBrandDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 100,
+	        required : false,
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $('#cartyp').combobox({
+	        url : '../webresources/login/contract/ContractIeDoc/getCCarTyp',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 120,
+	        required : false,
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+
+	    function saveHandler() {
+		    if ($("#missId").combobox('getValue') != "2") {
+		    var dataRow = $("#BillCarDatagrid1508123309089").datagrid('getChecked');
+		    for (var i = 0; i < dataRow.length; i++) {
+			    var mOverShortBack = $("#MOverShortBackForm1508123309089").serializeObject();
+			    mOverShortBack.shipNo = dataRow[i].shipNo;
+			    mOverShortBack.billNo = dataRow[i].billNo;
+			    mOverShortBack.iEId = dataRow[i].iEId;
+			    mOverShortBack.vinNo = dataRow[i].vinNo;
+			    mOverShortBack.portCarNo = dataRow[i].portCarNo;
+			    mOverShortBack.rfidCardNo = dataRow[i].rfidCardNo;
+			    if (dataRow[i].brandCod != null) mOverShortBack.brandCod = dataRow[i].brandCod;
+			    if (dataRow[i].carTyp != null) mOverShortBack.carTyp = dataRow[i].carTyp;
+			    HdUtils.ajax.post({
+			        url : "../webresources/login/damage/MOverShortBack/saveone",
+			        data : mOverShortBack,
+			        success : function(data) {
+				        if (data.key == '-1') {
+					        HdUtils.messager.info(data.message);
+					        return false;
+				        }
+				        HdUtils.dialog.close();
+				        HdUtils.messager.bottomRight('保存成功', '保存操作');
+				        $("#MOverShortBackDatagrid1508123301002" + radi).datagrid("hdReload");
+			        }
+			    })
+		    }
+		    }else{
+		    	//生成溢卸相关数据
+		    	var bill=$("#bill").val();
+		    	iEId="I";
+		    	var vin=$("#vin").val();
+		    	var missId=$("#missId").combobox('getValue');
+		    	  HdUtils.ajax.post({
+				        url : "../webresources/login/damage/MOverShortBack/genmovershort?shipNo="+shipNo+"&tradeId="+tradeId+"&billNo="+bill+"&iEId="+iEId+"&vinNo="+vin+"&missId="+missId,
+				        success : function(data) {
+					        if (data.key == '-1') {
+						        HdUtils.messager.info(data.message);
+						        return false;
+					        }
+					        HdUtils.dialog.close();
+					        HdUtils.messager.bottomRight('保存成功', '保存操作');
+					        $("#MOverShortBackDatagrid1508123301002" + radi).datagrid("hdReload");
+				        }
+				    })	
+		    }
+	    }
+	    // 查询
+	    $("#query").on("click", function() {
+		    $("#BillCarDatagrid1508123309089").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    var vinNo = $("#vinno").val();
+		    var billNo = $("#billno").val();
+		    var rfidCardNo = $("#rfidcardno").val();
+		    var brandCod = $("#brandcod").combobox('getValue');
+		    var portCardNo = $("#portcardno").val();
+		    var carTyp = $("#cartyp").combobox('getValue');
+		    onlinquery.add("shipNo", shipNo);
+		    onlinquery.add("vinNo", vinNo);
+		    onlinquery.add("billNo", billNo);
+		    onlinquery.add("rfidCardNo", rfidCardNo);
+		    onlinquery.add("brandCod", brandCod);
+		    onlinquery.add("portCardNo", portCardNo);
+		    onlinquery.add("carTyp", carTyp);
+
+		    return onlinquery.build();
+	    }
+	    //在港车列表
+	    $("#BillCarDatagrid1508123309089").datagrid({
+	        striped : true,
+	        url : "../webresources/login/damage/MOverShortBack/findBillCar",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : false,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        fit : false,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+
+	        }, {
+
+	            field : "billNo",
+	            title : "提单号",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "portCarNo",
+	            title : '车辆流水号',
+	            multiSort : true,
+	            width : fixWidth(0.1),
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "vinNo",
+	            title : "车架号",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "rfidCardNo",
+	            title : "RFID号",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "brandCod",
+	            title : "品牌",
+	            multiSort : true,
+	            hidden : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "brandNam",
+	            title : "品牌",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "carTyp",
+	            title : "车型",
+	            multiSort : true,
+	            hidden : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "carTypNam",
+	            title : "车型",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        } ] ]
+	    });
+	    function fixWidth(percent) {
+		    return document.documentElement.portCarNo * percent; //这里你可以自己做调整
+	    }
+	    function fixWidth(percent) {
+		    return document.documentElement.brandCod * percent; //这里你可以自己做调整
+	    }
+	    $("#BillCarDatagrid1508123309089").datagrid("hdGetColumnNames");
+    });
+</script>
+</html>

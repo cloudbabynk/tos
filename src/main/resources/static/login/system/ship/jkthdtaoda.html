@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<object id="LODOP_OB"
+	classid="clsid:2105C259-1E0C-4534-8141-A753534CB4CA" width="0"
+	height="0">
+	<embed id="LODOP_EM" type="application/x-print-lodop" width="0"
+		height="0" pluginspage="../js/install_lodop64.exe"></embed>
+</object>
+</head>
+<body>
+
+	<form id="BillSplitForm1507959148710">
+		<input id="billspId" name="billspId" hidden="true"> <input
+			id="pre_pieces" name="pieces" hidden="true"> <a
+			class="easyui-linkbutton" id='print'>打印</a>
+		<table id="BillSplit1507959148710" style="height: 75%; width: 80%"
+			class="tableform">
+			<tr>
+				<th>提单号：</th>
+				<td><input id="billNo" name="billNo"
+					data-options="required:false" class="easyui-validatebox"
+					maxlength="10" /></td>
+				<th>中文货名：</th>
+				<td><input id="carTyp" name="carTyp"
+					data-options="required:false" class="easyui-validatebox"
+					maxlength="10" /></td>
+				<th>品牌：</th>
+				<td><input id="brandCod" name="brandCod"
+					data-options="required:false" class="easyui-validatebox"
+					maxlength="10" /></td>
+			</tr>
+			<tr>
+				<th>计费类型：</th>
+				<td><input id="carFeeTyp" name="carFeeTyp"
+					data-options="required:false" class="easyui-validatebox"
+					maxlength="10" /></td>
+				<th>计费件数：</th>
+				<td><input id="pieces" name="pieces"
+					data-options="required:false" class="easyui-validatebox"
+					maxlength="10" /></td>
+				<th>重量：</th>
+				<td><input id="weights" name="weights"
+					data-options="min:0,max:99999999,precision:3"
+					class="easyui-validatebox" maxlength="10" /></td>
+			</tr>
+			<tr>
+				<th>体积：</th>
+				<td><input id="volumes" name="volumes"
+					data-options="min:0,max:99999999,precision:3"
+					class="easyui-validatebox" maxlength="10" /></td>
+				<th>存放地点：</th>
+				<td><input id="cfPlace" name="cfPlace"
+					data-options="required:false" class="easyui-validatebox"
+					maxlength="10" /></td>
+				<th>备注：</th>
+				<td><input id="remarks" name="remarks"
+					data-options="required:false" class="easyui-validatebox"
+					maxlength="255" /></td>
+			</tr>
+
+		</table>
+	</form>
+	<script>
+		$(document).ready(function() {
+			var radi=HdUtils.dialog.getValue("radi");
+	        var billspId = HdUtils.dialog.getValue("billspId");
+	        var recNam=HdUtils.dialog.getValue("recNam");
+	        var cShipNam=HdUtils.dialog.getValue("cShipNam");
+	        var voyage=HdUtils.dialog.getValue("voyage");
+	        var weights=HdUtils.dialog.getValue("weights");
+	        var volumes=HdUtils.dialog.getValue("volumes");
+	        var pieces=HdUtils.dialog.getValue("pieces");
+	        HdUtils.ajax.post({
+	            url : "../webresources/login/ship/BillSplit/findD?billspId=" + billspId,
+	            success : function(data) {
+	            	data.pieces=pieces;
+	            	data.weights=weights;
+	            	data.volumes=volumes;
+		            $("#BillSplitForm1507959148710").form("loadData", data);
+	            }
+	        });
+	        $('#carTyp').combobox({
+		        url : '../webresources/login/ship/BillCar/getCCarTypDrop',
+		        valueField : 'value',
+		        textField : 'label',
+		        panelHeight:120,
+		        required :true,
+		        onSelect : function(rec) {
+		        	return rec.value;
+		        }
+		    });
+	        $('#brandCod').combobox({
+		        url : '../webresources/login/base/CCarTyp/getCBrandDrop',
+		        valueField : 'value',
+		        textField : 'label',
+		        panelHeight:120,
+		        onSelect : function(rec) {
+		        	return rec.value;
+		        }
+		    });
+	        $('#carFeeTyp').combobox(HdUtils.code.scode({
+			    fieldCod : 'CAR_FEE_TYP'
+		    }, {
+			    required : false
+		    }));
+	        $('#cfPlace').combobox(HdUtils.code.scode({
+			    fieldCod : 'CF_PLACE'
+		    }, {
+			    required : false
+		    }));
+	        $('#pieces').bind('blur',function(){
+	          var cha=  $('#pre_pieces').val()-$('#pieces').val();
+	          var bi=1-cha/$('#pre_pieces').val();
+	          $('#weights').val(($('#weights').val()*bi).toFixed(3));
+	          $('#volumes').val(($('#volumes').val()*bi).toFixed(3));
+	         });   
+		    //套打
+		    $("#print").on("click", function() {
+		    	if(billspId==null||billspId==""||billspId==undefined){
+			          HdUtils.messager.info('请选择一条数据！');	
+			    	}else{	
+		    HdUtils.dialog.setValue({
+			    'billspId' : billspId,
+			    'cShipNam':cShipNam,
+			    'voyage':voyage,
+			    'recNam':recNam,
+			    'cfPlace':$("#cfPlace").combobox('getText'),
+			    'billNo':$("#billNo").val(),
+		        'carTypNam':$("#carTyp").combobox('getText'),
+		        'weights':$("#weights").val(),
+		        'volumes':$("#volumes").val(),
+		        'pieces':$("#pieces").val()
+		    });
+		    HdUtils.dialog.show({
+		        width : 850,
+		        height :600,
+		        title : '提货单',
+		        href : "../login/system/ship/jkthdtaodap.html",
+		        isSaveHandler : false
+		    });
+		    
+			    	}
+			}); 
+        });
+	</script>
+</body>
+</html>

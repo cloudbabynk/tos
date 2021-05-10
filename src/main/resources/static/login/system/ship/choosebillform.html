@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+		 var dg = $("#ShipBillDatagrid1507959149306");
+		 var shipNo = HdUtils.dialog.getValue("shipNo");
+		 function getSelShipBillId() {
+			    var data = dg.datagrid("getSelected");
+			    if (!data) {
+				    HdUtils.messager.info('请先舱单！');
+				    return;
+			    }
+			    HdUtils.dialog.getValue("selBillCallBack")(data);
+			    HdUtils.dialog.close();
+		    }
+		    HdUtils.dialog.setValue({
+			    saveHandler : getSelShipBillId
+		    });
+		    $('#brandCod').combobox({
+		        url : '../webresources/login/base/CCarTyp/getCBrandDrop',
+		        valueField : 'value',
+		        textField : 'label',
+		        panelHeight:'auto',
+		        onSelect : function(rec) {
+		        	return rec.value;
+		        }
+		    });	
+    // 查询
+    $("#query").on("click", function() {
+	    $("#ShipBillDatagrid1507959149306").datagrid({
+		    queryParams : query(),
+	    })
+    });
+    function query() {
+	    var onlinquery = new HdQuery();
+	    var billNo = $("#billNo").val();
+	    var cyAreaNo = $("#cyAreaNo").val();
+	    var vinNo = $("#vinNo").val();
+	    var brandCod = $("#brandCod").combobox('getValue');
+	    onlinquery.add("billNo", billNo);
+	    onlinquery.add("shipNo",shipNo);
+	   // onlinquery.add("cyAreaNo", cyAreaNo);
+	    onlinquery.add("vinNo", vinNo);
+	    onlinquery.add("brandCod", brandCod);
+	    return onlinquery.build();
+    }
+    $("#ShipBillDatagrid1507959149306").datagrid({
+        url : "../webresources/login/ship/ShipLoadPlan/findShipBill",
+        queryParams : query(),
+        method : "post",
+        pagination : true,
+        singleSelect : true,
+        selectOnCheck : true,
+        checkOnSelect : true,
+        rownumbers : true,
+        pageSize : 20,
+        fit : false,
+        fitColumns : false,
+        columns : [ [ {
+            field : "ck",
+            checkbox : true,
+            sortable : false,
+
+        }, {
+
+            field : "consignNam",
+            title : '货主',
+            multiSort : true,
+            width : fixWidth(0.1),
+            align : "center",
+            editor : {
+                type : "validatebox",
+                options : {
+	                required : false
+                }
+            },
+            sortable : false
+        }, {
+
+            field : "consignCod",
+            title : '货主',
+            hidden:true,
+            multiSort : true,
+            width : fixWidth(0.1),
+            align : "center",
+            editor : {
+                type : "validatebox",
+                options : {
+	                required : false
+                }
+            },
+            sortable : false
+        }, {
+
+            field : "billNo",
+            title : '提单号',
+            multiSort : true,
+            halign : "center",
+            editor : {
+                type : "validatebox",
+                options : {
+                    required : false
+                }
+            },
+            sortable : false
+        }, {
+
+            field : "carKind",
+            title : '货类',
+            hidden:true,
+            multiSort : true,
+            halign : "center",
+            sortable : false
+        }, {
+
+            field : "carKindNam",
+            title : '货类',
+            multiSort : true,
+            halign : "center",
+            sortable : false
+        }, {
+
+            field : "brandCod",
+            title : '品牌',
+            multiSort : true,
+            hidden:true,
+            halign : "center",
+            editor : {
+                type : "validatebox",
+                options : {
+                    required : false
+                }
+            },
+            sortable : false
+        }, {
+
+            field : "brandNam",
+            title : '品牌',
+            multiSort : true,
+            halign : "center",
+            editor : {
+                type : "validatebox",
+                options : {
+                    required : false
+                }
+            },
+            sortable : false
+        }, {
+
+            field : "carTyp",
+            title : '车型',
+            hidden:true,
+            multiSort : true,
+            halign : "center",
+            editor : {
+                type : "validatebox",
+                options : {
+                    required : false
+                }
+            },
+            sortable : false
+        }, {
+
+            field : "carTypNam",
+            title : '车型',
+            multiSort : true,
+            halign : "center",
+            editor : {
+                type : "validatebox",
+                options : {
+                    required : false
+                }
+            },
+            sortable : false
+        }, {
+
+            field : "pieces",
+            title : '件数',
+            multiSort : true,
+            halign : "center",
+            editor : {
+                type : "validatebox",
+                options : {
+                    required : false
+                }
+            },
+            sortable : false
+        },{
+            field : "loadPortCod",
+            title : "装货港",
+            multiSort : true,
+            halign : "center",
+            editor : {
+                type : "validatebox",
+                options : {
+                    required : false
+                }
+            },
+            sortable : false
+        }, {
+
+            field : "tranPortCod",
+            title : "卸货港",
+            multiSort : true,
+            halign : "center",
+            editor : {
+                type : "validatebox",
+                options : {
+                    required : false
+                }
+            },
+            sortable : false
+        }, {
+
+            field : "receiveCod",
+            title : "收货人",
+            multiSort : true,
+            halign : "center",
+            editor : {
+                type : "validatebox",
+                options : {
+                    required : false
+                }
+            },
+            sortable : false
+        }, {
+
+            field : "cyAreaNo",
+            title : "场位",
+            multiSort : true,
+            halign : "center",
+            editor : {
+                type : "validatebox",
+                options : {
+                    required : false
+                }
+            },
+            sortable : false
+        }
+        ] ]
+    });
+    function fixWidth(percent) {
+	    return document.documentElement.shipNam * percent; //这里你可以自己做调整
+    }
+    function fixWidth(percent) {
+	    return document.documentElement.evoyage * percent ; //这里你可以自己做调整
+    }
+    $("#ShipBillDatagrid1507959149306").datagrid("hdGetColumnNames");
+	 });
+</script>
+<form th:id="ContractIeDocForm1507959149305">
+	<span>提单号：<input id="billNo" name="billNo" placeholder="提单号"
+		class="easyui-validatebox" data-options="required:false" style="width: 80px">
+		场地：<input id="cyAreaNo" name="cyAreaNo" placeholder="场地"
+		class="easyui-validatebox" data-options="required:false" style="width: 80px">
+		车架号：<input id="vinNo" name="vinNo" placeholder="车架号"
+		class="easyui-validatebox" data-options="required:false" style="width: 80px">
+		品牌：<input id="brandCod" name="brandCod" placeholder="品牌"
+		class="easyui-validatebox" data-options="required:false" style="width: 80px">
+		<a class="easyui-linkbutton" id="query">查询</a>
+	</span>
+	<table id="ShipBillDatagrid1507959149306" style="height: 285px;"></table>
+</form>
+</html>

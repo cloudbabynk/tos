@@ -1,0 +1,100 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#CDamgLevelForm1507959148645");
+	    var damgLevelCod = HdUtils.dialog.getValue("damgLevelCod");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    if (damgLevelCod) {
+	    	$("#damgLevelCod").attr("readonly",true);
+	    } else {
+	    	$("#damgLevelCod").attr("readonly",false);
+	    }
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/base/CDamgLevel/findone?damgLevelCod=" + damgLevelCod,
+	        success : function(data) {
+		        $("#CDamgLevelForm1507959148645").form("loadData", data);
+	        }
+	    })
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+		    var isValss = $("#CDamgLevelForm1507959148645").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#CDamgLevelForm1507959148645").serializeObject();
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/base/CDamgLevel/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#DayWorkClassDatagrid1508123307299" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+    });
+	function findCod(){
+    	var damgLevelCodValue = $("#damgLevelCod").val();
+    	HdUtils.ajax.post({
+			url : "../webresources/login/base/CDamgLevel/findCDamgLevel?damgLevelCod=" + damgLevelCodValue,
+			success : function(data) {
+				if (data.code == "-1") {
+					$('#damgLevelCod').val("");
+					HdUtils.messager.bottomRight(data.message);
+					$('#damgLevelCod').focus();
+			        return false;
+				}
+			}
+		});
+    }
+</script>
+<form id="CDamgLevelForm1507959148645">
+	<table id="CDamgLevelTable1507959148645" style="height: 75%; width: 80%"
+		class="tableform">
+		<tr>
+			<th>残损程度代码：</th>
+			<td><input id="damgLevelCod" name="damgLevelCod" onchange="findCod();"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="10" /></td>
+			<th>残损程度：</th>
+			<td><input id="damgLevel" name="damgLevel"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="10" /></td>
+		</tr>
+		<tr>
+			<th>备注：</th>
+			<td><input id="remarkTxt" name="remarkTxt"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		</tr>
+	</table>
+</form>

@@ -1,0 +1,137 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#ShipTimWorkForm1507959148710");
+	    var shipTimworkId = HdUtils.dialog.getValue("shipTimworkId");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    $('#workBegTim').datetimebox({
+	    	showSeconds:false,
+	    })
+	    $('#workEndTim').datetimebox({
+	    	showSeconds:false,
+	    })
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/ship/ShipTimWork/findone?shipTimworkId=" + shipTimworkId,
+	        success : function(data) {
+		        $("#ShipTimWorkForm1507959148710").form("loadData", data);
+	        }
+	    })
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    $('#shipTimTyp').combobox(HdUtils.code.scode({
+		    fieldCod : 'SHIP_TIM_TYP'
+	    }, {
+		    required : true,
+		    onChange : function(value) {
+		    //给马菲作业和叉车作业空货名,避免因相同作业项目相同作业起始时间，无货物信息报表显示不全问题，
+		     if(value=="02"||value=="03"){
+		     $("#description").val(" ");
+		     }
+	        }
+	    })
+	    );
+
+	    function saveHandler() {
+		    var isValss = $("#ShipTimWorkForm1507959148710").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#ShipTimWorkForm1507959148710").serializeObject();
+		    formdata.shipNo=HdUtils.dialog.getValue("shipNo");
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/ship/ShipTimWork/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#ShipTimWorkDatagrid1508123301002" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+    });
+</script>
+<form id="ShipTimWorkForm1507959148710">
+	<table id="ShipTimWorkTable1507959148710"
+		style="height: 75%; width: 80%" class="tableform">
+		<input id="shipTimworkId" name="shipTimworkId"
+			data-options="required:false" class="easyui-validatebox" hidden="true"
+			maxlength="10" />
+		<tr>
+			<th>杂作业类型：</th>
+			<td><input id="shipTimTyp" name="shipTimTyp"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="10" /></td>
+			<th>作业开始时间：</th>
+			<td><input id="workBegTim" name="workBegTim"
+				data-options="required:true" class="easyui-datetimebox"
+				maxlength="10" /></td>
+			<th>作业结束时间：</th>
+			<td><input id="workEndTim" name="workEndTim"
+				data-options="required:true" class="easyui-datetimebox"
+				maxlength="10" /></td>
+		</tr>
+		<tr>
+			<th>货物信息：</th>
+			<td><input id="description" name="description"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+			<th>长度：</th>
+			<td><input id="lengths" name="lengths"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+			<th>体积：</th>
+			<td><input id="volumes" name="volumes"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		</tr>
+		<tr>
+			<th>吨数：</th>
+			<td><input id="tons" name="tons" data-options="required:false"
+				class="easyui-validatebox" maxlength="255" /></td>
+			<th>待时：</th>
+			<td><input id="waitTim" name="waitTim"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+			<th>使用机械情况：</th>
+			<td><input id="useDevices" name="useDevices"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		</tr>
+		<tr>
+			<th>备注：</th>
+			<td colspan="5"><input id="remarks" name="remarks"
+				style="width: 100%;" data-options="required:false"
+				class="easyui-validatebox" maxlength="255" /></td>
+			<input id="shipNo" name="shipNo" data-options="required:false" hidden="true"
+				class="easyui-validatebox" maxlength="255" />
+		</tr>
+	</table>
+</form>

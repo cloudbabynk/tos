@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<div class="easyui-layout" data-options="fit:true"
+	style="height: 100%; width: 100%">
+	<div
+		data-options="region:'west',split:true,tools:reload5436,title:'船期预报'"
+		style="width: 280px; padding: 10px;">
+		<input class="easyui-searchbox"
+			data-options="searcher:searchShip,prompt:'搜索船舶'"
+			th:id="searchText+${radi}" style="width: 200px; height: 20px;"
+			name="search"></input>
+		<ul th:id="ShipStatusTree123+${radi}"></ul>
+	</div>
+	<div data-options="region:'center'" style="height: 100%; width: 100%">
+		<!-- 工具栏 -->
+		<div class="easyui-layout" data-options="fit:true"
+			th:id="shipdynamic277+${radi}">
+			<div th:id="DayWorkClassToolBar1508123307299+${radi}"
+				data-options="region:'north'" style="width: 100%; height: 30px">
+				<div style="float: left;">
+					<!-- 查询 -->
+					日期：<input th:id="workDte+${radi}" name="workDte"
+						class="easyui-datebox" style="width: 120px"
+						data-options="required:false" /> 班次：<input
+						th:id="shiftCode+${radi}" name="shiftCode"
+						data-options="required:false" style="width: 120px">  <a
+						class="easyui-linkbutton" th:id="query+${radi}">查询</a>
+					<div style="color: red; float: right;" th:id="labMess+${radi}" />
+				</div>
+			</div>
+			<div th:id="singleshiphtml+${radi}" data-options="region:'center'"
+				style="width: 100%; height: 100%">
+				<div class="easyui-tabs" data-options="fit:true"
+					th:id="daynightplantabs+${radi}">
+					<div
+						data-options="title:'进口作业',border:false,closable:false,fit:true,href:'../webresources/login/ship/ShipClassAct/shipclassactjk.htm'">
+					</div>
+					<div
+						data-options="title:'出口作业',border:false,closable:false,fit:true,href:'../webresources/login/ship/ShipClassAct/shipclassactck.htm'">
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- 工具栏 -->
+
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+/*<![CDATA[*/
+var reload5436 = [ {
+    iconCls : 'icon-reload',
+    handler : function() {
+        $('#ShipStatusTree123[(${radi})]').tree('reload');
+    }
+} ];
+var searchShip = function() {
+    var parentNode = $('#ShipStatusTree123[(${radi})]').tree('getRoots'); //得到tree顶级node  
+    var searchCon = $("input[name='search']").val();
+    var children;
+    for (var i = 0; i < parentNode.length; i++) { //循环顶级 node   
+	    children = $('#ShipStatusTree123[(${radi})]').tree('getChildren', parentNode[i].target);//获取顶级node下所有子节点   
+	    if (children) { //如果有子节点   
+		    for (var j = 0; j < children.length; j++) { //循环所有子节点   
+			    if (children[j].text.indexOf(searchCon) >= 0 || children[j].id.indexOf(searchCon) >= 0) { //判断节点text是否包含搜索文本                       
+				    expandParent(children[j]); //设置此节点所有父级展开   
+				    selectNode(children[j]); //设置此节点为选择状态   
+
+				    return;
+			    }
+		    }
+	    } else {
+		    if (parentNode[i].text.indexOf(searchCon) || children[j].id.indexOf(searchCon) >= 0 >= 0) {
+			    expandParent(parentNode[i]);
+			    selectNode(parentNode[i]);
+			    return;
+		    }
+	    }
+    }
+}
+function selectNode(node) {
+    $('#ShipStatusTree123[(${radi})]').tree('select', node.target);
+    $('#ShipStatusTree123[(${radi})]').tree('scrollTo', node.target);
+};
+
+function expandParent(node) {
+    var parent = node;
+    var t = true;
+    do {
+	    parent = $('#ShipStatusTree123[(${radi})]').tree('getParent', parent.target); //获取此节点父节点   
+	    if (parent) { //如果存在   
+		    t = true;
+		    $('#ShipStatusTree123[(${radi})]').tree('expand', parent.target);
+	    } else {
+		    t = false;
+	    }
+    } while (t);
+};
+	$(document).ready(function() {
+// 	    $("#workDte[(${radi})]").val(Date.prototype.dateAdd(0, "yyyy-MM-dd"));
+// 	    $.parser.parse($('#DayWorkClassToolBar1508123307299[(${radi})]'));
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#DayWorkClassDatagrid1508123307299[(${radi})]");
+	    var shipNo = "";
+	    var workDte = "";
+	    var newGroupShipNo;
+	    var newIShipId;
+	    var newEShipId;
+	    var cShipName;
+// 	    var workDte = Date.prototype.dateAdd(0, "yyyy-MM-dd");
+// 	    HdUtils.dialog.setValue({
+// 		    'workDte' : workDte
+// 	    });
+	    //班次
+	    $('#shiftCode[(${radi})]').combobox({
+	        url : '../webresources/login/damage/MDeliveryRecord/getClassRunDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 'auto',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    
+	    $('#ShipStatusTree123[(${radi})]').tree({
+	        method : "get",
+	        url : "../webresources/login/ship/Ship/gentree",
+	        onClick : treeclick
+	    });
+	    function treeclick(node) { 
+		    shipNo = node.id;
+		    dockCod = node.obj.dockCod;
+		    cShipName = node.obj.cShipNam;
+		    newIShipId = node.obj.newIShipId;
+		    newEShipId = node.obj.newEShipId;
+		    newGroupShipNo = node.obj.newGroupShipNo;
+		    var shiftCode = $("#shiftCode[(${radi})]").combobox('getValue');
+	    	var workDte = $("#workDte[(${radi})]").datebox("getValue");
+	    	HdUtils.dialog.setValue({
+			    'shipNo' : shipNo,
+			    'workDte' : workDte,
+			    'newGroupShipNo' : newGroupShipNo,
+			    'cShipName' : cShipName,
+		        'newIShipId' : newIShipId,
+		        'newEShipId' : newEShipId
+		    });
+		    var currentTab = $('#daynightplantabs[(${radi})]').tabs('getSelected');
+		    currentTab.panel('refresh');
+			setTimeout(function () {
+				HdUtils.dialog.setValue({
+					'shipNo' : "",
+					'iEId'   : "",
+					'tradeId':"",
+					'shipNam': "",
+					'voyage' :"",
+					'dockCod':"",
+					'eShipNam' : ""
+				});
+
+			},2000)
+	    }
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+		    var shiftCode = $("#shiftCode[(${radi})]").combobox('getValue');
+	    	var workDte = $("#workDte[(${radi})]").datebox("getValue");
+	    	HdUtils.dialog.setValue({
+			    'shipNo' : shipNo,
+			    'shiftCode' : shiftCode,
+			    'workDte' : workDte,
+			    'newGroupShipNo' : newGroupShipNo,
+			    'cShipName' : cShipName,
+		        'newIShipId' : newIShipId,
+		        'newEShipId' : newEShipId
+		    });
+		    var currentTab = $('#daynightplantabs[(${radi})]').tabs('getSelected');
+		    currentTab.panel('refresh');
+	    });
+    });
+	/*]]>*/
+</script>
+</html>

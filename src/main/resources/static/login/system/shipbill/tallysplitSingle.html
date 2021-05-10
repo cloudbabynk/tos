@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<style type="text/css">
+.subtotal {
+	font-weight: bold;
+} /*合计单元格样式*/
+</style>
+<body>
+	<div th:id="cc+${radi}" class="easyui-layout"
+		style="width: 100%; height: 100%;">
+		<input th:id="Type+${radi}" th:value='${Type}' type="hidden" />
+		
+		<div data-options="region:'center'" style="height: 100%; width: 100%">
+            <div th:id="sbillhtml+${radi}" class="easyui-layout" style="width: 100%; height: 100%;" data-options="fit:true">
+                <div th:id="workcommand+${radi}" data-options="region:'center',split:true,title:'理货数据'"></div>
+                <div th:id="tallysplit+${radi}" data-options="region:'south',split:true,title:'汇总数据' "
+                    style="width: 100%; height: 340px"></div>
+            </div>
+
+		</div>
+	</div>
+	<script type="text/javascript" th:inline="javascript">
+	
+        function refreshTallySpitDiv(){
+		    $('#sbillhtml[(${radi})]').layout('panel', 'south').panel('refresh');
+        }
+        $(document).ready(function() {
+	        var shipNo = "";
+	        var voyage = "";
+	        var dockCod = "";
+	        var eShipNam = "";
+	        let type = $("#Type[(${radi})]").val();
+	        $.parser.parse($('#ShipBillToolBar1508123309099[(${radi})]'));
+            var radi = /*[[${radi}]]*/'';
+            HdUtils.dialog.setValue({'splitTyp':type})
+            
+            $('#workcommand[(${radi})]').attr('href', '../webresources/login/shipbill/TallySplit/zysjSingle.htm');
+            $('#tallysplit[(${radi})]').attr('href', '../webresources/login/shipbill/TallySplit/tallysplithySingle.htm');
+
+        });
+	</script>
+
+</body>
+</html>

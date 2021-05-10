@@ -1,0 +1,240 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#BillCarForm150795914912345345");
+	    var shipShort;
+	    var recId = HdUtils.dialog.getValue("recId");
+	    var nmxclhRadi = HdUtils.dialog.getValue("nmxclhRadi");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    var queueId = HdUtils.dialog.getValue("queueId");
+	    var type = HdUtils.dialog.getValue("type");
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/work/WorkCommand/findOne?queueId=" + queueId,
+	        success : function(data) {
+		        $("#BillCarForm150795914912345345").form("loadData", data);
+		        $('#cyAreaNo').combobox('setValue', data.cyArea);
+	        }
+	    })
+	    $('#brandCod').combobox({
+	        url : '../webresources/login/ship/BillCar/getCBrandDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight:120,
+	        required : false,
+	    });
+	    $('#carKind').combobox({
+	        url : '../webresources/login/contract/ContractIeDoc/getCCarKind',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 100,
+	        required : 'true',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $('#consignCod').combobox({
+	        url : '../webresources/login/contract/ContractIeDoc/getCClientCodDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        mode : 'remote',
+	        panelHeight : 100,
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $('#carTyp').combobox({
+	        url : '../webresources/login/ship/BillCar/getCCarTypDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        mode : 'remote',
+	        panelHeight:120,
+	        required : true,
+	        onSelect : function(rec) {
+	        	HdUtils.ajax.post({
+	    	        url : "../webresources/login/base/CCarTyp/findone?carTyp="+ rec.value,
+	    	        success : function(data) {
+	    		        if (!data) {
+	    			        return false;
+	    		        }
+	    		        //页面刷新有些值不变
+	    		        $('#brandCod').combobox('setValue', data.brandCod);
+	    		        $('#carKind').combobox('setValue', data.carKind);
+	    		        $('#carLevel').val(data.carLevel);
+
+	    	        }
+	    	    });
+	        	return rec.value;
+	        }
+	    });
+	    $('#cyAreaNo').combobox({
+	        url : '../webresources/login/base/CCyArea/getCCyAreaDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight:'200',
+	        required : true,
+	    });
+	    $('#lhbz').combobox({
+	        url : '../webresources/login/base/CWorkClass/getCWorkClass',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight:120,
+	        required : true,
+	        onSelect : function(rec) {
+	        	$('#inCyNam').combobox({
+	    	        url : '../webresources/login/base/CEmployee/getCEmployee?classNo=' + rec.value,
+	    	        valueField : 'value',
+	    	        textField : 'label',
+	    	        panelHeight:120,
+	    	        required : true,
+	    	        onSelect : function(rec) {
+	    	        	return rec.value;
+	    	        }
+	    	    });
+	        	return rec.value;
+	        }
+	    });
+	    $('#inCyNam').combobox({
+	        url : '../webresources/login/base/CEmployee/getCEmployee',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight:120,
+	        required : true,
+	        onSelect : function(rec) {
+	        	return rec.value;
+	        }
+	    });
+	    if(recId){
+	    	HdUtils.ajax.post({
+        		url : "../webresources/login/base/CEmployee/findCemployee?sysUserNam="+ recId,
+        		success : function(data) {
+    		        if (!data) {
+    			        return false;
+    		        }
+    		        $('#inCyNam').combobox('setValue', data.empNo);
+    		        $('#lhbz').combobox('setValue', data.classNo);
+        		}
+        	})
+	    }
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+		    var isValss = $("#BillCarForm150795914912345345").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#BillCarForm150795914912345345").serializeObject();
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/work/WorkCommand/updateLhData?type=" + type,
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#ContractIeDocDatagrid150" + radi).datagrid("hdReload");
+			        $("#ContractIeDocDatagrid1508123320012" + nmxclhRadi).datagrid("hdReload");
+		        }
+		    })
+	    }
+    });
+	function change(value){
+		if (value.value == '1') {
+			    $("#length").attr("readonly", false);
+	    }else if (value.value == '0'){
+	    		$("#length").val("");
+			    $("#length").attr("readonly", true);
+	    }
+	}
+</script>
+<form id="BillCarForm150795914912345345">
+<input id="queueId" name="queueId" hidden="true">
+	<table id="BillCarTable150795914912349" style="height: 75%; width: 80%"
+		class="tableform">
+		<tr>
+			<th>品牌：</th>
+			<td><input id="brandCod" name="brandCod"
+				data-options="required:false" class="easyui-validatebox" 
+				maxlength="35" /></td>
+			<th>车类：</th>
+			<td><input id="carKind" name="carKind"
+				data-options="required:false" class="easyui-validatebox" 
+				maxlength="35" /></td>
+			<th>型号：</th>
+			<td><input id="carTyp" name="carTyp"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		</tr>
+		<tr>
+	     	<th>提单号：</th>
+			<td><input id="billNo" name="billNo"
+				data-options="required:false" class="easyui-validatebox" 
+				maxlength="255" /></td>
+		    <th>入场位置：</th>
+			<td><input id="cyAreaNo" name="cyAreaNo"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		</tr>
+		<tr>
+		    <th>车架号：</th>
+			<td><input id="vinNo" name="vinNo"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+			<th>入场时间：</th>
+			<td><input id="inCyTim" name="inCyTim" required="required"
+				class="easyui-datetimebox" /></td>
+		</tr>
+		<tr>
+		    <th>港方机力：</th>
+			<td><input type="radio"  name="useMachId" value="1"
+					class='easyui-radio'>是</input> 
+			<input type="radio" name="useMachId"  checked="checked"  value="0" class='easyui-radio'>否</input></td>
+		    <th>港方人力：</th>
+			<td><input type="radio"  name="useWorkerId" value="1" checked="checked"
+					class='easyui-radio'>是</input> 
+			<input type="radio" name="useWorkerId"    value="0" class='easyui-radio'>否</input></td>
+		    <th>夜班标识：</th>
+			<td><input type="radio"  name="nightId" value="1"
+					class='easyui-radio'>是</input> 
+			<input type="radio" name="nightId"  checked="checked"  value="0" class='easyui-radio'>否</input></td>
+		</tr>
+		<tr>
+		    <th>节假日标识：</th>
+			<td><input type="radio"  name="holidayId" value="1"
+					class='easyui-radio'>是</input> 
+			<input type="radio" name="holidayId"  checked="checked"  value="0" class='easyui-radio'>否</input></td>
+		    <th>超长标识：</th>
+			<td><input type="radio"  name="lengthOverId" value="1" onclick="change(this)"
+					class='easyui-radio'>是</input> 
+			<input type="radio" name="lengthOverId"  checked="checked" onclick="change(this)"  value="0" class='easyui-radio'>否</input></td>
+			<th>长：</th>
+			<td><input id="length" name="length"  readOnly="readonly"
+				data-options="min:0,max:100000,precision:2" class="easyui-numberbox"/></td>
+		</tr>
+	</table>
+</form>

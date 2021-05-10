@@ -1,0 +1,177 @@
+@CHARSET "UTF-8";
+
+.olmapTool {
+	z-index: 10;
+	position: absolute;
+	width: 500px;
+	height: 26px;
+	left: -10px;
+	bottom: 25px;
+}
+
+.olmapTool li {
+	width: 50px;
+	float: left;
+	margin-right: 20px;
+	height: 30px;
+	padding: 3px;
+	background-color: rgba(255, 255, 255, .4);
+	border-radius: 4px;
+	list-style-type: none;
+}
+
+.olmapTool li .button311 {
+	background-color: #3385FF;
+	border-radius: 5px;
+	padding: 0;
+	margin: 0;
+	border: 0;
+	height: 30px;
+	width: 70px;
+	color: #fff;
+	cursor: pointer;
+	font-weight: bold;
+}
+
+.count {
+	z-index: 20;
+	position: absolute;
+	width: 110px;
+	height: 80px;
+	right: 10px;
+	top: 10px;
+	background-color: #FCF9F2;
+	border: 1px solid #F3D7B5;
+	display: none;
+}
+
+.tableStyle {
+	color: #663366;
+	font-weight: bold;
+	font-size: 12px;
+}
+
+.box-shadow-3 {
+	-webkit-box-shadow: 0 0 10px 10px #666;
+	-moz-box-shadow: 0 0 10px 10px #666;
+	box-shadow: 0 0 10px 10px #666;
+}
+
+.olznzTool {
+	z-index: 10;
+	position: absolute;
+	width: 26px;
+	height: 26px;
+	left: 10px;
+	top: 5px;
+}
+
+.dangerClass {
+	z-index: 10;
+	position: absolute;
+	right: 20px;
+	top: 5px;
+	padding: 5px;
+}
+
+.box {
+	border: 1px solid #ddd;
+	background-color: #3385FF;
+	border-radius: 5px;
+	padding: 0;
+	margin: 0;
+	border: 0;
+	height: 30px;
+	width: 70px;
+	line-height: 30px;
+	color: #fff;
+	font-size: 12px;
+	cursor: pointer;
+	font-weight: bold;
+	text-align: center;
+}
+
+.red {
+	border: 1px solid #d00;
+	background: #ffe9e8;
+	color: #d00;
+}
+
+/* 收缩展开效果 */
+.foldBox {
+	padding-left: 10px;
+	position: relative;
+	float: right;
+}
+
+.foldBox h1 {
+	font-size:12px;
+	background-color: #3385FF;
+	border-radius: 5px;
+	padding:5px 10px 5px 10px;
+	margin: 0;
+	border: 0;
+	height: 20px;
+	color: #fff;
+	cursor: pointer;
+	font-weight: bold;
+}
+.text {
+	margin-top:-5px;
+	float: right;
+	background-color: #fff;
+	border:1px solid #696969;
+	border-top: 0px;
+}
+
+
+
+.ol-popup {
+	position: absolute;
+	background-color: white;
+	-webkit-filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.2));
+	filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.2));
+	padding: 5px;
+	border-radius: 10px;
+	border: 1px solid #cccccc;
+	bottom: 12px;
+	left: -50px;
+}
+
+.ol-popup:after, .ol-popup:before {
+	top: 100%;
+	border: solid transparent;
+	content: " ";
+	height: 0;
+	width: 0;
+	position: absolute;
+	pointer-events: none;
+}
+
+.ol-popup:after {
+	border-top-color: white;
+	border-width: 10px;
+	left: 48px;
+	margin-left: -10px;
+}
+
+.ol-popup:before {
+	border-top-color: #cccccc;
+	border-width: 11px;
+	left: 48px;
+	margin-left: -11px;
+}
+
+.ol-popup-closer {
+	text-decoration: none;
+	position: absolute;
+	top: 2px;
+	right: 8px;
+}
+
+.ol-popup-closer:after {
+	content: "✖";
+}
+#popup-content{
+	width: 150px;
+}

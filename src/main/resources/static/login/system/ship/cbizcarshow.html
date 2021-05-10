@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="CBizCarToolBar1508123301002+${radi}" style="float: left">
+	<div>
+		<!-- 查询 -->
+		<span> 
+			 牌号：<input th:id="platNo+${radi}" name="platNo"  type="text" data-options="required:false" style="width: 120px">
+			
+			车辆性质： <input th:id="carProp+${radi}" name="carProp" type="text" data-option="required:false" style="width: 105px" /> 
+			 <a class="easyui-linkbutton" th:id="query+${radi}">查询</a> 
+			<a class="easyui-linkbutton" th:id='clear+${radi}'>重置</a>
+			<!-- <shiro:hasPermission name="webresources:login:CBizcar:exportCbiz">
+		        	<a class="easyui-linkbutton" iconCls="icon-export" plain="false"
+			    	th:id="exportCbiz+${radi}">导出Excel</a>
+	           	</shiro:hasPermission> -->
+			 <!-- <a class="easyui-linkbutton" th:id='fresh+${radi}'>刷新</a> -->
+		</span> 
+	</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="CBizCarDatagrid1508123301002+${radi}" style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#CBizCarDatagrid1508123301002[(${radi})]");
+	    $.parser.parse($('#CBizCarToolBar1508123301002[(${radi})]'));
+		
+		  //车辆性质下拉
+		  $("#carProp[(${radi})]").combobox({
+			  valueField:'value',
+			  textField:'label',
+			  data:[{
+				  value:'*',
+				  label:'所有'
+			  },{
+				  value:'01',
+				  label:'内部车'
+			  },{
+				  value:'02',
+				  label:'业务车'
+			  },{
+				  value:'03',
+				  label:'临时车'
+			  }]
+		  });
+	    /* // 刷新。
+	    $("#fresh[(${radi})]").on("click", function() {
+	    	  $("#CBizCarDatagrid1508123301002[(${radi})]").datagrid({
+				    queryParams : query(),
+			    });
+	    }); */
+	    $("#carProp[(${radi})]").combobox("setValue","*");
+	    // 清空。
+	    $("#clear[(${radi})]").on("click", function() {
+	       $("#platNo[(${radi})]").val("");
+		   $("#carProp[(${radi})]").combobox("setValue","*");
+	       $("#CBizCarDatagrid1508123301002[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	      });
+	  /* //打印
+        $("#exportCbiz[(${radi})]").on("click", function() {
+        	dg.datagrid("hdExportExcel", {
+                url :"../webresources/login/base/CBizcar/exportCbiz",
+                exportFileName : "商务车名录-" + new Date().format("yyyyMMddhhmmss")
+            });
+        }); */
+	    //回车键触发操作
+	    $(document).keydown(function(event) {
+		    if (event.keyCode == 13) {
+			    $("#CBizCarDatagrid1508123301002[(${radi})]").datagrid({
+				    queryParams : query(),
+			    })
+		    }
+	    })
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+		    $("#CBizCarDatagrid1508123301002[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    var platNo = $("#platNo[(${radi})]").val();
+			var carProp = $("#carProp[(${radi})]").combobox("getValue");
+		    onlinquery.add("carProp",carProp);
+		    onlinquery.add("platNo", platNo);
+		    return onlinquery.build();
+	    }
+
+	    $("#CBizCarDatagrid1508123301002[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/base/CBizcar/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#CBizCarToolBar1508123301002" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+	        },{
+	            field : "platNo",
+	            title : "牌号",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        },{
+	            field : "factroy",
+	            title : "品牌",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        },{
+	            field : "carTyp",
+	            title : "车型",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        },{
+	            field : "carProp",
+	            title : "车辆性质",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        },{
+	            field : "carColor",
+	            title : "车身颜色",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        },{
+	            field : "driverNam",
+	            title : "司机",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        },{
+	            field : "corpNam",
+	            title : "单位",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        },{
+	            field : "corpNam",
+	            title : "部门",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        },{
+	            field : "relationNam",
+	            title : "联系人",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        },{
+	            field : "telephon",
+	            title : "电话",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        },{
+	            field : "mobileTele",
+	            title : "手机",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        },{
+	            field : "forbidId",
+	            title : "放行",
+	            multiSort : true,
+	            halign : "center",
+	            formatter : function(value) {
+						if (value == 1) {
+							value = "";
+							return value;
+						} else {
+							value = "放行";
+							return value;
+							 }
+				},
+	            sortable : false
+	        },{
+	            field : "forbidTxt",
+	            title : "禁行内容",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        },{
+	            field : "inDate",
+	            title : "制造日期",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        },{
+	            field : "remarks",
+	            title : "备注",
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        }
+	        ] ]
+	    });
+	    $("#CBizCarDatagrid1508123301002" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div class="easyui-layout" data-options="fit:true"
+	style="height: 100%; width: 100%">
+	<div
+		data-options="region:'west',split:true,tools:reload5436,title:'船期预报'"
+		style="width: 280px; padding: 10px;">
+		<input class="easyui-searchbox"
+			data-options="searcher:searchShip,prompt:'搜索船舶'"
+			th:id="searchText+${radi}" style="width: 200px; height: 20px;"
+			name="search"></input>
+		<ul th:id="ShipStatusTree123+${radi}"></ul>
+	</div>
+	<div data-options="region:'center'" style="height: 100%; width: 100%">
+		<!-- 工具栏 -->
+		<div class="easyui-tabs" data-options="fit:true" th:id="workcommandtabs+${radi}">
+			<div th:id="loadhtml2+${radi}"
+				data-options="title:'离线数据',region:'center',fit:true"
+				style="width: 100%; height: 100%;">
+				<div th:id="ContractIeDocToolBar15081233020012+${radi}"
+					style="float: left;">
+					<!-- 查询 -->
+					<input th:id="Type+${radi}" th:value='${Type}' type="hidden" /> <span>
+						<shiro:hasPermission
+							name="webresources:login:MPdaWorkCommand:saveLxlh">
+							<a class="easyui-linkbutton" th:id="lxlh+${radi}">离线理货导入</a>
+						</shiro:hasPermission> 
+						<shiro:hasPermission
+							name="webresources:login:MPdaWorkCommand:delete">
+						<a class="easyui-linkbutton" th:id="delete+${radi}">删除</a>
+						</shiro:hasPermission>
+					</span>
+
+				</div>
+				<table th:id="ContractIeDocDatagrid1508123320012+${radi}"
+					style="height: 100%"></table>
+			</div>
+			<div th:id="loadhtml3+${radi}"
+				data-options="title:'理货数据',region:'east',split:true"
+				style="width: 750px; height: 100%"></div>
+		</div>
+	</div>
+</div>
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	var reload5436 = [ {
+        iconCls : 'icon-reload',
+        handler : function() {
+	        $('#ShipStatusTree123[(${radi})]').tree('reload');
+        }
+    } ];
+    var searchShip = function() {
+	    var parentNode = $('#ShipStatusTree123[(${radi})]').tree('getRoots'); //得到tree顶级node  
+	    var searchCon = $("input[name='search']").val();
+	    /* alert("parentNode="+parentNode); 
+	    alert("searchCon="+searchCon); */
+	    var children;
+	    for (var i = 0; i < parentNode.length; i++) { //循环顶级 node   
+		    children = $('#ShipStatusTree123[(${radi})]').tree('getChildren', parentNode[i].target);//获取顶级node下所有子节点   
+		    if (children) { //如果有子节点   
+			    for (var j = 0; j < children.length; j++) { //循环所有子节点   
+				    //if($('#ul_tree_dept').tree('isLeaf',children[j].target)){ //判断子级是否为叶子节点,即不是父节点   
+				    if (children[j].text.indexOf(searchCon) >= 0 || children[j].id.indexOf(searchCon) >= 0) { //判断节点text是否包含搜索文本                       
+					    expandParent(children[j]); //设置此节点所有父级展开   
+					    selectNode(children[j]); //设置此节点为选择状态   
+
+					    return;
+				    }
+				    //}   
+			    }
+		    } else {
+			    if (parentNode[i].text.indexOf(searchCon) || children[j].id.indexOf(searchCon) >= 0 >= 0) {
+				    expandParent(parentNode[i]);
+				    selectNode(parentNode[i]);
+				    return;
+			    }
+		    }
+	    }
+    }
+    function selectNode(node) {
+	    $('#ShipStatusTree123[(${radi})]').tree('select', node.target);
+	    $('#ShipStatusTree123[(${radi})]').tree('scrollTo', node.target);
+    };
+
+    function expandParent(node) {
+	    var parent = node;
+	    var t = true;
+	    do {
+		    parent = $('#ShipStatusTree123[(${radi})]').tree('getParent', parent.target); //获取此节点父节点   
+		    if (parent) { //如果存在   
+			    t = true;
+			    $('#ShipStatusTree123[(${radi})]').tree('expand', parent.target);
+		    } else {
+			    t = false;
+		    }
+	    } while (t);
+    };
+    /*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#ContractIeDocDatagrid1508123320012[(${radi})]");
+	    var type = $("#Type[(${radi})]").val();
+	    var recNam;
+	    HdUtils.dialog.setValue({
+	        'nmxclhRadi' : radi,
+	    });
+	    $('#loadhtml3[(${radi})]').attr('href', '../webresources/login/work/WorkCommand/workcommandzx.htm?Type=' + type);
+	    $.get('/login/PrivilegeController/getLoginAccount?t=11&s=' + Math.random(), function(data) {
+		    recNam = data.name;
+	    });
+	    $('#ShipStatusTree123[(${radi})]').tree({
+	        method : "get",
+	        url : "../webresources/login/ship/Ship/gentree",
+	        onClick : treeclick
+	    });
+
+	    function treeclick(node) {
+		    shipNo = node.id;
+		    shipNam = node.type.split(",");
+		    cShipNam = shipNam[0];
+		    ivoyage = node.obj.ivoyage;
+		    dockCod = node.obj.dockCod;
+		    statBegTim = node.obj.conArrvTim;
+		    groupShipNo = node.obj.groupShipNo;
+		    $('#cShipNam[(${radi})]').val(cShipNam);
+		    $('#ivoyage[(${radi})]').val(ivoyage);
+		    HdUtils.dialog.setValue({
+		        'shipNo' : shipNo,
+		        'dockCod' : dockCod
+		    });
+		    var workcommandnmxcRadi = HdUtils.dialog.getValue("workcommandoneRadi");
+		    $('#ContractIeDocDatagrid1508123320012[(${radi})]').datagrid({
+			    queryParams : query(),
+		    })
+		    $('#ContractIeDocDatagrid150'  + workcommandnmxcRadi).datagrid({
+			    queryParams : query(),
+		    })
+	    }
+	    var shipNo = HdUtils.dialog.getValue("shipNo");
+	    var dockCod = HdUtils.dialog.getValue("dockCod");
+	    var workcommandoneRadi = HdUtils.dialog.getValue("workcommandoneRadi");
+	    var recId;
+	    $.get('/login/PrivilegeController/getLoginAccount?t=11&s=' + Math.random(), function(data) {
+		    recId = data.account;
+	    })
+	    var inCyNam;
+	    var driver;
+	    var cyPlac;
+	    var rfidCardNo;
+	    var vinNo;
+	    var contractNo;
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    if (shipNo) {
+			    onlinquery.add("shipNo", shipNo);
+		    } else {
+			    onlinquery.add("shipNo", '123456789###');
+		    }
+		    onlinquery.add("type", type);
+		    return onlinquery.build();
+	    }
+	    // 离线理货。
+	    $("#lxlh[(${radi})]").on("click", function() {
+		    if (!shipNo) {
+			    HdUtils.messager.info("请选择一条队列信息");
+			    return false;
+		    }
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/work/MPdaWorkCommand/saveLxlh?type=" + type +"&shipNo=" + shipNo,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.messager.bottomRight('操作成功', '保存操作');
+			        $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid("hdReload");
+			        $("#ContractIeDocDatagrid150" + workcommandoneRadi).datagrid("hdReload");
+		        }
+		    })
+	    });
+
+	    // 批量卸船理货回退
+	    $("#delete[(${radi})]").on("click", function() {
+	    	var dataRow = dg.datagrid("getChecked");
+	    	if (dataRow.length == 0) {
+	            HdUtils.messager.info('请至少选择一条数据！');
+	            return false;
+            }
+		    var queueIds = "";
+		    for (var i = 0; i < dataRow.length; i++) {
+		    	queueIds += dataRow[i].queueId + ",";
+		    }
+	    	HdUtils.ajax.post({
+		        url : "../webresources/login/work/MPdaWorkCommand/removeAll?queueIds=" + queueIds,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.messager.bottomRight('操作成功', '保存操作');
+			        $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid("hdReload");
+		        }
+		    })
+	    });
+
+	    $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/work/MPdaWorkCommand/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#ContractIeDocToolBar15081233020012" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+	        }, {
+	            field : "shipNam",
+	            title : '船名',
+	            multiSort : true,
+	            width : 100,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "voyage",
+	            title : '航次',
+	            multiSort : true,
+	            width : 80,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "brandNam",
+	            title : "品牌",
+	            multiSort : true,
+	            width : 80,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "carKindNam",
+	            title : "车类",
+	            multiSort : true,
+	            width : 60,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "carTypNam",
+	            title : "型号",
+	            multiSort : true,
+	            width : 60,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "vinNo",
+	            title : "车架号",
+	            multiSort : true,
+	            width : 60,
+	            align : "center",
+	            sortable : false
+	        },  {
+	            field : "inCyTim",
+	            title : "装卸日期",
+	            multiSort : true,
+	            width : 100,
+	            align : "center",
+	            formatter : $.hd.ezui.formatter.date,
+	            sortable : false
+	        }, {
+	            field : "useMachId",
+	            title : "使用港方动力",
+	            multiSort : true,
+	            align : "center",
+	            formatter : function(value) {
+		            if (value != null && value != undefined) {
+			            if (value == 0) {
+				            value = "×";
+				            return value;
+			            } else {
+				            value = "√";
+				            return value;
+			            }
+		            } else {
+			            return value;
+		            }
+	            },
+	            sortable : false
+	        }, {
+	            field : "useWorkerId",
+	            title : "使用港方人力",
+	            multiSort : true,
+	            align : "center",
+	            formatter : function(value) {
+		            if (value != null && value != undefined) {
+			            if (value == 0) {
+				            value = "×";
+				            return value;
+			            } else {
+				            value = "√";
+				            return value;
+			            }
+		            } else {
+			            return value;
+		            }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "nightId",
+	            title : "夜班作业",
+	            multiSort : true,
+	            align : "center",
+	            formatter : function(value) {
+		            if (value != null && value != undefined) {
+			            if (value == 0) {
+				            value = "×";
+				            return value;
+			            } else {
+				            value = "√";
+				            return value;
+			            }
+		            } else {
+			            return value;
+		            }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "holidayId",
+	            title : "节假日作业",
+	            multiSort : true,
+	            align : "center",
+	            formatter : function(value) {
+		            if (value != null && value != undefined) {
+			            if (value == 0) {
+				            value = "×";
+				            return value;
+			            } else {
+				            value = "√";
+				            return value;
+			            }
+		            } else {
+			            return value;
+		            }
+	            },
+	            sortable : false
+	        }, {
+	            field : "remarks",
+	            title : "备注",
+	            multiSort : true,
+	            width : 100,
+	            align : "center",
+	            sortable : false
+	        } ] ]
+	    });
+	    $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

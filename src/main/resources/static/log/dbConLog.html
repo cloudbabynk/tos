@@ -1,0 +1,270 @@
+<style>
+.process-bar {
+	width: 100px;
+	display: inline-block;
+	*zoom: 1;
+}
+
+.pb-wrapper {
+	border: 1px solid gray;
+	border-style: solid none;
+	position: relative;
+	background: #cfd0d2;
+}
+
+.pb-container {
+	border: 1px solid gray;
+	border-style: none solid;
+	height: 12px;
+	position: relative;
+	left: -1px;
+	margin-right: -2px;
+	font: 1px/0 arial;
+	padding: 1px;
+}
+
+.pb-highlight {
+	position: absolute;
+	left: 0;
+	top: 0;
+	_top: 1px;
+	width: 100%;
+	opacity: 0.6;
+	filter: alpha(opacity = 60);
+	height: 6px;
+	background: white;
+	font-size: 1px;
+	line-height: 0;
+	z-index: 1
+}
+
+.pb-text {
+	width: 100%;
+	position: absolute;
+	left: 0;
+	top: 0;
+	text-align: center;
+	font: 10px/12px arial;
+}
+
+.pb-value {
+	height: 100%;
+	width: 50%;
+	background: #19d73d;
+}
+
+.pb-text {
+	color: black;
+	font: 10px/12px arial
+}
+/* -- 以下是重写的皮肤 -- */
+/* green */
+.skin-green .pb-wrapper {
+	border-color: #666;
+	border-top-color: #628c2d;
+}
+
+.skin-green .pb-container {
+	border-color: #666;
+	border-left-color: #628c2d;
+}
+
+.skin-green .pb-text {
+	color: black
+}
+/* blue */
+.skin-blue .pb-wrapper {
+	border-color: #0e7c78;
+	border-top-color: #41beb9;
+}
+
+.skin-blue .pb-container {
+	border-color: #0e7c78;
+	border-left-color: #41beb9;
+}
+
+.skin-blue .pb-text {
+	color: white
+}
+
+.skin-blue .pb-value {
+	background: #159b96;
+}
+/* red */
+.skin-red .pb-wrapper {
+	border-color: #8e1411;
+	border-top-color: #cb3d3a;
+}
+
+.skin-red .pb-container {
+	border-color: #8e1411;
+	border-left-color: #cb3d3a;
+}
+
+.skin-red .pb-text {
+	color: #470200;
+}
+
+.skin-red .pb-value {
+	background: #d70500
+}
+/* orange */
+.skin-orange .pb-wrapper, .skin-orange .pb-container {
+	border-color: #d55110;
+}
+
+.skin-orange .pb-text {
+	color: #250f00;
+}
+
+.skin-orange .pb-value {
+	background: #d75a00;
+}
+/* purple */
+.skin-purple .pb-wrapper, .skin-purple .pb-container {
+	border-color: #a90561;
+}
+
+.skin-purple .pb-text {
+	color: #720040;
+}
+
+.skin-purple .pb-value {
+	background: #9d118e
+}
+/* black */
+.skin-black .pb-wrapper, .skin-black .pb-container {
+	border-color: black
+}
+
+.skin-black .pb-text {
+	color: gray;
+}
+
+.skin-black .pb-value {
+	background: #111111;
+}
+/* 分割线样式 */
+.hua-li-de-fen-ge-xian {
+	border-bottom: 2px dashed #eee;
+	height: 1px;
+	font-size: 1px;
+	margin: 5px 0
+}
+</style>
+<script type="text/javascript"> 
+	var logHandler;
+	$(function(){ 
+		tabItemHanlder="cancleDbLog";
+		initGrad();
+		loadServer();
+		logHandler=window.setInterval(loadServer,1000*5); 
+
+	});
+	//关闭监控器
+	function cancleDbLog()
+	{
+		clearInterval(logHandler);
+	}
+	//初始化grad
+	function initGrad()
+	{
+		$("#dgKettleConsole").datagrid({
+        	striped:true,
+		    pagination: false,
+		    singleSelect: true,
+		    columns: [[
+           	    { field: "port", title: "码头公司", multiSort: true, halign: "center",  sortable: true,width:60  },
+	            {  field: "objectName",title: "进程", multiSort: true,halign: "center", sortable: true,width:60},
+	            { field: "status", title: "状态",  multiSort: true,halign: "center",align:"center", sortable: true,width:60,
+	            	formatter: function(value,row,index){
+	            		if(value=="Y"){
+		    				return " <img src='/images/on.png' height='20' width='20'/>";
+	            		}else
+	            		{
+	            			return " <img src='/images/off.png' height='20' width='20'/>";
+	            		}
+    				}
+	            },
+	            {  field: "CPU", title: "CPU占比(百分比)", multiSort: true,halign: "center", sortable: true,width:110,
+	            	formatter: function(value,row,index){
+	    				return " <div class='process-bar'>"+
+	    				" <div class='pb-wrapper'>  "+
+	    				" <div class='pb-highlight'></div>  "+
+	    				" <div class='pb-container'> "+
+	    				" <div class='pb-text'>"+value+"</div>"+
+	    				" <div class='pb-value' style='width:"+value+"%'></div></div></div></div>";
+    				}
+	            },{ field: "RAM", title: "内存(MB)",multiSort: true, halign: "center", sortable: true ,width:90 },
+	            { field: "TIME", title: "运行时间", multiSort: true,  halign: "center",sortable: true,width:90}
+		   ]]
+		}); 
+		$("#dgSharePlexConsole").datagrid({
+        	striped:true,
+		    pagination: false,
+		    singleSelect: true,
+		    columns: [[
+           	    { field: "port", title: "码头公司", multiSort: true, halign: "center",  sortable: true,width:60 },
+	            {  field: "objectName",title: "进程", multiSort: true,halign: "center", sortable: true,width:60},
+	            { field: "status", title: "状态",  multiSort: true,halign: "center",align:"center", sortable: true,width:60,
+	            	formatter: function(value,row,index){
+	            		if(value=="Y"){
+		    				return " <img src='/images/on.png' height='20' width='20' />";
+	            		}else
+	            		{
+	            			return " <img src='/images/off.png' height='20' width='20' />";
+	            		}
+    				}
+	            },
+	            {  field: "CPU", title: "CPU占比(百分比)", multiSort: true,halign: "center", sortable: true,width:110,
+	    			formatter: function(value,row,index){
+	    				return " <div class='process-bar'>"+
+	    				" <div class='pb-wrapper'>  "+
+	    				" <div class='pb-highlight'></div> "+
+	    				" <div class='pb-container'> "+
+	    				" <div class='pb-text'>"+value+"</div>"+
+	    				" <div class='pb-value' style='width:"+value+"%'></div></div></div></div>";
+	    			}
+	            },{ field: "RAM", title: "内存(MB)",multiSort: true, halign: "center", sortable: true ,width:90 },
+	            { field: "TIME", title: "运行时间", multiSort: true,  halign: "center",sortable: true,width:90}
+		   ]]
+		}); 
+	}
+	function loadServer()
+	{
+		var datas={};
+    	$.ajax({
+            type: "POST",
+            url: "/webresources/DBServiceController/searchCacheLog",
+            contentType: "application/json",
+            dataType: "json",
+            data: $.toJSON(datas),
+            success: function (data) {
+            	var kettleData={};
+            	kettleData.total=1;
+            	kettleData.rows=data.entity.kettleTab;
+            	
+            	var sharePlexData={};
+            	sharePlexData.total=1;
+            	sharePlexData.rows=data.entity.shareplexTab;
+            	
+            	$('#dgKettleConsole').datagrid('loadData',kettleData);
+            	$('#dgSharePlexConsole').datagrid('loadData',sharePlexData);
+            },
+            error: function (data) {
+            }
+        });
+	}
+</script>
+    <div style="padding: 3px;">
+		<a class="easyui-linkbutton" iconCls="icon-reload" onclick="loadServer()" plain="false">刷新</a>
+	</div>
+   <div class="easyui-tabs" id="tabContanct" style="width: 100%;height: 100%" fit="true">
+       <div title="kettle监控" style="height:100%;width: 100%;" >
+			<div id="dgKettleConsole" style="width:100%;height:100%;" fit="true"/>
+			
+       </div>
+       <div title="sharePlex监控" style="height:100%;width: 100%;" >
+ 			<div id="dgSharePlexConsole" style="width:100%;height:100%" fit="true" />
+       </div>
+   </div>

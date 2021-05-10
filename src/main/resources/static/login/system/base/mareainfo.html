@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="DayWorkClassToolBar1508123307299+${radi}"
+	style="float: left">
+	<div>
+		<!-- 查询 -->
+		<span>
+                               日期：<input th:id="workDte+${radi}" name="workDte" class="easyui-datebox"style="width: 120px" data-options="required:false" />
+			<shiro:hasPermission name="webresources:login:MAreaInfo:importExcel">
+			<a
+			class="easyui-linkbutton" th:id='importExcel+${radi}'>导入excel</a> 
+			</shiro:hasPermission>
+<!-- 			<shiro:hasPermission name="webresources:login:MAreaInfo:update"> -->
+			<a
+			class="easyui-linkbutton" th:id='query+${radi}'>查询</a> 
+<!-- 			</shiro:hasPermission> -->
+			<shiro:hasPermission name="webresources:login:MAreaInfo:delete">
+			<a
+			class="easyui-linkbutton" th:id='delete+${radi}'>删除</a>
+			</shiro:hasPermission> <a
+			class="easyui-linkbutton" th:id='fresh+${radi}'>刷新</a>
+			
+		</span>
+	</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="DayWorkClassDatagrid1508123307299+${radi}"
+	style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+    $(document).ready(function() {
+//     	$("#recTim[(${radi})]").val(Date.prototype.dateAdd(0, "yyyy-MM-dd"));
+    	$.parser.parse($('#DayWorkClassToolBar1508123307299[(${radi})]'));
+    	var radi = /*[[${radi}]]*/'';
+	    var dg = $("#DayWorkClassDatagrid1508123307299[(${radi})]");
+	    
+	    
+	    // buttons
+	    // 增加。
+	    $("#add[(${radi})]").on("click", function() {
+	    	addoredit("");
+	    });
+	    // 导入excel。
+	    $("#importExcel[(${radi})]").on("click", function() {
+	    	var workDte = $("#workDte[(${radi})]").datebox("getValue");
+	    	if (!workDte){
+	    		HdUtils.messager.info('请先选择日期！');
+	    		return false;
+	    	}
+	    	HdUtils.dcsjupload({
+	    		workDte : workDte,
+	    		mutiple : false,
+	            isReadOnly : false,
+	        })
+	    });
+	    // 编辑。
+	    $("#edit[(${radi})]").on("click", function() {
+	    	var data = dg.datagrid("getSelected");
+		    if (data == null || data == undefined) {
+			    HdUtils.messager.info('请选择一条数据进行编辑！');
+			    return;
+		    }
+		    var damCod = data.damCod;
+		    addoredit(damCod);
+	    });
+	    function addoredit(damCod) {
+		    HdUtils.dialog.setValue({
+			    'damCod' : damCod
+		    });
+		    HdUtils.dialog.setValue({
+			    'radi' : radi
+		    });
+		    HdUtils.dialog.show({
+		        width : 500,
+		        height : 200,
+		        title : '残损信息',
+		        href : "../login/system/base/cdamageform.html",
+		        isSaveHandler : true
+		    });
+	    }
+	    // 删除。
+	    $("#delete[(${radi})]").on("click", function() {
+	    	 var selRow = $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("getChecked");
+	            if (selRow.length == 0) {
+		            HdUtils.messager.info('请至少选择一条数据！');
+		            return false;
+	            }
+	            var ids = '';
+	            $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+		            if (r) {
+			            for (var i = 0; i < selRow.length; i++) {
+				            ids += selRow[i].id + ",";
+			            }
+			            HdUtils.ajax.post({
+			                url : "../webresources/login/base/MAreaInfo/removeAll?ids=" + ids,
+			                success : function(data) {
+				                HdUtils.messager.bottomRight(data.message);
+				                $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("hdReload");
+			                }
+			            });
+		            }
+	            });
+	    });
+	    // 刷新。
+	    $("#fresh[(${radi})]").on("click", function() {
+		    dg.datagrid("hdReload");
+	    });
+    	// 清空。
+	    $("#clear[(${radi})]").on("click", function() {
+	    	$("#damCod[(${radi})]").val("");
+	    	$("#damNam[(${radi})]").val("");
+	    	$("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+		    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+	    //回车键触发操作
+	    $(document).keydown(function(event) {
+		    if (event.keyCode == 13) {
+			    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+				    queryParams : query(),
+			    })
+		    }
+	    })
+
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    var workDte = $("#workDte[(${radi})]").datebox("getValue");
+		    onlinquery.add("workDte", workDte);
+		    return onlinquery.build();
+	    }
+
+	    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/base/MAreaInfo/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : false,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#DayWorkClassToolBar1508123307299" + /*[[${radi}]]*/'',
+	        fit : true,
+	        onDblClickRow : function(rowIndex, rowData) {
+	        	var damCod = rowData.damCod;
+			    addoredit(damCod);
+	        },
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+
+	        }, {
+
+	            field : "id",
+	            title : '主键',
+	            multiSort : true,
+	            halign : "center",
+	            hidden : true,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "brandNam",
+	            title : "车辆品牌",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+	            field : "areaNum",
+	            title : "立体库层",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+	            field : "areaInfo",
+	            title : "立体库区",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "pieceNum",
+	            title : "数量",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "workDte",
+	            title : '<font color="red">导入时间</font>',
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.date,
+	            width : 120,
+	            editor : {
+	                type : "datebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }
+// 	        {
+
+// 	            field : "recNam",
+// 	            title : '<font color="red">录入员</font>',
+// 	            multiSort : true,
+// 	            halign : "center",
+// 	            editor : {
+// 	                type : "validatebox",
+// 	                options : {
+// 		                required : true
+// 	                }
+// 	            },
+// 	            sortable : false
+// 	        }, {
+
+// 	            field : "recTim",
+// 	            title : '<font color="red">录入时间</font>',
+// 	            multiSort : true,
+// 	            halign : "center",
+// 	            formatter : $.hd.ezui.formatter.datetime,
+// 	            width : 120,
+// 	            editor : {
+// 	                type : "datetimebox",
+// 	                options : {
+// 		                required : true
+// 	                }
+// 	            },
+// 	            sortable : false
+// 	        }, {
+
+// 	            field : "updNam",
+// 	            title : '<font color="red">修改人</font>',
+// 	            multiSort : true,
+// 	            halign : "center",
+// 	            editor : {
+// 	                type : "validatebox",
+// 	                options : {
+// 		                required : true
+// 	                }
+// 	            },
+// 	            sortable : false
+// 	        }, {
+
+// 	            field : "updTim",
+// 	            title : '<font color="red">修改时间</font>',
+// 	            multiSort : true,
+// 	            halign : "center",
+// 	            formatter : $.hd.ezui.formatter.datetime,
+// 	            width : 120,
+// 	            editor : {
+// 	                type : "datetimebox",
+// 	                options : {
+// 		                required : true
+// 	                }
+// 	            },
+// 	            sortable : false
+// 	        }
+
+	        ] ]
+	    });
+	    $("#DayWorkClassDatagrid1508123307299" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+</script>
+</html>

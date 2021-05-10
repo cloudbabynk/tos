@@ -1,0 +1,67 @@
+<!--2016-07-21 by huxj 从gh-base-web 引入，在此基础上修改-->
+<div>
+    <table width="90%" border="0" align="center" cellpadding="0" cellspacing="0" id="colorChange">
+  <tr>
+    <td width="50%" align="center">&nbsp;</td>
+    <td width="50%" align="center">&nbsp;</td>
+  </tr>
+  <tr>
+    <td align="center"><img src="../images/white1.png" width="350" height="173"  alt=""/></td>
+    <td align="center"><img src="../images/pink1.png" width="350" height="173"  alt=""/></td>
+  </tr>
+  <tr>
+      <td height="50" align="center"><input type="radio" onclick="changeThemes()" name="color" id="metro-white" value="metro-white" checked="true">
+      清纯</td>
+    <td align="center"><input type="radio" name="color" id="metro-pin" onclick="changeThemes()" value="metro-pink">
+    浪漫</td>
+  </tr>
+  <tr>
+    <td align="center"><img src="../images/blue1.png" width="350" height="173"  alt=""/></td>
+    <td align="center"><img src="../images/green1.png" width="350" height="173"  alt=""/></td>
+  </tr>
+  <tr>
+    <td height="50" align="center"><input type="radio" onclick="changeThemes()" name="color" id="metro-blue" value="metro-blue">
+      智慧</td>
+    <td align="center"><input type="radio" name="color" onclick="changeThemes()" id="metro-green" value="metro-green">
+      青春</td>
+  </tr>
+  <tr>
+    <td align="center"><img src="../images/orange1.png" width="350" height="173"  alt=""/></td>
+    <td align="center">&nbsp;</td>
+  </tr>
+  <tr>
+    <td height="50" align="center"><input type="radio" onclick="changeThemes()" name="color" id="metro-orange" value="metro-orange">
+    收获</td>
+    <!-- <td align="center"><input type="button" name="button" id="button" onclick="changeThemes()" value="保存"></td> -->
+  </tr>
+</table>
+    <script type="text/javascript">
+    function changeThemes(){
+        var theme=$("input:radio[name='color']:checked").val();
+        $('link').eq(0).attr('href', '../css/themes/' + theme + '/easyui.css');
+        $('link').eq(1).attr('href', '../css/themes/' + theme + '/hdMain.css');
+        $('link').eq(2).attr('href', '../css/themes/' + theme + '/hdStyle.css');
+        //alert("--"+theme);
+        $.ajax({
+                method: "GET",
+                url: "../webresources/login/privilege/AuthUser/updateUserStyleCss/" + theme+"?stylecss="+theme,
+                dataType: "json",
+                success: function() {
+                }
+            });
+        upDownTheme=theme;
+         //$('#mainTabsToolbar a[name="btnHideHead"] img').attr('src', '');//特殊处理，保存皮肤后将向上收缩按钮的图标去掉，防止重复
+    }
+    $(document).ready(function () {
+        var defaultSkin=$.main.loginOper.skin;
+        $("input:radio[value="+defaultSkin+"]").attr('checked','true');
+       
+    });
+
+
+
+
+
+      
+    </script>
+</div>

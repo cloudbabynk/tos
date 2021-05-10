@@ -1,0 +1,77 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var shipNo = HdUtils.dialog.getValue("shipNo");
+	    var shipLongNum = HdUtils.dialog.getValue("shipLongNum");
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/ship/Ship/findone?shipNo=" + shipNo,
+	        success : function(data) {
+		        $("#ShipForm150795923242321").form("loadData", data);
+		        $("#shipLongNum").val(shipLongNum);
+	        }
+	    })
+
+    });
+
+</script>
+<form id="ShipForm150795923242321">
+	<table id="ShipTable1507959148645" style="height: 75%; width: 80%"
+		class="tableform">
+		<tr>
+		    <th>中文船名：</th>
+			<td><input id="cShipNam" name="cShipNam" /></td>
+			<th>船长：</th>
+			<td><input id="shipLongNum" name="shipLongNum" /></td>
+		</tr>
+		<tr>
+		    <th>进口航次：</th>
+			<td><input id="ivoyage" name="ivoyage" /></td>
+			<th>出口航次：</th>
+			<td><input id="evoyage" name="evoyage" /></td>
+		</tr>
+		<tr>
+		    <th>进口货类：</th>
+			<td><input id="iCargoNam" name="iCargoNam" /></td>
+			<th>出口货类：</th>
+			<td><input id="eCargoNam" name="eCargoNam" /></td>
+		</tr>
+		<tr>
+			<th>预计抵港时间：</th>
+			<td><input id="etdArrvTim" name="etdArrvTim"
+				class="easyui-datetimebox" /></td>
+			<th>预计离港时间：</th>
+			<td><input id="etdLeavTim" name="etdLeavTim"
+				class="easyui-datetimebox" /></td>
+		</tr>
+		
+		<tr>
+		    <th>备注：</th>
+			<td colspan="7"><textarea id="remarks" name="remarks"
+					data-options="required:false" rows="2" style="width: 97%"
+					maxlength="255" ></textarea></td>
+		</tr>
+	</table>
+</form>

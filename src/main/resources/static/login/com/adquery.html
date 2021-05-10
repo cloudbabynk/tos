@@ -1,0 +1,135 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<script type="text/javascript">
+	/*<![CDATA[*/
+    var queryDrop = {};
+    var queryRel = {};
+    var connRel = [ {
+        fieldNam : "and",
+        fieldCod : "and"
+    }, {
+        fieldNam : "or",
+        fieldCod : "or"
+    } ];
+    $(function() {
+	    var gridSetVal = HdUtils.dialog.getValue('gridSetVal');
+	    var _this = HdUtils.dialog.getValue('gridSetObj');
+	    HdUtils.dialog.setValue({
+		    saveHandler : doAndClose
+	    });//设置弹窗确定时的回调
+
+	    HdUtils.ajax.post({//gridSetVal.url父窗口传来
+	        url : "../webresources/login/com/SysCusGrid/addrop",
+	        data : gridSetVal,
+	        success : function(data) {//依次执行
+		        queryDrop = data;
+		        HdUtils.ajax.post({//gridSetVal.url父窗口传来
+		            url : "../webresources/login/com/SysCusGrid/adrel",
+		            data : gridSetVal,
+		            success : function(reldata) {
+			            queryRel = reldata;
+			            adQuerycopyTr();//第一次先生成一个
+		            }
+
+		        });
+	        }
+
+	    });
+
+	    function doAndClose() {
+		    var query = new HdQuery();
+		    var sss = $('#advancedSearch').serializeArray();
+		    for (var i = 0; i < sss.length; i = i + 4) {
+			    if (sss[i].value) query.addHq(sss[i].value, sss[i + 1].value, sss[i + 2].value, sss[i + 3].value, getSelType(sss[i].value));
+		    }
+		    return query
+	    }
+	    // 	    $('[name="selName"]').combobox({
+	    // 		    onchange : function() {
+	    // 			    alert(this);
+	    // 		    }
+	    // 	    });
+    });
+    var adqueryindex = 0;
+    function adQuerycopyTr() {
+	    var nowIndex = adqueryindex++;
+	    var content = $('#queryDyn').html()
+	    $("<tr id='adquery"+nowIndex+"'>" + content + "</tr>").appendTo('#adQueryTab');
+
+	    $('#adquery' + nowIndex + ' [name="selName"]').combobox({
+	        textField : 'fieldNam',
+	        valueField : 'fieldCod',
+	        data : queryDrop,
+	        onChange : function(newCod, old) {//下拉变化时修改值对应的展示格式
+		        $('#adquery' + nowIndex + ' .innerVal').html("");
+		        $('#adquery' + nowIndex + ' .innerVal').append('<input name="selValue" style="width: 150px;" />');
+		        if (getSelType(newCod)) {
+			        eval("$('#adquery" + nowIndex + " [name=\"selValue\"]')." + getSelType(newCod));
+		        }
+	        }
+	    });
+
+	    $('#adquery' + nowIndex + ' [name="selRel"]').combobox({
+	        textField : 'fieldNam',
+	        valueField : 'fieldCod',
+	        value : '=',
+	        data : queryRel
+	    });
+	    $('#adquery' + nowIndex + ' [name="connRel"]').combobox({
+	        textField : 'fieldNam',
+	        valueField : 'fieldCod',
+	        value : 'and',
+	        data : connRel
+	    });
+
+    }
+    function getSelType(fieldCod) {
+	    for (var i = 0; i < queryDrop.length; i++) {
+		    if (fieldCod == queryDrop[i].fieldCod) {
+			    return queryDrop[i].description;
+		    }
+	    }
+    }
+    function removeOneLine(oneLine){
+    	console.debug($(oneLine).parent().parent());
+    	$(oneLine).parent().parent().remove();
+    }
+    /*]]>*/
+</script>
+<style>
+.trStyle {
+	height: 50px;
+}
+</style>
+<div style="display: none">
+	<table>
+		<tr id="queryDyn">
+			<td align="center"><a href="#" data-options="iconCls:'icon-add'"
+				onclick="adQuerycopyTr(this)">+</a></td>
+			<td align="center"><a href="#"
+				data-options="iconCls:'icon-cancel'"
+				onclick="removeOneLine(this)">-</a></td>
+			<td><div style="width: 150px" name="selName"></div></td>
+			<td><div style="width: 80px" value="=" name="selRel"></div></td>
+			<td><div class="innerVal">
+					<input name="selValue" style="width: 150px;" />
+				</div></td>
+			<td><div name="connRel" style="width: 80px;"></div></td>
+		</tr>
+	</table>
+</div>
+<form id="advancedSearch">
+	<table id="adQueryTab">
+		<tr>
+			<td width="30" align="center" onclick="adQuerycopyTr()"><a>增加</a></td>
+			<td width="30" align="center">移除</td>
+
+			<td width="100">属性</td>
+			<td width="80">关系</td>
+			<td width="150">属性值</td>
+			<td width="50">逻辑</td>
+		</tr>
+
+
+
+	</table>
+</form>

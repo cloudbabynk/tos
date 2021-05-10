@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+
+<div th:id="DayWorkClassToolBar1508123307299+${radi}" style="float: left;position: relative;">
+				<!-- 查询 -->
+						<a class="easyui-linkbutton" th:id='sure+${radi}'>确定</a>
+		</div>
+		<table th:id="DayWorkClassDatagrid1508123307299+${radi}"
+			style="height: 100%"></table>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#DayWorkClassDatagrid1508123307299[(${radi})]");
+	    var radiAttention = HdUtils.dialog.getValue("radiAttention");
+	    // 保存。
+	    $("#sure[(${radi})]").on("click", function() {
+	    	var selRow = dg.datagrid("getSelected");
+            if (!selRow) {
+	            HdUtils.messager.info('请先选数据！');
+	            return;
+            }
+            HdUtils.ajax.post({
+		        url : "../webresources/login/ship/Ship/findone?shipNo=" + selRow.shipNo,
+		        success : function(data) {
+		        	if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+		        	selRow.outCargo = data.eCargoNam;
+		        	selRow.inCargo = data.iCargoNam;
+		        	var shipVoyage = selRow.shipVoyage
+		            selRow.cshipnam = shipVoyage.substr(0, shipVoyage.indexOf('/'));
+		            $("#DayWorkClassDatagrid1508123307299" + radiAttention).datagrid("hdAdd", selRow);
+		            HdUtils.dialog.close();
+		        }
+		    });
+            
+	    });
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    onlinquery.add("trendsTyp", "05");
+		    return onlinquery.build();
+	    }
+
+	    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/ship/ShipTrend/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : false,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#DayWorkClassToolBar1508123307299" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+	        }, {
+	            field : "shipTrendsId",
+	            title : '主键',
+	            multiSort : true,
+	            hidden : "true",
+	            sortable : false
+	        },{
+	            field : "shipNo",
+	            title : '船舶编号',
+	            multiSort : true,
+	            hidden : "true",
+	            sortable : false
+	        }, {
+	            field : "trendsTypNam",
+	            title : '动态类型',
+	            multiSort : true,
+	            width : 120,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "trendsTyp",
+	            title : '动态类型',
+	            multiSort : true,
+	            hidden : true,
+	            width : 120,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "shipVoyage",
+	            title : '船名航次',
+	            multiSort : true,
+	            width : 120,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "groupShipNo",
+	            title : '集团船舶序号',
+	            multiSort : true,
+	            width : 120,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "trendsBegTim",
+	            title : '动态开始时间',
+	            formatter : $.hd.ezui.formatter.datetime,
+	            multiSort : true,
+	            width : 140,
+	            align : "center",
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "trendsPlanTim",
+	            title : '动态计划时间',
+	            width : 140,
+	            multiSort : true,
+	            formatter : $.hd.ezui.formatter.datetime,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "trendsBegAreaNam",
+	            title : '起始地点',
+	            multiSort : true,
+	            width : 120,
+	            align : "center",
+	            editor : {
+	                type : "combogrid",
+	                options : HdUtils.code.berth({
+	                    parentId : "#DayWorkClassDatagrid1508123307299[(${radi})]",
+	                    fieldMapping : {
+	                        berthCod : 'berthCod',
+	                        berthNam : 'berthNam',
+	                    },
+	                    required : false,
+	                })
+	            },
+	            sortable : false
+	        }, {
+	            field : "trendsTermini",
+	            title : '动向',
+	            align : "center",
+	            width : 100,
+	            editor : {
+	                type : "combobox",
+	                options : HdUtils.code.scode({
+		                fieldCod : 'DX_ID'
+	                }, {
+	                    required : false,
+	                    onChange : function(newValue, oldValue) {
+		                    if (newValue == '3') {
+			                    var sd = $('#DayWorkClassDatagrid1508123307299[(${radi})]');
+			                    var rowData = sd.datagrid('getSelected');
+			                    var rowIndex = sd.datagrid('getRowIndex', rowData);
+			                    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid('updateRowWhenEditing', {
+			                        index : rowIndex,
+			                        row : {
+				                        trendsEndAreaNam : '9000'
+			                        }
+			                    });
+		                    }
+	                    }
+	                })
+	            },
+	            formatter : function(value) {
+		            return HdUtils.code.name('DX_ID', value);
+	            },
+	            sortable : false
+	        }, {
+	            field : "trendsEndAreaNam",
+	            title : '终止地点',
+	            multiSort : true,
+	            width : 120,
+	            align : "center",
+	            editor : {
+	                type : "combogrid",
+	                options : HdUtils.code.berth({
+	                    parentId : "#DayWorkClassDatagrid1508123307299[(${radi})]",
+	                    fieldMapping : {
+	                        berthCod : 'berthCod',
+	                        berthNam : 'berthNam',
+	                    },
+	                    required : false,
+	                })
+	            },
+	            sortable : false
+	        }, {
+	            field : "begCableNoNam",
+	            title : '首缆',
+	            multiSort : true,
+	            width : 120,
+	            align : "center",
+	            editor : {
+	                type : "combogrid",
+	                options : HdUtils.code.cable({
+	                    parentId : "#DayWorkClassDatagrid1508123307299[(${radi})]",
+	                    fieldMapping : {
+	                        cableCod : 'cableCod',
+	                        cableNo : 'cableNo',
+	                    },
+	                    required : false,
+	                })
+	            },
+	            sortable : false
+	        }, {
+	            field : "endCableNoNam",
+	            title : '尾缆',
+	            multiSort : true,
+	            width : 120,
+	            align : "center",
+	            editor : {
+	                type : "combogrid",
+	                options : HdUtils.code.cable({
+	                    parentId : "#DayWorkClassDatagrid1508123307299[(${radi})]",
+	                    fieldMapping : {
+	                        cableCod : 'cableCod',
+	                        cableNo : 'cableNo',
+	                    },
+	                    required : false,
+	                })
+	            },
+	            sortable : false
+	        }, {
+	            field : "shipToCable",
+	            title : '首缆距离',
+	            multiSort : true,
+	            width : 120,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "shipDraft",
+	            title : '吃水',
+	            multiSort : true,
+	            width : 80,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+	                    required : false,
+	                    validType : 'length[0,4]'
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "useTag",
+	            title : '拖轮',
+	            multiSort : true,
+	            width : 100,
+	            align : "center",
+	            sortable : false
+	        }, {
+
+	            field : "usePilot",
+	            title : '是否使用引航',
+	            multiSort : true,
+	            align : "center",
+	            formatter : function(value) {
+		            if (value != null && value != undefined) {
+			            if (value == "N") {
+				            value = "×";
+				            return value;
+			            } else {
+				            value = "√";
+				            return value;
+			            }
+		            } else {
+			            return value;
+		            }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "iDanCargo",
+	            title : '进口危险品',
+	            multiSort : true,
+	            width : 140,
+	            align : "center",
+	            editor : {
+	                type : "combobox",
+	                options : HdUtils.code.scode({
+		                fieldCod : 'DAN_CARGO_TYP'
+	                }, {
+		                required : false
+	                })
+	            },
+	            formatter : function(value) {
+		            return HdUtils.code.name('DAN_CARGO_TYP', value);
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "eDanCargo",
+	            title : '出口危险品',
+	            multiSort : true,
+	            width : 140,
+	            align : "center",
+	            editor : {
+	                type : "combobox",
+	                options : HdUtils.code.scode({
+		                fieldCod : 'DAN_CARGO_TYP'
+	                }, {
+		                required : false
+	                })
+	            },
+	            formatter : function(value) {
+		            return HdUtils.code.name('DAN_CARGO_TYP', value);
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "trendsChangeTxt",
+	            title : '变更原因',
+	            multiSort : true,
+	            align : "center",
+	            width : 140,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "trendsChangeReason",
+	            title : '动态变更原因',
+	            multiSort : true,
+	            align : "center",
+	            sortable : false
+	        }, {
+
+	            field : "trendsChangeTim",
+	            title : '动态变更时间',
+	            multiSort : true,
+	            formatter : $.hd.ezui.formatter.datetime,
+	            align : "center",
+	            sortable : false
+	        }, {
+
+	            field : "sendFlag",
+	            title : '发送标志',
+	            multiSort : true,
+	            width : 100,
+	            align : "center",
+	            formatter : function(value) {
+		            if (value != null && value != undefined) {
+			            if (value == "F") {
+				            value = "发";
+				            return value;
+			            } else if (value == "Y") {
+				            value = "收";
+				            return value;
+			            } else if (value == "B") {
+				            value = "变";
+				            return value;
+			            } else if (value == "T") {
+				            value = "退";
+				            return value;
+			            }
+		            } else {
+			            return value;
+		            }
+	            },
+	            sortable : false
+	        }
+	        // 	        ,{
+
+	        // 	            field : "confirmFlag",
+	        // 	            title : '确认标志',
+	        // 	            multiSort : true,
+	        // 	            width : 100,
+	        // 	            align : "center",
+	        // 	            formatter : function(value) {
+	        // 		            if (value != null && value != undefined) {
+	        // 		            	if (value == "F") {
+	        // 				            value = "√";
+	        // 				            return value;
+	        // 			            } else {
+	        // 				            value = "×";
+	        // 				            return value;
+	        // 			            }
+	        // 		            } else {
+	        // 			            return value;
+	        // 		            }
+	        // 	            },
+	        // 	            sortable : false
+	        // 	        }
+	        , {
+
+	            field : "changeSendFlag",
+	            title : '变更发送标志',
+	            multiSort : true,
+	            width : 100,
+	            align : "center",
+	            formatter : function(value) {
+		            if (value != null && value != undefined) {
+			            if (value == "F") {
+				            value = "√";
+				            return value;
+			            } else {
+				            value = "×";
+				            return value;
+			            }
+		            } else {
+			            return value;
+		            }
+	            },
+	            sortable : false
+	        }
+	        // 	        ,{
+
+	        // 	            field : "changeConfirmFlag",
+	        // 	            title : '变更确认标志',
+	        // 	            multiSort : true,
+	        // 	            width : 100,
+	        // 	            align : "center",
+	        // 	            formatter : function(value) {
+	        // 		            if (value != null && value != undefined) {
+	        // 		            	if (value == "F") {
+	        // 				            value = "√";
+	        // 				            return value;
+	        // 			            } else {
+	        // 				            value = "×";
+	        // 				            return value;
+	        // 			            }
+	        // 		            } else {
+	        // 			            return value;
+	        // 		            }
+	        // 	            },
+	        // 	            sortable : false
+	        // 	        }
+
+	        ] ]
+	    });
+	    $("#DayWorkClassDatagrid1508123307299" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+</script>
+</html>

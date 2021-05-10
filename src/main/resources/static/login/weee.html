@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+	
+<meta charset="UTF-8">
+    <div class="mainMessage">
+        <div class="mainMessageTitle" >
+            <span>最新公告</span>
+            <div class="mainMessageTitleMore" ><a href="#" th:id="moreMessage+${radi}">更多</a></div>
+        </div>
+        <div  class="mainMessageCon" th:id="proclamation">
+            <ul th:id="publicProclamation">
+            
+            <li  th:each="page,iterStat:${list}">
+            <a th:id='${page.mid}' th:onclick="'javascript:checkinfo(\''+${page.mid}+'\')'"  th:text='${page.message}'></a><span th:text='${page.time}'></span>
+            </li>
+                <!-- <li><a href="#">Idev7最新公告最新公告最新公告最新公告...</a><span>2017/9/16</span></li>
+                <li><a href="#">Idev7最新公告最新公告最新公告最新公告...</a></li>
+                <li><a href="#">Idev7最新公告最新公告最新公告最新公告......</a></li>
+                <li><a href="#">Idev7最新公告最新公告最新公告最新公告......</a></li>
+                <li><a href="#">Idev7最新公告最新公告最新公告最新公告......</a></li>
+                <li><a href="#">Idev7最新公告最新公告最新公告最新公告......</a></li> -->
+            </ul>
+        </div>
+</div>            
+<script type="text/javascript" th:inline="javascript">
+/*<![CDATA[*/
+     
+      function checkinfo(a){
+    	  HdUtils.dialog.setValue({id:a});
+	     HdUtils.dialog.show({
+     		width : 600,
+     		height : 200,
+     		title : '消息内容',
+     		href : "../login/system/privilege/messageinform.html",
+     		isSaveHandler : false
+     	});
+     }
+     
+    
+     
+    $(document).ready(function() {
+    	//onclick='showRybqXx(\""+list[i].id+"\")'
+    	
+        $("#moreMessage"+/*[[${radi}]]*/'').bind('click', function() {
+        	
+        	HdUtils.dialog.show({
+        		width : 1000,
+        		height : 360,
+        		title : '消息内容',
+        		href : "../login/system/privilege/message.jsp",
+        		isSaveHandler : true
+        	});
+        });
+       
+    });
+   /*]]>*/
+</script>
+</html>

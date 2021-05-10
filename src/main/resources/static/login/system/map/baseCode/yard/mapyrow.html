@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div id="cyrowToolBar20181027" style="float: left">
+	<div>
+		<!-- 查询 -->
+	</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table id="ctrowDg20181027" style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {;
+	    var dg = $("#ctrowDg20181027");
+	    var cyAreaNo = HdUtils.dialog.getValue('cyAreaNo');
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    if(cyAreaNo)
+		    onlinquery.add("cyAreaNo", cyAreaNo);
+		    return onlinquery.build();
+	    }
+
+	    $("#ctrowDg20181027").datagrid({
+	        striped : true,
+	        url : "/webresources/login/base/CCyRow/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#cyrowToolBar20181027",
+	        fit : true,
+	        onSelect(rowIndex,rowData){
+	           	HdUtils.dialog.setValue({ 'cyAreaNo' : rowData.cyAreaNo  });
+	           	HdUtils.dialog.setValue({ 'cyRowNo' : rowData.cyRowNo });
+	           	var cyRowNo = rowData.cyRowNo;
+	           	function queryCcybay(){
+                  	var builder = new HdQuery();
+                    builder.add("cyAreaNo", HdUtils.dialog.getValue('cyAreaNo'));
+                    builder.add("cyRowNo", cyRowNo);
+                    return builder.build();
+                };
+                $('#cyBaydg20181027').datagrid({
+                    	 queryParams : queryCcybay(),
+                   });
+		        },
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+
+	        }, {
+
+	            field : "cyRowNo",
+	            title : '车道号',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "maxBayNum",
+	            title : "最大车数",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+
+	        ] ]
+	    });
+	    $("#ctrowDg20181027").datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="CHolidayToolBar1508123309005+${radi}" style="float: left">
+	<div>
+		<!-- 查询 -->
+		<span> 请选择年度来完成一年的节假日初始化&nbsp;&nbsp; 年度：<input
+			th:id="yearChoose+${radi}" name="yearChoose"
+			data-options="required:false" style="width: 120px">月份： <input
+			th:id="monthChoose+${radi}" name="monthChoose"
+			data-options="required:false" style="width: 120px"> <a
+			class="easyui-linkbutton" th:id="query+${radi}">查询</a>
+			<a class="easyui-linkbutton" th:id='clear+${radi}'>重置</a>
+			 <shiro:hasPermission
+				name="webresources:login:CHoliday:add">
+				<a class="easyui-linkbutton" th:id='add+${radi}' iconCls="icon-add"
+					plain="false">新增</a>
+			</shiro:hasPermission> <shiro:hasPermission name="webresources:login:CHoliday:update">
+				<a class="easyui-linkbutton" th:id='edit+${radi}'>编辑</a>
+			</shiro:hasPermission> <shiro:hasPermission name="webresources:login:CHoliday:delete">
+				<a class="easyui-linkbutton" th:id='delete+${radi}'>删除</a>
+			</shiro:hasPermission> <a class="easyui-linkbutton" th:id='fresh+${radi}'>刷新</a>
+			
+		</span>
+	</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="CHolidayDatagrid1508123309005+${radi}"
+	style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#CHolidayDatagrid1508123309005[(${radi})]");
+
+	    $("#yearChoose[(${radi})]").combobox({
+	        valueField : 'year',
+	        textField : 'year',
+	        panelHeight : 100
+	    });
+	    var data = [];//创建年度数组
+	    var startYear;//起始年份
+	    var thisYear = new Date().getUTCFullYear();//今年
+	    var endYear = thisYear + 20;//结束年份
+	    //数组添加值（2012-2016）//根据情况自己修改
+	    startYear = thisYear - 5;
+	    for (startYear; startYear < endYear; startYear++) {
+		    data.push({
+			    "year" : startYear
+		    });
+	    }
+	    $("#yearChoose[(${radi})]").combobox({
+	    	data:'data',
+	    	  onSelect: function () { 
+	    		  var year = $("#yearChoose[(${radi})]").combobox('getText');
+	    		  $.messager.confirm("确定","你确定要初始化"+year+"年度的节假日吗？", function(r) {
+	  			    if (r) {
+	  				    HdUtils.ajax.post({
+	  				        url : "../webresources/login/base/CHoliday/initHoliday?year=" + year,
+	  				        success : function(data) {
+	  					        HdUtils.messager.bottomRight(data.message);
+	  					        $("#CHolidayDatagrid1508123309005[(${radi})]").datagrid("hdReload");
+	  				        }
+	  				    });
+	  			    }
+	  		    });  
+	    	  }
+	    })
+	    
+	    $("#yearChoose[(${radi})]").combobox("loadData", data);//下拉框加载数据
+	    $("#yearChoose[(${radi})]").combobox("setValue", thisYear);//设置默认值为今年
+	    //月度下拉框初始化
+	    $("#monthChoose[(${radi})]").combobox({
+	        valueField : 'month',
+	        textField : 'month',
+	        panelHeight : 100,
+	    });
+	    var data1 = [];//创建月份数组
+	    var startMonth = 1;//起始月份
+	    var thisMonth = new Date().getUTCMonth() + 1;//本月
+	    //数组添加值（1-12月）为固定值
+
+	    for (startMonth; startMonth < 13; startMonth++) {
+		    data1.push({
+			    "month" : startMonth
+		    });
+	    }
+	    $("#monthChoose[(${radi})]").combobox("loadData", data1);//下拉框加载数据
+	    $("#monthChoose[(${radi})]").combobox("setValue", thisMonth);//设置默认值为今年
+
+	    // buttons
+	    // 增加。
+	    $("#add[(${radi})]").on("click", function() {
+		    addoredit("");
+	    });
+	    // 编辑。
+	    $("#edit[(${radi})]").on("click", function() {
+		    var data = dg.datagrid("getSelected");
+		    if (data == null || data == undefined) {
+			    HdUtils.messager.info('请选择一条数据进行编辑！');
+			    return;
+		    }
+		    var hId = data.hId;
+		    addoredit(hId);
+	    });
+	    function addoredit(hId) {
+		    HdUtils.dialog.setValue({
+			    'hId' : hId
+		    });
+		    HdUtils.dialog.setValue({
+			    'radi' : radi
+		    });
+		    HdUtils.dialog.show({
+		        width : 800,
+		        height : 300,
+		        title : '厂家信息',
+		        href : "../login/system/base/cholidayform.html",
+		        isSaveHandler : true
+		    });
+	    }
+	    // 删除。
+	    $("#delete[(${radi})]").on("click", function() {
+		    var selRow = $("#CHolidayDatagrid1508123309005[(${radi})]").datagrid("getChecked");
+		    if (selRow.length == 0) {
+			    HdUtils.messager.info('请至少选择一条数据！');
+			    return false;
+		    }
+		    var ids = '';
+		    $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+			    if (r) {
+				    for (var i = 0; i < selRow.length; i++) {
+					    ids += selRow[i].hId + ",";
+				    }
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/base/CHoliday/removeAll?hIds=" + ids,
+				        success : function(data) {
+					        HdUtils.messager.bottomRight(data.message);
+					        $("#CHolidayDatagrid1508123309005[(${radi})]").datagrid("hdReload");
+				        }
+				    });
+			    }
+		    });
+	    });
+	    // 刷新。
+	    $("#fresh[(${radi})]").on("click", function() {
+		    dg.datagrid("hdReload");
+	    });
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+		    $("#CHolidayDatagrid1508123309005[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+	    // 清空。
+	    $("#clear[(${radi})]").on("click", function() {
+	    	$('#yearChoose[(${radi})]').combobox('setValue', '');
+	    	$('#monthChoose[(${radi})]').combobox('setValue', '');
+	    	$("#CHolidayDatagrid1508123309005[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+	    //回车键触发操作
+	    $(document).keydown(function(event) {
+		    if (event.keyCode == 13) {
+			    $("#CHolidayDatagrid1508123309005[(${radi})]").datagrid({
+				    queryParams : query(),
+			    })
+		    }
+	    })
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    var yearChoose = $("#yearChoose[(${radi})]").combobox('getValue');
+		    var monthChoose = $("#monthChoose[(${radi})]").combobox('getValue');
+		    onlinquery.add("yearChoose", yearChoose);
+		    onlinquery.add("monthChoose", monthChoose);
+		    return onlinquery.build();
+	    }
+
+	    $("#CHolidayDatagrid1508123309005[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/base/CHoliday/find?yearChoose=" + $("#yearChoose[(${radi})]").combobox("getValue"),
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#CHolidayToolBar1508123309005" + /*[[${radi}]]*/'',
+	        fit : true,
+	        onDblClickRow : function(rowIndex, rowData) {
+	        	var hId = rowData.hId;
+			    addoredit(hId);
+	        },
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+
+	        }, {
+
+	            field : "hId",
+	            title : 'hId',
+	            multiSort : true,
+	            hidden : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "holidayYear",
+	            title : "年度",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "holidayMonth",
+	            title : "月份",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "holidayDay",
+	            title : "日期",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "holidayWeek",
+	            title : "周几",
+	            multiSort : true,
+	            halign : "center",
+	            formatter:function(value){
+	            	if(value=='0'){
+	            		value="星期日";
+	            		return value;
+	            	}else if(value=='1'){
+	            		value="星期一";
+	            		return value;
+	            	}else if(value=='2'){
+	            		value="星期二";
+	            		return value;
+	            	}else if(value=='3'){
+	            		value="星期三";
+	            		return value;
+	            	}else if(value=='4'){
+	            		value="星期四";
+	            		return value;
+	            	}else if(value=='5'){
+	            		value="星期五";
+	            		return value;
+	            	}else if(value=='6'){
+	            		value="星期六";
+	            		return value;
+	            	}
+	            },
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "holidayId",
+	            title : "节日标志",
+	            multiSort : true,
+	            halign : "center",
+	            formatter : function(value) {
+		            if (value != null && value != undefined) {
+			            if (value == 0) {
+				            value = "×";
+				            return value;
+			            } else {
+				            value = "√";
+				            return value;
+			            }
+		            } else {
+			            return value;
+		            }
+	            },
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "weekendId",
+	            title : "假日标志",
+	            multiSort : true,
+	            halign : "center",
+	            formatter : function(value) {
+		            if (value != null && value != undefined) {
+			            if (value == 0) {
+				            value = "×";
+				            return value;
+			            } else {
+				            value = "√";
+				            return value;
+			            }
+		            } else {
+			            return value;
+		            }
+	            },
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "actDate",
+	            title : "对应实际日期",
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.date,
+	            width : 120,
+	            editor : {
+	                type : "datebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "remarks",
+	            title : "备注",
+	            multiSort : true,
+	            halign : "center",
+	            hidden : true,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        } ] ]
+	    });
+	    $("#CHolidayDatagrid1508123309005" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

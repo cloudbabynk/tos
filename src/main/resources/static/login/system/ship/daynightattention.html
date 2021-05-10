@@ -1,0 +1,145 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var days = HdUtils.dialog.getValue('days');
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/ship/DayNightAttention/findone?days=" + days,
+	        success : function(data) {
+		        $("#DayNightAttentionForm1507959148645").form("loadData", data);
+		        if(!data.days){
+		        	$("#days").val(days);
+		        }
+	        }
+	    })
+    });
+	function saveAttention() {
+	    var isValss = $("#DayNightAttentionForm1507959148645").form('validate');
+	    if (!isValss) {
+		    return false;
+	    }
+	    var day = HdUtils.dialog.getValue('days');
+	    var formdata = $("#DayNightAttentionForm1507959148645").serializeObject();
+	    formdata.days = $("#days").val();
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/ship/DayNightAttention/saveone",
+	        data : formdata,
+	        success : function(data) {
+		        if (data.code == '-1') {
+			        HdUtils.messager.info(data.message);
+			        return false;
+		        }
+		        HdUtils.ajax.post({
+			        url : "../webresources/login/ship/DayNightAttention/findone?days=" + day,
+			        success : function(data) {
+				        if(data.attentionId){
+				        	$("#attentionId").val(data.attentionId);
+				        }
+			        }
+			    })
+		        HdUtils.messager.bottomRight('保存成功', '保存操作');
+	        }
+	    })
+    }
+	function importAttention(){
+		var yesterday = Date.prototype.dateAdd(-1, "yyyy-MM-dd");
+		HdUtils.ajax.post({
+	        url : "../webresources/login/ship/DayNightAttention/findone?days=" + yesterday,
+	        success : function(data) {
+	        	if(data){
+	        		$("#safetyMatters").val(data.safetyMatters);
+	        		$("#stressMatters").val(data.stressMatters);
+	        		$("#staffPlan").val(data.staffPlan);
+	        		$("#workPlan").val(data.workPlan);
+	        		$("#channelPlan").val(data.channelPlan);
+	        		$("#driverPlan").val(data.driverPlan);
+	        		$("#weather").val(data.weather);
+	        		$("#tide").val(data.tide);
+	        	}
+	        }
+	    })
+	}
+	function updateWorkplan(){
+		var yesterday = Date.prototype.dateAdd(-1, "yyyy-MM-dd");
+		HdUtils.ajax.post({
+	        url : "../webresources/login/ship/DayNightAttention/findAttention?days=" + yesterday,
+	        success : function(data) {
+	        	if(data){
+	        		$("#workPlan").val(data.workPlan);
+	        	}
+	        }
+	    })
+	}
+</script>
+<input type="button" value="保存" style="width : 65px" onclick="saveAttention()" />
+<input type="button" value="引入上昼夜安排" style="width : 130px" onclick="importAttention()" />
+<input type="button" value="更新作业安排" style="width : 130px" onclick="updateWorkplan()" />
+<form id="DayNightAttentionForm1507959148645">
+    <input id="attentionId" name="attentionId" hidden="true" />
+    <input id="days" name="days" hidden="true" />
+	<table id="DayNightAttentionTable1507959148645" style="height: 100%; width: 100%"
+		class="tableform">
+		<tr>
+			<th>重点注意事项：</th>
+			<td colspan="7"><textarea id="safetyMatters" name="safetyMatters"
+					data-options="required:false" rows="9" style="width: 90%;resize:none"
+					maxlength="2000" /></td>
+		    <th>安全注意事项：</th>
+			<td colspan="7"><textarea id="stressMatters" name="stressMatters"
+					data-options="required:false" rows="9" style="width: 90%;resize:none"
+					maxlength="2000" /></td>
+		</tr>
+		<tr>
+			<th>作业安排：</th>
+			<td colspan="7"><textarea id="workPlan" name="workPlan"
+					data-options="required:false" rows="9" style="width: 90%;resize:none"
+					maxlength="2000" /></td>
+			<th>人员配备：</th>
+			<td colspan="7"><textarea id="staffPlan" name="staffPlan"
+					data-options="required:false" rows="9" style="width: 90%;resize:none"
+					maxlength="2000" /></td>
+		</tr>
+		<tr>
+			<th>航道安排：</th>
+			<td colspan="7"><textarea id="channelPlan" name="channelPlan"
+					data-options="required:false" rows="9" style="width: 90%;resize:none"
+					maxlength="2000" /></td>
+			<th>人机配备：</th>
+			<td colspan="7"><textarea id="driverPlan" name="driverPlan"
+					data-options="required:false" rows="9" style="width: 90%;resize:none"
+					maxlength="2000" /></td>
+		</tr>
+		<tr>
+			<th>天气：</th>
+			<td colspan="7"><textarea id="weather" name="weather"
+					data-options="required:false" rows="9" style="width: 90%;resize:none"
+					maxlength="2000" /></td>
+			<th>潮汐：</th>
+			<td colspan="7"><textarea id="tide" name="tide"
+					data-options="required:false" rows="9" style="width: 90%;resize:none"
+					maxlength="2000" /></td>
+		</tr>
+	</table>
+</form>

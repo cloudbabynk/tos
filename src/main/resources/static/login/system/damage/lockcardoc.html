@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="LockCarDocToolBar1508123301002+${radi}" style="float: left">
+	<div>
+		<!-- 查询 -->
+		<span> 流水号：<input th:id="portCarNo+${radi}" name="portCarNo" 	class="easyui-validatebox"
+			 data-options="required:false"
+			style="width: 120px">车架号：<input th:id="vinNo+${radi}" class="easyui-validatebox"
+			name="vinNo" 
+			data-options="required:false" style="width: 120px">
+			RFID号：<input th:id="rfidCardNo+${radi}" class="easyui-validatebox"
+			name="rfidCardNo" 
+			data-options="required:false" style="width: 120px">
+			提单号：<input th:id="billNo+${radi}" class="easyui-validatebox"
+			name="billNo" 
+			data-options="required:false" style="width: 120px"> <a
+			class="easyui-linkbutton" th:id="query+${radi}">查询</a> 
+			<a class="easyui-linkbutton" th:id='clear+${radi}'>重置</a>
+			<shiro:hasPermission
+				name="webresources:login:LockCarDoc:add">
+				<a class="easyui-linkbutton" th:id='add+${radi}' iconCls="icon-add"
+					plain="false">扣车</a>
+			</shiro:hasPermission> <shiro:hasPermission name="webresources:login:LockCarDoc:update">
+				<a class="easyui-linkbutton" th:id='edit+${radi}'>解扣</a>
+			</shiro:hasPermission> <a class="easyui-linkbutton" th:id='fresh+${radi}'>刷新</a>
+		    
+		</span>
+	</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="LockCarDocDatagrid1508123301002+${radi}" style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#LockCarDocDatagrid1508123301002[(${radi})]");
+	    $.parser.parse($('#LockCarDocToolBar1508123301002[(${radi})]'));
+	  
+	    // buttons
+	    // 扣车。
+	    $("#add[(${radi})]").on("click", function() {
+		    add();
+	    });
+	 
+	  
+	    function add() {
+		    HdUtils.dialog.show({
+		        width : 700,
+		        height : 550,
+		        title : '扣车办理',
+		        href : "../login/system/damage/lockcardocform.html",
+		        isSaveHandler : true
+		    });
+	    }
+	    //解扣
+	      $("#edit[(${radi})]").on("click", function() {
+	    	 var dataRows= $("#LockCarDocDatagrid1508123301002[(${radi})]").datagrid("getSelections");
+	    	for(var i=0;i<dataRows.length;i++){
+	    		var lockcarId=dataRows[i].lockcarId;
+  	    		var portcarno=dataRows[i].portCarNo;
+  	    		var rfidcardno=dataRows[i].rfidCardNo;
+  	    		var vinno=dataRows[i].vinNo;
+  	    		var billno=dataRows[i].billNo;
+  	    		var brandcod=dataRows[i].brandCod;
+  	    		var lockreason=dataRows[i].lockReason;
+  	    		var lockunit=dataRows[i].lockUnit;
+  	    		var lockid='1';
+  	    		var relid='1';
+  	    		var lockrecnam=dataRows[i].lockRecNam;
+  	    		var lockrectim=dataRows[i].lockRecTim;
+  	    		var remarktxt=$("#remarkTxt").val();
+  	    		var formdata = {"lockcarId":lockcarId,"portCarNo":portcarno,"rfidCardNo":rfidcardno,"vinNo":vinno,"billNo":billno,"brandCod":brandcod,"lockReason":lockreason,"lockUnit":lockunit,"lockId":'1',"relId":relid,"remarkTxt":remarktxt,"lockRecNam":lockrecnam,"lockRecTim":lockrectim};
+  	    	   HdUtils.ajax.post({
+  	  		        url : "../webresources/login/damage/LockCarDoc/saveone",
+  	  		        data : formdata,
+  	  		        success : function(data) {
+  	  			        if (data.key == '-1') {
+  	  				        HdUtils.messager.info(data.message);
+  	  				        return false;
+  	  			        }
+  	  		        }
+  	  		    })
+  	  		    
+  	    	}
+	    	  HdUtils.messager.bottomRight('解扣成功！');
+	    });
+	     
+	    // 刷新。
+	    $("#fresh[(${radi})]").on("click", function() {
+	    	  $("#LockCarDocDatagrid1508123301002[(${radi})]").datagrid({
+				    queryParams : query(),
+			    })
+	    });
+	    // 清空。
+	    $("#clear[(${radi})]").on("click", function() {
+	       $("#portCarNo[(${radi})]").val("");
+	       $("#billNo[(${radi})]").val("");
+	       $("#vinNo[(${radi})]").val("");
+	       $("#rfidCardNo[(${radi})]").val("");
+	       $("#LockCarDocDatagrid1508123301002[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	      });
+
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+		    $("#LockCarDocDatagrid1508123301002[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+
+	    function query() {
+		    var onlinquery = new HdQuery();
+		   var portCarNo = $("#portCarNo[(${radi})]").val();
+		    var billNo = $("#billNo[(${radi})]").val();
+		    var vinNo = $("#vinNo[(${radi})]").val();
+		    var rfidCardNo = $("#rfidCardNo[(${radi})]").val();
+		    onlinquery.add("portCarNo", portCarNo);
+		    onlinquery.add("billNo", billNo);
+		    onlinquery.add("vinNo", vinNo);
+		    onlinquery.add("rfidCardNo", rfidCardNo);
+		    return onlinquery.build();
+	    }
+
+	    $("#LockCarDocDatagrid1508123301002[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/damage/LockCarDoc/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        multiSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#LockCarDocToolBar1508123301002" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+
+	        }, {
+
+	            field : "portCarNo",
+	            title : '车辆流水号',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+	        , {
+
+	            field : "rfidCardNo",
+	            title : 'RFID号',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        } , {
+	            field : "vinNo",
+	            title : '车架号',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "billNo",
+	            title : '提单号',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "brandCod",
+	            title : '品牌',
+	            multiSort : true,
+	            hidden:true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "brandNam",
+	            title : '品牌',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "lockUnit",
+	            title : '扣货单位',
+	            hidden:true,
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "lockUnitNam",
+	            title : '扣货单位',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "lockReason",
+	            title : '扣车原因',
+	            multiSort : true,
+	            hidden:true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "lockReasonNam",
+	            title : '扣车原因',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },
+	        {
+	            field : "lockId",
+	            title : "扣车标志",
+	            multiSort : true,
+	            halign : "center",
+	            formatter : function(value) {
+		            if (value != null && value != undefined) {
+			            if (value == 0) {
+				            value = "×";
+				            return value;
+			            } else {
+				            value = "√";
+				            return value;
+			            }
+		            } else {
+			            return value;
+		            }
+	            }, editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+	            field : "relId",
+	            title : "解扣标志",
+	            multiSort : true,
+	            halign : "center",
+	            formatter : function(value) {
+		            if (value != null && value != undefined) {
+			            if (value == 0) {
+				            value = "×";
+				            return value;
+			            } else {
+				            value = "√";
+				            return value;
+			            }
+		            } else {
+			            return value;
+		            }
+	            }, editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },
+	       {
+
+	            field : "lockRecNam",
+	            title : '<font color="red">扣车操作员</font>',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "lockRecTim",
+	            title : '<font color="red">扣车操作时间</font>',
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.date,
+	            width : 120,
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }
+	        ,
+		       {
+
+		            field : "relRecNam",
+		            title : '<font color="red">解扣操作员</font>',
+		            multiSort : true,
+		            halign : "center",
+		            editor : {
+		                type : "validatebox",
+		                options : {
+			                required : true
+		                }
+		            },
+		            sortable : false
+		        }, {
+
+		            field : "relRecTim",
+		            title : '<font color="red">解扣操作时间</font>',
+		            multiSort : true,
+		            halign : "center",
+		            formatter : $.hd.ezui.formatter.date,
+		            width : 120,
+		            editor : {
+		                type : "datetimebox",
+		                options : {
+			                required : true
+		                }
+		            },
+		            sortable : false
+		        }
+	        , {
+
+	            field : "updNam",
+	            title : '<font color="red">修改人</font>',
+	            multiSort : true,
+	            halign : "center",
+	            hidden:true,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "updTim",
+	            title : '<font color="red">修改时间</font>',
+	            multiSort : true,
+	            halign : "center",
+	            hidden:true,
+	            formatter : $.hd.ezui.formatter.date,
+	            width : 120,
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }
+
+	        ] ]
+	    });
+	    $("#LockCarDocDatagrid1508123301002" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="WorkCommandRollbackToolBar1508123301002+${radi}"
+	style="float: left">
+	<div>
+		<!-- 查询 -->
+		<span> 提单号：<input th:id="billNo+${radi}" name="billNo"
+			placeholder="请输入提单号" type="text" data-options="required:false"
+			style="width: 120px">委托号：<input th:id="contractNo+${radi}"
+			name="contractNo" placeholder="请输入委托号" type="text"
+			data-options="required:false" style="width: 100px">
+			品牌：<input th:id="brandCod+${radi}"
+			name="carTyp"  type="text"
+			data-options="required:false" style="width: 100px">
+			车架号：<input th:id="vinNo+${radi}"
+					  name="vinNo"  type="text"
+					  data-options="required:false" style="width: 120px">
+			车型：<input th:id="carTyp+${radi}"
+			name="carTyp"  type="text"
+			data-options="required:false" style="width: 100px">
+			船名：<input th:id="cShipNam+${radi}"
+			name="cShipNam" placeholder="船名" type="text" readonly="readonly"
+			data-options="required:false" style="width: 80px">
+			航次：<input th:id="voyage+${radi}" readonly="readonly"
+			name="voyage" placeholder="航次" type="text"
+			data-options="required:false" style="width: 80px">
+			<input th:id="shipNo+${radi}" name="shipNo" type="text" hidden="true"
+			data-options="required:false">
+		<a class="easyui-linkbutton" th:id="chooseShip+${radi}">选船</a>
+	    <input type="radio"  name="workTyp_back" value="SO"  class='easyui-radio'>装船</input>
+	    <input type="radio"  name="workTyp_back" value="SI"  class='easyui-radio'>卸船</input>
+	    <input type="radio"  name="workTyp_back" value="MV"  class='easyui-radio'>捣场</input>
+	    <input type="radio"  name="workTyp_back" value="TI"  class='easyui-radio'>集港</input>
+	    <input type="radio"  name="workTyp_back" value="TO"  class='easyui-radio'>疏港</input>
+	    <input type="radio"  name="workTyp_back" value="TZ"  class='easyui-radio'>转栈</input>
+	    <shiro:hasPermission name="webresources:login:WorkCommandRollback:query">
+	    <a class="easyui-linkbutton" th:id="query+${radi}">查询</a>
+	    </shiro:hasPermission>
+	    <shiro:hasPermission name="webresources:login:WorkCommandRollback:back">
+	    <a class="easyui-linkbutton" th:id='back+${radi}'>回退</a>
+	    </shiro:hasPermission>
+	    <shiro:hasPermission name="webresources:login:WorkCommandRollback:fresh">
+	    <a class="easyui-linkbutton" th:id='fresh+${radi}'>刷新</a>
+	    </shiro:hasPermission>
+	    <shiro:hasPermission name="webresources:login:WorkCommandRollback:clear">
+        <a class="easyui-linkbutton" th:id='clear+${radi}'>清空</a>
+        </shiro:hasPermission>
+		</span>
+	</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="WorkCommandRollbackDatagrid1508123301002+${radi}"
+	style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var brandCod;
+	    var dg = $("#WorkCommandRollbackDatagrid1508123301002[(${radi})]");
+	    //选船
+	    $("#chooseShip[(${radi})]").bind("click", function() {
+            HdUtils.selShip(callback);
+        });
+	    $('#brandCod[(${radi})]').combobox({
+	        url : '../webresources/login/work/WorkCommandRollback/getCBrandDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        mode : 'remote',
+	        panelHeight : 120,
+	        required : false,
+	        onSelect : function(rec) {
+	        	$('#carTyp[(${radi})]').combobox({
+	     	    	url : '../webresources/login/work/WorkCommandRollback/getCCarTyp?brandCod='+rec.value,
+	    	        valueField : 'value',
+	    	        textField : 'label',
+	    	        mode : 'remote',
+	    	        panelHeight : 120,
+	    	        required : false,
+	    	        onSelect : function(rec) {
+	    		        return rec.value;
+	    	        }
+	    	    });
+	        	return rec.value;
+	        }
+	    });
+ 	    $('#carTyp[(${radi})]').combobox({
+ 	    	url : '../webresources/login/work/WorkCommandRollback/getCCarTyp',
+	        valueField : 'value',
+	        textField : 'label',
+	        mode : 'remote',
+	        panelHeight : 120,
+	        required : false,
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    function callback(data){
+        	$("#cShipNam[(${radi})]").val(data.cShipNam);
+        	$("#voyage[(${radi})]").val(data.ivoyage+'/'+data.evoyage);
+        	$("#shipNo[(${radi})]").val(data.shipNo);
+        }
+	    // buttons
+	  
+	    // 刷新。
+	    $("#fresh[(${radi})]").on("click", function() {
+		    dg.datagrid("hdReload");
+	    });
+	    //回退
+	    $("#back[(${radi})]").on("click", function() {
+		var dataRow=dg.datagrid("getChecked");
+		var portCarNo="";
+		  for (var i = 0; i < dataRow.length; i++) {
+			  portCarNo += dataRow[i].portCarNo + ",";
+		    }
+		  portCarNo = portCarNo.substring(0, portCarNo.length - 1);
+		if(dataRow[0].workTyp=='SI'){
+			 HdUtils.ajax.post({
+			        url : "../webresources/login/work/WorkCommandRollback/unloadBack?portCarNo=" + portCarNo,
+			        success : function(data) {
+				        HdUtils.messager.bottomRight(data.message);
+				        $("#WorkCommandRollbackDatagrid1508123301002[(${radi})]").datagrid("hdReload");
+			        }
+			    });
+		}
+		//z装船
+        if(dataRow[0].workTyp=='SO'){
+        	HdUtils.ajax.post({
+		        url : "../webresources/login/work/WorkCommandRollback/loadBack?portCarNo=" + portCarNo,
+		        success : function(data) {
+			        HdUtils.messager.bottomRight(data.message);
+			        $("#WorkCommandRollbackDatagrid1508123301002[(${radi})]").datagrid("hdReload");
+		        }
+		    });	
+		}
+        if(dataRow[0].workTyp=='TI'){
+        	HdUtils.ajax.post({
+		        url : "../webresources/login/work/WorkCommandRollback/jgBack?portCarNo=" + portCarNo,
+		        success : function(data) {
+			        HdUtils.messager.bottomRight(data.message);
+			        $("#WorkCommandRollbackDatagrid1508123301002[(${radi})]").datagrid("hdReload");
+		        }
+		    });	
+		}
+        if(dataRow[0].workTyp=='TO'){
+        	HdUtils.ajax.post({
+		        url : "../webresources/login/work/WorkCommandRollback/sgBack?portCarNo=" + portCarNo,
+		        success : function(data) {
+			        HdUtils.messager.bottomRight(data.message);
+			        $("#WorkCommandRollbackDatagrid1508123301002[(${radi})]").datagrid("hdReload");
+		        }
+		    });	
+		}
+        if(dataRow[0].workTyp=='TZ'){
+        	HdUtils.ajax.post({
+		        url : "../webresources/login/work/WorkCommandRollback/tzBack?portCarNo=" + portCarNo,
+		        success : function(data) {
+			        HdUtils.messager.bottomRight(data.message);
+			        $("#WorkCommandRollbackDatagrid1508123301002[(${radi})]").datagrid("hdReload");
+		        }
+		    });	
+		}
+	    });
+	    
+	    // 清空。
+	    $("#clear[(${radi})]").on("click", function() {
+		    $("#billNo[(${radi})]").val("");
+		    $("#contractNo[(${radi})]").val("");
+		    $("#shipNo[(${radi})]").val("");
+		    $("#carTyp[(${radi})]").combobox('setValue', '');
+		    $("#brandCod[(${radi})]").combobox('setValue', '');
+		    $('#carTyp[(${radi})]').combobox({
+	 	    	url : '../webresources/login/work/WorkCommandRollback/getCCarTyp',
+		        valueField : 'value',
+		        textField : 'label',
+		        mode : 'remote',
+		        panelHeight : 120,
+		        required : false,
+		        onSelect : function(rec) {
+			        return rec.value;
+		        }
+		    });
+		    $("#WorkCommandRollbackDatagrid1508123301002[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+		    $("#WorkCommandRollbackDatagrid1508123301002[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    var billNo = $("#billNo[(${radi})]").val();
+			var vinNo = $("#vinNo[(${radi})]").val();
+		    var carTyp = $("#carTyp[(${radi})]").combobox('getValue');
+		    var brandCod = $("#brandCod[(${radi})]").combobox('getValue');
+		    var contractNo = $("#contractNo[(${radi})]").val();
+		    var shipNo=$("#shipNo[(${radi})]").val();
+		    var cShipNam=$("#cShipNam[(${radi})]").val();
+		    var workTyp=$("input[name='workTyp_back']:checked").val();
+		    onlinquery.add("billNo", billNo);
+		    onlinquery.add("carTyp", carTyp);
+		    onlinquery.add("brandCod", brandCod);
+		    onlinquery.add("contractNo", contractNo);
+		    onlinquery.add("shipNo", shipNo);
+		    onlinquery.add("workTyp", workTyp);
+			onlinquery.add("vinNo", vinNo);
+		    return onlinquery.build();
+	    }
+
+	    $("#WorkCommandRollbackDatagrid1508123301002[(${radi})]").datagrid({
+	        striped : true,
+	       url : "../webresources/login/work/WorkCommandRollback/find",
+
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : false,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#WorkCommandRollbackToolBar1508123301002" + /*[[${radi}]]*/'',
+	        fit : true,
+			autoLoad:false,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+
+	        }
+	        , {
+	            field : "cShipNam",
+	            title : '船名',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+	        , {
+
+	            field : "voyage",
+	            title : '航次',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }   , {
+
+	            field : "billNo",
+	            title : '提单号',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        } , {
+
+	            field : "workTypNam",
+	            title : '作业类型',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "vinNo",
+	            title : '车架号',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+	      , {
+	            field : "contractNo",
+	            title : "委托号",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }  , {
+	            field : "brandNam",
+	            title : '品牌',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        } , {
+	            field : "carTypNam",
+	            title : '车型',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "carTyp",
+	            title : "车型",
+	            hidden:true,
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+	        , {
+	            field : "oldPlac",
+	            title : '原车位',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }  , {
+	            field : "cyPlac",
+	            title : '场号',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }  , {
+	            field : "truckNo",
+	            title : '拖车号',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }  , {
+	            field : "directId",
+	            title : '直装/直取',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }  , {
+
+	            field : "shipWorkTim",
+	            title : '装卸船时间',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        } ,{
+
+	            field : "tranPortCodNam",
+	            title : '流向',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "inCyTim",
+	            title : '入场时间',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }  , {
+	            field : "outCyTim",
+	            title : '出场时间',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        } 
+	        ] ]
+	    });
+	    $("#WorkCommandRollbackDatagrid1508123301002" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<style type="text/css">
+.tf {
+	margin: 10px auto;
+}
+
+.tf tr {
+	height: 20px;
+}
+
+.tf th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tf td {
+	text-align: left;
+	width: 80px;
+}
+
+.tf input {
+	text-align: left;
+}
+</style>
+<!-- 工具栏 -->
+<div th:id="PortCarToolBar1508123309089+${radi}">
+	<table class="tf">
+		<tr>
+			<th>大驾号：</th>
+			<td><input id="vinNo" name="vinNo" class='easyui-validatebox'
+				data-options="required:false" style="width: 80px;"></td>
+			<th>提单号：</th>
+			<td><input id="billNo" name="billNo" class='easyui-validatebox'
+				data-options="required:false" style="width: 80px;"></td>
+			<th>堆场号：</th>
+			<td><input id="cyAreaNo" name="cyAreaNo"
+				class='easyui-validatebox' data-options="required:false"
+				style="width: 80px;"></td>
+			<th></th>
+			<td></td>
+		</tr>
+		<tr>
+			<th>RFID号：</th>
+			<td><input id="rfidCardNo" name="rfidCardNo"
+				class='easyui-validatebox' data-options="required:false"
+				style="width: 80px;"></td>
+			<th>品牌：</th>
+			<td><input id="brandCod" name="brandCod"
+				class='easyui-validatebox' data-options="required:false"
+				style="width: 80px;"></td>
+			<th>堆场行号：</th>
+			<td><input id="cyRowNo" name="cyRowNo"
+				class='easyui-validatebox' data-options="required:false"
+				style="width: 80px;"></td>
+			<th></th>
+			<td><a class="easyui-linkbutton" id="query">查询</a></td>
+		</tr>
+		<tr>
+			<th>车辆流水号：</th>
+			<td><input id="portCarNo" name="portCarNo"
+				class='easyui-validatebox' data-options="required:false"
+				style="width: 80px;"></td>
+			<th>车型：</th>
+			<td><input id="carTyp" name="carTyp" class='easyui-validatebox'
+				data-options="required:false" style="width: 80px;"></td>
+			<th>车位：</th>
+			<td><input id="cyBayNo" name="cyBayNo"
+				class='easyui-validatebox' data-options="required:false"
+				style="width: 80px;"></td>
+			<th></th>
+			<td></td>
+		</tr>
+
+	</table>
+	<!-- Datagrid -->
+	<table id="PortCarDatagrid1508123309089" style="width: 650px; height: 250px;"></table>
+</div>
+<form id="LockCarDocForm1507959148710">
+	<table id="LockCarDocTable1507959148710"
+		style="height: 35%; width: 80%" class="tableform">
+		<tr>
+			<th>扣车单位：</th>
+			<td><input id="lockUnit" name="lockUnit"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="10" /></td>
+			<th>扣车原因：</th>
+			<td><input id="lockReason" name="lockReason"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="10" /></td>
+		</tr>
+		<tr>
+			<th>扣车操作员：</th>
+			<td><input id="lockRecNam" name="lockRecNam" readonly="readonly"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="10" /></td>
+			<th>扣车时间：</th>
+			<td><input id="lockRecTim" name="lockRecTim" readonly="readonly"
+				data-options="required:false" class="easyui-datebox" maxlength="10" /></td>
+		</tr>
+		<tr>
+
+			<th>备注：</th>
+			<td colspan="3"><input id="remarkTxt" name="remarkTxt" style="width:90%;"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		</tr>
+	</table>
+</form>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+    $(document).ready(function() {
+    	 var dg = $("#PortCarDatagrid1508123309089");
+    	  $('#lockUnit').combobox(HdUtils.code.scode({
+    	               fieldCod : 'LOCK_UNIT'
+    	         }, {
+    	               required : false
+    	         })
+    	         );
+
+    	  HdUtils.dialog.setValue({
+  		    saveHandler : saveHandler
+  	    });
+    	$('#lockReason').combobox(HdUtils.code.scode({
+              fieldCod : 'LOCK_REASON'
+        }, {
+              required : false
+        })
+        );
+    	$('#carTyp').combobox({
+ 	        url : '../webresources/login/damage/LockCarDoc/getCCarTyp',
+ 	        valueField : 'value',
+ 	        textField : 'label',
+ 	        panelHeight : 120,
+ 	        required : false,
+ 	        onSelect : function(rec) {
+ 		        return rec.value;
+ 	        }
+ 	    });
+    	 $('#brandCod').combobox({
+  	        url : '../webresources/login/damage/LockCarDoc/getCBrandDrop',
+  	        valueField : 'value',
+  	        textField : 'label',
+  	        panelHeight : 100,
+  	        required : false,
+  	        onSelect : function(rec) {
+  		        return rec.value;
+  	        }
+  	    });
+         HdUtils.dialog.setValue({
+	               saveHandler : saveHandler
+          });
+  	    function saveHandler() {
+  	    var dataRows=$("#PortCarDatagrid1508123309089").datagrid("getSelections");
+  	    	for(var i=0;i<dataRows.length;i++){
+  	    		var portcarno=dataRows[i].portCarNo;
+  	    		var rfidcardno=dataRows[i].rfidCardNo;
+  	    		var vinno=dataRows[i].vinNo;
+  	    		var billno=dataRows[i].billNo;
+  	    		var brandcod=dataRows[i].brandCod;
+  	    		var lockunit=$("#lockUnit").combobox('getValue');
+  	    		var lockreason=$("#lockReason").combobox('getValue');
+  	    		var lockid='1';
+  	    		var relid='0';
+  	    		var remarktxt=$("#remarkTxt").val();
+  	    		var formdata = {"portCarNo":portcarno,"rfidCardNo":rfidcardno,"vinNo":vinno,"billNo":billno,"brandCod":brandcod,"lockUnit":lockunit,"lockId":'1',"lockReason":lockreason,"relId":'0',"remarkTxt":remarktxt};
+  	    	   HdUtils.ajax.post({
+  	  		        url : "../webresources/login/damage/LockCarDoc/saveone",
+  	  		        data : formdata,
+  	  		        success : function(data) {
+  	  			        if (data.key == '-1') {
+  	  				        HdUtils.messager.info(data.message);
+  	  				        return false;
+  	  			        }
+  	  		        }
+  	  		    })
+  	  		    
+  	    	}
+  	            HdUtils.dialog.close();
+		        HdUtils.messager.bottomRight('保存成功', '保存操作');
+		        $("#PortCarDatagrid1508123309089").datagrid("hdReload");
+  	    } 
+    }); 
+    // 查询
+    $("#query").on("click", function() {
+	    $("#PortCarDatagrid1508123309089").datagrid({
+		    queryParams : query(),
+	    })
+    });
+    function query() {
+	    var onlinquery = new HdQuery();
+	    var vinNo= $("#vinNo").val();
+	    var billNo=$("#billNo").val();
+	    var cyAreaNo=$("#cyAreaNo").val();
+	    var rfidCardNo=$("#rfidCardNo").val();
+	    var brandCod=$("#brandCod").val();
+	    var cyRowNo=$("#cyRowNo").val();
+	    var portCardNo=$("#portCardNo").val();
+	    var carTyp=$("#carTyp").val();
+	    var cyBayNo=$("#cyBayNo").val();
+	    onlinquery.add("vinNo", vinNo);
+	    onlinquery.add("billNo", billNo);
+	    onlinquery.add("cyAreaNo", cyAreaNo);
+	    onlinquery.add("rfidCardNo", rfidCardNo);
+	    onlinquery.add("brandCod", brandCod);
+	    onlinquery.add("cyRowNo", cyRowNo);
+	    onlinquery.add("portCardNo", portCardNo);
+	    onlinquery.add("carTyp", carTyp);
+	    onlinquery.add("cyBayNo", cyBayNo);
+	    
+	    return onlinquery.build();
+	} 
+        	//在港车列表
+    	$("#PortCarDatagrid1508123309089").datagrid({
+    	    striped : true,
+    	    url : "../webresources/login/damage/CarDamage/findPortCar",
+    	    queryParams : query(),
+    	    method : "post",
+    	    pagination : true,
+    	    multiSelect : true,
+    	    selectOnCheck : true,
+    	    checkOnSelect : true,
+    	    rownumbers : true,
+    	    pageSize : 20,
+    	    fit : false,
+    	    fitColumns : false,
+    	    columns : [ [ {
+    	        field : "ck",
+    	        checkbox : true,
+    	        sortable : false,
+
+    	    }, {
+
+    	        field : "portCarNo",
+    	        title : '车辆流水号',
+    	        multiSort : true,
+    	        width : fixWidth(0.1),
+    	        halign : "center",
+    	        editor : {
+    	            type : "validatebox",
+    	            options : {
+    	                required : false
+    	            }
+    	        },
+    	        sortable : false
+    	    }, {
+    	        field : "vinNo",
+    	        title : "车架号",
+    	        multiSort : true,
+    	        halign : "center",
+    	        editor : {
+    	            type : "validatebox",
+    	            options : {
+    	                required : false
+    	            }
+    	        },
+    	        sortable : false
+    	    }, {
+
+    	        field : "rfidCardNo",
+    	        title : "RFID号",
+    	        multiSort : true,
+    	        halign : "center",
+    	        editor : {
+    	            type : "validatebox",
+    	            options : {
+    	                required : false
+    	            }
+    	        },
+    	        sortable : false
+    	    }, {
+
+    	        field : "brandCod",
+    	        title : "品牌",
+    	        hidden:true,
+    	        multiSort : true,
+    	        halign : "center",
+    	        editor : {
+    	            type : "validatebox",
+    	            options : {
+    	                required : false
+    	            }
+    	        },
+    	        sortable : false
+    	    }, {
+
+    	        field : "brandNam",
+    	        title : "品牌",
+    	        multiSort : true,
+    	        halign : "center",
+    	        editor : {
+    	            type : "validatebox",
+    	            options : {
+    	                required : false
+    	            }
+    	        },
+    	        sortable : false
+    	    } , {
+
+    	        field : "carTyp",
+    	        title : "车型",
+    	        hidden:true,
+    	        multiSort : true,
+    	        halign : "center",
+    	        editor : {
+    	            type : "validatebox",
+    	            options : {
+    	                required : false
+    	            }
+    	        },
+    	        sortable : false
+    	    }
+    	    , {
+
+    	        field : "carTypNam",
+    	        title : "车型",
+    	        multiSort : true,
+    	        halign : "center",
+    	        editor : {
+    	            type : "validatebox",
+    	            options : {
+    	                required : false
+    	            }
+    	        },
+    	        sortable : false
+    	    }, {
+
+    	        field : "billNo",
+    	        title : "提单号",
+    	        multiSort : true,
+    	        halign : "center",
+    	        editor : {
+    	            type : "validatebox",
+    	            options : {
+    	                required : false
+    	            }
+    	        },
+    	        sortable : false
+    	    }
+    	    , {
+
+    	        field : "cyAreaNo",
+    	        title : "区号",
+    	        multiSort : true,
+    	        halign : "center",
+    	        editor : {
+    	            type : "validatebox",
+    	            options : {
+    	                required : false
+    	            }
+    	        },
+    	        sortable : false
+    	    }
+    	    , {
+
+    	        field : "cyRowNo",
+    	        title : "行号",
+    	        multiSort : true,
+    	        halign : "center",
+    	        editor : {
+    	            type : "validatebox",
+    	            options : {
+    	                required : false
+    	            }
+    	        },
+    	        sortable : false
+    	    }
+    	    , {
+
+    	        field : "cyBayNo",
+    	        title : "车位",
+    	        multiSort : true,
+    	        halign : "center",
+    	        editor : {
+    	            type : "validatebox",
+    	            options : {
+    	                required : false
+    	            }
+    	        },
+    	        sortable : false
+    	    }
+    	    ] ]
+    	});
+    	  function fixWidth(percent) {
+    		    return document.documentElement.portCarNo * percent; //这里你可以自己做调整
+    	    }
+    	    function fixWidth(percent) {
+    		    return document.documentElement.brandCod * percent ; //这里你可以自己做调整
+    	    }
+    	$("#PortCarDatagrid1508123309089").datagrid("hdGetColumnNames");
+</script>
+</html>

@@ -1,0 +1,46 @@
+<meta charset="UTF-8" />
+<form id="backreasonForm">
+	<table style="width: 99%" class="tableform">
+		<tr>
+			<th>原因编码：</th>
+			<td><input id="backreasonCod" name="backreasonCod"/></td>
+			<td colspan="1"><input id="backreasonTxt" style="width: 250px"
+				name="backreasonTxt" class="easyui-validatebox" required="required"></input></td>
+		</tr>
+	</table>
+</form>
+
+<!-- 脚本控制 -->
+<script type="text/javascript">
+
+	$(document).ready(function() {
+		$('#backreasonCod').combobox(HdUtils.code.scode({fieldCod: 'SEA_COD'}, {required: false}));
+		$("#backreasonCod").combobox({
+			onChange: function (n,o) {
+				var code = $('#backreasonCod').combobox("getValue");
+				HdUtils.ajax.post({
+					url : "../webresources/login/privilege/SysCode/finddescription?code=" + code,
+					success : function(data) {
+						if (!data) {
+							return false;
+						}
+						$('#backreasonTxt').val(data.description);
+					}
+				});
+
+			   }
+		  });
+      });
+    HdUtils.dialog.setValue({
+	    saveHandler : backreasonContent
+    });//设置弹窗确定时的回调
+    function backreasonContent() {
+	    var isVal = $("#backreasonForm").form('validate');
+	    if (!isVal) {
+		    return false;
+	    }
+	    var result=$('#backreasonForm').serializeObject();//在窗口关闭前
+	    HdUtils.dialog.handler.dialog("close");
+	    return result;
+    }
+</script>

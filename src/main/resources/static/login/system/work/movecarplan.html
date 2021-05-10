@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="ContractIeDocToolBar15081233020012+${radi}"
+	style="float: left;">
+	<!-- 查询 -->
+	<div th:id="jglh+${radi}" style="float: left;">
+		委托号：<input th:id="movePlanNo+${radi}" name="movePlanNo"
+			placeholder="请输入委托号" type="text" data-options="required:false"
+			style="width: 150px"> 码头：<input th:id="dockCod+${radi}"
+			name="dockCod" data-options="required:false" style="width: 150px">
+		原位置：<input th:id="oldPlac+${radi}" name="oldPlac" placeholder="请输入原位置"
+			type="text" data-options="required:false" style="width: 120px">
+		<shiro:hasPermission name="webresources:login:MoveCarPlan:query">
+			<a class="easyui-linkbutton" th:id="query+${radi}">查询</a>
+		</shiro:hasPermission>
+
+	</div>
+	<div th:id="sglh+${radi}" style="float: left;">
+		理货员：<input th:id="workNam+${radi}" name="workNam" type="text"
+			data-options="required:false" style="width: 120px">司机：<input
+			th:id="driver+${radi}" name="driver" type="text"
+			data-options="required:false" style="width: 120px"> 入场位置：<input
+			th:id="planPlac+${radi}" name="planPlac" type="text"
+			placeholder="请输入入场位置" data-options="required:false"
+			style="width: 180px">
+		<shiro:hasPermission name="webresources:login:MoveCarPlan:save">
+			<a class="easyui-linkbutton" th:id="save+${radi}">理货</a>
+		</shiro:hasPermission>
+	</div>
+
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="ContractIeDocDatagrid1508123320012+${radi}"
+	style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(
+            function() {
+	            var radi = /*[[${radi}]]*/'';
+	            var dg = $("#ContractIeDocDatagrid1508123320012[(${radi})]");
+	            //作业码头
+	            $('#dockCod[(${radi})]').combobox({
+	                url : '../webresources/login/ship/CShipData/getCDockDrop',
+	                valueField : 'value',
+	                textField : 'label',
+	                onSelect : function(rec) {
+		                return rec.value;
+	                }
+	            });
+	            $('#workNam[(${radi})]').combobox({
+	                url : '../webresources/login/cargo/TruckWork/getAuthUserDrop',
+	                valueField : 'value',
+	                textField : 'label',
+	                onSelect : function(rec) {
+		                return rec.value;
+	                }
+	            });
+	            $('#driver[(${radi})]').combobox({
+	                url : '../webresources/login/cargo/TruckWork/getCEmployeeDrop',
+	                valueField : 'value',
+	                textField : 'label',
+	                onSelect : function(rec) {
+		                return rec.value;
+	                }
+	            });
+	            function query() {
+		            var onlinquery = new HdQuery();
+		            var movePlanNo = $("#movePlanNo[(${radi})]").val();
+		            var dockCod = $("#dockCod[(${radi})]").combobox('getValue');
+		            var oldPlac = $("#oldPlac[(${radi})]").val();
+			        onlinquery.add("movePlanNo", movePlanNo);
+			        onlinquery.add("dockCod", dockCod);
+			        onlinquery.add("oldPlac", oldPlac);
+		            return onlinquery.build();
+	            }
+	            // 理货
+	            $("#save[(${radi})]").on(
+	                    "click",
+	                    function() {
+		                    var workNam = $("#workNam[(${radi})]").combobox('getValue');
+		                    var driver = $("#driver[(${radi})]").combobox('getValue');
+		                    var planPlac = $("#planPlac[(${radi})]").val();
+		                    if (!workNam) {
+			                    HdUtils.messager.info("请选择理货员");
+			                    return false;
+		                    }
+		                    if (!driver) {
+			                    HdUtils.messager.info("请选择司机！");
+			                    return false;
+		                    }
+		                    
+		                    if (!planPlac) {
+			                    HdUtils.messager.info("请输入入场位置！");
+			                    return false;
+		                    }
+		                    var selRow = $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid("getChecked");
+		                    if (selRow.length == 0) {
+		        	            HdUtils.messager.info('请至少选择一条数据！');
+		        	            return false;
+		                    }
+		                    var ids = '';
+		                    $.messager.confirm(Resources.WB_CONFIRM, "请确认是否进行理货？", function(r) {
+		        	            if (r) {
+		        		            for (var i = 0; i < selRow.length; i++) {
+		        			            ids += selRow[i].moveplanId + ",";
+		        		            }
+		        		            HdUtils.ajax.post({
+		        		                url : "../webresources/login/work/MoveCarPlan/saveAll?moveplanIds=" + ids + "&workNam="
+		        		                		+ workNam + "&driver=" + driver +"&planPlac=" + planPlac,
+		        		                success : function(data) {
+		        		                	HdUtils.dialog.close();
+		        			                HdUtils.messager.bottomRight(data.message);
+		        			                $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid("hdReload");
+		        		                }
+		        		            });
+		        	            }
+		                    });
+		                    
+	                    });
+
+	            $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid({
+	                striped : true,
+	                url : "../webresources/login/work/MoveCarPlan/find",
+	                queryParams : query(),
+	                method : "post",
+	                pagination : true,
+	                singleSelect : true,
+	                selectOnCheck : true,
+	                checkOnSelect : true,
+	                rownumbers : true,
+	                pageSize : 20,
+	                toolbar : "#ContractIeDocToolBar15081233020012" + /*[[${radi}]]*/'',
+	                fit : true,
+	                fitColumns : false,
+	                columns : [ [ {
+	                    field : "ck",
+	                    checkbox : true,
+	                    sortable : false,
+	                }, {
+	                    field : "rfidCardNo",
+	                    title : "RFID卡号",
+	                    multiSort : true,
+	                    align : "center",
+	                    width : 100,
+	                    sortable : false
+	                }, {
+	                    field : "vinNo",
+	                    title : '车架号',
+	                    multiSort : true,
+	                    width : 100,
+	                    align : "center",
+	                    sortable : false
+	                }, {
+	                    field : "oldPlac",
+	                    title : "原位置",
+	                    multiSort : true,
+	                    width : 100,
+	                    align : "center",
+	                    sortable : false
+	                }, {
+	                    field : "movePlanNo",
+	                    title : "委托号",
+	                    multiSort : true,
+	                    width : 150,
+	                    align : "center",
+	                    sortable : false
+	                }, {
+	                    field : "planPlac",
+	                    title : "计划位置",
+	                    multiSort : true,
+	                    width : 100,
+	                    align : "center",
+	                    sortable : false
+	                }, {
+	                    field : "dockCod",
+	                    title : "码头",
+	                    multiSort : true,
+	                    width : 100,
+	                    align : "center",
+	                    sortable : false
+	                } ] ]
+	            });
+	            $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid("hdGetColumnNames");
+            });
+    /*]]>*/
+</script>
+</html>

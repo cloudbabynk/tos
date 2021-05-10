@@ -1,0 +1,133 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#ShipMoorForm1507959148710");
+	    var shipMoorId = HdUtils.dialog.getValue("shipMoorId");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    var draftfront= HdUtils.dialog.getValue("draftfront");
+	    var draftback= HdUtils.dialog.getValue("draftback");
+	    if(shipMoorId==""){
+	    	  $('#draftF').val(draftfront);	
+	    	  $('#draftA').val(draftback);	
+	    }else{
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/ship/ShipMoor/findone?shipMoorId=" + shipMoorId,
+	        success : function(data) {
+	        	data.draftFront=draftfront;
+	        	data.draftBack=draftback;
+		        $("#ShipMoorForm1507959148710").form("loadData", data);
+	        }
+	    })
+	    }
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    $('#moorId').combobox(HdUtils.code.scode({
+		    fieldCod : 'MOOR_ID'
+	    }, {
+		    required : true
+	    }));
+	    $('#berthCod').combobox({
+	        url : '../webresources/login/base/CBerth/getCBerthDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 100,
+	        required : true,
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    function saveHandler() {
+		    var isValss = $("#ShipMoorForm1507959148710").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#ShipMoorForm1507959148710").serializeObject();
+		    formdata.shipNo=HdUtils.dialog.getValue("shipNo");
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/ship/ShipMoor/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#ShipMoorDatagrid1508123301002" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+    });
+</script>
+<form id="ShipMoorForm1507959148710">
+	<table id="ShipMoorTable1507959148710"
+		style="height: 75%; width: 80%" class="tableform">
+		<input id="shipMoorId" name="shipMoorId"
+			data-options="required:false" class="easyui-validatebox" hidden="true"
+			maxlength="10" />
+		<tr>
+			<th>系解揽标志：</th>
+			<td><input id="moorId" name="moorId"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="10" /></td>
+			<th>作业开始时间：</th>
+			<td><input id="workBegTim" name="workBegTim"
+				data-options="required:true" class="easyui-datetimebox"
+				maxlength="10" /></td>
+			<th>作业结束时间：</th>
+			<td><input id="workEndTim" name="workEndTim"
+				data-options="required:true" class="easyui-datetimebox"
+				maxlength="10" /></td>
+		</tr>
+		<tr>
+			<th>作业泊位：</th>
+			<td><input id="berthCod" name="berthCod"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+			<th>指导员：</th>
+			<td><input id="director" name="director"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+			<th>前吃水：</th>
+			<td><input id="draftF" name="draftF"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		</tr>
+		<tr>
+			<th>后吃水：</th>
+			<td><input id="draftA" name="draftA" data-options="required:false"
+				class="easyui-validatebox" maxlength="255" /></td>
+			<th>备注：</th>
+			<td colspan="3"><input id="remarks" name="remarks"
+				style="width: 100%;" data-options="required:false"
+				class="easyui-validatebox" maxlength="255" /></td>
+			<input id="shipNo" name="shipNo" data-options="required:false" hidden="true"
+				class="easyui-validatebox" maxlength="255" />
+		</tr>
+		
+	</table>
+</form>

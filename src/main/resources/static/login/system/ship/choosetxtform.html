@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var entityName = "Ship";
+	    var radi = HdUtils.dialog.getValue("radi");
+	    var shipNo = HdUtils.dialog.getValue("data").shipNo;
+	    var voyage = HdUtils.dialog.getValue("data").voyage;
+	    var iEId = HdUtils.dialog.getValue("data").iEId;
+	    var eShipNam = HdUtils.dialog.getValue("data").eShipNam;
+	    var entityId = shipNo + iEId;
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    //批量导入
+	    function saveHandler() {
+		    var dataRows = $('#TxtDatagrid1507959149305').datagrid("getSelections");
+		    if (dataRows.length == 0) {
+			    HdUtils.messager.info('请至少选择一条数据！');
+			    return false;
+		    }
+		    var filenam = '';
+		    $.messager.confirm("确认", "确定要导入这些数据吗?", function(r) {
+			    if (r) {
+				    for (var i = 0; i < dataRows.length; i++) {
+					    filenam += ".//upload//Ship//" + dataRows[i].uploadId + ".upload" + ",";
+				    }
+				    filenam = filenam.substring(0, filenam.length - 1);
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/ship/ShipBill/txtimport?filenam=" + filenam+"&iEId="+iEId+"&eShipNam="+eShipNam+"&Voyage="+voyage,
+				        success : function(data) {
+					        if (data.code == "-1") {
+						        HdUtils.messager.info(data.message);
+						        return false;
+					        }
+					        HdUtils.dialog.close();
+					        HdUtils.messager.bottomRight(data.message);
+					        $("#ShipBillDatagrid1508123309099" + radi).datagrid("hdReload");
+					        $("#BillSplitDatagrid1508123301002" + radi).datagrid("hdReload");
+				        }
+				    });
+			    }
+		    });
+	    }
+
+	    // 查询
+	    $("#query").on("click", function() {
+		    $("#TxtDatagrid1507959149305").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    var entityName = "Ship";
+		    onlinquery.add("entityName", entityName);
+		    onlinquery.add("entityId", shipNo);
+		    return onlinquery.build();
+	    }
+	    $("#TxtDatagrid1507959149305").datagrid({
+	        url : "../webresources/login/com/comfileupload/find?entityName=" + entityName + "&entityId=" + entityId,
+	        //  queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : false,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        fit : false,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+
+	        }, {
+
+	            field : "fileName",
+	            title : '文件名',
+	            multiSort : true,
+	            width : fixWidth(0.1),
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "filePath",
+	            title : "文件路径",
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "fileSize",
+	            title : "文件大小",
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        } ] ]
+	    });
+	    function fixWidth(percent) {
+		    return document.documentElement.shipNam * percent; //这里你可以自己做调整
+	    }
+	    function fixWidth(percent) {
+		    return document.documentElement.evoyage * percent; //这里你可以自己做调整
+	    }
+	    $("#TxtDatagrid1507959149305").datagrid("hdGetColumnNames");
+    });
+</script>
+
+<form th:id="ContractIeDocForm1507959149305">
+	<table id="TxtDatagrid1507959149305" style="height: 270px;"></table>
+</form>
+</html>

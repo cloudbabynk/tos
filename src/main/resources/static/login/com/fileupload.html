@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<head>
+
+<title>文件上传</title>
+<script type="text/javascript" th:src="@{/js/jquery.min.js}"></script>
+<link th:href="@{/bootstrap-3.3.4-dist/css/bootstrap.css}"
+	rel="stylesheet" />
+<link th:href="@{/fileupload/css/fileinput.css}" media="all"
+	rel="stylesheet" type="text/css" />
+<link th:href="@{/fileupload/themes/explorer/theme.css}" media="all"
+	rel="stylesheet" type="text/css" />
+<script th:src="@{/bootstrap-3.3.4-dist/js/bootstrap.js}"
+	type="text/javascript"></script>
+
+<script th:src="@{/fileupload/js/plugins/sortable.js}"
+	type="text/javascript"></script>
+<script th:src="@{/fileupload/js/fileinput.js}" type="text/javascript"></script>
+<script th:src="@{/fileupload/js/locales/zh.js}" type="text/javascript"></script>
+<script th:src="@{/fileupload/js/locales/es.js}" type="text/javascript"></script>
+<script th:src="@{/fileupload/themes/explorer/theme.js}"
+	type="text/javascript"></script>
+</head>
+<body>
+
+	<form enctype="multipart/form-data">
+		<input id="comfileupload" type="file" multiple="${param.mutiple}" name="file"/>
+	</form>
+
+	<script type="text/javascript" th:inline="javascript">
+	
+		var uuids = '';//上传文件的uuid
+		var fileNames = '';//上传文件的name
+		var initialPreview = [];//从ajax取值
+		var initialPreviewConfig = [];
+		var entityId = /*[[${param.entityId}]]*/'';//业务主键
+		var entityName = /*[[${param.entityName}]]*/'';//业务名
+		var callback=/*[[${param.callback}]]*/'';//全部上传后的回调
+		var allowType=/*[[${param.allowType}]]*/'';//全部上传后的回调
+		var isReadOnly=/*[[${param.isReadOnly}]]*/'';//全部上传后的回调
+		/*<![CDATA[*/
+		function upload() {
+			$("#comfileupload").fileinput("upload");
+		}
+		$(document).ready(
+				function() {
+					var queryData = {
+						entityName : entityName,
+						entityId : entityId,
+					};
+					$.ajax({
+						type : "GET",
+						url : "find?t=" + Math.random()+"&entityName="+entityName+"&entityId="+entityId,
+						contentType : "application/json",
+						dataType : "json",
+						success: function(data){
+							$.each(data, function(i, one) {
+								uuids+=one+",";
+								initialPreview.push(one.fileName);
+								initialPreviewConfig.push({
+									url : 'delete?uploadId=' + one.uploadId,
+									caption : one.fileName,
+									size:one.fileSize,
+									key:one.uploadId
+								});
+								fileNames+=one.fileName+",";
+							});
+							inputReady();
+						}
+					});
+
+					function inputReady() {
+						var fileObj = {
+							 language: 'zh',
+							'theme' : 'explorer',
+							otherActionButtons:'<button type="button" class="kv-preview-thumb kv-file-down btn btn-xs btn-default" {dataKey} title="下载"><i class="glyphicon glyphicon-download-alt"></i></button>',
+							allowedFileExtensions: allowType,
+							overwriteInitial : false,
+							initialPreviewAsData : false,
+							hideThumbnailContent: true,
+					        showUpload: false,//单文件中
+					        showZoom: false,
+							uploadUrl : "upload?entityId=" + entityId+"&entityName="+entityName,
+							initialPreview : initialPreview,
+							initialPreviewConfig : initialPreviewConfig
+						}
+						$("#comfileupload").fileinput(fileObj).on("fileuploaded",
+								function(event, data, previewId, index) {
+									downloadHandler(this);
+									if (data.type == '1') {
+										uuids += data.message + ",";
+									}
+									if(callback&&callback!='undefined'){
+										callback.call(this,data,uuids,fileNames);
+									}
+								}
+						).on('filesuccessremove',function(event, id) {
+									uuids.replace(id+",", "")
+						});
+						 downloadHandler($("#comfileupload"));
+						 $(".kv-file-zoom").hide();
+						 if(isReadOnly&&isReadOnly!='false'){
+							 $(".kv-file-remove").hide();
+							 $(".file-caption-main").hide();
+						 }
+						 
+						 
+						
+					}
+				});
+		 downloadHandler=function(fileobj){
+		        var objs=$(fileobj).data('fileinput').$preview.find(".kv-preview-thumb .kv-file-down");
+		        objs.unbind("click");
+		        objs.on("click",function(data){
+		           //点击下载
+		            window.location.href="download?uploadId="+$(this).data("key");
+		        });
+		    }
+		  /*]]>*/
+	</script>
+
+</body>
+</html>

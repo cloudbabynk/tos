@@ -1,0 +1,327 @@
+
+/*变换图片样式*/
+
+.deke-banner-1 {background: url(../images/banner1.jpg) no-repeat 50% 0px;}
+
+.deke-banner-2 {background: url(../images/banner2.jpg) no-repeat 50% 0px;}
+
+.deke-banner-3 {background: url(../images/banner3.jpg) no-repeat 50% 0px;}
+
+.deke-banner-4 {background: url(../images/banner4.jpg) no-repeat 50% 0px;}
+
+.deke-banner-5 {background: url(../images/banner5.jpg) no-repeat 50% 0px;}
+
+
+
+.header .index span{}
+
+.indbody{
+	height:354px;
+	padding:0px 0 0 0;
+	min-width:888px;
+	/*background:url(../images/bg_index.jpg) no-repeat left top;*/
+}
+.indbody .container{
+	position:relative;
+	z-index:50;
+	padding:20px 30px 30px;
+	width:888px;
+	background-color:#fff;
+	/*margin-left:60px;*/
+	margin:0 auto;
+}
+.indbanner{
+	position:absolute;
+	left:0;
+	top:0;
+	width:100%;
+	height:354px;
+}
+
+.indbanner_2{
+	width:100%;
+	height:354px;
+	background-color:#d2e0ed;
+}
+.indbanner_2 .slide{
+	overflow:hidden;
+	height:354px;
+}
+.indbanner_2 .slide div{
+	position:relative;
+	overflow:hidden;
+	width:100%;
+	height:354px;
+}
+.indbanner_2 .slide .link{
+	position:absolute;
+	left:50%;
+	top:0;
+	display:block;
+	margin-left:-485px;
+	width:970px;
+	height:299px;
+}
+.indbanner_2 .slide .slidetext{
+	position:absolute;
+	left:50%;
+	margin:90px 0 0 -425px;
+	width:460px;
+	height:180px;
+}
+
+.indbanner_2 .deke-banner-1 .slidetext{ width:460px;}
+
+.indbanner_2 .ctrl{
+    left: 50%;
+    margin: -50px 0 0 -490px;
+    position: relative;
+    text-align: right;
+    width: 960px;
+    z-index:99;
+}
+.indbanner_2 .ctrl a{
+	position:relative;
+	z-index:2100;
+	width:56px;
+	height:36px;
+	display:inline-block;
+	text-decoration:none;
+	padding:0;
+	margin:3px 5px;
+	font-size:1px;
+	outline:0;
+	border:2px solid #EEE;
+	border:2px solid rgba(255,255,255,0.6);
+	box-shadow:0 1px 3px rgba(0,0,0,0.6);
+}
+.indbanner_2 .ctrl a.activeSlide{
+	top:-10px;
+	border:2px solid #FFF;
+	border:2px solid rgba(255,255,255,0.9);
+	box-shadow:0 1px 3px rgba(0,0,0,0.85);
+}
+
+.indmain{
+	float:left;
+	width:540px;
+}
+.indside{
+	float:right;
+	padding-top:5px;
+	width:340px;
+}
+
+.indnews{
+	margin-bottom:20px;
+	padding-bottom:10px;
+}
+.indnews .textbox{
+	overflow:hidden;
+}
+
+.indnewsside{
+	float:left;
+	width:182px;
+}
+.indnewsside .img{
+	display:block;
+	margin-bottom:10px;
+}
+.indnewsside .img img{ border:1px solid #ddd;}
+.indnewsside .t{}
+.indnewsside .t a{}
+
+.indnewsmain{
+	float:right;
+	width:340px;
+}
+.indnewsmain .firstnews{
+	margin-bottom:25px;
+}
+.indnewsmain .t{ font-size:14px;}
+.indnewsmain .text{}
+
+
+.indservice{}
+.indservice .titlebox{
+	overflow:hidden;
+}
+.indservice h3{ float:left;}
+.indservice .ctrl{
+	float:right;
+	margin-top:5px;
+}
+.indservice .ctrl .prev{
+	float:left;
+	border:1px solid #dadada;
+	width:18px;
+	height:18px;
+	background:url(../images/ico_ctrl.png) no-repeat left 0px;
+	cursor:pointer;
+}
+.indservice .ctrl .next{
+	float:left;
+	display:inline;
+	margin-left:-1px;
+	border:1px solid #dadada;
+	width:18px;
+	height:18px;
+	background:url(../images/ico_ctrl.png) no-repeat left -36px;
+	cursor:pointer;
+}
+.indservice .ctrl .prev:hover{ background-position:left -18px;}
+.indservice .ctrl .next:hover{ background-position:left -54px;}
+.indservice .weather{
+	float:right;
+	margin:4px 10px 0 0;
+	text-align:right;
+}
+.indside .weather{ margin-bottom:10px;}
+.weather a{
+	display:block;
+	overflow:hidden;
+}
+.weather a:hover{
+	text-decoration:none;
+}
+.weather span{ float:left; margin:0 8px 0 0; white-space:nowrap;}
+.weather img{ position:relative;top:-2px;}
+.weather .wind{}
+
+.servicescroll{
+	position:relative;
+	overflow:hidden;
+	width:539px;
+	height:160px;
+}
+.servicescroll li{
+	float:left;
+	margin-right:-1px;
+	width:270px;
+	height:160px;
+	background:url(../images/shade_1.png) repeat-x left top;
+}
+.servicescroll li a{
+	display:block;
+	padding:15px 15px 15px 95px;
+	border:1px solid #dadada;
+	width:158px;
+	height:128px;
+	background:url(../images/service_img.png) repeat-x -1530px 25px;
+}
+.servicescroll li.cur{
+	background-position:left -200px;
+}
+.servicescroll li .img{
+	float:left;
+	display:inline;
+	margin:0 0 0 -80px;
+}
+.servicescroll li .title{
+	display:block;
+	margin-bottom:5px;
+	font-size:16px;
+	font-weight:bold;
+	color:#005599;
+}
+.servicescroll li .text{ color:#555;}
+
+.servicescroll .li_1 a{}
+.servicescroll .li_2 a{ background-position:-1330px -175px;}
+.servicescroll .li_3 a{ background-position:-1130px -375px;}
+.servicescroll .li_4 a{ background-position:-930px -575px;}
+.servicescroll .li_5 a{ background-position:-730px -775px;}
+.servicescroll .li_6 a{ background-position:-530px -975px;}
+.servicescroll .li_7 a{ background-position:-330px -1175px;}
+.servicescroll .li_8 a{ background-position:-130px -1375px;}
+
+.servicescroll li.cur a{ text-decoration:none; background-image:url(../images/service_img_on.png);}
+
+
+.indsidebox{
+	position:relative;
+	margin-bottom:10px;
+	padding:10px 12px 30px;
+	border:1px solid #ccc;
+	background:url(../images/shade_2.png) repeat-x left bottom;
+}
+.indsidebox h3{}
+.indsidebox_weather .textbox{
+	overflow:hidden;
+}
+.indsidebox_weather .img{
+	float:left;
+	margin-right:10px;
+}
+.indsidebox_weather .title{ display:block; margin-bottom:5px; font-size:14px; font-weight:bold;}
+.indsidebox_weather .text{ overflow:hidden; zoom:1;}
+
+.indsidebox .ico{
+	display:none;
+	position:absolute;
+	top:-1px;
+	right:-1px;
+	width:30px;
+	height:30px;
+	background:url(../images/ico_6.png) no-repeat left top;
+}
+.indsidebox_cur .ico{
+	display:block;
+}
+
+.indsidebox_weather .ico{
+	display:none;
+}
+.indsidebox_weather{
+}
+.indsidebox_weather .title_1{
+	font-weight:bold;
+	color:#fd5e00;
+}
+.indsidebox_weather .title{
+	color:#777;
+	font-weight:normal;
+	font-size:12px;
+}
+
+.indsidebot{ padding:10px 0 5px;}
+.indsidebot .text a{ color:#555;}
+.indsidebot div.selector { width:190px;}
+.indsidebot div.selector select{ }
+
+
+.indsidebox #indpopbox_1{ display:none;}
+
+
+.list_2 li a {
+	font-size:13px;
+}
+
+#indflashbox .close{
+	position:absolute;
+	top:0;
+	right:0;
+	z-index:999;
+	display:block;
+	width:22px;
+	height:22px;
+	line-height:22px;
+	background:#059 url(../images/ico_close_2.png) no-repeat right top;
+	color:#fff;
+	overflow:hidden; zoom:1;
+}
+#indflashbox .close:hover{ text-decoration:none; color:#fff;}
+
+
+
+
+
+
+
+
+
+
+@media screen and (min-width: 1120px) {
+	.indbody .container{ margin:0 auto;}
+}

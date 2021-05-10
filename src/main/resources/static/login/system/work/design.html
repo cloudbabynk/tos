@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>设计</title>
+</head>
+<style type="text/css">
+.boxes {
+	font-size: 2px;
+}
+div{margin:0px;}
+.ft{
+border-spacing: 0px;
+}
+.ft tr {
+	height: 15px;
+	margin:0px;
+}
+.ft td {
+    width:40px;
+	height: 15px;
+	margin:0px;
+	border:0.5px solid;
+}
+.tdcell{
+width:40px;
+height: 15px;
+}
+</style>
+<!-- 工具栏 -->
+<div th:id="DesignToolBar15081233020012+${radi}">
+	<div style="width:100%">
+		日期：<input th:id="Dte+${radi}" name="Dte" class="easyui-datebox"
+			style="width: 120px" />内外贸：<input
+			th:id="tradeId+${radi}" name="tradeId" type="text"
+			data-options="required:false" style="width: 100px"><a class="easyui-linkbutton"
+			th:id="query+${radi}">查询</a>
+<!-- 			<a class="easyui-linkbutton"  -->
+<!-- 			th:id="exportExcel+${radi}">导出Excel</a> -->
+		</div>
+		<div id="tit"  style="float: left;width: 100%;height:220px;">
+		<div style="float:left;margin-left:5px;">
+		<table class="ft">
+		<tr><td colspan="6" align="center">今日集港情况</td> </tr>
+		<tr><td></td><td></td><td>东</td><td>南</td><td>上海</td><td></td></tr>
+		<tr>
+		<td rowspan='2'>一厂</td>
+		<td>威驰FS</td>
+		<td><input id="wcfsdgjg"  name="wcfsdgjg" class="tdcell"/></td>
+		<td><input id="wcfsnsjg"  name="wcfsnsjg" class="tdcell"/></td>
+		<td><input id="wcfsshjg"  name="wcfsshjg" class="tdcell"/></td>
+		<td><input id="wcfshjjg"  name="wcfshjjg" class="tdcell"/></td>
+		</tr>
+		<tr> 
+		<td>威驰</td>
+		<td><input id="wcdgjg"  name="wcdgjg" class="tdcell"/></td>
+		<td><input id="wcnsjg"  name="wcnsjg" class="tdcell"/></td>
+		<td><input id="wcshjg"  name="wcshjg" class="tdcell"/></td>
+		<td><input id="wchjjg"  name="wchjjg" class="tdcell"/></td>
+		</tr>
+		<tr>
+		<td>三厂</td>
+		 <td>卡罗拉</td>
+		<td><input id="klldgjg"  name="klldgjg" class="tdcell"/></td>
+		<td><input id="kllnsjg"  name="kllnsjg" class="tdcell"/></td>
+		<td><input id="kllshjg"  name="kllshjg" class="tdcell"/></td>
+		<td><input id="kllhjjg"  name="kllhjjg" class="tdcell"/></td>
+		 </tr>
+		<tr>
+		<td rowspan='3'>二厂</td>
+		 <td>皇冠</td>
+		<td><input id="hgdgjg"  name="hgdgjg" class="tdcell"/></td>
+		<td><input id="hgnsjg"  name="hgnsjg" class="tdcell"/></td>
+		<td><input id="hgshjg"  name="hgshjg" class="tdcell"/></td>
+		<td><input id="hghjjg"  name="hghjjg" class="tdcell"/></td>
+		 </tr>
+		<tr>
+		<td>锐志</td>
+		<td><input id="rzdgjg"  name="rzdgjg" class="tdcell"/></td>
+		<td><input id="rznsjg"  name="rznsjg" class="tdcell"/></td>
+		<td><input id="rzshjg"  name="rzshjg" class="tdcell"/></td>
+		<td><input id="rzhjjg"  name="rzhjjg" class="tdcell"/></td>
+		</tr>
+		<tr>
+		<td>花冠</td>
+		<td><input id="huagdgjg"  name="huagdgjg" class="tdcell"/></td>
+		<td><input id="huagnsjg"  name="huagnsjg" class="tdcell"/></td>
+		<td><input id="huagshjg"  name="huagshjg" class="tdcell"/></td>
+		<td><input id="huaghjjg"  name="huaghjjg" class="tdcell"/></td>
+		</tr>
+		<tr>
+		<td>合计</td>
+		<td><input id="jgtotal"  name="jgtotal" class="tdcell"/></td>
+		<td><input id="dgtotaljg"  name="dgtotaljg" class="tdcell"/></td>
+		<td><input id="nstotaljg"  name="nstotaljg" class="tdcell"/></td>
+		<td><input id="shtotaljg"  name="shtotaljg" class="tdcell"/></td>
+		<td><input id=""  name="" class="tdcell"/></td>
+		</tr>
+		</table>
+		</div>
+		<div  style="float:left;">
+		<table class="ft">
+		<tr><td colspan="6" align="center">整体堆场情况</td> </tr>
+		<tr><td></td><td></td><td>东</td><td>南</td><td>上海</td><td></td></tr>
+		<tr>
+		<td rowspan='2'>一厂</td>
+		<td>威驰FS</td>
+		<td><input id="wcfsdg"  name="wcfsdg" class="tdcell"/></td>
+		<td><input id="wcfsns"  name="wcfsns" class="tdcell"/></td>
+		<td><input id="wcfssh"  name="wcfssh" class="tdcell"/></td>
+		<td><input id="wcfshj"  name="wcfshj" class="tdcell"/></td>
+		</tr>
+		<tr> 
+		<td>威驰</td>
+		<td><input id="wcdg"  name="wcdg" class="tdcell"/></td>
+		<td><input id="wcns"  name="wcns" class="tdcell"/></td>
+		<td><input id="wcsh"  name="wcsh" class="tdcell"/></td>
+		<td><input id="wchj"  name="wchj" class="tdcell"/></td>
+		</tr>
+		<tr>
+		<td>三厂</td>
+		 <td>卡罗拉</td>
+		<td><input id="klldg"  name="klldg" class="tdcell"/></td>
+		<td><input id="kllns"  name="kllns" class="tdcell"/></td>
+		<td><input id="kllsh"  name="kllsh" class="tdcell"/></td>
+		<td><input id="kllhj"  name="kllhj" class="tdcell"/></td>
+		 </tr>
+		<tr>
+		<td rowspan='3'>二厂</td>
+		 <td>皇冠</td>
+		<td><input id="hgdg"  name="hgdg" class="tdcell"/></td>
+		<td><input id="hgns"  name="hgns" class="tdcell"/></td>
+		<td><input id="hgsh"  name="hgsh" class="tdcell"/></td>
+		<td><input id="hghj"  name="hghj" class="tdcell"/></td>
+		 </tr>
+		<tr>
+		<td>锐志</td>
+		<td><input id="rzdg"  name="rzdg" class="tdcell"/></td>
+		<td><input id="rzns"  name="rzns" class="tdcell"/></td>
+		<td><input id="rzsh"  name="rzsh" class="tdcell"/></td>
+		<td><input id="rzhj"  name="rzhj" class="tdcell"/></td>
+		</tr>
+		<tr>
+		<td>花冠</td>
+		<td><input id="huagdg"  name="huagdg" class="tdcell"/></td>
+		<td><input id="huagns"  name="huagns" class="tdcell"/></td>
+		<td><input id="huagsh"  name="huagsh" class="tdcell"/></td>
+		<td><input id="huaghj"  name="huaghj" class="tdcell"/></td>
+		</tr>
+	    <tr>
+		<td>合计</td>
+		<td><input id="dctotal"  name="dctotal" class="tdcell"/></td>
+		<td><input id="dgtotaldc"  name="dgtotaldc" class="tdcell"/></td>
+		<td><input id="nstotaldc"  name="nstotaldc" class="tdcell"/></td>
+		<td><input id="shtotaldc"  name="shtotaldc" class="tdcell"/></td>
+		<td><input id=""  name="" class="tdcell"/></td>
+		</tr>
+		</table>
+		</div>
+		 </div>
+		<div style="float: left;width: 100%;height:100%;">
+			<div style="float: left; width: 360px; height: 554px;">
+				<span>
+			<div id="left" style="float: left;background-color:red;width:180px;height:554px;">
+				<textarea class="boxes" id="JSG" name="JSG" style="width: 100%;height:100%;"></textarea>
+			</div>
+			<div id="right" style="float: left;background-color:yellow;width:180px;height:554px;" >
+				<textarea class="boxes" id="DCDETAIL" name="DCDETAIL"  style="width: 100%;height:100%;"></textarea>
+			</div>
+			</span>
+			</div>
+			<div id="maincontent" style="float: left; width:824px; height: 554px;">
+				<div id="firstrow" style="float: left; width:100%; height:80px;">
+					<div class="firstr" style="float: left; border: 0px solid;width:93px;height: 80px;"></div>
+					<div class="firstr" style="float: left; border: 0px solid;width:93px;height: 80px;"></div>
+					<div class="firstr" style="float: left; border: 0px solid;width:93px;height: 80px;"></div>
+					<div class="firstr" style="float: left; border: 0px solid;width:93px;height: 80px;"></div>
+					<div class="firstr" style="float: left; border: 1px solid;width:93px;height: 80px;">
+						<textarea id="HQE1" name="HQE1" style="width:100%;height:100%"></textarea>
+					</div>
+					<div class="firstr" style="float: left; border: 1px solid;width:93px;height: 80px;">
+						<textarea id="HQD1" name="HQD1" style="width:100%;height:100%"></textarea>
+					</div>
+					<div id="" class="firstr" style="float: left; border: 1px solid;width:93px;height: 80px;">
+						<textarea id="HQC1" name="HQC1" style="width:100%;height:100%"></textarea>
+					</div>
+					<div id="" class="firstr" style="float: left; border: 1px solid;width:93px;height: 80px;">
+						<textarea id="HQB1" name="HQB1" style="width:100%;height:100%"></textarea>
+					</div>
+					<div class="firstr" style="float: left; border: 0px solid;width:60px;height: 80px;"></div>
+				</div>
+				<div id="secondrow" style="float: left; width:100%;height:314px;">
+					<div id="firstcol" style="float: left; width:372px; height:314px;">
+						<div style="float: left;width:186px;height: 314px;">
+							<div id="I1" name="I1" class="left" style="background-color:cornflowerblue;float: left;border: 0px solid;width:93px;height:100%;">
+							<textarea id="" name="" style="width:100%;height:100%"></textarea>
+							</div>
+							<div id="H1" name="H1" class="right" style="background-color:blueviolet;float:left;width:93px;border: 0px solid;height:100%;">
+							<textarea id="" name="" style="width:100%;height:100%"></textarea>
+							</div>
+						</div>
+						<div style="float: left;width:186px;height:100%;">
+							<div style="float: left;width:186px;height:85px;">
+								<div id="G1" name="G1" class="left" style="background-color:cornflowerblue;float: left;border: 0px solid;width:93px;height:100%;">
+								<textarea id="" name="" style="width:100%;height:100%"></textarea>
+								</div>
+								<div id="F1" name="F1" class="right" style="background-color:blueviolet;float:left;width:93px;border: 0px solid;height:100%;">
+								<textarea id="HQF1" name="HQF1" style="width:100%;height:100%"></textarea>
+								</div>
+							</div>
+							<div style="float: left;width:186px;height:85px;">
+								<div id="G2" name="G2" class="left" style="float: left;border: 0px solid;width:93px;height:100%;">
+								<textarea id="" name="" style="width:100%;height:100%"></textarea>
+								</div>
+								<div id="F2" name="F2" class="right" style="float:left;width:93px;border: 0px solid;height:100%;">
+								<textarea id="HQF2" name="HQF2" style="width:100%;height:100%"></textarea>
+								</div>
+							</div>
+							<div style="float: left;width:186px;height:85px;">
+								<div id="G3" name="G3" class="left" style="background-color:cornflowerblue;float: left;border: 0px solid;width:93px;height:100%;">
+								<textarea id="" name="" style="width:100%;height:100%"></textarea>
+								</div>
+								<div id="F3" name="F3" class="right" style="background-color:blueviolet;float:left;width:93px;border: 0px solid;height:100%;">
+								<textarea id="HQF3" name="HQF3" style="width:100%;height:100%"></textarea>
+								</div>
+							</div>
+							<div style="float: left;width:186px;height:85px;">
+								<div id="" name="" class="left" style="float: left;border: 0px solid;width:93px;height:100%;"></div>
+								<div id="HQKB" name="HQKB" class="right" style="float:left;width:93px;border: 0px solid;height:100%;"></div>
+							</div>
+						</div>
+					</div>
+					<div id="secondtcol" style="float: left;width:452px;height:314px;">
+					<div style="float: left;width:93px;height:314px;border: 1px solid;">
+					<textarea id="HQE2" name="HQE2" style="width:100%;height:100%"></textarea>	
+					</div>
+					<div style="float: left;width:339px;height:314px;border: 0px solid;">
+					<div style="float: left;width:339px;height:104px;border: 0px solid;">
+					<div style="float: left;width:93px;height:100%;border: 1px solid;">
+					<textarea id="HQD2" name="HQD2" style="width:100%;height:100%"></textarea>		
+					</div>	
+					<div style="float: left;width:93px;height:100%;border: 1px solid;">
+					<textarea id="HQC2" name="HQC2" style="width:100%;height:100%"></textarea>	
+					</div>	
+					<div style="float: left;width:93px;height:100%;border: 1px solid;">
+					<textarea id="HQB2" name="HQB2" style="width:100%;height:100%"></textarea>		
+					</div>
+					<div style="float: left;width:50px;height:100%;border: 1px solid;">
+					<textarea id="HQA1" name="HQA1" style="width:100%;height:100%"></textarea>		
+					</div>
+					</div>	
+					<div style="float: left;width:339px;height:104px;border: 0px solid;">
+					<div style="float: left;width:93px;height:100%;border: 1px solid;">
+					<textarea id="HQD3" name="HQD3" style="width:100%;height:100%"></textarea>	
+					</div>	
+					<div style="float: left;width:93px;height:100%;border: 1px solid;">
+					<textarea id="HQC3" name="HQC3" style="width:100%;height:100%"></textarea>
+					</div>	
+					<div style="float: left;width:93px;height:100%;border: 1px solid;">
+					<textarea id="HQB3" name="HQB3" style="width:100%;height:100%"></textarea>
+					</div>	
+					<div style="float: left;width:50px;height:100%;border: 1px solid;">
+					<textarea id="HQA2" name="HQA2" style="width:100%;height:100%"></textarea>
+					</div>
+					</div>
+					<div style="float: left;width:339px;height:104px;border: 0px solid;">
+					<div style="float: left;width:93px;height:100%;border: 1px solid;">
+					<textarea id="HQD4" name="HQD4" style="width:100%;height:100%"></textarea>
+					</div>	
+					<div style="float: left;width:93px;height:100%;border: 1px solid;">
+					<textarea id="HQC4" name="HQC4" style="width:100%;height:100%"></textarea>	
+					</div>	
+					<div style="float: left;width:93px;height:100%;border: 1px solid;">
+					<textarea id="HQB4" name="HQB4" style="width:100%;height:100%"></textarea>	
+					</div>
+					<div style="float: left;width:50px;height:100%;border: 1px solid;">
+					<textarea id="HQXC" name="HQXC" style="width:100%;height:100%"></textarea>
+					</div>
+					</div>
+					</div>
+					</div>
+				</div>
+				<div id="thirdrow" style="float: left;width:824px;height:160px;">
+					<div class="one" style="float: left;width:100%;height:80px;">
+						<div style="float: left;border: 1px solid;width:140px;height:80px;">
+						<textarea id="I2" name="I2" style="width:100%;height:100%"></textarea>	
+						</div>
+						<div style="float: left;border: 1px solid;width:140px;height:80px;">
+						<textarea id="H2" name="H2" style="width:100%;height:100%"></textarea>	
+						</div>
+						<div style="float: left;border: 1px solid;width:182px;height:80px;">
+						<textarea id="HQCK" name="HQCK" style="width:100%;height:100%"></textarea>
+						</div>
+						<div style="float: left;border: 1px solid;width:93px;height:80px;">
+						<textarea id="HQD5" name="HQD5" style="width:100%;height:100%"></textarea>	
+						</div>
+						<div style="float: left;border: 1px solid;width:93px;height:80px;">
+						<textarea id="HQC5" name="HQC5" style="width:100%;height:100%"></textarea>	
+						</div>
+						<div style="float: left;border: 1px solid;width:52px;height:80px;">
+						<textarea id="HQB5" name="HQB5" style="width:100%;height:100%"></textarea>	
+						</div>
+					</div>
+					<div class="two" style="float: left;width:100%;height:80px;">
+						<div style="float: left;border: 1px solid;width:140px;height:80px;">
+						<textarea id="I3" name="I3" style="width:100%;height:100%"></textarea>	
+						</div>
+						<div style="float: left;border: 1px solid;width:140px;height:80px;">
+						<textarea id="H3" name="H3" style="width:100%;height:100%"></textarea>	
+						</div>
+						<div style="float: left;border: 1px solid;width:182px;height:80px;">
+						<textarea id="HQLJ" name="HQLJ" style="width:100%;height:100%"></textarea>
+						</div>
+						<div style="float: left;border: 1px solid;width:93px;height:80px;">
+						<textarea id="HQKN" name="HQCN" style="width:100%;height:100%"></textarea>	
+						</div>
+						<div style="float: left;border: 0px solid;width:93px;height:80px;">
+						<textarea id="HQCP" name="HQCP" style="width:100%;height:100%"></textarea>	
+						</div>
+						<div style="float: left;border: 0px solid;width:52px;height:80px;"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+</div>
+<script type="text/javascript" th:inline="javascript">
+	$(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    $('#tradeId[(${radi})]').combobox(HdUtils.code.scode({
+		    fieldCod : 'TRADE_ID'
+	    }, {
+		    required : false
+	    }));
+	    $("#query[(${radi})]").on("click", function() {
+	    	var date=$("#Dte[(${radi})]").datebox('getValue');
+	    	var tradeId = $("#tradeId[(${radi})]").combobox('getValue');
+	        //$("#contractDte[(${radi})]").datebox("getValue");
+	            //丰田各个厂区整体堆存数量
+		      HdUtils.ajax.post({
+		        url : "../webresources/login/cargo/PortCar/getFtDcqk?date=" + date,
+		        success : function(data) {
+ 		        	  $("#wcfsdg").val(data.wcfsdg);
+				        $("#wcfsns").val(data.wcfsns);
+				        $("#wcfssh").val(data.wcfssh);
+				        $("#wcdg").val(data.wcdg);
+				        $("#wcns").val(data.wcns);
+				        $("#wcsh").val(data.wcsh);
+				        $("#klldg").val(data.klldg);
+				        $("#kllns").val(data.kllns);
+				        $("#kllsh").val(data.kllsh);
+				        $("#hgdg").val(data.huanggdg);
+				        $("#hgns").val(data.huanggns);
+				        $("#hgsh").val(data.huanggsh);
+				        $("#rzdg").val(data.rzdg);
+				        $("#rzns").val(data.rzns);
+				        $("#rzsh").val(data.rzsh);
+				        $("#huagdg").val(data.hgdg);
+				        $("#huagns").val(data.hgns);
+				        $("#huagsh").val(data.hgsh);
+		        }
+		    })
+		    	    //丰田各个厂区及品牌集港数量
+		      HdUtils.ajax.post({
+		        url : "../webresources/login/cargo/PortCar/getFtJsg?date=" + date,
+		        success : function(data) {
+		        	$("#wcfsdgjg").val(data.wcfsdgjg);
+			        $("#wcfsnsjg").val(data.wcfsnsjg);
+			        $("#wcfshjg").val(data.wcfshjg);
+			        $("#wcdgjg").val(data.wcdgjg);
+			        $("#wcnsjg").val(data.wcnsjg);
+			        $("#wcshjg").val(data.wcshjg);
+			        $("#klldgjg").val(data.klldgjg);
+			        $("#kllnsjg").val(data.kllnsjg);
+			        $("#kllshjg").val(data.kllshjg);
+			        $("#hgdgjg").val(data.hgdgjg);
+			        $("#hgnsjg").val(data.hgnsjg);
+			        $("#hgshjg").val(data.hgshjg);
+			        $("#rzdgjg").val(data.rzdgjg);
+			        $("#rznsjg").val(data.rznsjg);
+			        $("#rzshjg").val(data.rzshjg);
+			        $("#huagdgjg").val(data.huagdgjg);
+			        $("#huagnsjg").val(data.huagnsjg);
+			        $("#huagshjg").val(data.huagshjg);
+		        }
+		    })
+		 
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/cargo/PortCar/getDetail?dockCod=03409000&date=" + date + "&tradeId=" + tradeId,
+		        success : function(data) {
+                    if(data.HQLJ!=undefined)
+			        $("#HQLJ").val("LJ:" + data.HQLJ);
+                    else $("#HQLJ").val("");
+                    if(data.HQCP!=undefined)
+			        $("#HQCP").val("CP:" + data.HQCP);
+                    else $("#HQCP").val("");
+                    if(data.HQXC!=undefined)
+			        $("#HQXC").val("XC:" + data.HQXC);
+                    else $("#HQXC").val("");
+                    if(data.HQA1!=undefined)
+			        $("#HQA1").val("A1:" + data.HQA1);
+                    else $("#HQA1").val("");
+                    if(data.HQA2!=undefined)
+			        $("#HQA2").val("A2:" + data.HQA2);
+                    else $("#HQA2").val("");
+                    if(data.HQB1!=undefined)
+			        $("#HQB1").val("B1:" + data.HQB1);
+                    else $("#HQB1").val("");
+                    if(data.HQB2!=undefined)
+			        $("#HQB2").val("B2:" + data.HQB2);
+                    else $("#HQB2").val("");
+                    if(data.HQB3!=undefined)
+			        $("#HQB3").val("B3:" + data.HQB3);
+                    else $("#HQB3").val("");
+                    if(data.HQB4!=undefined)
+			        $("#HQB4").val("B4:" + data.HQB4);
+                    else $("#HQB4").val("");
+                    if(data.HQC1!=undefined)
+			        $("#HQC1").val("C1:" + data.HQC1);
+                    else $("#HQC1").val("");
+                    if(data.HQC2!=undefined)
+			        $("#HQC2").val("C2:" + data.HQC2);
+                    else $("#HQC2").val("");
+                    if(data.HQCP!=undefined)
+			        $("#HQC3").val("C3:" + data.HQC3);
+                    else $("#HQC3").val("");
+                    if(data.HQC4!=undefined)
+			        $("#HQC4").val("C4:" + data.HQC4);
+                    else $("#HQC4").val("");
+                    if(data.HQC5!=undefined)
+			        $("#HQC5").val("C5:" + data.HQC5);
+                    else $("#HQC5").val("");
+                    if(data.HQD1!=undefined)
+			        $("#HQD1").val("D1:" + data.HQD1);
+                    else $("#HQD1").val("");
+                    if(data.HQD2!=undefined)
+			        $("#HQD2").val("D2:" + data.HQD2);
+                    else $("#HQD2").val("");
+                    if(data.HQD3!=undefined)
+			        $("#HQD3").val("D3:" + data.HQD3);
+                    else $("#HQD3").val("");
+                    if(data.HQD4!=undefined)
+			        $("#HQD4").val("D4:" + data.HQD4);
+                    else $("#HQD4").val("");
+                    if(data.HQD5!=undefined)
+			        $("#HQD5").val("D5:" + data.HQD5);
+                    else $("#HQD5").val("");
+                    if(data.HQE1!=undefined)
+			        $("#HQE1").val("E1:" + data.HQE1);
+                    else $("#HQE1").val("");
+                    if(data.HQE2!=undefined)
+			        $("#HQE2").val("E2:" + data.HQE2);
+                    else $("#HQE2").val("");
+                    if(data.HQF1!=undefined)
+			        $("#HQF1").val("F1:" + data.HQF1);
+                    else $("#HQF1").val("");
+                    if(data.HQF2!=undefined)
+			        $("#HQF2").val("F2:" + data.HQF2);
+                    else $("#HQF2").val("");
+                    if(data.HQF3!=undefined)
+			        $("#HQF3").val("F3:" + data.HQF3);
+                    else $("#HQF3").val("");
+                    if(data.HQCK!=undefined)
+			        $("#HQCK").val("CK:" + data.HQCK);
+                    else $("#HQCK").val("");
+                    if(data.HQKN!=undefined)
+			        $("#HQKN").val("KN:" + data.HQKN);
+                    else $("#HQKN").val("");
+                    if(data.HQKB!=undefined)
+			        $("#HQKB").val("KB:" + data.HQKB);
+                    else $("#HQKB").val("");
+
+		        }
+		    });
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/cargo/PortCar/getJsg?date=" + date,
+		        success : function(data) {
+			        $("#JSG").val("进出场情况:" + "\n" + data.JSG);
+		        }
+		    })
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/cargo/PortCar/getDuiChangDetail?date=" + date,
+		        success : function(data) {
+			        $("#DCDETAIL").val("堆场情况:" + "\n" + data.DCDETAIL);
+		        }
+		    })
+	
+	    });
+    })
+</script>
+</html>

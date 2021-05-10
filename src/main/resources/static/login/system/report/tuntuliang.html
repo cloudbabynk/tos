@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<body>
+<div style="float: left">
+		装卸船日期：<input th:id="shipworkTim+${radi}" name="shipworkTim" class="easyui-datebox"
+			style="width: 120px" /><a class="easyui-linkbutton"
+			th:id="report+${radi}">报表</a>
+</div>
+<iframe th:id="tuntuliang+${radi}" style="width:100%;height:100%;"> </iframe>	
+<script>
+	$(document).ready(function() {
+		   $("#report[(${radi})]").on("click", function() {
+		    	var shipworkTim=$("#shipworkTim[(${radi})]").datebox('getValue');
+		    	shipworkTim=new Date(shipworkTim).format('yyyy-MM');
+		    	var src='http://10.163.204.56:8090/show/?fileid=4b4cf40ac326493099d361dfc920d57d&rpttoken=333&shipworkTim='+shipworkTim;
+			    $("#tuntuliang[(${radi})]").attr('src',src);  	
+		   });
+    });
+</script>
+</body>
+</html>

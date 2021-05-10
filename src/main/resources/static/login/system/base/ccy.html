@@ -1,0 +1,24 @@
+
+<meta charset="UTF-8">
+<div class="easyui-layout" style="width: 100%; height: 100%;" data-options="fit:true"
+	id="shipdynamic256">
+	<div id="loadshiphtml1"
+		data-options="region:'north',split:true,title:'堆场-场',href:'../webresources/login/base/CCyArea/ccyarea.htm'"
+		style="width: 100%; height: 250px;"></div>
+	<div data-options="region:'center'" >
+		<div class="easyui-layout" data-options="fit:true">
+			<div id="loadshiphtml"
+				data-options="region:'center',fit:true,title:'堆场-行',href:'../webresources/login/base/CCyRow/ccyrow.htm'"
+				style="width: 100%; height: 100%;"></div>
+			<div id="singleshiphtml"
+				data-options="region:'east',split:true,title:'堆场-车位',href:'../webresources/login/base/CCyBay/ccybay.htm'"
+				style="width: 550px; height: 100%"></div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+HdUtils.dialog.setValue({
+	'cyAreaNo' : ""
+})
+</script>
+

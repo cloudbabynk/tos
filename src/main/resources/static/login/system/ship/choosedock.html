@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+</head>
+<body>
+
+	<form id="BillSplitForm1507959148710">
+		<table id="BillSplit1507959148710" style="height: 75%; width: 80%"
+			class="tableform">
+			<tr>
+				<td><input type="radio" name="dockCod" value="03406500">滚装</input>
+				 <input type="radio" name="dockCod"
+				value="03409000">环球</input></td>
+			</tr>
+		</table>
+	</form>
+	<script>
+		$(document).ready(function() {
+		var radi=HdUtils.dialog.getValue('radi');
+	    var shipNo = HdUtils.dialog.getValue('shipNo');
+	    var billspId = HdUtils.dialog.getValue('billspId');
+	    var dockCod= HdUtils.dialog.getValue('dockCod');
+	    if(dockCod=="03406500"){
+	    $("input[name='dockCod'][value=03406500]").attr("checked",true); 
+	    }else{
+	    $("input[name='dockCod'][value=03409000]").attr("checked",true); 	
+	    }
+	    $('input[type=radio][name=dockCod]').change(function() {
+	        if (this.value == '03406500') {
+	        	dockCod='03406500';
+	        }
+	        else if (this.value == '03409000') {
+	        	dockCod='03409000';
+	        }
+	    });
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+			    HdUtils.ajax.post({
+		        url : "../webresources/login/ship/BillSplit/upbillsplit?billspId=" + billspId+"&dockCod="+dockCod,
+		        success : function(data) {
+		        	HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight(data.message);
+			        $("#BillSplitDatagrid1508123301002"+radi).datagrid("hdReload");
+		        }
+		    });	
+	    }
+		})
+	</script>
+</body>
+</html>

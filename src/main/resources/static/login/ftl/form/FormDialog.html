@@ -1,0 +1,86 @@
+<meta charset="UTF-8">
+<style type="text/css">
+    .tableform{
+       margin: 16px auto;
+    }
+    .tableform tr{
+       height: 30px; 
+    } 
+    .tableform th{
+       text-align: right;
+       white-space: nowrap;
+    }
+    .tableform td{
+       text-align: left;
+       width: 80px; 
+    }
+    .tableform input{ 
+       text-align: left;
+    }
+ </style>
+ <script>
+   $(document).ready(function() {
+     var formObject=$("#${prefix}Form${stuffix}");
+     var dataObject=HdUtils.dialog.getValue("data");
+     var dg=HdUtils.dialog.getValue("dataGrid");
+        formObject.form("loadData",dataObject);
+        HdUtils.dialog.setValue({saveHandler: saveHandler});
+        	
+        	
+        function saveHandler() {
+        <#assign iSum=0>
+        <#assign colNum="${colNum}">
+        <#assign colNum2=colNum?number>
+
+        var formdata = formObject.serializeObject();
+    	HdUtils.ajax.post({
+            url: "${dgUrl}/saveone",
+            data:formdata, 
+            success: function (data) {               
+            	if (data.key == '-1') {
+					HdUtils.messager.info(data.message);
+					return false;
+				}
+            	HdUtils.dialog.close();
+				HdUtils.messager.bottomRight('保存成功', '保存操作');
+				 $("#authUserDatagrid").datagrid("hdReload");
+            }
+        });
+    }});
+     });
+</script>
+    <form id="${prefix}Form${stuffix}">
+    <table id="${prefix}Table${stuffix}" style="height:75%;width:80%" class="tableform">         
+        <#assign iSum=0>
+        <#assign colNum="${colNum}">
+        <#assign colNum2=colNum?number>
+        <#list dgColumns as col>
+        <#if iSum=0>
+        <tr>
+            <#elseif iSum%colNum2=0> 
+        </tr>
+        <tr> 
+            </#if> 
+            <th>
+                    <#if "${col.nullable?string('true','false')}"== 'true'>
+    ${col.comments}：
+    <#else>
+    <font color="red">${col.comments}：</font>
+    </#if>
+            </th>
+            <td><input id="${col.columnName}" name="${col.columnName}">
+                       <#if "${col.nullable?string('true','false')}"== 'true'>
+                       data-options="required:false"
+                       <#else>
+                       data-options="required:true"
+                       </#if>
+                       <#if "${col.dataType}"=="datetime"||"${col.dataType}"=="timestamp"> class="easyui-datetimebox" 
+                       <#elseif "${col.dataType}"=="NUMBER">  class="easyui-numberbox"  
+                       <#else> class="easyui-validatebox" maxlength="${col.dataLength}"
+                       </#if>
+                      /> </td>
+            <#assign iSum=iSum+1>
+            </#list>
+        </tr>
+    </table>
+    </form>

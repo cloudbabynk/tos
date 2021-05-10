@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<div th:id="slp+${radi}" class="easyui-layout"
+	style="width: 100%; height: 100%;">
+	<div
+		data-options="region:'west',split:true,tools:reload5439,title:'船期状态'"
+		style="width: 280px; padding: 10px;">
+		<input class="easyui-searchbox"
+			data-options="searcher:searchShip,prompt:'搜索船舶'"
+			th:id="searchText+${radi}" style="width: 200px; height: 20px;"
+			name="search"></input>
+		<ul th:id="ShipStatusTree123+${radi}"></ul>
+	</div>
+	<div data-options="region:'center'" style="height: 100%; width: 100%">
+		<!-- 工具栏 -->
+		<div th:id="ShipLoadPlanToolBar1508123301025+${radi}"
+			style="float: left">
+			<!-- 查询 -->
+			<span> 船名：<input th:id="cShipNam+${radi}" name="cShipNam"
+				type="text" style="width: 80px" /> 航次：<input th:id="voyage+${radi}"
+				name="voyage" type="text" style="width: 80px" /> <!-- 				<a class="easyui-linkbutton" th:id="chooseBill+${radi}">选 舱单</a> -->
+				<a class="easyui-linkbutton" th:id="chooseArea+${radi}">选场地</a> <shiro:hasPermission
+					name="webresources:login:ShipLoadPlan:save">
+					<a class="easyui-linkbutton" th:id='save+${radi}'>保存</a>
+				</shiro:hasPermission> <shiro:hasPermission name="webresources:login:ShipLoadPlan:delete">
+					<a class="easyui-linkbutton" th:id='delete+${radi}'>删除</a>
+				</shiro:hasPermission> <a class="easyui-linkbutton" th:id='fresh+${radi}'>刷新</a> <shiro:hasPermission
+					name="webresources:login:ShipLoadPlan:export">
+					<a class="easyui-linkbutton" iconCls="icon-export" plain="false"
+						th:id="export+${radi}">导出Excel</a>
+				</shiro:hasPermission> <!-- 				<shiro:hasPermission name="webresources:login:ShipLoadPlan:import"> -->
+				<!-- 					<a class="easyui-linkbutton" th:id='import+${radi}'>导入Excel</a> -->
+				<!-- 				</shiro:hasPermission> --> <shiro:hasPermission
+					name="webresources:login:ShipLoadPlan:impShipLoadPlan">
+					<a class="easyui-linkbutton" th:id='impShipLoadPlan+${radi}'>导入Excel</a>
+				</shiro:hasPermission>
+				<div th:id="containerServiceDialog201704271605"
+					class="easyui-dialog" data-options="closed:true">
+					<form th:id="uploadForm20171108" name="fileForm" method="POST"
+						enctype="multipart/form-data"
+						action="/webresources/login/ship/ShipLoadPlan/impShipLoadPlan"
+						+ target="message">
+						<table align="center">
+							<tr>
+								<td colspan="2"><input type="file" name="file"
+									id="fileNam20171108" style="width: 210px;" /></td>
+								<td><input id="shipNo" name="shipNo" hidden="true" /> <!-- 				               <input th:id="cntrTyp1217" name="cntrTyp" hidden="true" /> -->
+									<!-- 				               <input th:id="cntrSiz1217" name="cntrSiz" hidden="true" /> -->
+									<!-- 				               <input th:id="cntrBelong1217" name="cntrBelong" hidden="true" /> -->
+									<!-- 				               <input th:id="cntrTypNam1217" name="cntrTypNam" hidden="true" /> -->
+									<!-- 				               <input th:id="cntrSizNam1217" name="cntrSizNam" hidden="true" /> -->
+									<!-- 				               <input th:id="cntrBelongNam1217" name="cntrBelongNam" hidden="true" /> -->
+									<!-- 				               <input th:id="address1217" name="address" hidden="true" /> -->
+									<!--                            </td> -->
+							</tr>
+							<tr>
+								<td><input type="submit" value="导入" /></td>
+							</tr>
+							<iframe name="message" style="display: none"></iframe>
+						</table>
+					</form>
+				</div> 
+				<shiro:hasPermission
+					name="webresources:login:ShipLoadPlan:impShipLoadPlanWL">
+					<a class="easyui-linkbutton" th:id='impShipLoadPlanWL+${radi}'>华伦Excel</a>
+				</shiro:hasPermission>
+				<div th:id="containerServiceDialog201704271638"
+					class="easyui-dialog" data-options="closed:true">
+					<form th:id="uploadForm2017110838" name="fileForm" method="POST"
+						enctype="multipart/form-data"
+						action="/webresources/login/ship/ShipLoadPlan/impShipLoadPlanWL"
+						+ target="message">
+						<table align="center">
+							<tr>
+								<td colspan="2"><input type="file" name="file"
+									id="fileNam20171108" style="width: 210px;" /></td>
+								<td><input id="shipNo123" name="shipNo123" hidden="true" /> </td>
+							</tr>
+							<tr>
+								<td><input type="submit" value="导入" /></td>
+							</tr>
+							<iframe name="message" style="display: none"></iframe>
+						</table>
+					</form>
+				</div>
+				
+					<shiro:hasPermission
+					name="webresources:login:ShipLoadPlan:impShipLoadPlanEUKOU">
+					<a class="easyui-linkbutton" th:id='impShipLoadPlanEUKOU+${radi}'>EUKOUExcel</a>
+				</shiro:hasPermission>
+				<div th:id="containerServiceDialog201704271639"
+					class="easyui-dialog" data-options="closed:true">
+					<form th:id="uploadForm2017110839" name="fileForm" method="POST"
+						enctype="multipart/form-data"
+						action="/webresources/login/ship/ShipLoadPlan/impShipLoadPlanEUKOU"
+						+ target="message">
+						<table align="center">
+							<tr>
+								<td colspan="2"><input type="file" name="file"
+									id="fileNam20171108" style="width: 210px;" /></td>
+								<td><input id="shipNo456" name="shipNo456" hidden="true" /> </td>
+							</tr>
+							<tr>
+								<td><input type="submit" value="导入" /></td>
+							</tr>
+							<iframe name="message" style="display: none"></iframe>
+						</table>
+					</form>
+				</div>
+				
+				<a class="easyui-linkbutton" th:id='genWorkQueue+${radi}'>生成装船队列</a>
+				<input th:id="shipNo+${radi}" name="shipNo" type="text"
+				hidden="true"></input>
+			</span>
+		</div>
+		<!-- Datagrid -->
+		<table th:id="ShipLoadPlanDatagrid1508123301025+${radi}"
+			style="height: 100% ；weight:90%;"></table>
+	</div>
+</div>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	var reload5439 = [ {
+        iconCls : 'icon-reload',
+        handler : function() {
+	        $('#ShipStatusTree123[(${radi})]').tree('reload');
+        }
+    } ];
+    var searchShip = function() {
+	    var parentNode = $('#ShipStatusTree123[(${radi})]').tree('getRoots'); //得到tree顶级node  
+	    var searchCon = $("input[name='search']").val();
+	    /* alert("parentNode="+parentNode); 
+	    alert("searchCon="+searchCon); */
+	    var children;
+	    for (var i = 0; i < parentNode.length; i++) { //循环顶级 node   
+		    children = $('#ShipStatusTree123[(${radi})]').tree('getChildren', parentNode[i].target);//获取顶级node下所有子节点   
+		    if (children) { //如果有子节点   
+			    for (var j = 0; j < children.length; j++) { //循环所有子节点   
+				    //if($('#ul_tree_dept').tree('isLeaf',children[j].target)){ //判断子级是否为叶子节点,即不是父节点   
+				    if (children[j].text.indexOf(searchCon) >= 0 || children[j].id.indexOf(searchCon) >= 0) { //判断节点text是否包含搜索文本                       
+					    expandParent(children[j]); //设置此节点所有父级展开   
+					    selectNode(children[j]); //设置此节点为选择状态   
+
+					    return;
+				    }
+				    //}   
+			    }
+		    } else {
+			    if (parentNode[i].text.indexOf(searchCon) || children[j].id.indexOf(searchCon) >= 0 >= 0) {
+				    expandParent(parentNode[i]);
+				    selectNode(parentNode[i]);
+				    return;
+			    }
+		    }
+	    }
+    }
+    function selectNode(node) {
+	    $('#ShipStatusTree123[(${radi})]').tree('select', node.target);
+	    $('#ShipStatusTree123[(${radi})]').tree('scrollTo', node.target);
+    };
+
+    function expandParent(node) {
+	    var parent = node;
+	    var t = true;
+	    do {
+		    parent = $('#ShipStatusTree123[(${radi})]').tree('getParent', parent.target); //获取此节点父节点   
+		    if (parent) { //如果存在   
+			    t = true;
+			    $('#ShipStatusTree123[(${radi})]').tree('expand', parent.target);
+		    } else {
+			    t = false;
+		    }
+	    } while (t);
+    };
+    $(document).ready(function() {
+	    var shipNo;
+	    var voyage;
+	    var shipNam;
+	    var recNam;
+	    var dockCod;
+	    $.get('/login/PrivilegeController/getLoginAccount?t=11&s=' + Math.random(), function(data) {
+		    recNam = data.name;
+	    })
+	    var groupShipNo;
+	    var radi = /*[[${radi}]]*/'';
+	    $('#ShipStatusTree123[(${radi})]').tree({
+	        method : "get",
+	        url : "../webresources/login/ship/ShipLoadPlan/gentreeslp",
+	        onClick : treeclick
+	    });
+	    function treeclick(node) {
+		    shipNo = node.id;
+		    shipNam = node.obj.cShipNam;
+		    evoyage =  node.obj.evoyage;
+		    dockCod =node.obj.dockCod;
+		    $("#cShipNam[(${radi})]").val(shipNam);
+		    $("#voyage[(${radi})]").val(evoyage);
+		    $("#ShipLoadPlanDatagrid1508123301025[(${radi})]").datagrid({
+	            queryParams : query(),
+            });
+	    }
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    var shipNam = $("#shipNam[(${radi})]").val();
+		    var evoyage = $("#voyage[(${radi})]").val();
+		    onlinquery.add("shipNam", shipNam);
+		    onlinquery.add("evoyage", evoyage);
+		    onlinquery.add("shipNo", shipNo);
+		    return onlinquery.build();
+	    }
+	    var dg = $("#ShipLoadPlanDatagrid1508123301025[(${radi})]");
+	    $.parser.parse($('#ShipLoadPlanToolBar1508123301025[(${radi})]'));
+	    // buttons
+	    //选船
+	    $("#chooseShip[(${radi})]").on("click", function() {
+		    HdUtils.selShip(callback);
+	    });
+	    function callback(data) {
+		    $("#cShipNam[(${radi})]").val(data.cShipNam);
+		    $("#voyage[(${radi})]").val(data.ivoyage + '/' + data.evoyage);
+		    $("#tradeId[(${radi})]").val(data.tradeId);
+		    $("#shipNo[(${radi})]").val(data.shipNo);
+		    shipNo = $("#shipNo[(${radi})]").val();
+		    $("#dockCod").val(data.dockCod);
+		    $("#cShipNam[(${radi})]").val(data.cShipNam);
+		    $("#voyage[(${radi})]").val(data.evoyage);
+		    $("#dockCod[(${radi})]").val(data.dockCod);
+
+		    $("#ShipLoadPlanDatagrid1508123301025[(${radi})]").datagrid({
+			    queryParams : query()
+		    });
+	    }
+	    //舱单
+// 	    $("#chooseBill[(${radi})]").bind("click", function() {
+// 		    if ($("#cShipNam[(${radi})]").val() != null && $("#cShipNam[(${radi})]").val() != '') {
+// 			    HdUtils.selBill(callback1, shipNo);
+// 		    } else {
+// 			    HdUtils.messager.info('请先选择船！');
+// 		    }
+// 	    });
+	    function callback1(data) {
+		    $("#billNo").val(data.billNo);
+		    $("#consignCod").val(data.consignCod);
+		    $("#consignNam").val(data.consignNam);
+		    $("#iEId").val(data.iEId);
+		    $("#tradeId").val(data.tradeId);
+		    $("#brandCod").val(data.brandCod);
+		    $("#carKind").val("01");
+		    $("#carTyp").val(data.carTyp);
+		    $("#loadPortCod").val(data.loadPortCod);
+		    $("#tranPortCod").val(data.tranPortCod);
+		    $("#discPortCod").val(data.discPortCod);
+		    $("#weights").val(data.weights);
+		    $("#volumes").val(data.volumes);
+		    $("#length").val(data.length);
+		    $("#width").val(data.width);
+		    $("#height").val(data.height);
+		    $("#carNum").val(data.carNum);
+	    }
+	    //场地车
+	    $("#chooseArea[(${radi})]").bind("click", function() {
+		    if ($("#cShipNam[(${radi})]").val() != null && $("#cShipNam[(${radi})]").val() != '') {
+			    HdUtils.selPortCarZ(callback2, shipNo);
+		    } else {
+			    HdUtils.messager.info('请先选择船！');
+		    }
+	    });
+	    Date.prototype.Format = function (fmt) { //author: meizz 
+	        var o = {
+	            "M+": this.getMonth() + 1, //月份 
+	            "d+": this.getDate(), //日 
+	            "h+": this.getHours(), //小时 
+	            "m+": this.getMinutes(), //分 
+	            "s+": this.getSeconds(), //秒 
+	            "q+": Math.floor((this.getMonth() + 3) / 3), //季度 
+	            "S": this.getMilliseconds() //毫秒 
+	        };
+	        if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+	        for (var k in o)
+	        if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+	        return fmt;
+	    }
+	    function callback2(data) {
+            var uuid=guid();
+            var recTim=(new Date()).Format("yyyy-MM-dd hh:mm:ss");
+		    var formdata = {"shipNo":shipNo,"planNo":uuid,"consignCod":data.consignCod,"consignNam":data.consignNam,
+		    	"shipNam":$("#cShipNam[(${radi})]").val(),"voyage": $("#voyage[(${radi})]").val(),"iEId":data.iEId,"billNo":data.billNo,"tradeId":data.tradeId,"brandCod":data.brandCod,
+		    	"carTyp":data.carTyp,"carKind":data.carKind,"loadPortCod":"","tranPortCod":data.tranPortCod,"discPortCod":data.discPortCod,
+		    	"weights":data.weights,"volumes":data.volumes,"length":data.length,"width":data.width,"height":data.height,"carNum":data.pieces,"plac":data.cyAreaNo,
+		    	"dockCod":dockCod,"workSeqNo":"","remarks":"","recNam":recNam,"recTim":recTim,"updNam":recNam,"updTim":"","tele":""};
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/ship/ShipLoadPlan/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#ShipLoadPlanDatagrid1508123301025[(${radi})]").datagrid("hdReload");
+		        }
+		    })
+	    }
+	    // Generate four random hex digits.  
+	    function S4() {
+		    return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+	    }
+	    ;
+	    // Generate a pseudo-GUID by concatenating random hexadecimal.  
+	    function guid() {
+		    return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
+	    }
+	    ;
+	        // 保存。
+	        $("#save[(${radi})]").on("click", function() {
+		        dg.datagrid("hdSave", {
+			        url : "../webresources/login/ship/ShipLoadPlan/save"
+		        });
+	        });
+	    function addoredit(planNo) {
+		    HdUtils.dialog.setValue({
+			    'planNo' : planNo
+		    });
+		    HdUtils.dialog.setValue({
+			    'radi' : radi
+		    });
+		    HdUtils.dialog.show({
+		        width : 800,
+		        height : 180,
+		        title : '装船计划信息',
+		        href : "../login/system/ship/shiploadplanform.html",
+		        isSaveHandler : true
+		    });
+	    }
+	    // 删除。
+	    $("#delete[(${radi})]").on("click", function() {
+		    var selRow = $("#ShipLoadPlanDatagrid1508123301025[(${radi})]").datagrid("getChecked");
+		    if (selRow.length == 0) {
+			    HdUtils.messager.info('请至少选择一条数据！');
+			    return false;
+		    }
+		    var ids = '';
+		    $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+			    if (r) {
+				    for (var i = 0; i < selRow.length; i++) {
+					    ids += selRow[i].planNo + ",";
+				    }
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/ship/ShipLoadPlan/removeAll?planNos=" + ids,
+				        success : function(data) {
+					        HdUtils.messager.bottomRight(data.message);
+					        $("#ShipLoadPlanDatagrid1508123301025[(${radi})]").datagrid("hdReload");
+				        }
+				    });
+			    }
+		    });
+	    });
+	    //打印
+	    $("#export[(${radi})]").on("click", function() {
+		    dg.datagrid("hdExportExcel", {
+		        url : dg.datagrid('options').url = "../webresources/login/ship/ShipLoadPlan/exportExcel",
+		        exportFileName : "装船计划-" + new Date().format("yyyyMMddhhmmss")
+		    });
+	    });
+	    // 上传导入EXCEL
+	    $("#import[(${radi})]").on("click", function() {
+	    	var entityid=shipNo+$("#voyage[(${radi})]").val();
+	    	HdUtils.slpupload({
+	    		entityName : 'ShipLoadPlan',
+	            entityId : entityid,
+	    		mutiple : false,
+	            isReadOnly : false
+	        });
+	    });
+	    
+	      //华伦船公司装船计划
+	    $("#impShipLoadPlanWL[(${radi})]").on("click", function() {
+		    if(shipNo==null||shipNo==undefined){
+		    return false ;
+		    }
+		    $("#shipNo123").val(shipNo);	
+			$("#containerServiceDialog201704271638").dialog({
+	  			title:'导入',      			
+	  			closed:false,
+	  			width:300,
+	  			height:130,
+	  			buttons:[{
+	  				text:'关闭',
+	  				handler:function(){
+	  				      $("#containerServiceDialog201704271638").dialog({closed:true});
+	  			    }
+	  			}]
+	  		}); 
+			
+		    });
+		    //文件上传成功后的回掉函数
+		   	 $("#uploadForm2017110838").form({
+		   		 success:function(data){
+		   		  var data = eval("(" + data + ")");
+		   		  if (data.code=="-1") {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        } 
+		   		  if(data.code=="1"){
+		   			  HdUtils.messager.info(data.message);
+		   			  $("#containerServiceDialog201704271638").dialog({closed:true});
+		   			  $("#ShipLoadPlanDatagrid1508123301025[(${radi})]").datagrid("hdReload");
+				        return true;  
+		   		  }
+		   		 }
+		   	 });
+		     //EUKOU  船公司装船计划
+			    $("#impShipLoadPlanEUKOU[(${radi})]").on("click", function() {
+				    if(shipNo==null||shipNo==undefined){
+				    return false ;
+				    }
+				    $("#shipNo456").val(shipNo);	
+					$("#containerServiceDialog201704271639").dialog({
+			  			title:'导入',      			
+			  			closed:false,
+			  			width:300,
+			  			height:130,
+			  			buttons:[{
+			  				text:'关闭',
+			  				handler:function(){
+			  				      $("#containerServiceDialog201704271639").dialog({closed:true});
+			  			    }
+			  			}]
+			  		}); 
+					
+				    });
+				    //文件上传成功后的回掉函数
+				   	 $("#uploadForm2017110839").form({
+				   		 success:function(data){
+				   		  var data = eval("(" + data + ")");
+				   		  if (data.code=="-1") {
+						        HdUtils.messager.info(data.message);
+						        return false;
+					        } 
+				   		  if(data.code=="1"){
+				   			  HdUtils.messager.info(data.message);
+				   			  $("#containerServiceDialog201704271639").dialog({closed:true});
+				   			  $("#ShipLoadPlanDatagrid1508123301025[(${radi})]").datagrid("hdReload");
+						        return true;  
+				   		  }
+				   		 }
+				   	 });
+	    
+	    
+	    
+	    $("#impShipLoadPlan[(${radi})]").on("click", function() {
+	    if(shipNo==null||shipNo==undefined){
+	    return false ;
+	    }
+	    $("#shipNo").val(shipNo);	
+		$("#containerServiceDialog201704271605").dialog({
+  			title:'导入',      			
+  			closed:false,
+  			width:300,
+  			height:130,
+  			buttons:[{
+  				text:'关闭',
+  				handler:function(){
+  				      $("#containerServiceDialog201704271605").dialog({closed:true});
+  			    }
+  			}]
+  		}); 
+		
+	    });
+	    //文件上传成功后的回掉函数
+	   	 $("#uploadForm20171108").form({
+	   		 success:function(data){
+	   		  var data = eval("(" + data + ")");
+	   		  if (data.code=="-1") {
+			        HdUtils.messager.info(data.message);
+			        return false;
+		        } 
+	   		 }
+	   	 });
+	    //生成装船队列
+	    $("#genWorkQueue[(${radi})]").on("click", function() {
+	    	var dataRow = dg.datagrid("getChecked");
+	        if (dataRow.length == 0) {
+			 HdUtils.messager.info('请至少选择一条数据！');
+			 return false;
+			 }
+			 var planNos = "";
+			    for (var i = 0; i < dataRow.length; i++) {
+			    planNos += dataRow[i].planNo + ",";
+			    }
+			    HdUtils.ajax.post({
+			        url : "../webresources/login/ship/ShipLoadPlan/genWorkQueue?planNos=" + planNos,
+			        success : function(data) {
+				        HdUtils.messager.bottomRight(data.message);
+				        $("#ShipLoadPlanDatagrid1508123301025[(${radi})]").datagrid("hdReload");
+			        }
+			    });
+	    });
+
+	    $("#ShipLoadPlanDatagrid1508123301025[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/ship/ShipLoadPlan/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : false,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#ShipLoadPlanToolBar1508123301025" + /*[[${radi}]]*/'',
+	        fit : true,
+	        onDblClickRow : function(rowIndex, rowData) {
+		    var data = dg.datagrid("getSelected");
+		    dg.datagrid("hdEdit");
+	        },
+	        fitColumns : true,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+
+	        }, {
+
+	            field : "planNo",
+	            title : '计划号',
+	            multiSort : true,
+	            halign : "center",
+	            hidden : true,
+	            // 	            editor : {
+	            // 	                type : "validatebox",
+	            // 	                options : {
+	            // 		                required : false
+	            // 	                }
+	            // 	            },
+	            sortable : false
+	        }, {
+
+	            field : "shipNo",
+	            title : '船舶编号',
+	            multiSort : true,
+	            halign : "center",
+	            hidden : true,
+	            // 	            editor : {
+	            // 	                type : "validatebox",
+	            // 	                options : {
+	            // 		                required : false
+	            // 	                }
+	            // 	            },
+	            sortable : false
+	        }, {
+
+	            field : "consignNam",
+	            title : '货代',
+	            multiSort : true,
+	            halign : "center",
+	            // 	            editor : {
+	            // 	                type : "validatebox",
+	            // 	                options : {
+	            // 		                required : false
+	            // 	                }
+	            // 	            },
+	            sortable : false
+	        }, {
+	            field : "billNo",
+	            title : "提单号",
+	            multiSort : true,
+	            halign : "center",
+	            // 	            editor : {
+	            // 	                type : "validatebox",
+	            // 	                options : {
+	            // 		                required : false
+	            // 	                }
+	            // 	            },
+	            sortable : false
+	        }, {
+
+	            field : "carKindNam",
+	            title : "车类",
+	            multiSort : true,
+	            halign : "center",
+	            // 	            editor : {
+	            // 	                type : "validatebox",
+	            // 	                options : {
+	            // 		                required : false
+	            // 	                }
+	            // 	            },
+	            sortable : false
+	        }, {
+
+	            field : "carTypNam",
+	            title : "车型",
+	            multiSort : true,
+	            halign : "center",
+	            // 	            editor : {
+	            // 	                type : "validatebox",
+	            // 	                options : {
+	            // 		                required : false
+	            // 	                }
+	            // 	            },
+	            sortable : false
+	        }, {
+
+	            field : "loadPortNam",
+	            title : "装货港",
+	            multiSort : true,
+	            halign : "center",
+	            // 	            editor : {
+	            // 	                type : "validatebox",
+	            // 	                options : {
+	            // 		                required : false
+	            // 	                }
+	            // 	            },
+	            sortable : false
+	        }, {
+
+	            field : "tranPortNam",
+	            title : "卸货港",
+	            multiSort : true,
+	            halign : "center",
+	            // 	            editor : {
+	            // 	                type : "validatebox",
+	            // 	                options : {
+	            // 		                required : false
+	            // 	                }
+	            // 	            },
+	            sortable : false
+	        }, {
+
+	            field : "discPortNam",
+	            title : "目的港",
+	            multiSort : true,
+	            halign : "center",
+	            // 	            editor : {
+	            // 	                type : "validatebox",
+	            // 	                options : {
+	            // 		                required : false
+	            // 	                }
+	            // 	            },
+	            sortable : false
+	        }, {
+
+	            field : "workSeqNo",
+	            title : "作业顺序",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : true
+	        }, {
+
+	            field : "length",
+	            title : "长(M)",
+	            multiSort : true,
+	            halign : "center",
+	            	            editor : {
+	            	                type : "validatebox",
+	            	                options : {
+	            		                required : false
+	            	                }
+	            	            },
+	            sortable : false
+	        }, {
+
+	            field : "width",
+	            title : "宽(M)",
+	            multiSort : true,
+	            halign : "center",
+	            	            editor : {
+	            	                type : "validatebox",
+	            	                options : {
+	            		                required : false
+	            	                }
+	            	            },
+	            sortable : false
+	        }, {
+
+	            field : "height",
+	            title : "高(M)",
+	            multiSort : true,
+	            halign : "center",
+	            	            editor : {
+	            	                type : "validatebox",
+	            	                options : {
+	            		                required : false
+	            	                }
+	            	            },
+	            sortable : false
+	        }
+
+	        , {
+
+	            field : "carNum",
+	            title : "车数",
+	            multiSort : true,
+	            halign : "center",
+	            	            editor : {
+	            	                type : "validatebox",
+	            	                options : {
+	            		                required : false
+	            	                }
+	            	            },
+	            sortable : false
+	        }, {
+
+	            field : "weights",
+	            title : "车重(Kg)",
+	            multiSort : true,
+	            halign : "center",
+	            	            editor : {
+	            	                type : "validatebox",
+	            	                options : {
+	            		                required : false
+	            	                }
+	            	            },
+	            sortable : false
+	        }, {
+
+	            field : "volumes",
+	            title : "体积",
+	            multiSort : true,
+	            halign : "center",
+	            // 	            editor : {
+	            // 	                type : "validatebox",
+	            // 	                options : {
+	            // 		                required : false
+	            // 	                }
+	            // 	            },
+	            sortable : false
+	        }, {
+
+	            field : "plac",
+	            title : "出货位置",
+	            hidden:true,
+	            multiSort : true,
+	            halign : "center",
+	            // 	            editor : {
+	            // 	                type : "validatebox",
+	            // 	                options : {
+	            // 		                required : false
+	            // 	                }
+	            // 	            },
+	            sortable : false
+	        }, {
+
+	            field : "cyAreaNam",
+	            title : "出货位置",
+	            multiSort : true,
+	            halign : "center",
+	            // 	            editor : {
+	            // 	                type : "validatebox",
+	            // 	                options : {
+	            // 		                required : false
+	            // 	                }
+	            // 	            },
+	            sortable : false
+	        }, {
+
+	            field : "dockNam",
+	            title : "作业码头",
+	            multiSort : true,
+	            halign : "center",
+	            // 	            editor : {
+	            // 	                type : "validatebox",
+	            // 	                options : {
+	            // 		                required : false
+	            // 	                }
+	            // 	            },
+	            sortable : false
+	        }, {
+
+	            field : "remarks",
+	            title : "备注",
+	            multiSort : true,
+	            halign : "center",
+	            // 	            editor : {
+	            // 	                type : "validatebox",
+	            // 	                options : {
+	            // 		                required : false
+	            // 	                }
+	            // 	            },
+	            sortable : false
+	        }, {
+
+	            field : "recNam",
+	            title : '<font color="red">录入员</font>',
+	            multiSort : true,
+	            halign : "center",
+	            hidden : true,
+	            // 	            editor : {
+	            // 	                type : "validatebox",
+	            // 	                options : {
+	            // 		                required : true
+	            // 	                }
+	            // 	            },
+	            sortable : false
+	        }, {
+
+	            field : "recTim",
+	            title : '<font color="red">录入时间</font>',
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.date,
+	            width : 120,
+	            hidden : true,
+	            // 	            editor : {
+	            // 	                type : "datetimebox",
+	            // 	                options : {
+	            // 		                required : true
+	            // 	                }
+	            // 	            },
+	            sortable : false
+	        }, {
+
+	            field : "updNam",
+	            title : '<font color="red">修改人</font>',
+	            multiSort : true,
+	            halign : "center",
+	            hidden : true,
+	            // 	            editor : {
+	            // 	                type : "validatebox",
+	            // 	                options : {
+	            // 		                required : true
+	            // 	                }
+	            // 	            },
+	            sortable : false
+	        }, {
+
+	            field : "updTim",
+	            title : '<font color="red">修改时间</font>',
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.date,
+	            width : 120,
+	            hidden : true,
+	            // 	            editor : {
+	            // 	                type : "datetimebox",
+	            // 	                options : {
+	            // 		                required : true
+	            // 	                }
+	            // 	            },
+	            sortable : false
+	        }
+
+	        ] ]
+	    });
+	    $("#ShipLoadPlanDatagrid1508123301025" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+</script>
+</html>

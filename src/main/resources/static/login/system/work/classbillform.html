@@ -1,0 +1,231 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#BillCarForm15079591491234534555");
+	    var classbillNo = HdUtils.dialog.getValue("classbillNo");
+	    var workDte = HdUtils.dialog.getValue("workDte");
+	    var workRunCod = HdUtils.dialog.getValue("workRunCod");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    var shipNo = HdUtils.dialog.getValue("shipNo");
+	    
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/work/ClassBill/findone?classbillNo=" + classbillNo,
+	        success : function(data) {
+		        $("#BillCarForm15079591491234534555").form("loadData", data);
+		        if (!classbillNo) {
+			        $("#workDte").datebox("setValue", workDte);
+			        $("#workRunCod").combobox('setValue', workRunCod);
+			        $("#shipNo").val(shipNo);
+		        }
+	        }
+	    })
+	    $('#workRunCod').combobox({
+	        url : '../webresources/login/damage/MDeliveryRecord/getClassRunDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 'auto',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    //工班票类型
+	    $('#billTyp').combobox(HdUtils.code.scode({
+		    fieldCod : 'WORK_TYP'
+	    }, {
+		    required : true
+	    }));
+	    //进出口
+	    $('#iEId').combobox(HdUtils.code.scode({
+		    fieldCod : 'I_E_ID'
+	    }, {
+		    required : true
+	    }));
+	    //车级
+	    $('#carLevel').combobox(HdUtils.code.scode({
+		    fieldCod : 'CAR_LEVEL'
+	    }, {
+		    required : false
+	    }));
+	    $('#cyAreas').combobox({
+	        url : '../webresources/login/base/CCyArea/getCCyAreaDrop?shipNo=' + shipNo,
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight:'200',
+	        onSelect : function(rec) {
+	        	return rec.value;
+	        }
+	    });
+	    $('#brand').combobox({
+	        url : '../webresources/login/ship/BillCar/getCBrandDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight:120,
+	        required : false,
+	        onSelect : function(rec) {
+	        	return rec.value;
+	        }
+	    });
+	    $('#tallierNam').combobox({
+	        url : '../webresources/login/base/CEmployee/getCEmployee',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight:120,
+	        required : false,
+	        onSelect : function(rec) {
+	        	return rec.value;
+	        }
+	    });
+	    $('#driverClass').combobox({
+	        url : '../webresources/login/base/CWorkClass/getCWorkClass',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight:120,
+	        required : true,
+	        onSelect : function(rec) {
+	        	return rec.value;
+	        }
+	    });
+	    $('#carKind').combobox({
+	        url : '../webresources/login/contract/ContractIeDoc/getCCarKind',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 100,
+	        required : 'true',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $('#carTyp').combobox({
+	        url : '../webresources/login/ship/BillCar/getCCarTypDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight:120,
+	        required : true,
+	        onSelect : function(rec) {
+	        	HdUtils.ajax.post({
+	    	        url : "../webresources/login/base/CCarTyp/findone?carTyp="+ rec.value,
+	    	        success : function(data) {
+	    		        if (!data) {
+	    			        return false;
+	    		        }
+	    		        //页面刷新有些值不变
+	    		        $('#brand').combobox('setValue', data.brandCod);
+	    		        $('#carKind').combobox('setValue', data.carKind);
+	    		        $('#carLevel').combobox('setValue', data.carLevel);
+	    	        }
+	    	    });
+	        	return rec.value;
+	        }
+	    });
+	    
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+		    var isValss = $("#BillCarForm15079591491234534555").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#BillCarForm15079591491234534555").serializeObject();
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/work/ClassBill/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#DayWorkClassDatagrid1508123307299" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+    });
+</script>
+<form id="BillCarForm15079591491234534555">
+<input id="classbillNo" name="classbillNo" hidden="true">
+	<table id="BillCarTable1507959149123412" style="height: 75%; width: 80%"
+		class="tableform">
+		<tr>
+		    <th>工班票日期：</th>
+			<td><input id="workDte" name="workDte" required="required"
+				class="easyui-datebox" /></td>
+			<th>班次：</th>
+			<td><input id="workRunCod" name="workRunCod"
+				data-options="required:false" class="easyui-validatebox"  /></td>
+			<th>工班票类型：</th>
+			<td><input id="billTyp" name="billTyp"
+				data-options="required:false" class="easyui-validatebox"  /></td>
+		</tr>
+		<tr>
+	    	<th>进出口：</th>
+			<td><input id="iEId" name="iEId"
+				data-options="required:false" class="easyui-validatebox"  /></td>
+			<th>船代码：</th>
+			<td><input id="shipNo" name="shipNo"
+				data-options="required:false" class="easyui-validatebox"  /></td>
+			<th>提单号：</th>
+			<td><input id="billNo" name="billNo"
+				data-options="required:false" class="easyui-validatebox"  /></td>
+		</tr>
+		<tr>
+			<th>品牌：</th>
+			<td><input id="brand" name="brand"
+				data-options="required:false" class="easyui-validatebox" /></td>
+			<th>车类：</th>
+			<td><input id="carKind" name="carKind"
+				data-options="required:false" class="easyui-validatebox" /></td>
+			<th>型号：</th>
+			<td><input id="carTyp" name="carTyp"
+				data-options="required:false" class="easyui-validatebox"/></td>
+		</tr>
+		<tr>
+		    <th>车级：</th>
+			<td><input id="carLevel" name="carLevel"
+				data-options="required:false" class="easyui-validatebox"/></td>
+		    <th>场地：</th>
+			<td><input id="cyAreas" name="cyAreas" 
+				data-options="required:false" class="easyui-validatebox"/></td>
+			<th>司机班次：</th>
+			<td><input id="driverClass" name="driverClass" 
+				data-options="required:false" class="easyui-validatebox" /></td>
+		</tr>
+		<tr>
+		    <th>作业数量：</th>
+			<td><input id="workNum" name="workNum" required="required"
+				data-options="min:0,max:1000000000,precision:0" class="easyui-numberbox"
+				/></td>
+			<th>马菲数量：</th>
+			<td><input id="mafiNum" name="mafiNum" required="required"
+				data-options="min:0,max:1000,precision:0" class="easyui-numberbox"
+				/></td>
+			<th>理货员：</th>
+			<td><input id="tallierNam" name="tallierNam" 
+				data-options="required:false" class="easyui-validatebox"/></td>
+		</tr>
+	</table>
+</form>

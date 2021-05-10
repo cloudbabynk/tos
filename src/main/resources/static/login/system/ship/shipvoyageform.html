@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+		  var entityName="Ship";
+	     var radi=HdUtils.dialog.getValue("radi");
+		 var shipNo=HdUtils.dialog.getValue("data").shipNo;
+		 var voyage=HdUtils.dialog.getValue("data").voyage;
+		 var iEId = HdUtils.dialog.getValue("data").iEId;
+		 var eShipNam = HdUtils.dialog.getValue("data").eShipNam;
+		 var entityId=shipNo+iEId;
+		 var rowSelected;
+	     // 保存。
+    	    $("#save").on("click", function() {
+    	    	$("#XmlDatagrid1507959149305").datagrid("hdSave", {
+    			    url : "../webresources/login/ship/ShipPlanSend/saveVoyage"
+    		    }); 
+    	    });	 
+    	  //处理
+  	      $("#proc").on("click", function() {
+   	    	   HdUtils.ajax.post({
+   	    		    url : "../webresources/login/ship/ShipPlanSend/procVoyage?shipNo="+shipNo+"&tradeId="+iEId,
+   	  		        success : function(data) {
+   	  		       		$("#XmlDatagrid1507959149305").datagrid('load');
+   	  			        if (data.key == '-1') {
+   	  				        HdUtils.messager.info(data.message);
+   	  				        return false;
+   	  			        }
+   	  		        }
+   	  		    });
+  	    	  HdUtils.messager.bottomRight('处理成功！');
+  	    });
+    	  //发送报文
+  	      $("#transmit").on("click", function() {
+  	    	var selRow = $("#XmlDatagrid1507959149305").datagrid('getSelected');
+	        if (selRow == null) {
+		        HdUtils.messager.info('请选择一条数据！');
+		        return false;
+	        }
+	        $.ajax({
+   	    		    url : "../webresources/login/ship/ShipPlanSend/uploadData?id="+selRow.id,
+   	  		        success : function(data) {
+   	  		       		$("#XmlDatagrid1507959149305").datagrid('load');
+   	  				   		HdUtils.messager.info(data.message);
+   	  		        },
+   	  		        error : function(data) {
+  		       			$("#XmlDatagrid1507959149305").datagrid('load');
+  				      	HdUtils.messager.info(data.message);
+  		        	}
+   	  		    });
+  	    });
+  	  //删除。
+  	    $("#del").on("click", function() {
+  		    var selRow = $("#XmlDatagrid1507959149305").datagrid('getSelected');
+  		    if (selRow) {
+  		    	var rowIndex = $('#XmlDatagrid1507959149305').datagrid('getRowIndex', selRow);
+  		    	$("#XmlDatagrid1507959149305").datagrid('deleteRow', rowIndex);
+  		    } else {
+  			    HdUtils.messager.info('请选择行！');
+  		    }
+  	    });
+  	 // 复制
+  	    $("#copy").on("click", function() {
+  		    var dataRow = $('#XmlDatagrid1507959149305').datagrid("getSelected");
+  		    if(dataRow){
+  			    var copyRow={};
+  			    $.extend(true,copyRow,dataRow );
+  			    var uuid = guid();
+  			    copyRow.id = uuid;
+  		    	//$('#BillSplitDatagrid1508123301002[(${radi})]').datagrid('endEdit',0);
+  			    
+  		    	$('#XmlDatagrid1507959149305').datagrid('insertRow',{
+  		    		index: 0,	// index start with 0
+  		    		row: copyRow
+  		    	});
+  		    	$('#XmlDatagrid1507959149305').datagrid('beginEdit',0);
+  		    	$('#XmlDatagrid1507959149305').datagrid('selectRow',0);
+  		    } else {
+  			    HdUtils.messager.info('请选择行！');
+  		    }
+  	    });
+  	  	function S4() {
+		    return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+	    };
+	    // Generate a pseudo-GUID by concatenating random hexadecimal.  
+	    function guid() {
+		    return (S4() + S4() + S4() + S4() + S4() + S4() + S4() + S4());
+	    };
+    function query() {
+	    var onlinquery = new HdQuery();
+	    onlinquery.add("shipNo", shipNo);
+	    return onlinquery.build();
+    }
+    $("#XmlDatagrid1507959149305").datagrid({
+        url : "../webresources/login/ship/ShipPlanSend/findVoyage",
+        queryParams : query(),
+        method : "post",
+        pagination : true,
+        singleSelect : false,
+        selectOnCheck : true,
+        checkOnSelect : true,
+        rownumbers : true,
+        pageSize : 20,
+        fit : false,
+        fitColumns : false,
+        columns : [ [{
+            field : "vesselname",
+            title : '船名',
+            multiSort : true,
+            width : fixWidth(0.1),
+            align : "center",
+            editor : {
+                type : "validatebox",
+                options : {
+	                required : false
+                }
+            },
+            sortable : false
+        },{
+
+            field : "vesselnameen",
+            title : '英文船名',
+            multiSort : true,
+            width : fixWidth(0.1),
+            align : "center",
+            editor : {
+                type : "validatebox",
+                options : {
+	                required : false
+                }
+            },
+            sortable : false
+        },  {
+
+            field : "voyage",
+            title : "航次",
+            multiSort : true,
+            align : "center",
+            editor : {
+                type : "validatebox",
+                options : {
+	                required : false
+                }
+            },
+            sortable : false
+        }, {
+            field : "impexpid",
+            title : "进出口",
+            multiSort : true,
+            align : "center",
+            editor : {
+                type : "combobox",
+                options : HdUtils.code.scode({
+                    fieldCod : 'I_E_ID'
+                }, {
+                    required : true
+                })
+            },
+            formatter : function(value) {
+                return HdUtils.code.name('I_E_ID', value);
+            },
+            sortable : false
+        }, {
+
+            field : "vesseltradeid",
+            title : "内外贸",
+            multiSort : true,
+            align : "center",
+            editor : {
+                type : "combobox",
+                options : HdUtils.code.scode({
+                    fieldCod : 'TRADE_ID'
+                }, {
+                    required : true
+                })
+            },
+            /* formatter : function(value) {
+                return HdUtils.code.name('TRADE_ID', value);
+            }, */
+            sortable : false
+        },{
+            field : "vesselweight",
+            title : "净吨",
+            multiSort : true,
+            align : "center",
+            editor : {
+                type : "validatebox",
+                options : {
+	                required : false
+                }
+            },
+            sortable : false
+        }, {
+
+            field : "vesselagentid",
+            title : "船代",
+            multiSort : true,
+            align : "center",
+            editor : {
+                type : "validatebox",
+                options : {
+	                required : false
+                }
+            },
+            sortable : false
+        }, {
+
+            field : "carrierid",
+            title : "船公司",
+            multiSort : true,
+            align : "center",
+            editor : {
+                type : "validatebox",
+                options : {
+	                required : false
+                }
+            },
+            sortable : false
+        }, {
+
+            field : "imo",
+            title : "IMO",
+            multiSort : true,
+            align : "center",
+            editor : {
+                type : "validatebox",
+                options : {
+	                required : false
+                }
+            },
+            sortable : false
+        }, {
+
+            field : "facilityid",
+            title : "码头公司",
+            multiSort : true,
+            align : "center",
+            editor : {
+                type : "validatebox",
+                options : {
+	                required : false
+                }
+            },
+            sortable : false
+        }, {
+
+            field : "complexid",
+            title : "码头类型",
+            multiSort : true,
+            align : "center",
+            editor : {
+                type : "validatebox",
+                options : {
+	                required : false
+                }
+            },
+            sortable : false
+        }, {
+
+            field : "sendname",
+            title : "上传人",
+            multiSort : true,
+            align : "center",
+            sortable : false
+        },{
+            field : "sendtime",
+            title : '上传时间',
+            width : 120,
+            formatter : $.hd.ezui.formatter.datetime,
+          /*   editor : {
+                type : "datetimebox",
+                options : {
+	                required : true
+                }
+            }, */
+            multiSort : true,
+            sortable : false
+        },{
+            field : "bwSendId",
+            title : '报文发送标记',
+            width : 100,
+            formatter : function(value) {
+				if (value == 1) {
+					value = "√";
+					return value;
+				} else {
+					value = "×";
+					return value;
+					 }
+		},
+            multiSort : true,
+            align : "center",
+            sortable : false
+        },{
+            field : "jfOkId",
+            title : '接收报文标记',
+            width : 100,
+            formatter : function(value) {
+				if (value == 1) {
+					value = "√";
+					return value;
+				} else {
+					value = "×";
+					return value;
+					 }
+		},
+            multiSort : true,
+            align : "center",
+            sortable : false
+        },{
+            field : "delId",
+            title : '删除标记',
+            width : 100,
+            formatter : function(value) {
+				if (value == 1) {
+					value = "√";
+					return value;
+				} else {
+					value = "×";
+					return value;
+					 }
+		},
+            multiSort : true,
+            align : "center",
+            sortable : false
+        },{
+            field : "delSendId",
+            title : '删除报文发送标记',
+            width : 100,
+            formatter : function(value) {
+				if (value == 1) {
+					value = "√";
+					return value;
+				} else {
+					value = "×";
+					return value;
+					 }
+		},
+            multiSort : true,
+            align : "center",
+            sortable : false
+        },{
+            field : "jfDelOkId",
+            title : '接收删除报文标记',
+            width : 100,
+            multiSort : true,
+            formatter : function(value) {
+				if (value == 1) {
+					value = "√";
+					return value;
+				} else {
+					value = "×";
+					return value;
+					 }
+		},
+            align : "center",
+            sortable : false
+        }]],
+        onDblClickRow : function(rowIndex, rowData) {
+        	$("#XmlDatagrid1507959149305").datagrid("hdEdit");
+        	rowSelected = rowIndex;
+        }
+    });
+  
+    function fixWidth(percent) {
+	    return document.documentElement.shipNam * percent; //这里你可以自己做调整
+    }
+    function fixWidth(percent) {
+	    return document.documentElement.evoyage * percent ; //这里你可以自己做调整
+    }
+    $("#XmlDatagrid1507959149305").datagrid("hdGetColumnNames");
+	 });
+</script>
+		<!-- <a class="easyui-linkbutton" id='copy'>复制</a>
+		<a class="easyui-linkbutton" id='del'>删除</a>
+		<a class="easyui-linkbutton" id='save'>保存</a> -->
+		<a class="easyui-linkbutton" id='proc'>处理</a>
+		<a class="easyui-linkbutton" id='transmit'>报文发送</a>
+<form th:id="ContractIeDocForm1507959149305">
+	<table id="XmlDatagrid1507959149305" style="height: 530px;"></table>
+</form>
+</html>

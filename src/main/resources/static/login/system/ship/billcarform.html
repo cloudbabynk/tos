@@ -1,0 +1,223 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#BillCarForm1507959149123");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    var billNo=HdUtils.dialog.getValue("data").billNo;
+	    var shipNo=HdUtils.dialog.getValue("data").shipNo;
+	    var iEId=HdUtils.dialog.getValue("data").iEId;
+	    var tradeId=HdUtils.dialog.getValue("data").tradeId;
+	    var shipbillId=HdUtils.dialog.getValue("data").shipbillId;
+	    $("input[name='billNo']").val(billNo); 
+	    $("input[name='shipNo']").val(shipNo); 
+	    $("input[name='iEId']").val(iEId); 
+	    $("input[name='tradeId']").val(tradeId); 
+	    $("input[name='shipbillId']").val(shipbillId); 
+	    $('#carKind').combobox({
+	        url : '../webresources/login/ship/BillCar/getCCarKindDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight:120,
+	        onSelect : function(rec) {
+	        	return rec.value;
+	        }
+	    });
+	    $('#brandCod').combobox({
+	        url : '../webresources/login/ship/BillCar/getCBrandDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight:120,
+	        onSelect : function(rec) {
+	        	return rec.value;
+	        }
+	    });
+	    $('#carTyp').combobox({
+	        url : '../webresources/login/ship/BillCar/getCCarTypDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight:120,
+	        onSelect : function(rec) {
+	        	return rec.value;
+	        }
+	    });
+	    $('#dockCod').combobox({
+	        url : '../webresources/login/ship/BillCar/getCDockDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight:'auto',
+	        onSelect : function(rec) {
+	        	return rec.value;
+	        }
+	    });
+
+
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+		    var isValss = $("#BillCarForm1507959149123").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#BillCarForm1507959149123").serializeObject();
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/ship/BillCar/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#ShipBillCarDatagrid1508123309097").datagrid("hdReload");
+		        }
+		    })
+	    }
+    });
+</script>
+<form id="BillCarForm1507959149123">
+	<table id="BillCarTable1507959149123" style="height: 75%; width: 80%"
+		class="tableform">
+		
+		<tr>
+		   <th>提单号：</th>
+		   <td><input id="billNo" name="billNo" 
+				data-options="required:false" class="easyui-textbox" readonly="readonly"
+				maxlength="255" /></td>
+			<th>车架号：</th>
+			<td><input id="vinNo"  name="vinNo" class="easyui-validatebox"
+				maxlength="20" />
+			</td>
+			<th>RFID卡号：</th>
+			<td><input id="rfidCardNo" name="rfidCardNo"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+	
+			<th>分类：</th>
+			<td><input id="carKind" name="carKind"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		</tr>
+		<tr>
+			<th>品牌：</th>
+			<td><input id="brandCod" name="brandCod"
+				data-options="required:false" class="easyui-validatebox" 
+				maxlength="35" /></td>
+			<th>型号：</th>
+			<td><input id="carTyp" name="carTyp"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+			<th>颜色：</th>
+			<td><input id="colorCod" name="colorCod"
+				data-options="required:false" class="easyui-validatebox" 
+				maxlength="35" /></td>
+			<th>重量：</th>
+			<td><input id="weights" name="weights"
+				data-options="min:0,max:99999,precision:3" class="easyui-numberbox"
+				maxlength="255" /></td>
+		</tr>
+		<tr>
+			<th>体积：</th>
+			<td><input id="volumes" name="volumes"
+			  data-options="min:0,max:99999,precision:3" class="easyui-numberbox" 
+				maxlength="35" /></td>
+			<th>长：</th>
+			<td><input id="length" name="length"
+				data-options="min:0,max:100000,precision:2" class="easyui-numberbox"
+				maxlength="255" /></td>
+			<th>宽：</th>
+			<td><input id="width" name="width"
+				data-options="min:0,max:100000,precision:2" class="easyui-numberbox" 
+				maxlength="35" /></td>
+			<th>高：</th>
+			<td><input id="height" name="height"
+				data-options="min:0,max:100000,precision:2" class="easyui-numberbox" 
+				maxlength="35" /></td>
+		</tr>
+		<tr>
+			<th>溢卸：</th>
+			<td><input type="radio"  name="overId" value="1"
+					  class='easyui-radio'>溢卸</input> 
+			<input type="radio" name="overId" value="2" class='easyui-radio'>加装</input></td>
+			<th>短卸：</th>
+			<td><input type="radio"  name="missId" value="1"
+					  class='easyui-radio'>短卸</input> 
+			<input type="radio" name="missId" value="2" class='easyui-radio'>退装</input></td>
+			
+			<th>超长标识：</th>
+			<td><input type="radio"  name="lengthOverId" value="1"
+					class='easyui-radio'>是</input> 
+			<input type="radio" name="lengthOverId"  checked="checked"  value="0" class='easyui-radio'>否</input></td>
+			
+			<th>超宽标识：</th>
+			<td><input type="radio"  name="widthOverId" value="1"
+					  class='easyui-radio'>是</input> 
+			<input type="radio" name="widthOverId" checked="checked" value="0" class='easyui-radio'>否</input></td>
+				
+		</tr>
+		<tr>
+			<th>舱单确认标志：</th>
+			<td><input type="radio"  name="confirmId" value="1"
+					  class='easyui-radio'>是</input> 
+			<input type="radio" name="confirmId" checked="checked" value="0" class='easyui-radio'>否</input></td>
+			<th>备注：</th>
+			<td colspan="5"><input id="remarks" name="remarks"
+				data-options="required:false" class="easyui-validatebox" style="width: 100%"
+				maxlength="255" /></td>
+			<!-- <th>进出口：</th> -->
+			<td><input id="iEId" name="iEId" hidden="true"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+			<!-- <th>所属码头：</th>
+			<td><input id="dockCod" name="dockCod" 
+				data-options="required:false" class="easyui-textbox"
+				maxlength="255" /></td> -->
+		</tr> 
+		</tr>
+		<tr>
+		<!-- <th>shipNo：</th> -->
+			<td><input id="shipNo" name="shipNo"  hidden="true"
+				data-options="required:false" class="easyui-textbox"
+				maxlength="255" /></td>
+		<!-- <th>tradeId：</th> -->
+		<td><input id="tradeId" name="tradeId"  hidden="true"
+				data-options="required:false" class="easyui-textbox"
+				maxlength="255" /></td>	
+	    <!-- 	<th>流水号：</th> -->
+		<td><input id="portCarNo" name="portCarNo" hidden="true"
+				data-options="required:false" class="easyui-textbox" readonly="readonly"
+				maxlength="10" /></td>
+		<!-- <th>shipbillId：</th> -->
+			<td><input id="shipbillId" name="shipbillId"  hidden="true"
+				data-options="required:false" class="easyui-textbox"
+				maxlength="255" /></td>
+		</tr> 
+		<td><input id="billcarId" name="billcarId" 
+				data-options="required:false" class="easyui-textbox" hidden="true"
+				maxlength="255" /></td>
+	</table>
+</form>

@@ -1,0 +1,256 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#ShipThruputRecForm1507959148645");
+	    var formCache = {};
+	    var sthruputId = HdUtils.dialog.getValue("sthruputId");
+	    var shipNo = HdUtils.dialog.getValue("shipNo");
+	    var ivoyage = HdUtils.dialog.getValue("ivoyage");
+	    var evoyage = HdUtils.dialog.getValue("evoyage");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    $("#shipNo").val(shipNo);
+	    formCache.sthruputId = sthruputId;
+	    formCache.shipNo = shipNo;
+	    formCache.ivoyage = ivoyage;
+	    formCache.evoyage = evoyage;
+	    $('input[name="iEId"]').click(function() {
+		    if ($(this).val() == 'I') {
+			    $("#voyage").val(ivoyage);
+		    }
+		    if ($(this).val() == 'E') {
+			    $("#voyage").val(evoyage);
+		    }
+	    });
+	    if (sthruputId) {
+		    $("#sthruputId").attr("readonly", true);
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/ship/ShipThruputRecord/findone?sthruputId=" + sthruputId,
+		        success : function(data) {
+			        formCache = data;
+			        $("#ShipThruputRecForm1507959148645").form("loadData", data);
+			        ctToileWgt();
+		        }
+		    })
+	    } else {
+		    $("#sthruputId").attr("readonly", false);
+		    $("#statDate").val(Date.prototype.dateAdd(0, "yyyy-MM-dd"));
+	    }
+
+	    //cargoWgt dgrCargoWgt piecesWgt titleWgt
+	    $("#cargoWgt").bind("input", function() {
+		    ctToileWgt();
+	    });
+	    $("#dgrCargoWgt").bind("input", function() {
+		    ctToileWgt();
+	    });
+	    $("#piecesWgt").bind("input", function() {
+		    ctToileWgt();
+	    });
+
+	    $("input[name=iEId]").click(function() {
+		    var shipQueryBuild = new HdQuery();
+		    var ieCod = $("input[name=iEId]:checked").attr("value");
+		    shipQueryBuild.ieId = ieCod;
+		    shipQueryBuild.shipNo = shipNo;
+		    formCache.iEId = ieCod;
+		    $.ajax({
+		        type : "POST",
+		        dataType : "json",
+		        url : "/webresources/login/ship/ShipThruputRecord/getShipTueInfo",
+		        contentType : "application/json; charset=utf-8",
+		        data : $.toJSON(shipQueryBuild),
+		        success : function(result) {
+			        if (result.data) {
+				        formCache.carNum = result.data.carNum;
+				        formCache.cargoWgt = result.data.cargoWgt;
+				        formCache.dgrCargoWgt = result.data.dgrCargoWgt;
+				        formCache.cargoWgt1 = result.data.cargoWgt;
+				        formCache.dgrCargoWgt1 = result.data.dgrCargoWgt;
+				        formCache.pieces = result.data.pieces;
+				        if (formCache.cargo) {
+					        /* 1 车, 2油 */
+					        if (formCache.cargo.value.substr(0, 1) == "1") {
+						        formCache.dgrCargoWgt = 0;
+						        formCache.cargoWgt = formCache.cargoWgt1;
+					        } else {
+						        formCache.cargoWgt = 0;
+						        formCache.dgrCargoWgt = formCache.dgrCargoWgt1;
+					        }
+				        }
+				        loadNumForm();
+			        }
+		        },
+		        error : function(result) {
+
+		        }
+
+		    });
+	    });
+
+	    //货名下拉
+	    $('#cargoCode').combobox({
+	        url : '/webresources/login/ship/ShipThruputRecord/getUnitCargo',
+	        valueField : 'value',
+	        textField : 'label',
+	        onSelect : function(rec) {
+		        formCache.cargo = rec;
+		        formCache.cargoCode = rec.value;
+		        /* 1 车, 2油 */
+		        if (rec.value.substr(0, 1) == "1") {
+			        formCache.dgrCargoWgt = 0;
+			        formCache.cargoWgt = formCache.cargoWgt1;
+		        } else {
+			        formCache.cargoWgt = 0;
+			        formCache.dgrCargoWgt = formCache.dgrCargoWgt1;
+		        }
+		        loadNumForm(rec.value);
+		        return rec.value;
+	        }
+	    });
+
+	    function loadNumForm() {
+	    	formCache.statDate = $("#statDate").datebox("getValue");
+	    	$("#ShipThruputRecForm1507959148645").form("loadData", formCache);
+// 		    $('#cargoCode').val(formCache.cargoCode);
+// 		    if (formCache.carNum){
+// 		    	$('#carNum').val(formCache.carNum);
+// 		    }
+// 		    $('#cargoWgt').val(formCache.cargoWgt);
+// 		    $('#dgrCargoWgt').val(formCache.dgrCargoWgt);
+// 		    if (formCache.pieces){
+// 		    	$('#pieces').val(formCache.pieces);
+// 		    }
+		    ctToileWgt();
+	    }
+
+	    $('#dockCod').combobox({
+	        url : '../webresources/login/ship/ShipThruputRecord/getCDock',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 120,
+	        onSelect : function(rec) {
+		        formCache.dockCod = rec.value;
+		        return rec.value;
+	        }
+	    });
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+		    var isValss = $("#ShipThruputRecForm1507959148645").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    
+		    var formdata = $("#ShipThruputRecForm1507959148645").serializeObject();
+		    if (!formdata.cargoCode || formdata.cargoCode == "") {
+			    HdUtils.messager.bottomRight('请录入货名', '录入项不正确');
+			    return;
+		    }
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/ship/ShipThruputRecord/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#DayWorkClassDatagrid1508123307299" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+	    //
+	    function ctToileWgt() {
+		    $("#titleWgt").text(Number($("#cargoWgt").val()) + Number($("#dgrCargoWgt").val()));
+	    }
+    });
+</script>
+<form id="ShipThruputRecForm1507959148645">
+	<input id="sthruputId" name="sthruputId" hidden="true"> <input
+		id="voyage" name="voyage" hidden="true" /> <input id="shipName"
+		name="shipName" hidden="true" /> <input id="tradeId" name="tradeId"
+		hidden="true" /> <input id="shipNo" name="shipNo" hidden="true" />
+	<input id="thruputType" name="thruputType" hidden="true" value="0"
+		maxlength="10" />
+	<table id="CBrandTable1507959148645" style="height: 75%; width: 80%"
+		class="tableform">
+		<tr>
+			<th>统计日期：</th>
+			<td><input id="statDate" name="statDate"
+				data-options="required:true" class="easyui-datebox" maxlength="10" /></td>
+			<th>作业公司：</th>
+			<td><input id="dockCod" name="dockCod"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="10" /></td>
+		</tr>
+		<tr>
+			<th>进出口：</th>
+			<td><input type="radio" name="iEId" value="I">进口</input> <input
+				type="radio" name="iEId" value="E">出口</input></td>
+			<th>货名：</th>
+			<td><input id="cargoCode" name="cargoCode"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		</tr>
+		<tr>
+			<th>车数：</th>
+			<td><input id="carNum" name="carNum"
+				data-options="required:false"
+				data-options="min:0,max:999999999,precision:0"
+				class="easyui-numberbox" maxlength="13" /></td>
+			<th>体积：</th>
+			<td><input id="cargoVol" name="cargoVol"
+				data-options="required:false"
+				data-options="min:0,max:999999999,precision:0"
+				class="easyui-numberbox" maxlength="13" /></td>
+		</tr>
+		<tr>
+			<th>重量：</th>
+			<td><input id="cargoWgt" name="cargoWgt"
+				data-options="min:0,max:999999999,precision:3"
+				class="easyui-numberbox" maxlength="13" /></td>
+
+			<th>危险品重量：</th>
+			<td><input id="dgrCargoWgt" name="dgrCargoWgt"
+				data-options="min:0,max:999999999,precision:3"
+				class="easyui-numberbox" maxlength="13" /></td>
+		</tr>
+		<tr>
+			<th>件杂货数：</th>
+			<td><input id="pieces" name="pieces"
+				data-options="required:false"
+				data-options="min:0,max:999999999,precision:0"
+				class="easyui-numberbox" maxlength="13" /></td>
+
+			<th style="color: red">总吨数：</th>
+			<td style="color: red"><lable id="titleWgt" name="titleWgt">
+				</lable></td>
+
+		</tr>
+	</table>
+</form>

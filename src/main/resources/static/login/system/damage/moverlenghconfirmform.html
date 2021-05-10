@@ -1,0 +1,211 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var confirmid = HdUtils.dialog.getValue("confirmid");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    var vinNo = HdUtils.dialog.getValue('vinNo');
+	    var shipNo = HdUtils.dialog.getValue('shipNo');
+	    var portCarNo = HdUtils.dialog.getValue('portCarNo');
+	    var rfidCardNo = HdUtils.dialog.getValue('rfidCardNo');
+	    var brandCod = HdUtils.dialog.getValue('brandCod');
+	    $("input[name='vinNo']").val(vinNo);
+	    $("input[name='portCarNo']").val(portCarNo);
+	    $("input[name='rfidCardNo']").val(rfidCardNo);
+	    $("input[name='brandCod']").val(brandCod);
+	    $("input[name='shipNo']").val(shipNo);
+	    $("#regDte").val(Date.prototype.dateAdd(0, "yyyy-MM-dd"));
+	    if (confirmid) {
+		    $("#confirmid").attr("readonly", true);
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/damage/MOverlenghConfirm/findone?confirmid=" + confirmid,
+		        success : function(data) {
+			        $("#MOverlenghConfirmForm1507959148710").form("loadData", data);
+		        }
+		    })
+	    } else {
+		    $("#confirmid").attr("readonly", false);
+	    }
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    // 	    $('#carTyp').combobox({
+	    // 	        url : '../webresources/login/damage/MOverlenghConfirm/getCarTypDrop',
+	    // 	        valueField : 'value',
+	    // 	        textField : 'label',
+	    // 	        panelHeight :200,
+	    // 	        onSelect : function(rec) {
+	    // 		        return rec.value;
+	    // 	        }
+	    // 	    });
+	    //选在港车辆
+	    function saveHandler() {
+		    var isValss = $("#MOverlenghConfirmForm1507959148710").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#MOverlenghConfirmForm1507959148710").serializeObject();
+		    var pnoList = formdata.portCarNo;
+		    var vnoList = formdata.vinNo;
+		    var rfidList = formdata.rfidCardNo;
+		    var bcdList = formdata.brandCod;
+		    var ctpList = formdata.carTyp;
+		    var shipNolist = formdata.shipNo;
+		    var arr = [];
+		    var arr2 = [];
+		    var arr3 = [];
+		    var arr4 = [];
+		    var arr5 = [];
+		    var arr6 = [];
+		    arr = pnoList.split(',');
+		    arr2 = vnoList.split(',');
+		    arr3 = rfidList.split(',');
+		    arr4 = bcdList.split(',');
+		    arr5 = ctpList.split(',');
+		    arr6 = shipNolist.split(',');
+		    if (arr.length != 0) {
+			    for (var i = 0; i < arr.length; i++) {
+				    formdata.portCarNo = arr[i];
+				    formdata.vinNo = arr2[i];
+				    formdata.rfidCardNo = arr3[i];
+				    formdata.brandCod = arr4[i];
+				    formdata.carTyp = arr5[i];
+				    formdata.shipNo = arr6[i];
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/damage/MOverlenghConfirm/saveone",
+				        data : formdata,
+				        success : function(data) {
+					        if (data.key == '-1') {
+						        HdUtils.messager.info(data.message);
+						        return false;
+					        }
+					        HdUtils.dialog.close();
+					        HdUtils.messager.bottomRight('保存成功', '保存操作');
+					        $("#MOverlenghConfirmDatagrid1508123301002" + radi).datagrid("hdReload");
+				        }
+				    })
+			    }
+		    }
+	    }
+    });
+	function choosePortCar() {
+	    HdUtils.selPortCarC(callback);
+	    HdUtils.dialog.setValue('shipNo',shipNo);
+	}
+	var vinNo = "";
+	var portCarNo = "";
+	var rfidCardNo = "";
+	var brandCod = "";
+	var carTyp = "";
+	var shipNo = "";
+	function callback(data) {
+	    for (var i = 0; i < data.length; i++) {
+		    vinNo += data[i].vinNo + ",";
+		    portCarNo += data[i].portCarNo + ",";
+		    rfidCardNo += data[i].rfidCardNo + ",";
+		    shipNo += data[i].shipNo + ",";
+		    if (data[i].brandCod != null) brandCod += data[i].brandCod + ",";
+		    if (data[i].carTyp != null) carTyp += data[i].carTyp + ",";
+	    }
+	    vinNo = vinNo.substring(0, vinNo.length - 1);
+	    portCarNo = portCarNo.substring(0, portCarNo.length - 1);
+	    rfidCardNo = rfidCardNo.substring(0, rfidCardNo.length - 1);
+	    brandCod = brandCod.substring(0, brandCod.length - 1);
+	    carTyp = carTyp.substring(0, carTyp.length - 1);
+	    shipNo = shipNo.substring(0, shipNo.length - 1);
+	    $("input[name='vinNo']").val(vinNo);
+	    $("input[name='portCarNo']").val(portCarNo);
+	    $("input[name='rfidCardNo']").val(rfidCardNo);
+	    $("input[name='brandCod']").val(brandCod);
+	    $("#carTyp").val(carTyp);
+	    $("input[name='shipNo']").val(shipNo);
+	}
+</script>
+<form id="MOverlenghConfirmForm1507959148710">
+	<table id="MOverlenghConfirmTable1507959148710"
+		style="height: 75%; width: 80%" class="tableform">
+		<input id="confirmid" name="confirmid" data-options="required:false"
+			class="easyui-validatebox" maxlength="100" hidden="true" />
+		<input id="shipNo" name="shipNo" data-options="required:false"
+			class="easyui-validatebox" maxlength="100"  hidden="true" />
+		<tr>
+			<th>登记日期：</th>
+			<td><input id="regDte" name="regDte"
+				data-options="required:false" class="easyui-datebox" maxlength="100" />
+				<a style="background-color: #cccccc" href="javascript:void(0)"
+				onclick="choosePortCar()">选场地车</a></td>
+		</tr>
+		<tr>
+			<th>车长：</th>
+			<td><input id="lengh" name="lengh" style="width: 65px"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="100" /> <input id="lengthOverId" name="lengthOverId"
+				style="width: 15px" data-options="required:false" type="checkbox"
+				value='1' checked="checked" maxlength="10" />超长</td>
+		</tr>
+		<tr>
+			<th>车宽：</th>
+			<td><input id="width" name="width" style="width: 65px"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="10" /></td>
+		</tr>
+		<tr>
+			<th>车高：</th>
+			<td><input id="height" name="height" style="width: 65px"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="10" /></td>
+		</tr>
+		<tr>
+			<!-- 	<th>RFID号：</th> -->
+			<td><input id="rfidCardNo" name="rfidCardNo" style="width: 80px"
+				hidden="true" data-options="required:false"
+				class="easyui-validatebox" maxlength="100" /></td>
+		</tr>
+		<tr>
+			<!-- 			<th>车型：</th> -->
+			<td><input id="carTyp" name="carTyp" hidden="true"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="100" /></td>
+		</tr>
+		<tr>
+			<!-- 	<th>流水号：</th> -->
+			<td><input id="portCarNo" name="portCarNo" style="width: 80px"
+				hidden="true" data-options="required:false"
+				class="easyui-validatebox" maxlength="100" /></td>
+		</tr>
+		<tr>
+			<!-- <th>车架号：</th> -->
+			<td><input id="vinNo" name="vinNo" style="width: 80px"
+				hidden="true" data-options="required:false"
+				class="easyui-validatebox" maxlength="100" /></td>
+		</tr>
+		<tr>
+			<!-- <th>品牌：</th> -->
+			<td><input id="brandCod" name="brandCod" style="width: 80px"
+				hidden="true" data-options="required:false"
+				class="easyui-validatebox" maxlength="100" /></td>
+		</tr>
+	</table>
+</form>

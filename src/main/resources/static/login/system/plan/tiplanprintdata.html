@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="ContractIeDocToolBar15081233020012"  style="float: left; height: 25px">
+
+<div>
+    <!-- 查询 -->
+    <shiro:hasPermission
+            name="webresources:login:ContractIeDoc:contractprint">
+        <a class="easyui-linkbutton" iconCls="icon-export" plain="false"
+           th:id="contractprint">补打印</a>
+    </shiro:hasPermission>
+    <div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+
+<table th:id="ContractIeDocDatagrid1508123320012" style="height: 100%"></table>
+
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+    /*<![CDATA[*/
+    $(document).ready(function () {
+        var radi = /*[[${radi}]]*/'';
+        var dg = $("#ContractIeDocDatagrid1508123320012");
+        $("#contractprint").on("click", function() {
+
+            var selRow = dg.datagrid("getChecked");
+            if(selRow.length===0){
+                HdUtils.messager.info("请先选择二维码数据！");
+                return;
+            }
+            var ids = '';
+
+                for (var i = 0; i < selRow.length; i++) {
+                    ids += selRow[i].ieVinId + ",";
+                }
+            HdUtils.ajax.post({
+                dataType: "text",
+                url :"../webresources/login/privilege/ContractIeVin/genPrintExt?ieVinIds=" + ids,
+                success : function(data) { 
+                    if(data.code==="200"){
+                        dg.datagrid("hdReload");
+                    }
+                    HdUtils.messager.bottomRight(data.message);
+
+                }
+            });
+        })
+
+        $("#ContractIeDocDatagrid1508123320012").datagrid({
+            striped: true,
+            method: "post",
+            pagination: true,
+            singleSelect: true,
+            selectOnCheck: true,
+            checkOnSelect: true,
+            rownumbers: true,
+            fit: true,
+            fitColumns: false,
+            pageSize: 20,
+          //  queryParams: query(),
+            url: "../webresources/login/privilege/ContractIeVin/find",
+            toolbar: "#ContractIeDocToolBar15081233020012" + /*[[${radi}]]*/'',
+
+            columns: [ [ {
+                field: "ck",
+                checkbox: true,
+                sortable: false,
+            },
+                {
+                field: "ieVinId",
+                title: 'id',
+                multiSort: true,
+                width: 100,
+                align: "center",
+                hidden:true,
+                sortable: false
+            },
+                {
+                field: "seqNo",
+                title: "序号",
+                multiSort: true,
+                width: 100,
+                align: "center",
+                sortable: false
+            }, {
+                field: "vinNo",
+                title: "车架号",
+                multiSort: true,
+                width: 100,
+                align: "center",
+                sortable: false
+            }, {
+                field: "isUser",
+                title: "是否打印",
+                multiSort: true,
+                width: 100,
+                align: "center",
+                    formatter : function(value) {
+                        if (value != null && value != undefined) {
+                            if (value == "1") {
+                                value = "√";
+                                return value;
+                            } else {
+                                value = "×";
+                                return value;
+                            }
+                        } else {
+                            return value;
+                        }
+                    },
+                sortable: false
+            }, {
+                field: "isTally",
+                title: "是否理货",
+                multiSort: true,
+                width: 100,
+                align: "center",
+                    formatter : function(value) {
+                        if (value != null && value != undefined) {
+                            if (value == "1") {
+                                value = "√";
+                                return value;
+                            } else {
+                                value = "×";
+                                return value;
+                            }
+                        } else {
+                            return value;
+                        }
+                    },
+                sortable: false
+            }, {
+                field: "recNam",
+                title: "记录人",
+                multiSort: true,
+                width: 100,
+                align: "center",
+                sortable: false
+            },
+                {
+                    field: "recTim",
+                    title: "记录时间",
+                    multiSort: true,
+                    width: 100,
+                    align: "center",
+                    sortable: false
+                }
+            ]]
+        });
+        $("#ContractIeDocDatagrid1508123320012").datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>天津港环球滚装码头有限公司业务系统</title>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+<meta charset="UTF-8"><link rel="stylesheet" type="text/css" href="/css/themes/metro-blue/easyui.css">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<meta charset="UTF-8" />
+
+<link rel="stylesheet" type="text/css" href="/css/themes/metro-blue/hdMain.css">
+<link rel="stylesheet" type="text/css" href="/css/themes/metro-blue/hdStyle.css">
+<link rel="stylesheet" type="text/css" href="/css/themes/icon.css">
+<link rel="stylesheet" type="text/css" href="/css/huadong/hdNewStyle.css">
+<link rel="stylesheet" type="text/css" href="/css/ol/ol.css">
+<link rel="stylesheet" type="text/css" href="/css/ol/map.css">
+
+<script  type="application/javascript" src="/js/jquery.min.js" type="text/javascript"></script>
+<script  type="application/javascript" src="/js/jquery.cycle.all.min.js"></script>
+<script  type="application/javascript"  src="/js/jquery.jcarousel.min.js"></script>
+<script  type="application/javascript" src="/js/jquery.easyui.min.js"></script>
+<script  type="application/javascript" src="/js/plugins/jquery.international.js"></script>
+
+<script  type="application/javascript" src="/js/jquery.json-2.4.js"></script>
+<script  type="application/javascript" src="/js/jquery-migrate-1.2.1.min.js"></script>
+<script  type="application/javascript" src="/js/datagrid-bufferview.js"></script>
+<script type="application/javascript" src="/js/hdEzuiEx_js/ezuiEx-lang-zh.js"></script>
+<script type="application/javascript" src="/i18n/locale/easyui-lang-zh.js"></script>
+<script type="application/javascript" src="/js/jquery.i18n.properties-min-1.0.9.js"></script>
+
+
+
+<script  type="application/javascript" src="/js/hdEzuiEx_js/ezui.ex.tabs.js"></script>
+<script  type="application/javascript" src="/js/hdEzuiEx_js/ezui.ex.combo.js"></script>
+<script type="application/javascript" src="/js/hdEzuiEx_js/ezui.ex.datagrid.js"></script>
+<script type="application/javascript" src="/js/hdEzuiEx_js/ezui.ex.form.js"></script>
+<script type="application/javascript" src="/js/hdEzuiEx_js/ezui.ex.datebox.js"></script>
+<script type="application/javascript" src="/js/hdEzuiEx_js/ezui.ex.datetimebox.js"></script>
+<script type="application/javascript" src="/js/hdEzuiEx_js/ezui.ex.combogrid.js"></script>
+<script type="application/javascript" src="/js/hdEzuiEx_js/ezui.ex.treegrid.js"></script>
+<script type="application/javascript" src="/js/hdEzuiEx_js/HdEzuiQueryParams.js"></script>
+
+
+<script type="application/javascript" src="/js/hdEzuiEx_js/HdObject.js"></script>
+
+<script type="application/javascript" src="/js/hdEzuiEx_js/HdConditions.js"></script>
+<script type="application/javascript" src="/js/hdEzuiEx_js/extension.js"></script>
+
+
+<script  type="application/javascript" src="/js/hdUtils/HdUtils.js"></script>
+<script  type="application/javascript" src="/js/hdUtils/commonUtils.js"></script>
+<script type="application/javascript" src="/js/hdUtils/comutil.js"></script>
+<script type="application/javascript" src="/login/system/map/mapJs/idev8andutiles.js"></script>
+<script type="application/javascript" src="/js/hdUtils/hdAppendUitl.js" type="text/javascript"></script>
+<script type="application/javascript"  src="/js/hdDropList/comboDropListBase.js" type="text/javascript"></script>
+
+
+<style>
+a.l-btn span.l-btn-left {
+    display: inline-block;
+    padding: 2px;
+}
+
+</style>
+<script type="text/javascript">
+
+    /*获取浏览器语言*/
+    function getBrowserLanguage() {
+            return "zh";
+    }
+
+</script>
+</head>
+
+<body style="width:100%;height:100%;padding:0;margin:0px"   class="easyui-layout">
+    <div data-options="region:'center',onResize:resizeLayoutCenter" style="width: 100%;height:100%;">
+        <div id="map"  class="map" style="height:100%;" >
+            <div id="popup" class="ol-popup">  
+                <a href="#" id="popup-closer" class="ol-popup-closer" style="display: none"></a>  
+                    <div id="popup-content"> </div>  
+            </div>  
+        </div>
+    </div>
+       <div class="dangerClass"  >         		
+      		<div class="foldBox" >
+			<h1 id="divEmergeList">作业线规划</h1>
+			<div  class="text" style="display: none; width:650px;height:330px;" >
+				<div class="easyui-layout" style="width:650px;height:330px;">
+			        <div data-options="region:'east',split:true" title="视频"  style="width:310px;padding-bottom:25px;">
+			        	<div id="gdWorkBillCameraToolBar" style="padding: 0px;margin: 0px;float: left;" >    		
+				             <a class="easyui-linkbutton"  iconCls="icon-add"    plain="false">新增</a>
+				             <a class="easyui-linkbutton"  iconCls="icon-edit"   plain="false">修改</a>
+				             <a class="easyui-linkbutton"  iconCls="icon-remove" plain="false">删除</a>
+				             <a class="easyui-linkbutton"  iconCls="icon-save"   plain="false">保存</a>
+				             <a class="easyui-linkbutton"  iconCls="icon-reload" plain="false">刷新</a>
+						</div>
+			        	<table  id="gdWorkBillCamera" style="height:100%;"></table>
+			        </div>
+
+			        <div data-options="region:'center',title:'作业线'" style="padding-bottom: 25px;">
+						<div id="gdWorkBillToolBar" style="padding: 0px;margin: 0px;float: left;" >    		
+				             <a class="easyui-linkbutton"  iconCls="icon-add"    plain="false">新增</a>
+				             <a class="easyui-linkbutton"  iconCls="icon-edit"   plain="false">修改</a>
+				             <a class="easyui-linkbutton"  iconCls="icon-remove" plain="false">删除</a>
+				             <a class="easyui-linkbutton"  iconCls="icon-save"   plain="false">保存</a>
+				            <!--  <a class="easyui-linkbutton"  iconCls="icon-reload" plain="false">刷新</a> -->
+				             <a class="easyui-linkbutton"  iconCls="icon-draw"   plain="false">规划</a>
+				             <a class="easyui-linkbutton"  iconCls="icon-redo"   plain="false">发送</a>
+						</div>
+						<table  id="gdWorkBill" style="width:100%;height:100%;"></table>
+			        </div>
+			    </div>
+			</div>
+		</div>
+		<div class="foldBox" >
+			<h1 id="billNoSearchTool">在场车辆查询</h1>
+			<div  class="text" style="display: none; width:750px;height:400px;" >	
+				<div class="easyui-layout" style="width:100%;height:100%;">		
+					<div id="cAreaDatagridToolBar" style="width:100%;" > 
+					<table style="width:100%;">
+						<tr >
+							<td style="text-align: left;">
+								提单:<input id="billNoSearch" style="width:60px;"placeholder="提单号" />
+								<input id="cmapShipNam" name="cShipNam" placeholder="请选择船名" type="text" data-options="required:false" readonly="readonly"	style="width:100px">
+								<input id="cShipNo" hidden="true"/>
+								<a class="easyui-linkbutton" id="selShip">选船</a>
+								堆场：<input id="areaNoSearch"   style="width:80px" placeholder="堆场" /> 
+								<a class="easyui-linkbutton" onclick="showMapCargo()" >查询</a>
+								<a class="easyui-linkbutton" id="mapLoc" onclick="locArea()" >定位</a>
+								<a class="easyui-linkbutton" onclick="mapClearVal()" >清空</a>
+							</td>
+							<td style="text-align: right;">
+								<a class="easyui-linkbutton" onclick="portCarInit()" style="">初始化</a>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2" style="text-align: left;">
+								品牌:<input id="bandCodSearch" style="width:80px;"placeholder="品牌" />
+								车型:<input id="carTypeSearch" style="width:80px;"placeholder="车型" />
+								车类:<input id="carKindSearch" style="width:80px;"placeholder="车类" />
+								入场时间<input id="inTimeSearch" style="width:90px;"placeholder="入场时间"  class="easyui-datebox" />
+							</td>
+						</tr>
+					</table>   				
+							
+							
+					</div>
+					<table id="cAreaDatagrid" style="width:100%;height:100%;"></table>
+			 	</div>
+		 	</div>
+
+      	</div>
+	</div>
+</body>
+<script type="text/javascript">
+    //地图所属公司
+    var companyCod="TJG_GZ"; 
+    $(function(){
+        initMapThing(true);
+    });
+    
+</script>
+<script src="/js/ol/ol.js" type="text/javascript"></script>
+<script src="/login/system/map/mapJs/mapUtils.js" type="text/javascript"></script>
+<script src="/login/system/map/mapJs/vStyles.js" type="text/javascript"></script>
+<script src="/login/system/map/mapJs/layers.js" type="text/javascript"></script>
+<script src="/login/system/map/mapJs/otools.js" type="text/javascript"></script>
+<script src="/login/system/map/mapJs/vdraw.js" type="text/javascript"></script> 
+<script src="/login/system/map/mapJs/vctrl.js" type="text/javascript"></script>
+<script src="/login/system/map/mapJs/map.js" type="text/javascript"></script>
+<script src="/login/system/map/mapJs/vcamera.js" type="text/javascript"></script>
+<script src="/login/system/map/mapJs/vyard.js" type="text/javascript"></script>
+<script src="/login/system/map/mapJs/vcargo.js" type="text/javascript"></script>
+<script src="/login/system/map/mapJs/mapGrad.js" type="text/javascript"></script>
+<script src="/login/system/map/mapJs/vflow.js" type="text/javascript"></script>
+<script src="/login/system/map/mapJs/vFlexTool.js" type="text/javascript"></script>
+</html> 

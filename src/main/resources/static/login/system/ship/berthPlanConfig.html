@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+
+
+    <div class="easyui-layout" data-options="fit:true">
+        <div data-options="region:'center',href:'../login/system/ship/berth2.html'">
+        </div>
+        <div id="berthShip56789"
+            data-options="region:'south',split:true,href:'../login/system/ship/berthShip.html'"
+            style="width:100%;height:280px">
+        </div>
+    </div>
+
+
+    <script type="text/javascript" >
+        function refreshBerthShip() {
+            $("#berthShip56789").panel('open').panel('refresh');
+        }
+        $(document).ready(function () {
+
+        })
+    </script>
+</html>

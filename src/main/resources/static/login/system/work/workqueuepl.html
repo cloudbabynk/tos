@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="DayWorkClassToolBar1508123307299+${radi}"
+	style="float: left">
+	<div>
+		<!-- 查询 -->
+		<span> 船名：<input th:id="cShipNam+${radi}" name="cShipNam"
+			placeholder="请输入船名" type="text" data-options="required:false"
+			style="width: 120px">航次：<input th:id="ivoyage+${radi}"
+			name="ivoyage" placeholder="请输入航次" type="text"
+			data-options="required:false" style="width: 120px">进出口：<input th:id="iEId+${radi}"
+			name="iEId"  type="text"
+			data-options="required:false" style="width: 120px"> <a
+			class="easyui-linkbutton" th:id="query+${radi}">选船</a>  
+			<a
+			class="easyui-linkbutton" th:id='clear+${radi}'>重置</a>
+			<input th:id="shipNo+${radi}" name="shipNo" type="hidden" >
+			<input th:id="Type+${radi}" th:value='${Type}' type="hidden" />
+		</span>
+	</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="DayWorkClassDatagrid1508123307299+${radi}"
+	style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#DayWorkClassDatagrid1508123307299[(${radi})]");
+	    var type = $("#Type[(${radi})]").val();
+	    // buttons
+	    // 增加。
+	    $("#add[(${radi})]").on("click", function() {
+	    	addoredit("");
+	    });
+	    // 刷新。
+	    $("#fresh[(${radi})]").on("click", function() {
+		    dg.datagrid("hdReload");
+	    });
+    	// 清空。
+	    $("#clear[(${radi})]").on("click", function() {
+	    	$("#cShipNam[(${radi})]").val("");
+	    	$("#ivoyage[(${radi})]").val("");
+	    	$("#iEId[(${radi})]").val("");
+	    	$("#shipNo[(${radi})]").val("");
+	    	$("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+	    	HdUtils.selShip(callback);
+	    });
+
+	    function callback(data){
+        	$("#cShipNam[(${radi})]").val(data.cShipNam);
+        	$("#ivoyage[(${radi})]").val(data.ivoyage);
+        	$("#iEId[(${radi})]").val(data.iEId);
+        	$("#shipNo[(${radi})]").val(data.shipNo);
+        	$("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+        }
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    var shipNo = $("#shipNo[(${radi})]").val();
+		    onlinquery.add("shipNo", shipNo);
+		    onlinquery.add("type", type);
+		    return onlinquery.build();
+	    }
+
+	    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/work/WorkQueue/findPl",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : false,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#DayWorkClassToolBar1508123307299" + /*[[${radi}]]*/'',
+	        fit : true,
+	        onSelect(rowIndex,rowData){
+	           	var shipNo = rowData.shipNo;
+	           	var billNo = rowData.billNo;
+	           	var carTyp = rowData.carTyp;
+	           	HdUtils.dialog.setValue({
+	           		 'contractNo' : rowData.contractNo
+	        	 });
+	           	function queryBillCar(){
+                   var builder = new HdQuery();
+                   builder.add("shipNo", shipNo);
+                   builder.add("billNo", billNo);
+                   builder.add("carTyp", carTyp);
+                   builder.add("type", type);
+                   return builder.build();
+               };
+               var radibillcar = HdUtils.dialog.getValue('radibillcar');
+               $('#DayWorkClassDatagrid1508123307299'+radibillcar).datagrid({
+                   	 queryParams : queryBillCar(),
+                  });
+		    },
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+
+	        }, {
+	            field : "billNo",
+	            title : "提单号",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },  {
+
+	            field : "planNum",
+	            title : '总件数',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        },  {
+
+	            field : "unTallyNum",
+	            title : '未理件数',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }
+
+	        ] ]
+	    });
+	    $("#DayWorkClassDatagrid1508123307299" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

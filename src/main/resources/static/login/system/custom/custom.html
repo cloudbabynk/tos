@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+
+<div id="cc" class="easyui-layout" style="width: 100%; height: 100%;">
+	<div data-options="region:'north',split:true" style="height: 40px;">
+		船名：<input th:id="cShipNam+${radi}" name="cShipNam" placeholder="船名"
+			type="text" data-options="required:false" style="width: 120px">航次：<input
+			th:id="voyage+${radi}" name="voyage" placeholder="航次" type="text"
+			data-options="required:false" style="width: 120px">
+		<!-- shipNo： -->
+		<input th:id="shipNo+${radi}" name="shipNo" type="text"
+			data-options="required:false" style="width: 120px"> <a
+			class="easyui-linkbutton" th:id='chooseShip+${radi}'>选船</a> <input
+			type="radio" name="ieid" value="I" class='easyui-radio'>进口</input> <input
+			type="radio" name="ieid" value="E" class='easyui-radio'>出口</input>
+	</div>
+	<div data-options="region:'center',title:'委托信息'"
+		style="padding: 5px; background: #eee;">
+		<form id="CustomForm1507959148710">
+			<table id="CustomTable1507959148710">
+				<tr>
+					<th>提单号：</th>
+					<td><input id="billNo" name="billNo"
+						data-options="required:false" class="easyui-validatebox"
+						maxlength="10" /></td>
+					<th>委托人：</th>
+					<td><input id="agentCod" name="agentCod"
+						data-options="required:true" class="easyui-validatebox"
+						maxlength="10" /></td>
+					<th>申报单位：</th>
+					<td><input id="contractUnit" name="contractUnit"
+						data-options="required:true" class="easyui-validatebox"
+						maxlength="10" /></td>
+				</tr>
+				<tr>
+					<th>海关单号：</th>
+					<td><input id="customBillNo" name="customBillNo"
+						data-options="required:true" class="easyui-validatebox"
+						maxlength="10" /></td>
+					<th>海关船号：</th>
+					<td><input id="ctmShipNo" name="ctmShipNo"
+						data-options="required:true" class="easyui-validatebox"
+						maxlength="10" /></td>
+					<th>海关船名：</th>
+					<td><input id="ctmCShipNam" name="ctmCShipNam"
+						data-options="required:true" class="easyui-validatebox"
+						maxlength="10" /></td>
+					<th>海关航次：</th>
+					<td><input id="ctmVoyage" name="ctmVoyage"
+						data-options="required:true" class="easyui-validatebox"
+						maxlength="10" /></td>
+
+				</tr>
+				<tr>
+					<th>保函(放行)标志：</th>
+					<td><input id="customBillId" name="customBillId"
+						type="checkbox" onclick="myclick(this)" value='1' /></td>
+					<th>放行时间：</th>
+					<td><input id="custTim" name="custTim"
+						data-options="required:false" class="easyui-datebox"
+						maxlength="10" /></td>
+					<th>海关放行人：</th>
+					<td><input id="custNam" name="custNam" readonly="readonly"
+						data-options="required:false" class="easyui-validatebox"
+						maxlength="10" /></td>
+
+				</tr>
+				<tr>
+					<th>取消放行标志：</th>
+					<td><input id="cancelId" name="cancelId" type="checkbox"
+						onclick="myclick(this)" value='1' /></td>
+					<th>取消放行时间：</th>
+					<td><input id="cancelTim" name="cancelTim"
+						class="easyui-datebox" /></td>
+					<th>取消放行人：</th>
+					<td><input id="cancelNam" name="cancelNam"
+						readonly="readonly" data-options="required:false"
+						class="easyui-validatebox" maxlength="255" /></td>
+					<th>edi接受标志：</th>
+					<td><input id="ediId" name="ediId" type="checkbox" /></td>
+				</tr>
+				<tr>
+					<th>备注：</th>
+					<td colspan="7"><input id="remarks" name="remarks"
+						data-options="required:false" class="easyui-validatebox"
+						style="width: 100%" maxlength="255" /></td>
+					<!-- 	<th>shipNo：</th> -->
+					<td><input id="shipNo" name="shipNo" hidden="true"
+						data-options="required:false" class="easyui-validatebox"
+						maxlength="255" /></td>
+				</tr>
+				<tr>
+					<!-- <th>货主：</th> -->
+					<td><input id="consignCod" name="consignCod" hidden="true"
+						data-options="required:false" class="easyui-validatebox"
+						maxlength="255" /></td>
+					<!-- <th>车数：</th> -->
+					<td><input id="carNum" name="carNum" hidden="true"
+						data-options="required:false" class="easyui-validatebox"
+						style="width: 100%" maxlength="255" /></td>
+					<!-- <th>件数：</th> -->
+					<td><input id="pieces" name="pieces" hidden="true"
+						data-options="required:false" class="easyui-validatebox"
+						style="width: 100%" maxlength="255" /></td>
+					<!-- <th>重量：</th> -->
+					<td><input id="weight" name="weight" hidden="true"
+						data-options="required:false" class="easyui-validatebox"
+						style="width: 100%" maxlength="255" /></td>
+					<!-- 	<th>体积：</th> -->
+					<td><input id="volume" name="volume" hidden="true"
+						data-options="required:false" class="easyui-validatebox"
+						style="width: 100%" maxlength="255" /></td>
+					<!-- 	<th>进出口：</th> -->
+					<td><input type="radio" name="iEId" value="I" hidden="true"
+						class='easyui-radio'></input>
+					   <input type="radio" name="iEId" hidden="true"
+						value="E" class='easyui-radio'></input></td>
+				</tr>
+			</table>
+		</form>
+	</div>
+	<div data-options="region:'south',title:'委托明细',split:true"
+		style="height: 300px;">
+		<div>
+			<a class="easyui-linkbutton" th:id='nextbill+${radi}'>下一单</a>
+			 <a class="easyui-linkbutton" th:id='save+${radi}'>保存</a>
+		</div>
+		<table th:id="CustomDatagrid1508123301002+${radi}"
+			style="height: 300px;"></table>
+	</div>
+</div>
+
+
+
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#CustomDatagrid1508123301002[(${radi})]");
+	    var shipNo;
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+		    $("#CustomDatagrid1508123301002[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+	    //保存
+	    $("#save[(${radi})]").on("click", function() {
+		    var isValss = $("#CustomForm1507959148710").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#CustomForm1507959148710").serializeObject();
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/custom/CustomRelease/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+		        }
+		    })
+	    })
+	    $("#chooseShip[(${radi})]").bind("click", function() {
+		    HdUtils.selShip(callback);
+	    });
+	    function callback(data) {
+		    $("#cShipNam[(${radi})]").val(data.cShipNam);
+		    $("#voyage[(${radi})]").val(data.ivoyage + '/' + data.evoyage);
+		    $("#tradeId[(${radi})]").val(data.tradeId);
+		    $("#shipNo[(${radi})]").val(data.shipNo);
+		    shipNo = $("#shipNo[(${radi})]").val();
+		    $("#dockCod[(${radi})]").val(data.dockCod);
+
+	    }
+	    $(function() {
+		    $("input:radio[name='ieid']").change(function() {
+			    var ie = $('input:radio[name="ieid"]:checked').val();
+			    if (ie == 'I') {
+				    $('#billNo').combobox({
+				        url : '../webresources/login/custom/CustomRelease/getShipBillDrop?shipNo=' + shipNo + "&iEId=" + ie,
+				        valueField : 'billNo',
+				        textField : 'billNo',
+				        panelHeight : 'auto',
+				        onSelect : function(rec) {
+					        $("#consignCod").val(rec["consignCod"]);
+					        $("#carNum").val(rec["carNum"]);
+					        $("#pieces").val(rec["pieces"]);
+					        $("#weight").val(rec["weights"]);
+					        $("#volume").val(rec["valumes"]);
+					        $("#customBillNo").val(rec["customBillNo"]);
+					        
+					        $("#iEId").val(rec["iEId"]);
+					        $("#shipNo").val(rec["shipNo"]);
+					        return rec.value;
+				        }
+				    });
+			    } else {
+				    $('#billNo').combobox({
+				        url : '../webresources/login/custom/CustomRelease/getShipBillDrop2?shipNo=' + shipNo + "&iEId=" + ie,
+				        valueField : 'billNo',
+				        textField : 'billNo',
+				        panelHeight : 'auto',
+				        onSelect : function(rec) {
+					        $("#consignCod").val(rec["consignCod"]);
+					        //$("#carNum").val(rec["carNum"]);
+					        //	$("#pieces").val(rec["pieces"]);
+					        $("#weight").val(rec["weights"]);
+					        $("#volume").val(rec["valumes"]);
+					        //  $("#customBillNo").val(rec["customBillNo"]);
+					        $("input[name='iEId'][value=E]").attr("checked",true); 
+					        $("#shipNo").val(rec["shipNo"]);
+					        return rec.value;
+				        }
+				    });
+			    }
+		    });
+	    })
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    var billNo = $("#billNo[(${radi})]").val();
+		    onlinquery.add("billNo", billNo);
+		    return onlinquery.build();
+	    }
+
+	    $("#CustomDatagrid1508123301002[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/custom/CustomRelease/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#CustomToolBar1508123301002" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+
+	        }, {
+
+	            field : "vinNo",
+	            title : '大驾号',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "carTyp",
+	            title : "车型",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "carKind",
+	            title : "车属类别",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "colorCod",
+	            title : "颜色",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "marks",
+	            title : "唛头",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "plac",
+	            title : "车位",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "recNam",
+	            title : '<font color="red">录入员</font>',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "recTim",
+	            title : '<font color="red">录入时间</font>',
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.date,
+	            width : 120,
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "updNam",
+	            title : '<font color="red">修改人</font>',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "updTim",
+	            title : '<font color="red">修改时间</font>',
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.date,
+	            width : 120,
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }
+
+	        ] ]
+	    });
+	    $("#CustomDatagrid1508123301002" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    function myclick(value) {
+	    var name = $(value).attr("name").substring(0, 4);
+	    if ($(value).is(':checked')) {
+		    $("input[name^=" + name + "]").each(function() {
+			    $(this).attr("readonly", false);
+			    //    $(".datebox :text").attr("readonly",false);
+		    })
+	    } else {
+		    $("input[name^=" + name + "]").each(function() {
+			    $(this).val("");
+			    $(this).attr("readonly", true);
+			    //    $(".datebox :text").attr("readonly",true);
+		    })
+	    }
+    }
+    /*]]>*/
+</script>
+</html>

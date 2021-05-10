@@ -1,0 +1,420 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#CShipDataForm1507959148645");
+	    var shipCodId = HdUtils.dialog.getValue("shipCodId");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/ship/CShipData/findone?shipCodId=" + shipCodId,
+	        success : function(data) {
+		        $("#CShipDataForm1507959148645").form("loadData", data);
+		        $.each($("input[type=checkbox]:checked"),function(){
+		        	if($(this).attr("name")){
+		        		var name = $(this).attr("name").substring(0,4);
+			        	$("input[name^=" + name + "]").each(function() {
+						    $(this).attr("readonly", false);
+					    })
+		        	}
+		        	
+		        	
+		        })
+	        }
+	    })
+	    $('#countryCod').combobox({
+	        url : '../webresources/login/ship/CShipData/getCCountryDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $('#ownercode').combobox({
+	        url : '../webresources/login/ship/CShipData/getshipCorpCodDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $('#shipCorpCod').combobox({
+	        url : '../webresources/login/ship/CShipData/getshipCorpCodDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $('#shipAgentCod').combobox({
+	        url : '../webresources/login/ship/CShipData/getshipAgentCodDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $('#shipTyp').combobox(HdUtils.code.scode({
+		    fieldCod : 'SHIP_TYP'
+	    }, {
+		    required : false
+	    }));
+	    $('#shipProperty').combobox(HdUtils.code.scode({
+		    fieldCod : 'SHIP_PROPERTY'
+	    }, {
+		    required : false
+	    }));
+	    $('#tradeId').combobox(HdUtils.code.scode({
+		    fieldCod : 'TRADE_ID'
+	    }, {
+		    required : false
+	    }));
+	    $('#lastPortCod').combobox({
+	        url : '../webresources/login/ship/CShipData/getCPortDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $('#nextPortCod').combobox({
+	        url : '../webresources/login/ship/CShipData/getCPortDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $('#shipLineCod').combobox({
+	        url : '../webresources/login/ship/CShipData/getCShipLineDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+		    var isValss = $("#CShipDataForm1507959148645").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+
+		    var formdata = $("#CShipDataForm1507959148645").serializeObject();
+
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/ship/CShipData/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.code == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#DayWorkClassDatagrid1508123307299" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+    });
+    function myclick(value) {
+    	var name = $(value).attr("name").substring(0, 4);
+	    if ($(value).is(':checked')) {
+		    $("input[name^=" + name + "]").each(function() {
+			    $(this).attr("readonly", false);
+		    })
+	    }else{
+	    	$("input[name^=" + name + "]").each(function() {
+	    		$(this).val("");
+			    $(this).attr("readonly", true);
+		    })
+	    }
+    }
+</script>
+<form id="CShipDataForm1507959148645">
+	<input id="shipCodId" name="shipCodId" hidden="true">
+	<table id="CShipDataTable1507959148645" style="height: 75%; width: 80%"
+		class="tableform">
+		<tr>
+			<th>船代码：</th>
+			<td><input id="shipCod" name="shipCod"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="35" style="width: 100px;" /></td>
+			<th>船舶简称：</th>
+			<td><input id="shipShort" name="shipShort"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="20" style="width: 100px;" /></td>
+			<th>中文船名：</th>
+			<td><input id="cShipNam" name="cShipNam"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="35" style="width: 100px;" /></td>
+			<th>英文船名：</th>
+			<td><input id="eShipNam" name="eShipNam"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="35" style="width: 100px;" /></td>
+			<th>国籍：</th>
+			<td><input id="countryCod" name="countryCod"
+				data-options="required:true" maxlength="2" style="width: 100px;" /></td>
+		</tr>
+		<tr>
+			<th>呼号：</th>
+			<td><input id="shipCall" name="shipCall"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="35" style="width: 100px;" /></td>
+
+			<th>IMO号：</th>
+			<td><input id="shipImo" name="shipImo"
+				data-options="required:false" maxlength="9" style="width: 105px;" /></td>
+			<th>MMSI号：</th>
+			<td><input id="mmsiShipCod" name="mmsiShipCod"
+				data-options="required:false" maxlength="20" style="width: 105px;" /></td>
+			<th>船型：</th>
+			<td><input id="shipTyp" name="shipTyp" maxlength="4"
+				style="width: 105px;" /></td>
+            <th>船舶性质：</th>
+			<td><input id="shipProperty" name="shipProperty" maxlength="4"
+				style="width: 105px;" /></td>
+			
+		</tr>
+		<tr>
+			<th>船长：</th>
+			<td><input id="shipLongNum" name="shipLongNum"
+				data-options="min:0,max:1000,precision:2" class="easyui-numberbox"
+				style="text-align: right; width: 100px;" /></td>
+			<th>船宽：</th>
+			<td><input id="shipWidthNum" name="shipWidthNum"
+				data-options="min:0,max:100,precision:2" class="easyui-numberbox"
+				style="text-align: right; width: 100px;" /></td>
+			<th>船高：</th>
+			<td><input id="shipHigh" name="shipHigh"
+				data-options="min:0,max:100,precision:3" class="easyui-numberbox"
+				style="text-align: right; width: 100px;" /></td>
+			<th>型深：</th>
+			<td><input id="typeDeep" name="typeDeep"
+				data-options="min:0,max:10000,precision:2" class="easyui-numberbox"
+				style="width: 100px;" /></td>
+			<th>船速：</th>
+			<td><input id="shipSpeed" name="shipSpeed" class="easyui-numberbox"
+				data-options="min:0,max:1000,precision:2"  style="width: 105px;" /></td>
+		</tr>
+		<tr>
+			<th>总吨：</th>
+			<td><input id="shipGrossWgt" name="shipGrossWgt"
+				data-options="min:0,max:1000000,precision:2"
+				class="easyui-numberbox" style="text-align: right; width: 100px;" /></td>
+			<th>净吨：</th>
+			<td><input id="shipNetWgt" name="shipNetWgt"
+				data-options="min:0,max:1000000,precision:2"
+				class="easyui-numberbox" style="text-align: right; width: 100px;" /></td>
+			<th>载重吨：</th>
+			<td><input id="shipDeadWt" name="shipDeadWt"
+				data-options="min:0,max:1000000,precision:2" class="easyui-numberbox"
+				style="text-align: right; width: 100px;" /></td>
+
+			<th>仓容：</th>
+			<td><input id="totalCapacity" name="totalCapacity" class="easyui-numberbox"
+				data-options="min:0,max:1000,precision:2" style="width: 100px;" /></td>
+			<th>甲板数：</th>
+			<td><input id="deckNum" name="deckNum" data-options="min:0,max:1000" class="easyui-numberbox"
+				style="width: 100px;" /></td>
+		</tr>
+		<tr>
+			<th>满载前吃水：</th>
+			<td><input id="fullDraftFront" name="fullDraftFront"
+				data-options="min:0,max:1000,precision:2" class="easyui-numberbox"
+				style="text-align: right; width: 100px;" /></td>
+			<th>满载后吃水：</th>
+			<td><input id="fullDraftBack" name="fullDraftBack"
+				data-options="min:0,max:1000,precision:2" class="easyui-numberbox"
+				style="text-align: right; width: 100px;" /></td>
+			<th>空载前吃水：</th>
+			<td><input id="emptyDraftFront" name="emptyDraftFront"
+				data-options="min:0,max:1000,precision:2" class="easyui-numberbox"
+				style="text-align: right; width: 100px;" /></td>
+			<th>空载后吃水：</th>
+			<td><input id="emptyDraftBack" name="emptyDraftBack"
+				data-options="min:0,max:1000,precision:2" class="easyui-numberbox"
+				style="text-align: right; width: 100px;" /></td>
+			<th>建造日期：</th>
+			<td><input id="buildDte" name="buildDte" class="easyui-datebox"
+				style="width: 105px;" /></td>
+		</tr>
+		<tr>
+
+			<th>船东：</th>
+			<td><input id="ownercode" name="ownercode" maxlength="10"
+				style="width: 100px;" /></td>
+			<th>船公司：</th>
+			<td><input id="shipCorpCod" name="shipCorpCod"
+				data-options="required:true" maxlength="10" style="width: 100px;" /></td>
+
+			<th>船代理：</th>
+			<td><input id="shipAgentCod" name="shipAgentCod" maxlength="10"
+				style="width: 100px;" /></td>
+			<th>班轮标志：</th>
+			<td><input id="linerId" name="linerId" type="checkbox" value="1"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="1" /></td>
+
+			<th>内外贸：</th>
+			<td><input id="tradeId" name="tradeId" 
+				data-options="required:false" class="easyui-validatebox" />
+			<td></td>
+		</tr>
+
+		<tr>
+
+			<th>航线：</th>
+			<td><input id="shipLineCod" name="shipLineCod" maxlength="6"
+				style="width: 100px;" /></td>
+			<th>上一港：</th>
+			<td><input id="lastPortCod" name="lastPortCod"
+				style="width: 100px;" /></td>
+			<th>下一港：</th>
+			<td><input id="nextPortCod" name="nextPortCod"
+				style="width: 100px;" /></td>
+			
+		</tr>
+		<tr>
+			<th>前跳：</th>
+			<td><input id="frontBoardId" name="frontBoardId" type="checkbox"
+				onclick="myclick(this)" value="1" data-options="required:false"
+				class="easyui-validatebox" maxlength="1" /></td>
+			<th>跳板长：</th>
+			<td><input id="frontBoardLength" name="frontBoardLength" data-options="min:0,max:1000,precision:2"
+			  style="width: 100px;"   readonly="readonly"/></td>
+			<th>跳板宽：</th>
+			<td><input id="frontBoardWidth" name="frontBoardWidth" data-options="min:0,max:1000,precision:2"
+				readonly="readonly"  style="width: 100px;" /></td>
+			<th>承重：</th>
+			<td><input id="frontBoardBearing" name="frontBoardBearing" data-options="min:0,max:1000,precision:2"
+				readonly="readonly" style="width: 100px;" /></td>
+			<th>舱口高：</th>
+			<td><input id="frontHatchHight" name="frontHatchHight" data-options="min:0,max:1000,precision:2"
+				readonly="readonly" style="width: 100px;" /></td>
+		</tr>
+		<tr>
+			<th>舱口宽：</th>
+			<td><input id="frontHatchWidth" name="frontHatchWidth" data-options="min:0,max:1000,precision:2"
+				readonly="readonly" style="width: 100px;" /></td>
+			<th>船底距：</th>
+			<td><input id="frontBottomDistance" name="frontBottomDistance"  data-options="min:0,max:1000,precision:2"
+				readonly="readonly" style="width: 100px;" /></td>
+			<th>主甲板No：</th>
+			<td><input id="frontDeckNo" name="frontDeckNo" data-options="min:0,max:1000"
+				readonly="readonly" style="width: 100px;" /></td>
+		</tr>
+		<tr>
+			<th>中跳：</th>
+			<td><input id="middleBoardId" name="middleBoardId"
+				type="checkbox" onclick="myclick(this)" value="1"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="1" /></td>
+			<th>跳板长：</th>
+			<td><input id="middleBoardLength" name="middleBoardLength" data-options="min:0,max:1000,precision:2"
+				readonly="readonly" style="width: 100px;" /></td>
+			<th>跳板宽：</th>
+			<td><input id="middleBoardWidth" name="middleBoardWidth" data-options="min:0,max:1000,precision:2"
+				readonly="readonly" style="width: 100px;" /></td>
+			<th>承重：</th>
+			<td><input id="middleBoardBearing" name="middleBoardBearing" data-options="min:0,max:1000,precision:2"
+				readonly="readonly" style="width: 100px;" /></td>
+			<th>舱口高：</th>
+			<td><input id="middleHatchHight" name="middleHatchHight" data-options="min:0,max:1000,precision:2"
+				readonly="readonly" style="width: 100px;" /></td>
+		</tr>
+		<tr>
+			<th>舱口宽：</th>
+			<td><input id="middleHatchWidth" name="middleHatchWidth" data-options="min:0,max:1000,precision:2"
+				readonly="readonly" style="width: 100px;" /></td>
+			<th>船底距：</th>
+			<td><input id="middleBottomDistance" name="middleBottomDistance" data-options="min:0,max:1000,precision:2"
+				readonly="readonly" style="width: 100px;" /></td>
+			<th>主甲板No：</th>
+			<td><input id="middleDeckNo" name="middleDeckNo" data-options="min:0,max:1000"
+				readonly="readonly" style="width: 100px;" /></td>
+		</tr>
+		<tr>
+			<th>后跳：</th>
+			<td><input id="backBoardId" name="backBoardId" type="checkbox"
+				onclick="myclick(this)" value="1" data-options="required:false"
+				class="easyui-validatebox" maxlength="1" /></td>
+			<th>跳板长：</th>
+			<td><input id="backBoardLength" name="backBoardLength" data-options="min:0,max:1000,precision:2"
+				readonly="readonly" style="width: 100px;" /></td>
+			<th>跳板宽：</th>
+			<td><input id="backBoardWidth" name="backBoardWidth" data-options="min:0,max:1000,precision:2"
+				readonly="readonly" style="width: 100px;" /></td>
+			<th>承重：</th>
+			<td><input id="backBoardBearing" name="backBoardBearing" data-options="min:0,max:1000,precision:2"
+				readonly="readonly" style="width: 100px;" /></td>
+			<th>舱口高：</th>
+			<td><input id="backHatchHight" name="backHatchHight" data-options="min:0,max:1000,precision:2"
+				readonly="readonly" style="width: 100px;" /></td>
+		</tr>
+		<tr>
+			<th>舱口宽：</th>
+			<td><input id="backHatchWidth" name="backHatchWidth" data-options="min:0,max:1000,precision:2"
+				readonly="readonly" style="width: 100px;" /></td>
+			<th>船底距：</th>
+			<td><input id="backBottomDistance" name="backBottomDistance" data-options="min:0,max:1000,precision:2"
+				readonly="readonly" style="width: 100px;" /></td>
+			<th>主甲板No：</th>
+			<td><input id="backDeckNo" name="backDeckNo" readonly="readonly" data-options="min:0,max:1000"
+				style="width: 100px;" /></td>
+		</tr>
+		<tr>
+			<th>升降机：</th>
+			<td><input id="liftId" name="liftId" type="checkbox"
+				onclick="myclick(this)" value="1" data-options="required:false"
+				class="easyui-validatebox" maxlength="1" /></td>
+			<th>升降情况：</th>
+			<td><input id="liftDescription" name="liftDescription" 
+				readonly="readonly" style="width: 100px;" /></td>
+		</tr>
+		<tr>
+			<th>侧推：</th>
+			<td><input id="pushId" name="pushId" type="checkbox"
+				onclick="myclick(this)" value="1" data-options="required:false"
+				class="easyui-validatebox" maxlength="1" /></td>
+			<th>功率：</th>
+			<td><input id="pushPower" name="pushPower" readonly="readonly"
+				style="width: 100px;" /></td>
+		</tr>
+		<tr>
+			<th>作业要求：</th>
+			<td colspan="9"><textarea id="workRequ" name="workRequ"
+					data-options="required:false" rows="2" style="width: 100%"
+					maxlength="255" /></td>
+		</tr>
+		<tr>
+			<th>配载要求：</th>
+			<td colspan="9"><textarea id="stowRequ" name="stowRequ"
+					data-options="required:false" rows="2" style="width: 100%"
+					maxlength="255" /></td>
+		</tr>
+	</table>
+</form>

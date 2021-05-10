@@ -1,0 +1,132 @@
+<meta charset="UTF-8">
+<style type="text/css">
+    .tableform{
+       margin: 16px auto;
+    }
+    .tableform tr{
+       height: 30px; 
+    } 
+    .tableform th{
+       text-align: right;
+       color: #ff3300;
+       white-space: nowrap;
+    }
+    .tableform td{
+       text-align: left;
+       width: 80px; 
+    }
+    .tableform input{ 
+       text-align: left;
+    }
+ </style>
+ <script>
+   $(document).ready(function() {
+     var formObject=$("#AuthUserForm1427699416046");
+     var dataObject=HdUtils.dialog.getValue("data");
+        formObject.form("loadData",dataObject);
+        HdUtils.dialog.setValue({
+        saveHandler: function () {
+        var tenantObject={};
+            var pwNeverPassIdObject=$("input[name='pwNeverPassId']").val();   
+            tenantObject.pwNeverPassId=pwNeverPassIdObject;
+            var pwValidDaysObject=$("input[name='pwValidDays']").val();   
+            tenantObject.pwValidDays=pwValidDaysObject;
+            var pwModifyTimObject=$("input[name='pwModifyTim']").val();   
+            tenantObject.pwModifyTim=pwModifyTimObject;
+            var donotChgIdObject=$("input[name='donotChgId']").val();   
+            tenantObject.donotChgId=donotChgIdObject;
+            var nextChgIdObject=$("input[name='nextChgId']").val();   
+            tenantObject.nextChgId=nextChgIdObject;
+            var skinObject=$("input[name='skin']").val();   
+            tenantObject.skin=skinObject;
+            var insAccountObject=$("input[name='insAccount']").val();   
+            tenantObject.insAccount=insAccountObject;
+            var insTimestampObject=$("input[name='insTimestamp']").val();   
+            tenantObject.insTimestamp=insTimestampObject;
+            var updAccountObject=$("input[name='updAccount']").val();   
+            tenantObject.updAccount=updAccountObject;
+            var updTimestampObject=$("input[name='updTimestamp']").val();   
+            tenantObject.updTimestamp=updTimestampObject;
+            var descriptionObject=$("input[name='description']").val();   
+            tenantObject.description=descriptionObject;
+            var userIdObject=$("input[name='userId']").val();   
+            tenantObject.userId=userIdObject;
+            var tenantIdObject=$("input[name='tenantId']").val();   
+            tenantObject.tenantId=tenantIdObject;
+            var orgnIdObject=$("input[name='orgnId']").val();   
+            tenantObject.orgnId=orgnIdObject;
+            var accountObject=$("input[name='account']").val();   
+            tenantObject.account=accountObject;
+            var accountPassDateObject=$("input[name='accountPassDate']").val();   
+            tenantObject.accountPassDate=accountPassDateObject;
+            var lockIdObject=$("input[name='lockId']").val();   
+            tenantObject.lockId=lockIdObject;
+            var stopIdObject=$("input[name='stopId']").val();   
+            tenantObject.stopId=stopIdObject;
+            var nameObject=$("input[name='name']").val();   
+            tenantObject.name=nameObject;
+            var passwordObject=$("input[name='password']").val();   
+            tenantObject.password=passwordObject;
+       //var tenantObject={text: nameObject, phone: phoneObject, address: addressObject};
+        var dataJason=null;
+        if (dataObject.id==="") {
+            dataJason={deletedRows:[],insertedRows:[tenantObject],updatedRows:[]};
+        }else{
+            dataJason={deletedRows:[],insertedRows:[],updatedRows:[tenantObject]};
+        }
+        $.ajax({
+            type: "POST",
+            url: "../webresources/login/AuthUser/save",
+            contentType: "application/json",
+            dataType: "json",
+            data: $.toJSON(dataJason),
+            success: function (data) {
+                if (dataObject.id==="") {
+                    HdUtils.messager.info('保存成功');
+                    HdUtils.dialog.close();
+                } else {
+                    HdUtils.messager.info('修改成功');
+                    HdUtils.dialog.close();
+                }
+                HdUtils.dialog.close();
+            },
+            error: function (data) {
+                HdUtils.messager.info(data.responseText);
+            }
+        });
+    }});
+     });
+</script>
+    <form id="AuthUserForm1427699416046">
+    <table id="AuthUserTable1427699416046" style="height:75%;weight:80%" class="tableform">         
+        <tr>
+            <th>密码用不过期: </th><td><input  id="pwNeverPassId" name="pwNeverPassId"  class="easyui-validatebox" /></td>
+            <th>密码有效天数: </th><td><input  id="pwValidDays" name="pwValidDays"   class="easyui-numberbox" /></td>
+            <th>密码修改时间: </th><td><input  id="pwModifyTim" name="pwModifyTim"  class="easyui-validatebox" /></td>
+        </tr><tr> 
+            <th>用户不能更改密码 '0'=用户可以更改 ‘1’=用户不能更还: </th><td><input  id="donotChgId" name="donotChgId"  class="easyui-validatebox" /></td>
+            <th>用户下次登录时必须更改密码: </th><td><input  id="nextChgId" name="nextChgId"  class="easyui-validatebox" /></td>
+            <th>换肤: </th><td><input  id="skin" name="skin"  class="easyui-validatebox" /></td>
+        </tr><tr> 
+            <th>创建人: </th><td><input  id="insAccount" name="insAccount"  class="easyui-validatebox" /></td>
+            <th>创建时间: </th><td><input  id="insTimestamp" name="insTimestamp"  class="easyui-datetimebox"  required="required" /></td>
+            <th>更新人: </th><td><input  id="updAccount" name="updAccount"  class="easyui-validatebox" /></td>
+        </tr><tr> 
+            <th>更新时间: </th><td><input  id="updTimestamp" name="updTimestamp"  class="easyui-datetimebox"  required="required" /></td>
+            <th>描述: </th><td><input  id="description" name="description"  class="easyui-validatebox" /></td>
+            <th>标识: </th><td><input  id="userId" name="userId"  class="easyui-validatebox" /></td>
+        </tr><tr> 
+            <th>租户标识: </th><td><input  id="tenantId" name="tenantId"  class="easyui-validatebox" /></td>
+            <th>标识: </th><td><input  id="orgnId" name="orgnId"  class="easyui-validatebox" /></td>
+            <th>账户: </th><td><input  id="account" name="account"  class="easyui-validatebox" /></td>
+        </tr><tr> 
+            <th>账号过期日期: </th><td><input  id="accountPassDate" name="accountPassDate"  class="easyui-validatebox" /></td>
+            <th>账户锁定标志: </th><td><input  id="lockId" name="lockId"  class="easyui-validatebox" /></td>
+            <th>账户停用标志: </th><td><input  id="stopId" name="stopId"  class="easyui-validatebox" /></td>
+        </tr><tr> 
+            <th>姓名: </th><td><input  id="name" name="name"  class="easyui-validatebox" /></td>
+            <th>密码: </th><td><input  id="password" name="password"  class="easyui-validatebox" /></td>
+
+        </tr>
+    </table>
+    </form>

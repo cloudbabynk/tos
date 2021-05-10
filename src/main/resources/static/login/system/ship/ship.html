@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="DayWorkClassToolBar1508123307299+${radi}"
+	style="float: left">
+	<div>
+		<!-- 查询 -->
+		<span> <input type="radio" name="shipflg" value="E"
+			checked="true"><label>预报</label><input type="radio"
+			name="shipflg" value="A"><label>沽口</label> <input type="radio"
+			name="shipflg" value="Y"><label>在港</label> <input
+			type="radio" name="shipflg" value="L"><label>离港</label> 船代码：<input
+			th:id="shipCod+${radi}" name="shipCod" placeholder="请输入船代码"
+			type="text" data-options="required:false" style="width: 110px">船名：<input
+			th:id="cShipNam+${radi}" name="cShipNam" placeholder="请输入船名"
+			type="text" data-options="required:false" style="width: 110px">航次：<input
+			th:id="voyage+${radi}" name="voyage" placeholder="请输入航次" type="text"
+			data-options="required:false" style="width: 110px"> <a
+			class="easyui-linkbutton" th:id="query+${radi}">查询</a> <shiro:hasPermission
+				name="webresources:login:Ship:add">
+				<a class="easyui-linkbutton" th:id='add+${radi}' iconCls="icon-add"
+					plain="false">新增</a>
+			</shiro:hasPermission> <shiro:hasPermission name="webresources:login:Ship:import">
+				<a class="easyui-linkbutton" th:id="import+${radi}">集团导入</a>
+			</shiro:hasPermission> 
+<!-- 			<shiro:hasPermission name="webresources:login:Ship:importNew"> -->
+<!-- 				<a class="easyui-linkbutton" th:id="importnew+${radi}">新集团导入</a> -->
+<!-- 			</shiro:hasPermission> -->
+			<shiro:hasPermission name="webresources:login:Ship:uploadJt">
+				<a class="easyui-linkbutton" th:id="uploadJt+${radi}">上报集团</a>
+			</shiro:hasPermission>  
+			<shiro:hasPermission name="webresources:login:Ship:BillingInterface">
+				<a class="easyui-linkbutton" th:id="BillingInterface+${radi}">上报计费</a>
+			</shiro:hasPermission><shiro:hasPermission name="webresources:login:Ship:update">
+				<a class="easyui-linkbutton" th:id='edit+${radi}'>编辑</a>
+			</shiro:hasPermission> <shiro:hasPermission name="webresources:login:Ship:delete">
+				<a class="easyui-linkbutton" th:id='delete+${radi}'>删除</a>
+			</shiro:hasPermission> <a class="easyui-linkbutton" th:id='fresh+${radi}'>刷新</a> <a
+			class="easyui-linkbutton" th:id='clear+${radi}'>清空</a> <a
+			class="easyui-linkbutton" th:id='upload+${radi}'>附件上传</a>
+			<shiro:hasPermission name="webresources:login:Ship:iKg">
+				<a class="easyui-linkbutton" th:id='iKg+${radi}'>进口开工</a>
+			</shiro:hasPermission>
+<!-- 			<shiro:hasPermission name="webresources:login:Ship:iWc"> -->
+<!-- 				<a class="easyui-linkbutton" th:id='iWc+${radi}'>进口完船</a> -->
+<!-- 			</shiro:hasPermission> -->
+			<shiro:hasPermission name="webresources:login:Ship:eKg">
+				<a class="easyui-linkbutton" th:id='eKg+${radi}'>出口开工</a>
+			</shiro:hasPermission>
+<!-- 			<shiro:hasPermission name="webresources:login:Ship:eWc"> -->
+<!-- 				<a class="easyui-linkbutton" th:id='eWc+${radi}'>出口完船</a> -->
+<!-- 			</shiro:hasPermission> -->
+			<shiro:hasPermission name="webresources:login:Ship:iZz">
+				<a class="easyui-linkbutton" th:id='iZz+${radi}'>转栈开工</a>
+			</shiro:hasPermission>
+			<shiro:hasPermission name="webresources:login:ShipBill:voyage11">
+		        <a class="easyui-linkbutton" th:id='voyage11+${radi}'>航次接口</a>
+	        </shiro:hasPermission>
+	        <shiro:hasPermission name="webresources:login:ShipBill:berth">
+		        <a class="easyui-linkbutton" th:id='berth+${radi}'>停泊接口</a>
+	        </shiro:hasPermission>
+		</span>
+	</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="DayWorkClassDatagrid1508123307299+${radi}"
+	style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#DayWorkClassDatagrid1508123307299[(${radi})]");
+		var recNam;
+  	  $.get('/login/PrivilegeController/getLoginAccount?t=11&s='+Math.random(), function(data) {
+  		recNam=data.name;  
+  	  });
+	    var shipNo = "";
+	    // buttons
+	    // 增加。
+	    $("#add[(${radi})]").on("click", function() {
+		    addoredit("");
+	    });
+	    // 编辑。
+	    $("#edit[(${radi})]").on("click", function() {
+		    var data = dg.datagrid("getSelected");
+		    if (data == null || data == undefined) {
+			    HdUtils.messager.info('请选择一条数据进行编辑！');
+			    return;
+		    }
+		    var shipNo = data.shipNo;
+		    addoredit(shipNo);
+	    });
+	    function addoredit(shipNo) {
+		    HdUtils.dialog.setValue({
+			    'shipNo' : shipNo
+		    });
+		    HdUtils.dialog.setValue({
+			    'radi' : radi
+		    });
+		    HdUtils.dialog.show({
+		        width : 1200,
+		        height : 450,
+		        title : '船舶航次预报',
+		        href : "../login/system/ship/shipform.html",
+		        isSaveHandler : true
+		    });
+	    }
+	    // 删除。
+	    $("#delete[(${radi})]").on("click", function() {
+		    var selRow = $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("getSelected");
+		    if (selRow) {
+			   var ids = '';
+			    $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+				    if (r) {
+					   /*  for (var i = 0; i < selRow.length; i++) { */
+						    ids += selRow.shipNo;
+					    /* } */
+					    HdUtils.ajax.post({
+					        url : "../webresources/login/ship/Ship/removeAll?shipNos=" + ids,
+					        success : function(data) {
+						        if (data.code == '-1') {
+							        HdUtils.messager.info(data.message);
+							        return false;
+						        }
+						        HdUtils.messager.bottomRight(data.message);
+						        $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("hdReload");
+					        }
+					    });
+				    }
+			    });
+		    }else{
+		    	 HdUtils.messager.info('请至少选择一条数据！');
+				    return false;
+		    }
+		   
+	    });
+	    // 刷新。
+	    $("#fresh[(${radi})]").on("click", function() {
+		    dg.datagrid("hdReload");
+	    });
+	    // 重置。
+	    $("#clear[(${radi})]").on("click", function() {
+		    $("#cShipNam[(${radi})]").val("");
+		    $("#voyage[(${radi})]").val("");
+		    $("#shipCod[(${radi})]").val("");
+	    });
+	    //回车键触发操作
+	    $(document).keydown(function(event) {
+		    if (event.keyCode == 13) {
+			    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+				    queryParams : query(),
+			    })
+		    }
+	    })
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+		    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+	    // 上报集团
+	    $("#uploadJt[(${radi})]").on("click", function() {
+	    	var selRow = $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("getChecked");
+            if (selRow.length == 0) {
+	            HdUtils.messager.info('请至少选择一条数据！');
+	            return false;
+            }
+		    var ids = '';
+		    $.messager.confirm("发送", "确认上报集团吗?", function(r) {
+			    if (r) {
+			    	for (var i = 0; i < selRow.length; i++) {
+			            ids += selRow[i].shipNo + ",";
+		            }
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/ship/Ship/uploadAll?shipNos=" + ids,
+				        success : function(data) {
+					        HdUtils.messager.bottomRight(data.message);
+					        $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+						        queryParams : query(),
+					        })
+				        }
+				    });
+			    }
+		    });
+	    });
+	    // 集团查询
+	    $("#import[(${radi})]").on("click", function() {
+// 	    	HdUtils.dialog.setValue({
+// 			    'radi' : radi
+// 		    });
+// 		    HdUtils.dialog.show({
+// 		        width : 1400,
+// 		        height : 450,
+// 		        title : '集团船舶预报',
+// 		        href : "../webresources/login/ship/Ship/shipzong.htm",
+// 		        isSaveHandler : false
+// 		    });
+	    	HdUtils.dialog.setValue({
+			    'radi' : radi
+		    });
+		    HdUtils.dialog.show({
+		        width : 1400,
+		        height : 450,
+		        title : '集团船舶预报',
+		        href : "../webresources/login/ship/Ship/shipzongnew.htm",
+		        isSaveHandler : false
+		    });
+		    
+	    });
+	    // 新集团查询
+	    $("#importnew[(${radi})]").on("click", function() {
+	    	HdUtils.dialog.setValue({
+			    'radi' : radi
+		    });
+		    HdUtils.dialog.show({
+		        width : 1400,
+		        height : 450,
+		        title : '集团船舶预报',
+		        href : "../webresources/login/ship/Ship/shipzongnew.htm",
+		        isSaveHandler : false
+		    });
+	    });
+	   // 计费接口
+	    $("#BillingInterface[(${radi})]").on("click", function() {
+	    	var data = dg.datagrid("getSelected");
+	    	if (data == null || data == undefined) {
+			    HdUtils.messager.info('请选择一条数据进行上报！');
+			    return;
+		    }
+	    	if (data.shipStat!="L") {
+			    HdUtils.messager.info('只有离港数据可以上报！');
+			    return;
+		    }
+	    	HdUtils.dialog.setValue({
+			    'radi' : radi,
+			    'shipNo' : data.shipNo,
+		    });
+	    	HdUtils.dialog.show({
+		        width : 400,
+		        height : 250,
+		        title : '上报计费',
+		        href : "../login/system/ship/shipjf.html",
+		        isSaveHandler : true
+		    });
+// 	    	var shipNo = data.shipNo;
+// 	        $.messager.confirm("上报", "确认上报计费?", function(r) {
+// 		        if (r) {
+// 			        HdUtils.ajax.post({
+// 			            url : "../webresources/login/ship/Ship/importBilling?shipNo=" + shipNo,
+// 			            success : function(data) {
+// 				            HdUtils.messager.bottomRight(data.message);
+// 				            $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("hdReload");
+// 			            }
+// 			        });
+// 		        }
+// 	        });
+	    });
+	    //附件上传
+	    $("#upload[(${radi})]").on("click", function() {
+		    var data = dg.datagrid("getSelected");
+		    if (data == null || data == undefined) {
+			    HdUtils.messager.info('请先选择一条数据，然后上传！');
+			    return;
+		    }
+		    var shipNo = data.shipNo;
+		    HdUtils.fileupload({
+		        entityName : 'Ship',
+		        entityId : shipNo,
+		        mutiple : false,
+		        isReadOnly : false
+		    });
+	    });
+	   // 进口开工
+	    $("#iKg[(${radi})]").on("click", function() {
+	    	 var data = dg.datagrid("getSelected");
+			    if (data == null || data == undefined) {
+				    HdUtils.messager.info('请先选择一条数据！');
+				    return;
+			    }
+			    var shipNo = data.shipNo;
+			    var date = new Date();
+			    formdata = {
+			        "workQueueNo" : "SI" + "-" +shipNo,
+			        "workTyp" : "SI",
+			        "shipNo" : shipNo,
+			        "contractNo" : "",
+			        "truckNo" : "",
+			        "recNam" : recNam,
+			        "recTim" : date
+			    };
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/work/WorkQueue/generatewq",
+				        data : formdata,
+				        success : function(data) {
+					        if (data.key == '-1') {
+						        HdUtils.messager.info(data.message);
+						        return false;
+					        }
+					        HdUtils.messager.bottomRight('作业队列生成成功');
+				        }
+				    });
+	    });	 
+	 // 进口完船
+	    $("#iWc[(${radi})]").on("click", function() {
+	    	 var data = dg.datagrid("getSelected");
+			    if (data == null || data == undefined) {
+				    HdUtils.messager.info('请先选择一条数据！');
+				    return;
+			    }
+			    var shipNo = data.shipNo;
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/work/WorkCommand/jkWanChuan?shipNo=" + shipNo,
+				        success : function(data) {
+					        HdUtils.messager.bottomRight(data.message);
+				        }
+				    });
+	    });	 
+	 // 出口开工
+	    $("#eKg[(${radi})]").on("click", function() {
+	    	 var data = dg.datagrid("getSelected");
+			    if (data == null || data == undefined) {
+				    HdUtils.messager.info('请先选择一条数据！');
+				    return;
+			    }
+			    var shipNo = data.shipNo;
+			    	   var date = new Date();
+					    formdata = {
+					        "workQueueNo" : "SO" + "-" +shipNo,
+					        "workTyp" : "SO",
+					        "shipNo" : shipNo,
+					        "contractNo" : "",
+					        "truckNo" : "",
+					        "recNam" : recNam,
+					        "recTim" : date
+					    };
+					    HdUtils.ajax.post({
+					        url : "../webresources/login/work/WorkQueue/generatewq2",
+					        data : formdata,
+					        success : function(data) {
+						        if (data.key == '-1') {
+							        HdUtils.messager.info(data.message);
+							        return false;
+						        }
+						        HdUtils.messager.bottomRight('作业队列生成成功');
+					        }
+					    })
+	    });	  
+		// 出口完船
+	    $("#eWc[(${radi})]").on("click", function() {
+	    	 var data = dg.datagrid("getSelected");
+			    if (data == null || data == undefined) {
+				    HdUtils.messager.info('请先选择一条数据！');
+				    return;
+			    }
+			    var shipNo = data.shipNo;
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/work/WorkCommand/ckWanChuan?shipNo=" + shipNo,
+				        success : function(data) {
+					        HdUtils.messager.bottomRight(data.message);
+				        }
+				    });
+	    });	 
+		//转栈开工
+	    $("#iZz[(${radi})]").on("click", function() {
+	    	 var data = dg.datagrid("getSelected");
+			    if (data == null || data == undefined) {
+				    HdUtils.messager.info('请先选择一条数据！');
+				    return;
+			    }
+			    var shipNo = data.shipNo;
+			    	   var date = new Date();
+					    formdata = {
+					        "workQueueNo" : "TZ" + "-" +shipNo,
+					        "workTyp" : "TZ",
+					        "shipNo" : shipNo,
+					        "contractNo" : "",
+					        "truckNo" : "",
+					        "recNam" : recNam,
+					        "recTim" : date
+					    };
+					    HdUtils.ajax.post({
+					        url : "../webresources/login/work/WorkQueue/generatewq3",
+					        data : formdata,
+					        success : function(data) {
+						        if (data.key == '-1') {
+							        HdUtils.messager.info(data.message);
+							        return false;
+						        }
+						        HdUtils.messager.bottomRight('作业队列生成成功');
+					        }
+					    })
+	    });	  
+	    //radio点击触发事件
+	    $(":radio").click(function() {
+		    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+	  //新增加航次接口
+	     $("#voyage11[(${radi})]").on("click", function() {
+	    	 var data = dg.datagrid("getSelected");
+			    if (data == null || data == undefined) {
+			    	HdUtils.messager.info('请先选择一条船数据！');
+				    return;
+			    }else {
+			    	    var shipNo = data.shipNo;
+				        //var iEId=data.iEId;
+				        HdUtils.dialog.setValue({
+					        data : {
+						        shipNo : shipNo,
+						        iEId   : "*"
+					        }
+				        });
+			        HdUtils.dialog.show({
+			            width : 1000,
+			            height : 600,
+			            title : '航次计费接口',
+			            href : "../login/system/ship/shipvoyageform.html",
+			            isSaveHandler : false
+			        });
+		        };
+	     });
+	  //新增加停泊接口
+	     $("#berth[(${radi})]").on("click", function() {
+	    	    var data = dg.datagrid("getSelected");
+			    if (data == null || data == undefined) {
+			    	HdUtils.messager.info('请先选择一条船数据！');
+				    return;
+			    }else{
+			    	if(data.shipStat!="L"){//离港状态的船才可以调用停时接口
+			    		HdUtils.messager.info('该船未完成作业，无法提交停时数据');
+			    		return;
+			    	}else{
+			    		var shipNo = data.shipNo;
+				        //var iEId=data.iEId;
+			    		HdUtils.dialog.setValue({
+					        data : {
+						        shipNo : shipNo,
+						        iEId   : "*"
+					        }
+				        });
+			        HdUtils.dialog.show({
+			            width : 1000,
+			            height : 600,
+			            title : '停泊计费接口',
+			            href : "../login/system/ship/shipBerthform.html",
+			            isSaveHandler : false
+			        });
+			    	}
+			    }
+	     });
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    var shipCod = $("#shipCod[(${radi})]").val();
+		    var cShipNam = $("#cShipNam[(${radi})]").val();
+		    var voyage = $("#voyage[(${radi})]").val();
+		    var val = $("input[name='shipflg']:checked").val();
+		    onlinquery.add("shipStat", val);
+		    onlinquery.add("cShipNam", cShipNam);
+		    onlinquery.add("shipCod", shipCod);
+		    onlinquery.add("voyage", voyage);
+		    return onlinquery.build();
+	    }
+
+	    var IsCheckFlag=false;//是否选中的标志
+	    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/ship/Ship/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : false,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#DayWorkClassToolBar1508123307299" + /*[[${radi}]]*/'',
+	        fit : true,
+	        onDblClickRow : function(rowIndex, rowData) {
+	        	var shipNo = rowData.shipNo;
+			    addoredit(shipNo);
+	        },
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+	            hidden : "false",
+	        }, {
+
+	            field : "shipNo",
+	            title : '主键',
+	            multiSort : true,
+	            hidden : "true",
+	            sortable : false
+	        }, {
+	            field : "shipCod",
+	            title : '船代码',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "cShipNam",
+	            title : '船名',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "berthCodNam",
+	            title : '泊位',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "recTim",
+	            title : '<font color="red">录入时间</font>',
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.datetime,
+	            width : 120,
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "ivoyage",
+	            title : "进口航次",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "evoyage",
+	            title : "出口航次",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "etdArrvTim",
+	            title : "预计抵港时间",
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.datetime,
+	            sortable : false
+	        }, {
+
+	            field : "etdLeavTim",
+	            title : "预报离港时间",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "shipStatNam",
+	            title : '状态',
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "newGroupShipNo",
+	           /* title : "新局调信息",*/
+				title : "局调已导入",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+				formatter : function(value) {
+					if (value != null && value != undefined) {
+						value = "√";
+						return value;
+					} else {
+						return value;
+					}
+				},
+	            sortable : false
+	        }
+
+	        ] ],
+	        onSelect: function (rowIndex, rowData) {
+				if(!IsCheckFlag){
+				    IsCheckFlag = true;
+				    rowIndexTo=rowIndex;
+				 }else if(rowIndexTo==rowIndex){
+					 IsCheckFlag = false;
+					 $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid("unselectRow",rowIndex);
+				 }else{
+					 IsCheckFlag = false;
+				 }
+			}
+	    });
+	    $("#DayWorkClassDatagrid1508123307299" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+	    $('#mm').menu('show',{left:200,top:200});
+    });
+    /*]]>*/
+</script>
+</html>

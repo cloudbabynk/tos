@@ -1,0 +1,80 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#BillCarForm15079591491234567");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    var billNo = HdUtils.dialog.getValue("billNo");
+	    var shipNo = HdUtils.dialog.getValue("shipNo");
+	    var carTyp = HdUtils.dialog.getValue("carTyp");
+	    var cyAreaNo = HdUtils.dialog.getValue("cyAreaNo");
+	    var currentStat = HdUtils.dialog.getValue("currentStat");
+	    var inCyTim = HdUtils.dialog.getValue("inCyTim");
+	    var rksl = HdUtils.dialog.getValue("rksl");
+	    
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+		    var rcsl = $("#rcsl").val();
+		    if (parseInt(rcsl) > parseInt(rksl)){
+		    	HdUtils.messager.info("数量过多！");
+		        return false;
+		    }
+		    var cargoInfo = new Object();
+		    cargoInfo.billNo = billNo;
+		    cargoInfo.shipNo = shipNo;
+		    cargoInfo.carTyp = carTyp;
+		    cargoInfo.cyAreaNo = cyAreaNo;
+		    cargoInfo.currentStat = currentStat;
+		    cargoInfo.inCyTim = inCyTim;
+		    cargoInfo.rcsl = rcsl;
+	    	HdUtils.ajax.post({
+		        url : "../webresources/login/cargo/TruckWork/updateJgsclhBill",
+		        data : cargoInfo,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#DayWorkClassDatagrid1508123307299" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+    });
+</script>
+<form id="BillCarForm15079591491234567">
+	<table id="BillCarTable15079591491234890" style="height: 75%; width: 90%"
+		class="tableform">
+		<tr>
+			<th>拆单数量：</th>
+			<td><input id="rcsl" name="rcsl"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="35" /></td>
+		</tr>
+	</table>
+</form>

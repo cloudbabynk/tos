@@ -1,0 +1,247 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+		var radi = HdUtils.dialog.getValue("radi");
+	    var billNo = HdUtils.dialog.getValue("data").billNo;
+	    var shipNo = HdUtils.dialog.getValue("data").shipNo;
+	    var recNam = HdUtils.dialog.getValue("data").recNam;
+	    // var recTim=HdUtils.dialog.getValue("data").recTim;
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+		    $("#ShipBillCarDatagrid1508123309085").datagrid("hdSave", {
+			    url : "../webresources/login/ship/BillCar/save"
+		    });
+		    var date = new Date();
+		    formdata = {
+		        "workQueueNo" : "SI" + "-" + shipNo,
+		        "workTyp" : "SI",
+		        "shipNo" : shipNo,
+		        "contractNo" : "",
+		        "truckNo" : "",
+		        "recNam" : recNam,
+		        "recTim" : date
+		    };
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/work/WorkQueue/generatewq",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.messager.bottomRight('作业计划生成成功');
+			        HdUtils.dialog.close();
+		        }
+		    })
+	    }
+	    var editRow = undefined;
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    var dataRow = $('#ShipBillDatagrid1508123309099'+radi).datagrid('getSelected');
+		    var billNo = dataRow.billNo;
+		    onlinquery.add("billNo", billNo);
+		    return onlinquery.build();
+	    }
+	    $("#ShipBillCarDatagrid1508123309085").datagrid({
+	        striped : true,
+	        url : "../webresources/login/ship/ShipBill/findShipBillCar",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        onDblClickRow : function(rowIndex, rowData) {
+		        $("#ShipBillCarDatagrid1508123309085").datagrid("hdEdit");
+
+		        /*  if (editRow != undefined) {
+		           $("#ShipBillCarDatagrid1508123309085").datagrid("endEdit", editRow);
+		           }
+		           if (editRow == undefined) {
+		        	   $("#ShipBillCarDatagrid1508123309085").datagrid("beginEdit", rowIndex);
+		                editRow = rowIndex;
+		               $("#ShipBillCarDatagrid1508123309085").datagrid("updateRow",{  
+		               index:rowIndex, //行索引  
+		               row:{  
+		                   confirmId:1 //行中的某个字段  
+		               }  
+		               }) 
+		                $("#ShipBillCarDatagrid1508123309085").datagrid("hdSave", {
+		            url : "../webresources/login/ship/BillCar/save"
+		              });
+		           }    */
+	        },
+	        fit : false,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+
+	        }, {
+
+	            field : "portCarNo",
+	            title : '流水号',
+	            multiSort : true,
+	            width : fixWidth(0.1),
+	            halign : "center",
+	            /*   editor : {
+	                  type : "validatebox",
+	                  options : {
+	                      required : false
+	                  }
+	              }, */
+	            sortable : false
+	        }, {
+	            field : "brandCod",
+	            title : "品牌",
+	            multiSort : true,
+	            width : fixWidth(0.1),
+	            halign : "center",
+	            /*  editor : {
+	                 type : "validatebox",
+	                 options : {
+	                     required : false
+	                 }
+	             }, */
+	            sortable : false
+	        }, {
+
+	            field : "carTyp",
+	            title : "车型",
+	            multiSort : true,
+	            width : fixWidth(0.1),
+	            halign : "center",
+	            /*  editor : {
+	                 type : "validatebox",
+	                 options : {
+	                     required : false
+	                 }
+	             }, */
+	            sortable : false
+	        }, {
+
+	            field : "carKind",
+	            title : "车类",
+	            multiSort : true,
+	            width : fixWidth(0.1),
+	            halign : "center",
+	            /*  editor : {
+	                 type : "validatebox",
+	                 options : {
+	                     required : false
+	                 }
+	             }, */
+	            sortable : false
+	        }, {
+
+	            field : "vinNo",
+	            title : "车架号",
+	            multiSort : true,
+	            width : fixWidth(0.1),
+	            halign : "center",
+	            /*  editor : {
+	                 type : "validatebox",
+	                 options : {
+	                     required : false
+	                 }
+	             }, */
+	            sortable : false
+	        }, {
+
+	            field : "colorCod",
+	            title : "颜色",
+	            multiSort : true,
+	            width : fixWidth(0.1),
+	            halign : "center",
+	            /*   editor : {
+	                  type : "validatebox",
+	                  options : {
+	                      required : false
+	                  }
+	              }, */
+	            sortable : false
+	        }, {
+
+	            field : "weights",
+	            title : "重量",
+	            multiSort : true,
+	            width : fixWidth(0.1),
+	            halign : "center",
+	            /*  editor : {
+	                 type : "validatebox",
+	                 options : {
+	                     required : false
+	                 }
+	             }, */
+	            sortable : false
+	        }, {
+
+	            field : "volumes",
+	            title : "体积",
+	            multiSort : true,
+	            width : fixWidth(0.1),
+	            halign : "center",
+	            /*  editor : {
+	                 type : "validatebox",
+	                 options : {
+	                     required : false
+	                 }
+	             }, */
+	            sortable : false
+	        }, {
+
+	            field : "confirmId",
+	            title : "确认标志",
+	            multiSort : true,
+	            width : fixWidth(0.1),
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        } ] ]
+	    });
+	    function fixWidth(percent) {
+		    return document.documentElement.portCarNo * percent; //这里你可以自己做调整
+	    }
+	    function fixWidth(percent) {
+		    return document.documentElement.brandCod * percent; //这里你可以自己做调整
+	    }
+	    $("#ShipBillCarDatagrid1508123309085").datagrid("hdGetColumnNames");
+    });
+   
+</script>
+<form id="ShipBillCarForm1507959148985">
+	<table id="ShipBillCarDatagrid1508123309085" style="height: 480px;"></table>
+</form>

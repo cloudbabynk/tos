@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+		<!-- 工具栏 -->
+		<div th:id="DayWorkClassToolBar1508123307299+${radi}" style="float: left;position: relative;">
+				<!-- 查询 -->
+						<a class="easyui-linkbutton" th:id='sure+${radi}'>确定</a>
+		</div>
+		<table th:id="DayWorkClassDatagrid1508123307299+${radi}"
+			style="height: 100%"></table>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+    $(document).ready(function() {
+    	$.parser.parse($('#DayWorkClassToolBar1508123307299[(${radi})]'));
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#DayWorkClassDatagrid1508123307299[(${radi})]");
+	    var radiImport = HdUtils.dialog.getValue("radiImport");
+	    // 保存。
+	    $("#sure[(${radi})]").on("click", function() {
+	    	var selRow = dg.datagrid("getSelected");
+            if (!selRow) {
+	            HdUtils.messager.info('请先选数据！');
+	            return;
+            }
+            selRow.days = Date.prototype.dateAdd(0, "yyyy-MM-dd");
+            selRow.planId = null;
+            HdUtils.dialog.close();
+            $("#DayWorkClassDatagrid1508123307299" + radiImport).datagrid("hdAdd", selRow);
+            HdUtils.dialog.close();
+	    });
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+		    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+
+	    function query() {
+	    	var onlinquery = new HdQuery();
+		    onlinquery.add("days", Date.prototype.dateAdd(-1, "yyyy-MM-dd"));
+		    return onlinquery.build();
+	    }
+
+	    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/ship/DayNightPlan/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : false,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#DayWorkClassToolBar1508123307299" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ {
+	            title : '',
+	            colspan : '4'
+	        }, {
+	            title : '20-08（白班）',
+	            colspan : '8'
+	        }, {
+	            title : '08-20（夜班）',
+	            colspan : '8'
+	        } ],[ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+	            rowspan : '2'
+	        }, {
+
+	            field : "planId",
+	            title : '主键',
+	            multiSort : true,
+	            hidden : "true",
+	            rowspan : '2',
+	            sortable : false
+	        }, {
+	            field : "shipNamVoyage",
+	            title : '船名/航次',
+	            multiSort : true,
+	            width : 100,
+	            halign : "center",
+	            rowspan : '2',
+	            sortable : false
+	        }, {
+	            field : "workNum",
+	            title : '装卸总数',
+	            multiSort : true,
+	            width : 100,
+	            halign : "center",
+	            rowspan : '2',
+	            sortable : false
+	        }, {
+
+	            field : "planWorkTim",
+	            title : '计划时间',
+	            multiSort : true,
+	            width : 140,
+	            rowspan : '2',
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "class08LoadTyp",
+	            title : "装/卸",
+	            multiSort : true,
+	            width : 80,
+	            halign : "center",
+	            rowspan : '2',
+	            formatter : function(value){
+	            	return HdUtils.code.name('LOAD_TYP',value);
+	            },
+	            editor : {
+	                type : "combobox",
+	                options : HdUtils.code.scode({
+		                	fieldCod : 'LOAD_TYP'
+		                },{
+		                	required : false
+		                })
+	            },
+	            sortable : false
+	        }, {
+	            field : "class08Tons",
+	            title : "吨数",
+	            width : 80,
+	            multiSort : true,
+	            halign : "center",
+	            rowspan : '2',
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false,
+		                validType : 'length[0,6]'
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "class08WorkNum",
+	            title : "件数",
+	            width : 80,
+	            multiSort : true,
+	            halign : "center",
+	            rowspan : '2',
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false,
+		                validType : 'length[0,6]'
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "class08Lines",
+	            title : "配头",
+	            rowspan : '2',
+	            width : 80,
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false,
+		                validType : 'length[0,2]'
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            title : '配机',
+	            width : 80,
+	            colspan : '3',
+	            rowspan : '1',
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false,
+		                validType : 'length[0,2]'
+		                
+	                }
+	            }
+	        }, {
+
+	            field : "class08Worker",
+	            title : '司机',
+	            width : 80,
+	            rowspan : '2',
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false,
+		                validType : 'length[0,3]'
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "class20LoadTyp",
+	            title : "装/卸",
+	            width : 80,
+	            rowspan : '2',
+	            multiSort : true,
+	            halign : "center",
+	            formatter : function(value){
+	            	return HdUtils.code.name('LOAD_TYP',value);
+	            },
+	            editor : {
+	                type : "combobox",
+	                options : HdUtils.code.scode({
+		                	fieldCod : 'LOAD_TYP'
+		                },{
+		                	required : false
+		                })
+	            },
+	            sortable : false
+	        }, {
+	            field : "class20Tons",
+	            title : "吨数",
+	            width : 80,
+	            rowspan : '2',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false,
+		                validType : 'length[0,6]'
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "class20WorkNum",
+	            title : "件数",
+	            width : 80,
+	            rowspan : '2',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false,
+		                validType : 'length[0,6]'
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "class20Lines",
+	            title : "配头",
+	            width : 80,
+	            rowspan : '2',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false,
+		                validType : 'length[0,2]'
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            title : '配机',
+	            width : 80,
+	            colspan : '3',
+	            rowspan : '1',
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false,
+		                validType : 'length[0,2]'
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "class20Worker",
+	            title : '司机',
+	            width : 80,
+	            rowspan : '2',
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false,
+		                validType : 'length[0,3]'
+	                }
+	            },
+	            sortable : false
+	        }
+
+	        ] ,[{
+	            field : "class20MachWorkcar",
+	            title : '交通车',
+	            width : 80,
+	            rowspan : '1',
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false,
+		                validType : 'length[0,2]'
+	                }
+	            },
+	            sortable : false
+	        },{
+	            field : "class20MachFork",
+	            title : '叉车',
+	            width : 80,
+	            rowspan : '1',
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false,
+		                validType : 'length[0,2]'
+	                }
+	            },
+	            sortable : false
+	        },{
+	            field : "class20MachTrailer",
+	            title : '托头',
+	            width : 80,
+	            rowspan : '1',
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false,
+		                validType : 'length[0,2]'
+	                }
+	            },
+	            sortable : false
+	        },{
+	            field : "class08MachWorkcar",
+	            title : '交通车',
+	            width : 80,
+	            rowspan : '1',
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false,
+		                validType : 'length[0,2]'
+	                }
+	            },
+	            sortable : false
+	        },{
+	            field : "class08MachFork",
+	            title : '叉车',
+	            width : 80,
+	            rowspan : '1',
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false,
+		                validType : 'length[0,2]'
+	                }
+	            },
+	            sortable : false
+	        },{
+	            field : "class08MachTrailer",
+	            title : '托头',
+	            width : 80,
+	            rowspan : '1',
+	            multiSort : true,
+	            align : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false,
+		                validType : 'length[0,2]'
+	                }
+	            },
+	            sortable : false
+	        },
+	            ]]
+	    });
+	    $("#DayWorkClassDatagrid1508123307299" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+</script>
+</html>

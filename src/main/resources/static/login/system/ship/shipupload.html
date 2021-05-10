@@ -1,0 +1,55 @@
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../fileupload/css/fileinput.min.css" />
+<!-- fileinput -->
+<script src="../fileupload/js/fileinput.js"></script>
+<script src="../fileupload/js/fileinput.min.js"></script>
+<script src="../fileupload/js/locales/zh.js"></script>
+<script src="../fileupload/js/plugins/canvas-to-blob.min.js"></script>
+<script src="../fileupload/themes/explorer/theme.js" type="text/javascript"></script>
+<script>
+$("#input-zh").fileinput({
+	'theme': 'explorer',
+    language: "zh",
+    showUpload:false,
+    layoutTemplates:{
+    	actionUpload:'',
+    },
+    uploadUrl: "../rptfile/upload",
+    allowedFileExtensions: ["excel","jasper","jpg","png","image"],
+ })
+ 
+	$(document).ready(function() {
+	    
+	    
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+		    var isValss = $("#ShipForm1507959148645").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+
+		    var formdata = $("#ShipForm1507959148645").serializeObject();
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/ship/Ship/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.code == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#DayWorkClassDatagrid1508123307299" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+
+    });
+</script>
+<form id="ShipUploadForm1507959148645">
+           <div>
+			<input id="input-zh" type="file" multiple="multiple" class="file" data-overwrite-initial="false" name="file"/>
+           </div>
+</form>

@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="PortCarVinExcelToolBar1508123301002+${radi}" style="float: left">
+	<div>
+		<!-- 查询 -->
+		<span> 
+		车架号：<input th:id="vinNo+${radi}" name="vinNo" type="text" data-options="required:false" style="width: 120px">
+		提单号：<input 	th:id="billNo+${radi}" name="billNo" type="text" data-options="required:false" style="width:80px">
+		品牌：<input 	th:id="brandCod+${radi}" name="brandCod" type="text" data-options="required:false" style="width: 80px">		
+		堆场：<input	th:id="cyAreaNo+${radi}" name="cyAreaNo" type="text" data-options="required:false" style="width: 80px">
+		流向：<input th:id="tranPortCod+${radi}"
+			name="tranPortCod"  data-options="required:false" style="width: 60px">
+		贸易性质：<input th:id="tradeId+${radi}" name="tradeId" type="text" data-options="required:false" style="width: 60px"> 
+		   进出口：<input 	th:id="iEId+${radi}" name="iEId" type="text" 	data-options="required:false" style="width: 60px"> 
+		 <a class="easyui-linkbutton" th:id="query+${radi}">查询</a>
+		  <a class="easyui-linkbutton" th:id='clear+${radi}'>重置</a>  
+		   <a class="easyui-linkbutton" th:id='updateVin+${radi}'>导入车架号</a>
+		 <a class="easyui-linkbutton" th:id='fresh+${radi}'>刷新</a>
+		</span>
+	</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="PortCarVinExcelDatagrid1508123301002+${radi}" style="height: 100%"></table>
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#PortCarVinExcelDatagrid1508123301002[(${radi})]"); 
+	    //按钮
+	    // 刷新。
+	    $("#fresh[(${radi})]").on("click", function() {
+		    dg.datagrid("hdReload");
+	    });
+	    // 清空。
+	    $("#clear[(${radi})]").on("click", function() {
+		    $("#vinNo[(${radi})]").val("");
+		    $("#billNo[(${radi})]").val("");
+		    $("#brandCod[(${radi})]").combobox("setValue", "");
+		    $("#cyAreaNo[(${radi})]").combobox("setValue", "");
+		    $("#tranPortCod[(${radi})]").combobox("setValue", "");
+		    $("#tradeId[(${radi})]").combobox("setValue", "");
+		    $("#iEId[(${radi})]").combobox("setValue", ""); 
+		    $("#PortCarVinExcelDatagrid1508123301002[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    }); 
+	    //更新车架号
+	    $("#updateVin[(${radi})]").on("click", function() {
+	    	//必须选择内外贸
+	    	//外贸必须输入提单
+	    	//内贸必须有车型  场号  进出口 
+		    var billNo = $("#billNo[(${radi})]").val();
+		    var brandCod = $("#brandCod[(${radi})]").combobox("getValue");
+		    var iEId = $("#iEId[(${radi})]").combobox("getValue");
+		    var tradeId=$("#tradeId[(${radi})]").combobox("getValue");  
+		    var cyAreaNo = $("#cyAreaNo[(${radi})]").combobox("getValue");
+		    var tranPortCod = $("#tranPortCod[(${radi})]").combobox('getValue');
+		    if(tradeId){
+		    	if(tradeId=="1"){
+		    		//内贸
+		    		if(brandCod&&iEId&&cyAreaNo){
+		    			
+		    		}else{
+		    			HdUtils.messager.info('内贸的必须要进行品牌、进出口！');
+		    		}
+		    	}else{
+		    		//外贸
+		    		if(billNo){
+						var selRow = dg.datagrid("getChecked");
+						if(selRow.length===0){
+							HdUtils.messager.info("请先选择集港计划！");
+							return;
+						}
+						var portCarNos = "";
+						if (selRow.length > 0) {
+							for (var i = 0; i < selRow.length; i++) {
+								portCarNos += selRow[i].portCarNo + ",";
+							}
+						}
+		    			//提单存在就正常导入；
+		    			HdUtils.portCarVinUpload({
+							mutiple : false,
+							isReadOnly : false,
+							tradeId:tradeId,
+							billNo:billNo,
+							iEId:iEId,
+							cyAreaNo:cyAreaNo,
+							tranPortCod:tranPortCod,
+							brandCod:brandCod,
+							portCarNos:portCarNos
+						})
+		    		}else{
+		    			HdUtils.messager.info('外贸的必须要选择提单号进行查询！'); 
+		    		}
+		    	}
+		    }else{
+		    	HdUtils.messager.info('内外贸必选！');
+		    }
+	    	
+	    });
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+		    $("#PortCarVinExcelDatagrid1508123301002[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+	    //下拉
+	    $('#cyAreaNo[(${radi})]').combobox({
+	        url : '../webresources/login/base/CCyArea/getCCyAreaDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : '200',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    }); 
+	    $('#brandCod[(${radi})]').combobox({
+	        url : '../webresources/login/cargo/PortCar/getCBrandDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 100,
+	       // required : 'true',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });  
+	    $('#iEId[(${radi})]').combobox(HdUtils.code.scode({
+		    fieldCod : 'I_E_ID'
+	    }, {
+		    required : false
+	    }));
+	    $('#tradeId[(${radi})]').combobox(HdUtils.code.scode({
+		    fieldCod : 'TRADE_ID'
+	    }, {
+		    required : false
+	    }));
+	    $('#tranPortCod[(${radi})]').combobox(HdUtils.code.scode({
+		    fieldCod : 'NM_FLOW_AREA'
+	    }, {
+		    required : false
+	    }));
+	    
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    var vinNo = $("#vinNo[(${radi})]").val();
+		    var billNo = $("#billNo[(${radi})]").val();
+		    var brandCod = $("#brandCod[(${radi})]").combobox("getValue");
+		    var iEId = $("#iEId[(${radi})]").combobox("getValue");
+		    var tradeId=$("#tradeId[(${radi})]").combobox("getValue");  
+		    var cyAreaNo = $("#cyAreaNo[(${radi})]").combobox("getValue");
+		    var tranPortCod = $("#tranPortCod[(${radi})]").combobox('getValue');
+		    onlinquery.add("cyAreaNo", cyAreaNo);
+		    onlinquery.add("vinNo", vinNo);
+		    onlinquery.add("billNo", billNo);
+		    onlinquery.add("brandCod", brandCod);
+		    onlinquery.add("tranPortCod", tranPortCod);
+		    onlinquery.add("iEId", iEId);
+		    onlinquery.add("tradeId", tradeId); 
+		    return onlinquery.build();
+	    }
+
+	    $("#PortCarVinExcelDatagrid1508123301002[(${radi})]").datagrid({
+	        striped : true,
+	        url : "/webresources/login/cargo/PortCar/findVinExcel",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : false,
+	        selectOnCheck : false,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#PortCarVinExcelToolBar1508123301002" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false
+	        }, {
+	            field : "vinNo",
+	            title : '车架号',
+	            multiSort : true,
+	            halign : "center",
+	            align : "left",
+	            sortable : false
+	        }, {
+	            field : "cShipNam",
+	            title : "船名",
+	            multiSort : true,
+	            halign : "center",
+	            align : "left",
+	            sortable : false
+	        }, {
+	            field : "voyage",
+	            title : "航次",
+	            multiSort : true,
+	            halign : "center",
+	            align : "left",
+	            sortable : false
+	        }, {
+	            field : "billNo",
+	            title : "提单号",
+	            multiSort : true,
+	            halign : "center",
+	            align : "left",
+	            sortable : false
+	        }, {
+	            field : "iEId",
+	            title : "进出口",
+	            multiSort : true,
+	            halign : "center",
+	            align : "left",
+	            formatter : function(value) {
+		            if (value == 'I') {
+			            value = "进口";
+			            return value;
+		            } else if (value == 'E') {
+			            value = "出口";
+			            return value;
+		            }
+	            },
+	            sortable : false
+	        }, {
+	            field : "tradeId",
+	            title : "内外贸",
+	            multiSort : true,
+	            halign : "center",
+	            align : "left",
+	            formatter : function(value) {
+		            if (value == '2') {
+			            value = "外贸";
+			            return value;
+		            } else if (value == '1') {
+			            value = "内贸";
+			            return value;
+		            }
+	            },
+	            sortable : false
+	        }, {
+	            field : "brandNam",
+	            title : "品牌",
+	            multiSort : true,
+	            halign : "center",
+	            align : "left",
+	            sortable : false
+	        }, {
+	        	  field : "carTypNam",
+	       	      title : "车型",
+	      	      multiSort : true,
+	    	      halign : "center",
+	      	      sortable : false,
+	      	      align : "left"
+	       	  },{
+	            field : "cyAreaNo",
+	            title : "场号",
+	            multiSort : true,
+	            halign : "center",
+	            align : "left",
+	            sortable : false
+	        }, {
+	            field : "cyRowNo",
+	            title : "行号",
+	            multiSort : true,
+	            halign : "center",
+	            align : "left",
+	            sortable : false
+	        }, {
+	            field : "cyBayNo",
+	            title : "车位号",
+	            multiSort : true,
+	            halign : "center",
+	            align : "left",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "exitCustomId",
+	            title : "退关",
+	            multiSort : true,
+	            halign : "center",
+	            align : "left",
+	            formatter : function(value) {
+		            if (value == '1') {
+			            value = "是";
+			            return value;
+		            } else{
+			            value = "否";
+			            return value;
+		            }
+	            },
+	            sortable : false
+	        }, {
+	            field : "currentStatNam",
+	            title : "状态",
+	            multiSort : true,
+	            halign : "center",
+	            align : "left",
+	            sortable : false
+	        }, {
+	            field : "recNam",
+	            title : '<font color="red">录入员</font>',
+	            multiSort : true,
+	            halign : "center",
+	            align : "left",
+	            sortable : false
+	        }, {
+	            field : "recTim",
+	            title : '<font color="red">录入时间</font>',
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.datetime,
+	            width : 120,
+	            sortable : false
+	        }, {
+	            field : "updNam",
+	            title : '<font color="red">修改人</font>',
+	            multiSort : true,
+	            halign : "center",
+	            align : "left",
+	            sortable : false
+	        }, {
+	            field : "updTim",
+	            title : '<font color="red">修改时间</font>',
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.datetime,
+	            width : 120,
+	            sortable : false
+	        }
+
+	        ] ]
+	    });
+	    $("#PortCarVinExcelDatagrid1508123301002" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    }); 
+	/*]]>*/
+</script>
+</html>

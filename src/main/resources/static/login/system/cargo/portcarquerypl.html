@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="PortCarToolBar1508123301002+${radi}" style="float: left">
+	提单号：<input th:id="billNo+${radi}" name="billNo" placeholder="提单号"
+		type="text" data-options="required:false" style="width: 120px">&nbsp;&nbsp;
+	码头：<input th:id="dockCod+${radi}" name="dockCod" type="text"
+		data-options="required:false" style="width: 63px"> <a
+		class="easyui-linkbutton" th:id="chooseShip+${radi}">选船</a> 船名：<input
+		th:id="cShipNam+${radi}" name="cShipNam" placeholder="请输入船名"
+		type="text" data-options="required:false" style="width: 80px">出口航次：<input
+		th:id="evoyage+${radi}" name="evoyage" placeholder="请输入航次" type="text"
+		data-options="required:false" style="width: 60px"> <br>
+	发货人：<input th:id="consignCod+${radi}" name="consignCod" type="text"
+		data-options="required:false" style="width: 120px">&nbsp; 场号：<input
+		th:id="cyAreaNo+${radi}" name="cyAreaNo" type="text"
+		data-options="required:false" style="width: 60px"> 品牌：<input
+		th:id="brandCod+${radi}" name="brandCod" type="text"
+		data-options="required:false" style="width: 83px"> <a
+		class="easyui-linkbutton" th:id="query+${radi}">查询</a> <a
+		class="easyui-linkbutton" th:id='clear+${radi}'>重置</a> <a
+		class="easyui-linkbutton" th:id='change+${radi}'>转配</a><a
+		class="easyui-linkbutton" th:id='transshipment+${radi}'>中转货</a>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="PortCarDatagrid1508123301002+${radi}"
+	style="height: 100%;"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function(){
+    	var radi = /*[[${radi}]]*/'';
+    	var shipNo;
+    	$('#brandCod[(${radi})]').combobox({
+   	        url : '../webresources/login/cargo/MChangeShip/getCBrandkDrop',
+   	        valueField : 'value',
+   	        textField : 'label',
+   	        onSelect : function(rec) {
+   		        return rec.value;
+   	        }
+   	    });
+   	   $('#consignCod[(${radi})]').combobox({
+     	        url : '../webresources/login/base/CClientCod/getCClientCodDrop',
+     	        valueField : 'value',
+     	        textField : 'label',
+     	        onSelect : function(rec) {
+     		        return rec.value;
+     	        }
+     	    });
+    	   $('#dockCod[(${radi})]').combobox({
+   	        url : '../webresources/login/contract/ContractIeDoc/getCDock',
+   	        valueField : 'value',
+   	        textField : 'label',
+   	        panelHeight : 'auto',
+   	        required : 'true',
+   	        onSelect : function(rec) {
+   	        	   $('#cyAreaNo[(${radi})]').combobox({
+   	       	        url : '../webresources/login/contract/ContractIeDoc/getCCyArea?dockCod='+rec.value,
+   	       	        valueField : 'value',
+   	       	        textField : 'label',
+   	       	        panelHeight : 100,
+   	       	        multiple : true,
+   	       	        onHidePanel: function () {
+   	                   }
+   	       	    });
+   		        return rec.value;
+   	        },
+   	        onLoadSuccess : function() {
+   		        var data = $('#dockCod[(${radi})]').combobox('getData');
+   		        if (data.length > 0) {
+   			        $('#dockCod[(${radi})]').combobox('select', data[0].value);
+   		        }
+   	        }
+   	    });
+    	   $('#cyAreaNo[(${radi})]').combobox({
+    		   url : '../webresources/login/contract/ContractIeDoc/getCCyArea?dockCod='+$('#dockCod[(${radi})]').combobox('getValue'),
+      	        valueField : 'value',
+      	        textField : 'label',
+      	        panelHeight : 100,
+      	        panelWidth: 80,
+      	        onSelect : function(rec) {
+    		        return rec.value;
+    	        }
+     	    });
+    	   // 查询
+    	    $("#query[(${radi})]").on("click", function() {
+    		    $("#PortCarDatagrid1508123301002[(${radi})]").datagrid({
+    			    queryParams : query(),
+    		    })
+    	    });
+    	    // 清空。
+    	    $("#clear[(${radi})]").on("click", function(){
+    	       $("#billNo[(${radi})]").val("");
+    	       $("#cShipNam[(${radi})]").val("");
+    	       $("#evoyage[(${radi})]").val("");
+    	       $("#brandCod[(${radi})]").combobox('setValue',"");
+    	       $("#cyAreaNo[(${radi})]").combobox('setValue',"");
+    	       $("#consignCod[(${radi})]").combobox('setValue',"");
+    	       $("#dockCod[(${radi})]").combobox('setValue',"");
+    	       $("#cyAreaNo[(${radi})]").combobox('setValue',"");
+    	       $("#PortCarDatagrid1508123301002[(${radi})]").datagrid({
+    			    queryParams : query(),
+    		    });
+    	      });
+
+    	  function query(){
+    		    var onlinquery = new HdQuery();
+    		    var billNo = $("#billNo[(${radi})]").val();
+    		    var consignCod=$("#consignCod[(${radi})]").combobox('getValue');
+    		    var brandCod = $("#brandCod[(${radi})]").combobox('getValue');
+    		    var cyAreaNo = $("#cyAreaNo[(${radi})]").combobox('getValue');
+    		    var dockCod = $("#dockCod[(${radi})]").combobox('getValue');
+    		    onlinquery.add("shipNo", shipNo);
+    		    onlinquery.add("consignCod", consignCod);
+    		    onlinquery.add("billNo", billNo);
+    		    onlinquery.add("brandCod", brandCod);
+    		    onlinquery.add("dockCod", dockCod);
+    		    onlinquery.add("cyAreaNo", cyAreaNo);
+    		    return onlinquery.build();
+    	    }
+    	  $("#chooseShip[(${radi})]").on("click", function() {
+  	    	HdUtils.selShip(callback);
+  	    });
+  	    function callback(data){
+          	$("#cShipNam[(${radi})]").val(data.cShipNam);
+          	$("#evoyage[(${radi})]").val(data.evoyage);
+          	shipNo=data.shipNo;
+          	HdUtils.dialog.setValue({
+			    'shipNo' : shipNo
+          	})
+            HdUtils.ajax.post({
+		        url : "../webresources/login/contract/ContractIeDoc/getShipDockCod?shipNo=" + shipNo,
+		        success : function(data) {
+		         $('#dockCod[(${radi})]').combobox('setValue',data.dockCod);
+		   	   $('#cyAreaNo[(${radi})]').combobox({
+	       	        url : '../webresources/login/contract/ContractIeDoc/getCCyArea?dockCod='+data.dockCod,
+	       	        valueField : 'value',
+	       	        textField : 'label',
+	       	        panelHeight : 100,
+	       	        panelWidth : 80,
+	       	     onSelect : function(rec) {
+	    		        return rec.value;
+	    	        }
+	       	    });
+		   	$("#PortCarDatagrid1508123301002[(${radi})]").datagrid({
+			    queryParams : query(),
+		    });
+		   	var radimchangeship = HdUtils.dialog.getValue('radimchangeship');
+		   	$("#mchangeship256").layout('panel', 'center').panel('refresh');
+		        }
+		    });
+
+          }
+
+		$("#transshipment[(${radi})]").on("click", function() {
+			var flag="T";
+			var selRow = $("#PortCarDatagrid1508123301002[(${radi})]").datagrid("getChecked");
+			var radimchangeship= HdUtils.dialog.getValue("radimchangeship");
+			if (selRow.length == 0) {
+				HdUtils.messager.info('请至少选择一条数据！');
+				return false;
+			}
+			HdUtils.dialog.setValue({
+				'dataRow' : selRow,
+				'radimchangeship':radimchangeship,
+				'flag':flag
+			});
+
+			HdUtils.dialog.show({
+				width : 500,
+				height : 250,
+				title : '转配货',
+				href : "../login/system/cargo/mchangeshipformpl.html",
+				isSaveHandler : true
+			});
+		});
+
+  	 $("#change[(${radi})]").on("click", function() {
+   	  	var selRow = $("#PortCarDatagrid1508123301002[(${radi})]").datagrid("getChecked");
+   	       var radimchangeship= HdUtils.dialog.getValue("radimchangeship");
+         if (selRow.length == 0) {
+             HdUtils.messager.info('请至少选择一条数据！');
+             return false;
+         }
+         HdUtils.dialog.setValue({
+			    'dataRow' : selRow,
+			    'radimchangeship':radimchangeship
+		    });
+
+         HdUtils.dialog.show({
+	    	    width : 500,
+	    	    height : 250,
+	    	    title : '转配船',
+	    	    href : "../login/system/cargo/mchangeshipformpl.html",
+	    	    isSaveHandler : true
+	    	});
+ 	    });
+    	 $("#PortCarDatagrid1508123301002[(${radi})]").datagrid({
+    	        url : "../webresources/login/cargo/PortCar/findZCPL",
+    	        queryParams : query(),
+    	        method : "post",
+    	        pagination : true,
+    	        singleSelect : true,
+    	        selectOnCheck : true,
+    	        checkOnSelect : true,
+    	        rownumbers : true,
+    	        pageSize : 20,
+    	        toolbar : "#PortCarToolBar1508123301002"+ /*[[${radi}]]*/'',
+    	        fit : true,
+    	        onSelect(rowIndex,rowData){
+   	           	var shipNo = rowData.shipNo;
+   	           	var billNo = rowData.billNo;
+   	    	     HdUtils.dialog.setValue({
+	           		 'shipNo' : shipNo,
+	           		 'billNo' : billNo
+	        	    });
+//    	           	function queryMChangeShip(){
+//                      	var builder = new HdQuery();
+//                        builder.add("shipNo", shipNo);
+//                        return builder.build();
+//                    };
+                   var radimchangeship = HdUtils.dialog.getValue('radimchangeship');
+                   $("#mchangeship256").layout('panel', 'center').panel('refresh');
+   		        },
+    	        fitColumns : false,
+    	        columns : [ [ {
+    	            field : "ck",
+    	            checkbox : true,
+    	            sortable : false,
+
+    	        }, {
+    	            field : "shipNo",
+    	            title : "船舶序号",
+    	            multiSort : true,
+    	            hidden:true,
+    	            align : "center",
+    	            editor : {
+    	                type : "validatebox",
+    	                options : {
+    		                required : false
+    	                }
+    	            },
+    	            sortable : false
+    	        }, {
+    	            field : "billNo",
+    	            title : "提单号",
+    	            multiSort : true,
+    	            align : "center",
+    	            editor : {
+    	                type : "validatebox",
+    	                options : {
+    		                required : false
+    	                }
+    	            },
+    	            sortable : false
+    	        }, {
+
+    	            field : "brandNam",
+    	            title : "品牌",
+    	            multiSort : true,
+    	            align : "center",
+    	            editor : {
+    	                type : "validatebox",
+    	                options : {
+    		                required : false
+    	                }
+    	            },
+    	            sortable : false
+    	        }, {
+
+    	            field : "carTypNam",
+    	            title : "车型",
+    	            multiSort : true,
+    	            align : "center",
+    	            editor : {
+    	                type : "validatebox",
+    	                options : {
+    		                required : false
+    	                }
+    	            },
+    	            sortable : false
+    	        }, {
+
+    	            field : "cyAreaNo",
+    	            title : "场号",
+    	            multiSort : true,
+    	            align : "center",
+    	            editor : {
+    	                type : "validatebox",
+    	                options : {
+    		                required : false
+    	                }
+    	            },
+    	            sortable : false
+    	        }, {
+
+    	            field : "cksl",
+    	            title : "车数",
+    	            multiSort : true,
+    	            align : "center",
+    	            editor : {
+    	                type : "validatebox",
+    	                options : {
+    		                required : false
+    	                }
+    	            },
+    	            sortable : false
+    	        }, {
+    	            field : "cyAreaNo",
+    	            title : "场号",
+    	            multiSort : true,
+    	            align : "center",
+    	            editor : {
+    	                type : "validatebox",
+    	                options : {
+    		                required : false
+    	                }
+    	            },
+    	            sortable : false
+    	        }, {
+    	            field : "inCyTim",
+    	            title : "进场时间",
+    	            multiSort : true,
+    	            align : "center",
+    	            formatter : $.hd.ezui.formatter.date,
+    	            sortable : false
+    	        }, {
+
+    	            field : "tranPortNam",
+    	            title : "卸货港",
+    	            multiSort : true,
+    	            align : "center",
+    	            editor : {
+    	                type : "validatebox",
+    	                options : {
+    		                required : false
+    	                }
+    	            },
+    	            sortable : false
+    	        }, {
+
+    	            field : "discPortNam",
+    	            title : "目的港",
+    	            multiSort : true,
+    	            align : "center",
+    	            editor : {
+    	                type : "validatebox",
+    	                options : {
+    		                required : false
+    	                }
+    	            },
+    	            sortable : false
+    	        }, {
+
+    	            field : "rfidCardNo",
+    	            title : "RFID",
+    	            multiSort : true,
+    	            hidden:true,
+    	            align : "center",
+    	            editor : {
+    	                type : "validatebox",
+    	                options : {
+    		                required : false
+    	                }
+    	            },
+    	            sortable : false
+    	        }, {
+
+    	            field : "portCarNo",
+    	            title : "车辆流水号",
+    	            multiSort : true,
+    	            hidden:true,
+    	            align : "center",
+    	            editor : {
+    	                type : "validatebox",
+    	                options : {
+    		                required : false
+    	                }
+    	            },
+    	            sortable : false
+    	        } ] ]
+    	    });
+    });
+    /*]]>*/
+</script>
+</html>

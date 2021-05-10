@@ -1,0 +1,160 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#CTruckForm1507959148645");
+	    var truckNo = HdUtils.dialog.getValue("truckNo");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    if (truckNo) {
+	    	$("#truckNo").attr("readonly",true);
+	    } else {
+	    	$("#truckNo").attr("readonly",false);
+	    }
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/base/CTruck/findone?truckNo=" + truckNo,
+	        success : function(data) {
+		        $("#CTruckForm1507959148645").form("loadData", data);
+	        }
+	    })
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+		    var isValss = $("#CTruckForm1507959148645").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#CTruckForm1507959148645").serializeObject();
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/base/CTruck/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#DayWorkClassDatagrid1508123307299" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+    });
+	function findCod(){
+    	var truckNoValue = $("#truckNo").val();
+    	HdUtils.ajax.post({
+			url : "../webresources/login/base/CTruck/findCTruck?truckNo=" + truckNoValue,
+			success : function(data) {
+				if (data.code == "-1") {
+					$('#truckNo').val("");
+					HdUtils.messager.bottomRight(data.message);
+					$('#truckNo').focus();
+			        return false;
+				}
+			}
+		});
+    }
+</script>
+<form id="CTruckForm1507959148645">
+	<table id="CTruckTable1507959148645" style="height: 75%; width: 80%"
+		class="tableform">
+		<tr>
+			<th>卡车号：</th>
+			<td><input id="truckNo" name="truckNo" onchange="findCod();"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="10" /></td>
+			<th>牌号：</th>
+			<td><input id="platNo" name="platNo"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="10" /></td>
+			<th>托牌号：</th>
+			<td><input id="trayNo" name="trayNo"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="4" /></td>
+				
+			<th>重量：</th>
+			<td><input id="truckWgt" name="truckWgt"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="35" /></td>
+			
+		</tr>
+		<tr>
+		    <th>单位：</th>
+			<td><input id="truckUnit" name="truckUnit"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="255" /></td>
+			<th>司机名：</th>
+			<td><input id="truckerNam" name="truckerNam"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="10" /></td>
+			<th>司机号：</th>
+			<td><input id="truckerNo" name="truckerNo"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="10" /></td>
+			<th>联系人：</th>
+			<td><input id="relationNam" name="relationNam"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="35" /></td>
+			
+		</tr>
+		<tr>
+		    <th>电话：</th>
+			<td><input id="telephon" name="telephon"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+			<th>手机：</th>
+			<td><input id="mobileTele" name="mobileTele"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="10" /></td>
+			<th>禁提标志：</th>
+			<td><input type="radio"  name="forbidId" value="1"
+					 checked="checked" class='easyui-radio'>是</input> 
+			<input type="radio" name="forbidId" value="0" class='easyui-radio'>否</input></td>
+			<th>禁提内容：</th>
+			<td><input id="forbidTxt" name="forbidTxt"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="35" /></td>
+			
+		</tr>
+		<tr>
+		    <th>载重吨：</th>
+			<td><input id="capability" name="capability"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+			<th>制造日期：</th>
+			<td><input id="inDate" name="inDate"
+				data-options="required:false" class="easyui-datebox"
+				maxlength="10" /></td>
+			<th>制造厂家：</th>
+			<td><input id="factroy" name="factroy"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="10" /></td>
+			<th>备注：</th>
+			<td><input id="remarks" name="remarks"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="35" /></td>
+		</tr>
+	</table>
+</form>

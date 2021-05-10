@@ -1,0 +1,80 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 120px;
+}
+
+.tableform input {
+	text-align: left;
+	width: 120px;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var qrcodepath = HdUtils.dialog.getValue("qrcodepath");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    $("#attach").val(qrcodepath.substring(10,22));
+	    function saveHandler() {
+		    var fromWho=$("#fromWho").val();
+		    var password=$("#password").val();
+		    var toWho=$("#toWho").val();
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/contract/ContractIeDoc/sendEmail?fromWho="+fromWho+"&password="+password+"&toWho="+toWho+"&attach="+qrcodepath.substring(10,22),
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('邮件发送成功');
+		        }
+		    })
+	    }
+    });
+</script>
+<form id="emailForm1507959148710">
+	<table id="EmailFormTable1507959148710" style="height: 75%; width: 80%"
+		class="tableform">
+		<tr>
+			<th>发件人邮箱号：</th>
+			<td><input id="fromWho" name="fromWho"
+				data-options="required:true" class="easyui-validatebox" validType="email"
+				maxlength="20" /></td>
+		</tr>
+		<tr>
+			<th>授权码密码：</th>
+			<td><input id="password" name="password" type="password"
+				maxlength="20" /></td>
+		</tr>
+		<tr>
+			<th>收件人：</th>
+			<td><input id="toWho" name="toWho" validType="email"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="20" /></td>
+		</tr>
+		
+		<tr>
+			<th>附件：</th>
+			<td><input id="attach" name="attach"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		</tr>
+	</table>
+</form>

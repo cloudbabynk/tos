@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8" />
+<div class="easyui-layout" data-options="fit:true"
+	style="height: 100%; width: 100%">
+	<div data-options="region:'center'" style="height: 100%; width: 100%">
+		<!-- 工具栏 -->
+		<div th:id="ShipCarMeasureToolBar+${radi}" style="float: left; position: relative;">
+			<div>
+				<!-- 查询 -->
+				码头公司：<input th:id="unit+${radi}"	name="unit" type="text" data-options="required:false"	style="width:80px"/>
+				道闸编号：<input th:id="lane+${radi}"	name="lane" type="text" data-options="required:false"	style="width:80px"/>
+				车辆牌照号：<input th:id="brandCod+${radi}" name="brandCod" style="width: 100px" data-options="required:false" />
+				起始时间：<input th:id="inCyTim+${radi}" name="inCyTim" class="easyui-datetimebox"style="width: 150px" data-options="required:false" />
+				结束时间：<input th:id="outCyTim+${radi}" name="outCyTim" class="easyui-datetimebox"style="width: 150px" data-options="required:false" />
+				<a class="easyui-linkbutton" th:id="query+${radi}" plain="false">查询</a>
+			</div>
+		</div>
+		<table th:id="ShipCarMeasureDatagrid +${radi}" style="height: 100%"></table>
+	</div>
+</div>
+
+<!-- 脚本控制 -->
+<script type="text/javascript">
+/*<![CDATA[*/
+	var reload5436 = [ {
+        iconCls : 'icon-reload',
+        handler : function() {
+	        $('#ShipStatusTree123[(${radi})]').tree('reload');
+        }
+    } ];
+	var unitCod ="";
+	$('#unit[(${radi})]').combobox({
+        url : '../webresources/login/ship/ShipThruputRecord/getCDock',
+        valueField : 'value',
+        textField : 'label',
+        panelHeight : 120,
+        onSelect : function(rec) {
+        	unitCod=rec.label;
+        	$('#lane[(${radi})]').combobox('reload','../webresources/login/ship/ShipThruputRecord/getLane?unit='+unitCod);
+        }
+    });
+	$('#lane[(${radi})]').combobox({
+        url : '../webresources/login/ship/ShipThruputRecord/getLane?unit='+unitCod,
+        valueField : 'LANE_NO',
+        textField : 'LANE_NAM',
+        panelHeight : 120
+    });
+
+    function expandParent(node) {
+	    var parent = node;
+	    var t = true;
+	    do {
+		    parent = $('#ShipStatusTree123[(${radi})]').tree('getParent', parent.target); //获取此节点父节点   
+		    if (parent) { //如果存在   
+			    t = true;
+			    $('#ShipStatusTree123[(${radi})]').tree('expand', parent.target);
+		    } else {
+			    t = false;
+		    }
+	    } while (t);
+    };
+    function detail(index){  
+    	$('#ShipCarMeasureDatagrid[(${radi})]').datagrid('selectRow',index);// 关键在这里  
+        var row = $('#ShipCarMeasureDatagrid[(${radi})]').datagrid('getSelected'); 
+        HdUtils.dialog.setValue({
+        	data : {
+        		billNo : row.billNo
+	        }
+    	});
+    	HdUtils.dialog.show({
+    	    width : 750,
+    	    height : 380,
+    	    title : '进出门明细',
+    	    href : "../login/system/ship/accessdetails.html",
+    	    isSaveHandler : false
+    	});
+    }  
+    function photo(index){  
+    	$('#ShipCarMeasureDatagrid[(${radi})]').datagrid('selectRow',index);// 关键在这里  
+        var row = $('#ShipCarMeasureDatagrid[(${radi})]').datagrid('getSelected'); 
+    	if(row.FULL_FILE_NAME!=null){
+    		var url=row.FULL_FILE_NAME.substr(14).replace(/\\/g,"/");
+    		var datas={};
+    		datas.url=url;
+        	$.ajax({
+                type: "POST",
+                url: "/webresources/login/ship/BillSplit/getImg",
+                contentType: "application/json",
+                dataType: "json",
+                data: $.toJSON(datas),
+                success: function (data) {
+                	HdUtils.dialog.setValue({
+                    	data : {
+                    		src : data
+            	        }
+                	});
+                	HdUtils.dialog.show({
+                	    width : 750,
+                	    height : 380,
+                	    title : '车辆进出闸',
+                	    href : "../login/system/ship/cariophoto.html",
+                	    isSaveHandler : false
+                	});
+                },
+                error: function (data) {
+                }
+            });
+    	}
+    }  
+    function detail(index){  
+    	$('#ShipCarMeasureDatagrid[(${radi})]').datagrid('selectRow',index);// 关键在这里  
+        var row = $('#ShipCarMeasureDatagrid[(${radi})]').datagrid('getSelected'); 
+        HdUtils.dialog.setValue({
+        	data : {
+        		platNo : row.PLAT_NO
+	        }
+    	});
+    	HdUtils.dialog.show({
+    	    width : 750,
+    	    height : 380,
+    	    title : '注册信息',
+    	    href : "../login/system/ship/register.html",
+    	    isSaveHandler : false
+    	});
+    }
+    function dateFormatHsbc(myDate) {
+//	      alert(myDate.getFullYear()+"-"+(myDate.getMonth()+1)+"-"+myDate.getDate());
+	      var myyear = myDate.getFullYear();
+	      var mymonth = (myDate.getMonth()+1)>9?(myDate.getMonth()+1):("0"+(myDate.getMonth()+1));
+	      var myday = myDate.getDate()>9?myDate.getDate():("0"+myDate.getDate());
+	      var hor = myDate.getHours()>9?myDate.getHours():("0"+myDate.getHours());
+	      var min = myDate.getMinutes()>9?myDate.getMinutes():("0"+myDate.getMinutes());
+	      var sec = myDate.getSeconds()>9?myDate.getSeconds():("0"+myDate.getSeconds());
+	      var str = myyear+"-"+mymonth+"-"+myday+" "+hor+":"+min+":"+sec;
+	      return str;
+	  }
+    $(document).ready(function() {
+	    var shipNo = "";
+	    $("#inCyTim[(${radi})]").val(dateFormatHsbc(new Date(new Date(new Date().toLocaleDateString()).getTime())));
+	  　　$("#outCyTim[(${radi})]").val(dateFormatHsbc(new Date(new Date(new Date().toLocaleDateString()).getTime()+24*60*60*1000-1)));
+	    $.parser.parse($('#ShipCarMeasureToolBar[(${radi})]'));
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#ShipCarMeasureDatagrid[(${radi})]");
+	    $('#ShipStatusTree123[(${radi})]').tree({
+	        method : "get",
+	        url : "../webresources/login/ship/Ship/gentree",
+	        onClick : treeclick
+	    });
+	    function treeclick(node) {
+		    shipNo = node.id;
+		    $("#ShipCarMeasureDatagrid[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    }
+	    $('#tradeId[(${radi})]').combobox(HdUtils.code.scode({
+		    fieldCod : 'TRADE_ID'
+	    }, {
+		    required : false
+	    }));
+	    $('#iEId[(${radi})]').combobox(HdUtils.code.scode({
+		    fieldCod : 'I_E_ID'
+	    }, {
+		    required : false
+	    }));
+	
+	    function query() {
+		    var unit = $("#unit[(${radi})]").combobox('getText');
+		    var lane = $("#lane[(${radi})]").combobox('getValue');
+		    var brandCod = $("#brandCod[(${radi})]").val();
+		    var inCyTim = $("#inCyTim[(${radi})]").datetimebox("getValue");
+		    var outCyTim = $("#outCyTim[(${radi})]").datetimebox("getValue");
+		    var onlinquery = new HdQuery();
+		    onlinquery.add("unit", unit);
+		    onlinquery.add("lane", lane);
+		    onlinquery.add("brandCod", brandCod);
+		    onlinquery.add("inCyTim", inCyTim);
+		    onlinquery.add("outCyTim", outCyTim);
+		    return onlinquery.build();
+	    }
+	    $("#query[(${radi})]").on("click", function() {
+	    	$("#ShipCarMeasureDatagrid[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+	    
+	    $("#ShipCarMeasureDatagrid[(${radi})]").hddatagrid({
+	        striped : true,
+	        url : "../webresources/login/ship/BillSplit/findIO",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        autoLoad : false,
+	        pageSize : 20,
+	        toolbar : "#ShipCarMeasureToolBar[(${radi})]",
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "PLAT_NO",
+	            title : "车辆牌照号",
+	            multiSort : true,
+	            halign : "center",
+	            formatter: function(value,row,index){
+	                  return "<a class='easyui-linkbutton' href='#' plain='false' onclick='detail("+index+")'>"+row.PLAT_NO+"</a>";
+	            },
+	            sortable : true
+	        }, {
+                field : "FACILITY_ID",
+                title : '码头公司（区域）',
+                multiSort : true,
+                halign : "center",
+                sortable : true
+            }, {
+
+                field : "LANE_NO",
+                title : '道闸编号',
+                multiSort : true,
+                halign : "center",
+                sortable : false
+            }, {
+
+                field : "STAGE_NAME",
+                title : '流向',
+                multiSort : true,
+                halign : "center",
+                sortable : false
+            }, {
+	            field : "IO_TIM",
+	            title : '时间',
+	            multiSort : true,
+	            halign : "center",
+	            formatter: function(value,row,index){
+	                  return "<a class='easyui-linkbutton' href='#' plain='false' onclick='photo("+index+")'>"+row.IO_TIM+"</a>";
+	            },
+	            sortable : false
+	        }] ]
+	    });
+    });
+    /*]]>*/
+</script>
+</html>

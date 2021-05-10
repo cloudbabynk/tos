@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+		  var entityName="Ship";
+	     var radi=HdUtils.dialog.getValue("radi");
+		 var platNo=HdUtils.dialog.getValue("data").platNo;
+		 var rowSelected;
+	    
+  	  	function S4() {
+		    return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+	    };
+	    // Generate a pseudo-GUID by concatenating random hexadecimal.  
+	    function guid() {
+		    return (S4() + S4() + S4() + S4() + S4() + S4() + S4() + S4());
+	    };
+    function query() {
+	    var onlinquery = new HdQuery();
+	    onlinquery.add("platNo", platNo);
+	    return onlinquery.build();
+    }
+    $("#XmlDatagrid1507959149305").datagrid({
+        url : "../webresources/login/ship/BillSplit/findRegisters",
+        queryParams : query(),
+        method : "post",
+        pagination : true,
+        singleSelect : false,
+        selectOnCheck : true,
+        checkOnSelect : true,
+        rownumbers : true,
+        pageSize : 20,
+        fit : false,
+        fitColumns : false,
+        columns : [ [{
+            field : "PLAT_NO",
+            title : '车牌照号',
+            multiSort : true,
+            width : fixWidth(0.1),
+            align : "center",
+            sortable : false
+        },{
+
+            field : "DRIVER_NAM",
+            title : '驾驶员姓名',
+            multiSort : true,
+            width : fixWidth(0.1),
+            align : "center",
+            sortable : false
+        },  {
+
+            field : "RELATION_NAM",
+            title : "联系人",
+            multiSort : true,
+            align : "center",
+            sortable : false
+        }, {
+            field : "TELEPHON",
+            title : '联系电话',
+            width : 120,
+            multiSort : true,
+            sortable : false
+        },{
+            field : "MOBILE_TELE",
+            title : '手机',
+            width : 120,
+            multiSort : true,
+            sortable : false
+        },{
+            field : "UNIT_NAM",
+            title : '单位',
+            width : 120,
+            multiSort : true,
+            sortable : false
+        },{
+            field : "DEPT_NAM",
+            title : '部门',
+            width : 120,
+            multiSort : true,
+            sortable : false
+        },{
+            field : "FACTROY",
+            title : '制造厂商',
+            width : 120,
+            multiSort : true,
+            sortable : false
+        }]],
+        onDblClickRow : function(rowIndex, rowData) {
+        	$("#XmlDatagrid1507959149305").datagrid("hdEdit");
+        	rowSelected = rowIndex;
+        }
+    });
+  
+    function fixWidth(percent) {
+	    return document.documentElement.shipNam * percent; //这里你可以自己做调整
+    }
+    function fixWidth(percent) {
+	    return document.documentElement.evoyage * percent ; //这里你可以自己做调整
+    }
+    $("#XmlDatagrid1507959149305").datagrid("hdGetColumnNames");
+	 });
+</script>
+<form th:id="ContractIeDocForm1507959149305">
+	<table id="XmlDatagrid1507959149305" style="height: 530px;"></table>
+</form>
+</html>

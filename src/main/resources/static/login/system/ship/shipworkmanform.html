@@ -1,0 +1,115 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#ShipWorkManForm1507959148710");
+	    var shipWorkmanId = HdUtils.dialog.getValue("shipWorkmanId");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/ship/ShipWorkman/findone?shipWorkmanId=" + shipWorkmanId,
+	        success : function(data) {
+		        $("#ShipWorkManForm1507959148710").form("loadData", data);
+	        }
+	    })
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    $('#wokrRunCod').combobox({
+	        url : '../webresources/login/ship/ShipWorkman/getWorkRunCodDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 'auto',
+	        required:'true',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+
+	    function saveHandler() {
+		    var isValss = $("#ShipWorkManForm1507959148710").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#ShipWorkManForm1507959148710").serializeObject();
+		    formdata.shipNo = HdUtils.dialog.getValue("shipNo");
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/ship/ShipWorkman/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#ShipWorkManDatagrid1508123301002" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+    });
+</script>
+<form id="ShipWorkManForm1507959148710">
+	<table id="ShipWorkManTable1507959148710"
+		style="height: 75%; width: 80%" class="tableform">
+		<input id="shipWorkmanId" name="shipWorkmanId"
+			data-options="required:false" class="easyui-validatebox"
+			hidden="true" maxlength="10" />
+		<tr>
+			<th>作业时间：</th>
+			<td><input id="workDay" name="workDay"
+				data-options="required:true" class="easyui-datetimebox"
+				maxlength="10" /></td>
+			<th>班次：</th>
+			<td><input id="wokrRunCod" name="wokrRunCod"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="10" /></td>
+		</tr>
+		<tr>
+			<th>作业种类：</th>
+			<td><input id="workTyp" name="workTyp"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="255" /></td>
+			<th>作业人员：</th>
+			<td><input id="workContent" name="workContent"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="255" /></td>
+
+		</tr>
+		<tr>
+			<th>作业完成量：</th>
+			<td><input id="wokrNum" name="wokrNum"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		</tr>
+		<tr>
+			<th>备注：</th>
+			<td colspan="5"><input id="remarks" name="remarks"
+				style="width: 100%;" data-options="required:false"
+				class="easyui-validatebox" maxlength="255" /></td>
+			<input id="shipNo" name="shipNo" data-options="required:false"
+				hidden="true" class="easyui-validatebox" maxlength="255" />
+		</tr>
+	</table>
+</form>

@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8" />
+<div class="easyui-layout" data-options="fit:true"
+	style="width: 100%; height: 100%;">
+	<!--<div data-options="region:'north',title:'North Title',split:true" style="height:100px;"></div>-->
+	<div data-options="region:'west',title:'组织架构',split:true"
+		style="width: 280px;">
+		<ul th:id="authUserTenantOrgnTree+${radi}"></ul>
+	</div>
+	<div data-options="region:'center',title:''">
+		<!-- style="padding:5px;"-->
+		<div th:id="authUserToolBar+${radi}">
+			<div style="float: left;">
+				<shiro:hasPermission name="webresources:login:AuthUser:add">
+					<a class="easyui-linkbutton" iconCls="icon-add" plain="false"><label
+						name="add">增加</label></a>
+				</shiro:hasPermission>
+				<shiro:hasPermission name="webresources:login:AuthUser:edit">
+					<a class="easyui-linkbutton" iconCls="icon-edit" plain="false"><label
+						name="edit">编辑</label></a>
+				</shiro:hasPermission>
+				<shiro:hasPermission name="webresources:login:AuthUser:remove">
+					<a class="easyui-linkbutton" iconCls="icon-remove" plain="false"><label
+						name="delete">删除</label></a>
+				</shiro:hasPermission>
+				<shiro:hasPermission name="webresources:login:AuthUser:save">
+					<a class="easyui-linkbutton" iconCls="icon-save" plain="false"><label
+						name="save">保存</label></a>
+				</shiro:hasPermission>
+				<shiro:hasPermission name="webresources:login:AuthUser:export">
+					<a class="easyui-linkbutton" iconCls="icon-export" plain="false">导出</a>
+				</shiro:hasPermission>
+				<shiro:hasPermission name="webresources:login:AuthUser:find">
+					<a class="easyui-linkbutton" iconCls="icon-reload" plain="false"><label
+						name="reload">刷新</label></a>
+				</shiro:hasPermission>
+				<!--  <shiro:hasPermission name="webresources:login:AuthUser:move">
+                <a class="easyui-linkbutton" iconCls="icon-" plain="false"><label name="move">调动</label></a>
+            </shiro:hasPermission>&nbsp; -->
+			</div>
+			<input class="easyui-searchbox" th:id="authUserSearchbox+${radi}" />
+		</div>
+		<table th:id="authUserDatagrid+${radi}" style="height: 100%"></table>
+	</div>
+	<!--<div data-options="region:'east',title:'East',split:true" style="width:100px;"></div>-->
+	<!--<div data-options="region:'south',title:'South Title',split:true" style="height:100px;"></div>-->
+</div>
+<div th:id="AuthUserFormDialog+${radi}" style="display: none"></div>
+<div th:id="AuthUserMoveDialog+${radi}" style="display: none"></div>
+<script type="text/javascript">
+	/*<![CDATA[*/
+	var dataGrid = $("#authUserDatagrid[(${radi})]");
+    $(document).ready(function() {
+	    var selUserId = '';//弹窗用!!wxl
+	    var selOrgnId = '0';
+	    HdUtils.i18n('user');
+	    $('#authUserTenantOrgnTree[(${radi})]').tree({
+	        url : "../webresources/login/privilege/AuthOrgn/gentree?mainMenuId=" + getSelTabMenuId(),
+	        onClick : function(node) {
+		        //值都是传递给后台,然后后台处理,不再在前台拼查询条件(安全)            	
+		        var hdConditions = new HdQuery();
+		        selOrgnId = node.id;
+		        hdConditions.add("orgnId", selOrgnId);
+		        var queryParams = hdConditions.build();
+		        $('#authUserDatagrid[(${radi})]').datagrid({
+			        queryParams : queryParams
+		        });
+	        }
+	    });
+	    //列声明
+	    var columns = [];
+	    var column = [];
+	    column.push({
+	        title : "用户id",
+	        field : "userId",
+	        hidden : true
+	    });
+	    column.push({
+	        field : "name",
+	        width : '90',
+	        title : $.i18n.prop("name"),
+	        multiSort : true,
+	        align : "center",
+	        halign : "center",
+	        editor : {
+	            type : "validatebox",
+	            options : {
+		            required : false
+	            }
+	        },
+	        sortable : true
+	    });
+	    column.push({
+	        field : "account",
+	        width : '120',
+	        align : "center",
+	        title : $.i18n.prop("account"),
+	        multiSort : true,
+	        halign : "center",
+	        editor : {
+	            type : "validatebox",
+	            options : {
+		            required : false
+	            }
+	        },
+	        sortable : true
+	    });
+
+	    /*
+	    column.push({
+	        field: "password",
+	        title: "密码",
+	        multiSort: true,
+	        halign: "center",
+	        editor: {type: "validatebox", options: {required: false}},
+	        sortable: true
+	    });
+	     */
+	    /* column.push({
+	        field: "tenantName",//zuhu
+	        width: '180',
+	        title: "集团名称",
+	        editor: {type: "text", options: {required: false}},
+	        formatter: function (val, row, idx) {
+	            return row.tenantId.text;
+	        },
+	        halign: "center"
+	    }); */
+	    column.push({
+	        field : "orgnId",
+	        title : $.i18n.prop("orgnId"),
+	        hidden : true
+	    });
+	    column.push({
+	        field : "orgnName",//zuzhi
+	        width : '100',
+	        title : $.i18n.prop("orgnName"),
+	        halign : "center",
+	        editor : {
+	            type : "text",
+	            options : {
+		            required : false
+	            }
+	        },
+	        adQuery : 'combotree(HdUtils.ezui.orgTree())'
+	    });
+
+	    column.push({
+	        field : "accountPassDate",
+	        width : '100',
+	        title : $.i18n.prop("accountPassDate"),
+	        align : "center",
+	        halign : "center",
+	        formatter : $.hd.ezui.formatter.date,
+	    });
+	    column.push({
+	        field : "pwModifyTim",
+	        width : '100',
+	        title : $.i18n.prop("pwModifyTim"),
+	        align : "center",
+	        halign : "center",
+	        formatter : $.hd.ezui.formatter.date,
+	    });
+	    column.push({
+	        field : 'opt',
+	        title : "操作",
+	        width : 70,
+	        align : "center",
+	        halign : "center",
+	        excel : false,
+	        formatter : function(val, row, idx) {
+		        return "<input type='button' value='重置密码' onclick='modifyPassword(\"" + row.userId + "\")'/>";
+	        }
+	    });
+	    column.push({
+	        field : "recNam",
+	        width : '80',
+	        title : "创建人",
+	        align : "center",
+	        halign : "center",
+	        editor : {
+	            type : "text",
+	            options : {
+		            required : false
+	            }
+	        }
+	    });
+	    column.push({
+	        field : "recTim",
+	        width : '120',
+	        title : "创建时间",
+	        align : "center",
+	        halign : "center",
+	        formatter : $.hd.ezui.formatter.datetime,
+	        editor : {
+	            type : "text",
+	            options : {
+		            required : false
+	            }
+	        }
+	    });
+	    column.push({
+	        field : "updNam",
+	        width : '80',
+	        title : "更新人",
+	        align : "center",
+	        halign : "center",
+	        editor : {
+	            type : "text",
+	            options : {
+		            required : false
+	            }
+	        }
+	    });
+	    column.push({
+	        field : "updTim",
+	        width : '120',
+	        title : "更新时间",
+	        align : "center",
+	        halign : "center",
+	        formatter : $.hd.ezui.formatter.datetime,
+	        editor : {
+	            type : "text",
+	            options : {
+		            required : false
+	            }
+	        }
+	    });
+
+	    columns.push(column);
+
+	    //过滤条件
+	    //var hdConditions = new HdConditions();
+	    var hdConditions = new HdQuery();
+	    //列表定义
+	   
+	    hdConditions.add("orgnId", selOrgnId);
+	    dataGrid.hddatagrid({
+	        url : "../webresources/login/privilege/AuthUser/find?t=" + Math.random(),
+	        queryParams : hdConditions.build(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#authUserToolBar[(${radi})]",
+	        fit : true,
+	        fitColumns : false,
+	        sortName : "updTim",
+	        columns : columns,
+	        onDblClickCell : function(index) {
+		        var data = dataGrid.datagrid("getSelected");
+		        selUserId = data.userId;
+		        editUser(selUserId, '');
+	        }
+	    });
+	    $("#authUserToolBar[(${radi})] a[iconCls='icon-add']").on("click", function() {
+		    // var sel = $('#authUserTenantOrgnTree[(${radi})]').tree("getSelected");
+		    if (!selOrgnId) {
+			    HdUtils.messager.info('请选择一个部门下进行增加用户！');
+			    return;
+		    }
+		    // selOrgnId=sel.id;//userform和user是同一个界面,值是共享的
+		    editUser('', selOrgnId);//''是增加
+	    });
+	    $("#authUserToolBar[(${radi})] a[iconCls='icon-edit']").on("click", function() {
+		    /*以下是弹窗表单编辑实现*/
+		    var data = dataGrid.datagrid("getSelected");
+		    if (!data) {
+			    HdUtils.messager.info('请选择一个用户进行编辑！');
+			    return;
+		    }
+		    selUserId = data.userId;
+		    editUser(selUserId, '');
+	    });
+	    $("#authUserToolBar[(${radi})] a[iconCls='icon-remove']").on("click", function() {
+		    var data = dataGrid.datagrid("getSelected");
+		    if (!data) {//data===null||data===undefined之前的
+			    HdUtils.messager.info('请选择一个用户进行删除！');
+			    return;
+		    }
+		    var userId = data.userId;
+		    $.messager.confirm("提示", "是否确认删除.", function(r) {
+			    if (r) {
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/privilege/AuthUser/remove?userId=" + userId,
+				        success : function(data) {
+					        if (data.code == "-1") {
+						        HdUtils.messager.info(data.message);
+						        return false;
+					        }
+					        HdUtils.messager.bottomRight(data.message);
+					        dataGrid.datagrid("hdReload");
+
+				        }
+				    });
+			    }
+		    });
+
+	    });
+	    //        $("#authUserToolBar[(${radi})] a[iconCls='icon-save']").on("click", function () {
+	    //            dataGrid.datagrid("hdSave", {url:'../webresources/login/privilege/privilege/AuthUser/save'});
+	    //        });
+	    $("#authUserToolBar[(${radi})] a[iconCls='icon-reload']").on("click", function() {
+		    dataGrid.datagrid("reload");
+	    });
+	    $("#authUserToolBar[(${radi})] a[iconCls='icon-export']").on("click", function() {
+		    dataGrid.datagrid("hdExportExcel", {
+		        url : dataGrid.datagrid('options').url.replace("/find", "/exportExcel"),
+		        exportFileName : "用户-" + new Date().format("yyyyMMddhhmmss")
+		    });
+	    });
+	    $("#authUserSearchbox[(${radi})]").searchbox({
+	        prompt : "姓名,账号",
+	        searcher : function(value, name) {
+		        var hdConditions = new HdEzuiQueryParamsBuilder();
+		        hdConditions.setOtherskeyValue("orgnId", selOrgnId);
+		        hdConditions.setOtherskeyValue("name", value);
+		        $('#authUserDatagrid[(${radi})]').datagrid({
+			        queryParams : hdConditions.build()
+		        });
+		        //dataGrid.datagrid("hdReload");
+	        }
+	    });
+
+    });
+
+    var modifyPasswordUserId = '';
+    function modifyPassword(value) {
+	    $.messager.confirm(Resources.WB_CONFIRM, '确定将密码重置为Roro@1234.com ？', function(r) {
+		    if (r) {
+			    HdUtils.ajax.post({
+			        url : "../webresources/login/privilege/AuthUser/resetPassword?userId=" + value,
+			        success : function(data) {
+				        if (data.key === '-1') {
+					        HdUtils.messager.info(data.message);
+					        return false;
+				        }
+				        HdUtils.messager.bottomRight('修改成功', '保存操作');
+				        $("#ShipRDatagrid1501049623861").datagrid("hdReload");
+			        }
+			    });
+		    }
+	    });
+
+    }
+
+    function editUser(userId, orgnId) {
+	    HdUtils.dialog.setValue({
+		    'userId' : userId
+	    });
+	    HdUtils.dialog.setValue({
+		    'orgnId' : orgnId
+	    });
+	    HdUtils.dialog.show({
+	        width : 600,
+	        height : 450,
+	        title : '修改用户',
+	        href : "../login/system/privilege/userform.html",
+	        isSaveHandler : true
+	    });
+    }
+    /*]]>*/
+</script>

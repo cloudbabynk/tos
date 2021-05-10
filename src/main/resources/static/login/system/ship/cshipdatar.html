@@ -1,0 +1,46 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<style type="text/css">
+iframe {
+	position: absolute;
+	z-index: 1001;
+	width: 1122px;
+	height: 800px
+}
+</style>
+<!-- 工具栏 -->
+<div class="easyui-layout" 
+	style="height: 800px; width: 1180px">
+	<div data-options="region:'center',fit:true" style="height: 150%; width: 100%">
+	    <a class="easyui-linkbutton" id='fresh'>下载PDF</a>
+	    <a class="easyui-linkbutton" id='genExcel'>下载Excel</a>
+	    <br>
+		<iframe th:id="qzd+${radi}"> </iframe>
+	</div>
+</div>
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    var shipNo;
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var shipNo = HdUtils.dialog.getValue('shipNo');
+	    var recNam = HdUtils.dialog.getValue('recNam');
+	    var src = 'http://10.163.204.56:8090/show/?fileid=ddba711d5cd94a7cb2ce1c0650816748&rpttoken=333&shipNo=' + shipNo+'&recNam='+recNam;
+	    $("#qzd[(${radi})]").attr('src', src);
+	    // 刷新。
+	    $("#fresh").on("click", function() {
+	    	src = 'http://10.163.204.56:8090/show/genpdf?fileid=ddba711d5cd94a7cb2ce1c0650816748&rpttoken=333&shipNo=' + shipNo+'&recNam='+recNam;
+	    	  $("#qzd[(${radi})]").attr('src', src);
+	    });
+	    $("#genExcel").on("click", function() {
+	    	  src = 'http://10.163.204.56:8090/show/genexcel?fileid=ddba711d5cd94a7cb2ce1c0650816748&rpttoken=333&shipNo=' + shipNo+'&recNam='+recNam;
+	    	  $("#qzd[(${radi})]").attr('src', src);
+	    }); 
+    });
+    /*]]>*/
+</script>
+</html>

@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<style>
+    .table_mouseright {
+        padding: 5px;
+        line-height: 18px;
+    }
+
+    .table_mouseright input {
+        width: 60px;
+    }
+
+    .div_mouseright {
+        border-color: #7B72E9;
+    }
+
+    .workClass {
+        display: none;
+    }
+</style>
+<!--ship右键菜单-->
+
+<body>
+    <div id="hdship_contextmenu" class="easyui-menu" style="width: 120px;">
+        <div id="editBerth">编辑泊位计划</div>
+        <div id="delBerth">删除泊位计划</div>
+        <div id="editBerthWay">更改靠向</div>
+    </div>
+    <div id="shipMouseover" class="div_mouseright button-border button-rounded button-glow"
+        style="background-color: white; z-index: 9999; display: none; position: absolute; padding: 0px;">
+        <table id="workTaskTable" style="height: 95%; width: 100%">
+            <tr>
+                <td colspan="2">
+                    <form id="ShipForm" style="height: 100%; width: 100%">
+                        <table style="height: 100%; width: 100%; border-bottom: 1px solid;" class="table_mouseright">
+                            <tr>
+                                <th>船名：</th>
+                                <td colspan="3"><input name="shipName" style="width: 98%;" /></td>
+                                <th>船长：</th>
+                                <td colspan="3"><input name="shipLongNum" style="width: 98%;" /></td>
+                            </tr>
+                            <tr>
+                                <th>进口航次：</th>
+                                <td colspan="3"><input name="imVoyage" style="width: 98%;" /></td>
+                                <th>出口航次：</th>
+                                <td colspan="3"><input name="exVoyage" style="width: 98%;" /></td>
+                            </tr>
+                            <tr>
+                                <th>进口货类：</th>
+                                <td colspan="3"><input name="iCargoNam" style="width: 98%;" /></td>
+                                <th>出口货类：</th>
+                                <td colspan="3"><input name="eCargoNam" style="width: 98%;" /></td>
+                            </tr>
+                            <tr>
+                                <th>备注：</th>
+                                <td colspan="7"><textarea id="remarks" name="remarks" data-options="required:false"
+                                        rows="2" style="width: 100%" maxlength="255"></textarea></td>
+                            </tr>
+                        </table>
+                    </form>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="easyui-layout" data-options="fit:true" style="height: 100%; width: 100%">
+        <div data-options="region:'center'">
+            <div class="easyui-layout" data-options="fit:true" id="shipdynamic259">
+                <div data-options="region:'north',split:false,collapsible:false"
+                    style="margin-left: 30px; height: 40px;">
+                    计划日期：<input id="beginTime" class="easyui-datebox" style="width: 120px;" /> <label
+                        id="plday">至&nbsp;&nbsp;<input id="endTime" class="easyui-datebox"
+                            style="width: 120px;" /></label>
+                    <button id="makeberthplan">查询</button>
+                    <br />
+                </div>
+                <div data-options="region:'center',title:'泊位计划图'" style="height: 100%;" id="wsw">
+                    <div id="shipberth" style="margin: 0px; padding: 0px; width: 95%; height: 85%;">
+                    </div>
+                </div>
+                <div data-options="region:'east',split:true,tools:[{iconCls:'icon-reload',handler:function(){$('#ShipStatusTree123').tree('reload');}
+        }],title:'船期预报'" style="width: 260px; padding: 3px;">
+                    <ul id="ShipStatusTree456"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/hdship.js"></script>
+    <script src="../js/dialog.js"></script>
+    <script type="text/javascript">
+        // 全局变量，用于跨页面传参
+        var shippic_vals = {};
+        //树节点点击事件
+        $(document).ready(function () {
+            //菜单显示
+            var contextmenuShipData = {};
+            $('#hdship_contextmenu').menu();
+            $('#hdship_contextmenu').menu({
+                onClick: function (item) {
+                    if (item.id === 'editBerth') {
+                        HdUtils.dialog.setValue({
+                            data: contextmenuShipData,
+                            refresh: refreshOneShip,
+                            queryPlan: shippic_vals.refresh,
+                        });
+                        HdUtils.dialog.show({
+                            height: 270,
+                            width: 500,
+                            title: '泊位计划',
+                            href: "../login/system/ship/shipberth2.html",
+                            isSaveHandler: true
+                        });
+                    } else if (item.id === 'delBerth') {
+                        $.messager.confirm(Resources.WB_CONFIRM, i18n("确定删除？"), function (r) {
+                            if (r) {
+                                HdUtils.ajax.post({
+                                    url: "../webresources/login/ship/Ship/removeShipPlan",
+                                    data: contextmenuShipData,
+                                    success: function (data) {
+                                        if (data.code === '-1') {
+                                            HdUtils.messager.info(data.message);
+                                            return false;
+                                        }
+                                        HdUtils.messager.bottomRight('操作成功', '操作');
+                                        shipBerth.removeOneShip(contextmenuShipData.shipVisitId);
+                                        // shipvisit刷新
+                                        if (shippic_vals.refresh) {
+                                            shippic_vals.refresh();
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    } else if (item.id === 'editBerthWay') {
+
+                        if (contextmenuShipData.planBerthingMode == 'L') {
+                            contextmenuShipData.planBerthingMode = 'R';
+                        } else if (contextmenuShipData.planBerthingMode == 'R') {
+                            contextmenuShipData.planBerthingMode = 'L';
+                        } else {
+                            HdUtils.messager.info("请先确认船舶靠向信息！");
+                            return false;
+                        }
+
+                        $.messager.confirm(Resources.WB_CONFIRM, i18n("确定修改船舶航次预报？"), function (r) {
+                            if (r) {
+                                HdUtils.ajax.post({
+                                    url: "../webresources/login/ship/Ship/saveBerthAndShip",
+                                    data: contextmenuShipData,
+                                    success: function (data) {
+                                        if (data.code === '-1') {
+                                            shipBerth.removeOneShip(contextmenuShipData.shipVisitId);
+                                            HdUtils.messager.info(data.message);
+                                            return false;
+                                        }
+                                        HdUtils.messager.bottomRight('操作成功', '操作');
+                                        query();
+                                    }
+                                });
+                            } else {
+                                HdUtils.ajax.post({
+                                    url: "../webresources/login/ship/Ship/saveBerth",
+                                    data: contextmenuShipData,
+                                    success: function (data) {
+                                        if (data.code === '-1') {
+                                            shipBerth.removeOneShip(contextmenuShipData.shipVisitId);
+                                            HdUtils.messager.info(data.message);
+                                            return false;
+                                        }
+                                        HdUtils.messager.bottomRight('操作成功', '操作');
+                                        query();
+                                    }
+                                });
+                            }
+                        });
+
+
+                    }
+                }
+            });
+            $('#ShipStatusTree456').tree({
+                method: "get",
+                url: "../webresources/login/ship/Ship/gentree",
+                onClick: treeclick
+            });
+            function treeclick(node) {
+                var shipNo = node.id;
+                if (!shipNo) {
+                    return false;
+                }
+                HdUtils.ajax.post({
+                    url: "../webresources/login/ship/Ship/findBerth?shipNo=" + shipNo,
+                    success: function (data) {
+                        preAddShip(data, true);
+                    }
+                })
+            }
+            var shipDrawList = [];
+            var $shipOver = $('#shipMouseover');
+            $("body").append($shipOver.detach());
+            $shipOver.hide();
+            var shipForm = $("#ShipForm");
+            var shipMouseover = function (event, ship) {
+                var offset = 10;
+                $shipOver.css({
+                    top: offset,
+                    left: $('body').width() - $shipOver.width() - offset,
+                });
+                // $shipOver.css('top',event.event.pageY);
+                // $shipOver.css('left',event.event.pageX);
+                $shipOver.show();
+                shipForm.form("loadData", ship);
+            };
+            var shipMouseout = function (event, ship) {
+                $shipOver.hide();
+            };
+            var func_saveOneShip = function (shipData, callback) {
+                $.messager.confirm(Resources.WB_CONFIRM, i18n("确定修改船舶航次预报？"), function (r) {
+                    if (r) {
+                        HdUtils.ajax.post({
+                            url: "../webresources/login/ship/Ship/saveBerthAndShip",
+                            data: shipData,
+                            success: function (data) {
+                                if (data.code === '-1') {
+                                    HdUtils.messager.info(data.message);
+                                    // shipBerth.removeOneShip(shipData.shipVisitId);
+                                    query();
+                                    if (callback) {
+                                        return false;
+                                    }
+                                    return false;
+                                }
+                                HdUtils.messager.bottomRight('操作成功', '操作');
+                                $.extend(shipData, data.data);
+                            }
+                        });
+                    } else {
+                        /* HdUtils.ajax.post({
+                            url : "../webresources/login/ship/Ship/saveBerth",
+                            data : shipData,
+                            success : function(data) {
+                                if (data.code === '-1') {
+                                    HdUtils.messager.info(data.message);
+                            // shipBerth.removeOneShip(shipData.shipVisitId);
+                            query();
+                            if (callback) {
+                                callback(false);
+                            }
+                            return false;
+                        }
+                        HdUtils.messager.bottomRight('操作成功', '操作');
+                        $.extend(shipData, data.data);
+                    }
+                        }); */
+                        shipBerth.removeOneShip(shipData.shipVisitId);//点击取消没有操作，图形消失
+                    }
+                });
+
+            };
+            var refreshOneShip = function (ship) {
+                shipBerth.refreshOneShip(ship);
+            };
+            var shipContextmenu = function (event, shipData) {
+                $('#hdship_contextmenu').menu('show', {
+                    left: event.event.pageX,
+                    top: event.event.pageY,
+                });
+                contextmenuShipData = shipData;
+            };
+            // 调用hdship.js模块
+            var shipBerth = new hdship.ShipBerth("shipberth", {
+                shipSaveHandler: func_saveOneShip,
+                shipContextmenu: shipContextmenu,
+                shipMouseover: shipMouseover,
+                shipMouseout: shipMouseout,
+            });
+            function setTimeDefault() {
+                //日期:默认值当天
+                $("#beginTime").val(Date.prototype.dateAdd(0, "yyyy-MM-dd"));
+                $("#endTime").val(Date.prototype.dateAdd(5, "yyyy-MM-dd"));
+            }
+            setTimeDefault();
+            var query = function () {
+                // 校验
+                if (!$('#beginTime').datetimebox('isValid')) {
+                    return false;
+                }
+                if (!$('#endTime').datetimebox('isValid')) {
+                    return false;
+                }
+                var beginTime = $('#beginTime').datetimebox('getValue');
+                var endTime = $('#endTime').datetimebox('getValue');
+                if (!beginTime) {
+                    HdUtils.messager.info('请输入起始时间');
+                    return;
+                }
+                if (!endTime) {
+                    HdUtils.messager.info('请输入结束时间');
+                    return;
+                }
+                if (beginTime > endTime) {
+                    HdUtils.messager.info('起始时间应小于结束时间');
+                    return;
+                }
+
+                var params = "?start=" + beginTime + "&end=" + endTime + "&interval=" + 60;
+                HdUtils.ajax.post({
+                    url: "../webresources/login/ship/Ship/findMsg" + params,
+                    async: false,
+                    success: function (data) {
+                        // console.log(data);
+                        if (data.code === '-1') {
+                            HdUtils.messager.info(i18n(data.message));
+                            return false;
+                        }
+
+                        var berthData = data.data;
+                        if (berthData.shipList.length < 1) {
+                            HdUtils.ajax.post({
+                                async: false,
+                                url: "../webresources/login/ship/Ship/findExpandMsg" + params,
+                                success: function (data) {
+                                    //debugger
+                                    if (data.code === '-1') {
+                                        HdUtils.messager.info(i18n(data.message));
+                                        return false;
+                                    }
+                                    var result = data.data;
+                                    berthData = result.berthPlanInfo;
+                                    var sdt = result.startdt;
+                                    var edt = result.enddt;
+                                    if (berthData.shipList.length > 0) {
+                                        $("#beginTime").datebox('setValue', sdt);
+                                        $("#endTime").datebox('setValue', edt);
+                                    }
+                                }
+                            });
+                        }
+                        // x轴比例
+                        //debugger
+                        var meter = 1.3;
+                        shipBerth.draw(berthData, {
+                            xScale: meter
+                        });// 绘制图形
+                        var div = document.getElementById('wsw');
+                        div.scrollTop = div.scrollHeight;
+                    }
+                });
+            };
+
+            // 查询
+            $("#makeberthplan").on("click", function () {
+                query();
+                refreshBerthShip();
+            });
+
+            setTimeout(query, 200);
+
+            /**
+             * 添加时显示的图形
+             */
+            var preAddShip = function (data, callback) {
+                shipBerth.preAddShip(data, callback, func_saveOneShip);
+            };
+        })
+    </script>
+</body>
+
+</html>

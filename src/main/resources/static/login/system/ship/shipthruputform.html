@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+	margin-left: 100px;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+	width: 60px;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#ShipThruputForm1507959148710");
+	    var shipNo = HdUtils.dialog.getValue('shipNo');
+	    var groupShipNo = HdUtils.dialog.getValue('groupShipNo');
+	    var radi = /*[[${radi}]]*/'';
+	    $('#inBegTim').datetimebox({
+	        required: false,
+	        showSeconds: false
+	    });
+	    $('#inEndTim').datetimebox({
+	        required: false,
+	        showSeconds: false
+	    });
+	    $('#outBegTim').datetimebox({
+	        required: false,
+	        showSeconds: false
+	    });
+	    $('#outEndTim').datetimebox({
+	        required: false,
+	        showSeconds: false
+	    });
+	    if (shipNo) {
+		    $("#shipThruputId").attr("readonly", true);
+	    } else {
+		    $("#shipThruputId").attr("readonly", false);
+	    }
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/ship/ShipThruput/findData?shipNo=" + shipNo,
+	        success : function(data) {
+		        $("#ShipThruputForm1507959148710").form("loadData", data);
+	        }
+	    })
+
+	    // 保存。
+	    $("#save[(${radi})]").on("click", function() {
+		    if (shipNo == null || shipNo == undefined) {
+			    HdUtils.messager.info('请选择一条一条船！');
+			    return;
+		    }
+		    var ShipthruPut = new Object();
+		    ShipthruPut.shipNo = shipNo;
+		    ShipthruPut.groupShipNo = groupShipNo;
+		    ShipthruPut.shipThruputId = $("#shipThruputId").val();
+		    ShipthruPut.iWorkWeight = $("#iWorkWeight").val();
+		    ShipthruPut.iWorkVolume = $("#iWorkVolume").val();
+		    ShipthruPut.iVisaWeight = $("#iVisaWeight").val();
+		    ShipthruPut.iCarNum = $("#iCarNum").val();
+		    ShipthruPut.iVisaVolume = $("#iVisaVolume").val();
+		    ShipthruPut.iPreKnot = $("input[name='iPreKnot']:checked").val();
+		    ShipthruPut.iQuickFlag = $("input[name='iQuickFlag']:checked").val();
+
+		    ShipthruPut.eWorkWeight = $("#eWorkWeight").val();
+		    ShipthruPut.eWorkVolume = $("#eWorkVolume").val();
+		    ShipthruPut.eVisaWeight = $("#eVisaWeight").val();
+		    ShipthruPut.eCarNum = $("#eCarNum").val();
+		    ShipthruPut.eVisaVolume = $("#eVisaVolume").val();
+		    ShipthruPut.inBegTim = $("#inBegTim").datetimebox("getValue");
+		    ShipthruPut.inEndTim = $("#inEndTim").datetimebox("getValue");
+		    ShipthruPut.outBegTim = $("#outBegTim").datetimebox("getValue");
+		    ShipthruPut.outEndTim = $("#outEndTim").datetimebox("getValue");
+		    ShipthruPut.ePreKnot = $("input[name='ePreKnot']:checked").val();
+		    ShipthruPut.eQuickFlag = $("input[name='eQuickFlag']:checked").val();
+		    ShipthruPut.sendFlag = $("input[name='sendFlag']:checked").val();
+		    ShipthruPut.remarks = $("#remarks").val();//iCarNum
+		    ShipthruPut.icarnum = "";
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/ship/ShipThruput/saveone",
+		        data : ShipthruPut,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+		        }
+		    })
+	    });
+	    // 删除。
+	    $("#delete[(${radi})]").on("click", function() {
+		    $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+			    if (r) {
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/ship/ShipThruput/removeByshipNo?shipNo=" + shipNo,
+				        success : function(data) {
+					        HdUtils.messager.bottomRight(data.message);
+				        }
+				    });
+			    }
+		    });
+	    });
+	    // 刷新。
+	    $("#fresh[(${radi})]").on("click", function() {
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/ship/ShipThruput/findData?shipNo=" + shipNo,
+		        success : function(data) {
+			        $("#ShipThruputForm1507959148710").form("loadData", data);
+		        }
+		    })
+	    });
+	    // 上报外签吨
+	    $("#sendData[(${radi})]").on("click", function() {
+		    $.messager.confirm("上报", "确认上报数据?", function(r) {
+			    if (r) {
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/ship/ShipThruput/sendData?shipNo=" + shipNo,
+				        success : function(data) {
+					        HdUtils.messager.bottomRight(data.message);
+				        }
+				    });
+			    }
+		    });
+	    });
+	    // 上报集团
+	    $("#upload[(${radi})]").on("click", function() {
+		    $.messager.confirm("上报", "确认上报?", function(r) {
+			    if (r) {
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/ship/ShipThruput/upload?shipNo=" + shipNo,
+				        success : function(data) {
+					        HdUtils.messager.bottomRight(data.message);
+				        }
+				    });
+			    }
+		    });
+	    });
+    });
+</script>
+<div>
+	<shiro:hasPermission name="webresources:login:ShipThruput:save">
+		<a class="easyui-linkbutton" th:id='save+${radi}'>保存</a>
+	</shiro:hasPermission>
+	<shiro:hasPermission name="webresources:login:ShipThruput:delete">
+		<a class="easyui-linkbutton" th:id='delete+${radi}'>删除</a>
+	</shiro:hasPermission>
+	<a class="easyui-linkbutton" th:id='fresh+${radi}'>刷新</a>
+	<shiro:hasPermission name="webresources:login:ShipThruput:sendData">
+		<a class="easyui-linkbutton" th:id='sendData+${radi}'>上报集团</a>
+	</shiro:hasPermission>
+	<shiro:hasPermission name="webresources:login:ShipThruput:upload">
+		<a class="easyui-linkbutton" th:id='upload+${radi}'>上报新集团</a>
+	</shiro:hasPermission>
+
+</div>
+<form id="ShipThruputForm1507959148710">
+	<table id="ShipThruputTable1507959148710"
+		style="height: 75%; width: 60%" class="tableform">
+		<input id="shipThruputId" name="shipThruputId" hidden="true">
+		<input id="shipNo" name="shipNo" class="easyui-validatebox"
+			maxlength="10" hidden="true" />
+		<!-- 集团船舶序号 -->
+		<input id="groupShipNo" name="groupShipNo" class="easyui-validatebox"
+			maxlength="10" hidden="true" />
+		<tr>
+			<!-- 上报集团标志 -->
+			<th>上报标志：</th>
+			<td><input type="radio" name="sendFlag" value="1" disabled
+				class='easyui-radio'>已发</input> <input type="radio" name="sendFlag"
+				disabled value="0" checked="checked" class='easyui-radio'>未发</input></td>
+		</tr>
+		<!-- 
+		<tr>
+			<th>进口作业吨数：</th>
+			<td><input id="iWorkWeight" name="iWorkWeight"
+				data-options="min:0,max:999999999,precision:3" class="easyui-numberbox"
+				maxlength="13" /></td>
+			<th>进口作业体积：</th>
+			<td><input id="iWorkVolume" name="iWorkVolume"
+				data-options="min:0,max:999999999,precision:3" class="easyui-numberbox"
+				maxlength="13" /></td>
+		</tr>
+		 -->
+		<tr>
+			<th><font color="blue">进口签证吨数：</font></th>
+			<td><input id="iVisaWeight" name="iVisaWeight"
+				data-options="min:0,max:999999999,precision:3"
+				class="easyui-numberbox" maxlength="13" /></td>
+			<!--  
+			<th><font color="red">进口签证体积：</font></th>
+			<td><input id="iVisaVolume" name="iVisaVolume"
+				data-options="min:0,max:999999999,precision:3" class="easyui-numberbox"
+				maxlength="13" /></td>-->
+			<th><font color="blue">进口外签车数：</font></th>
+			<td><input id="iCarNum" name="iCarNum"
+				data-options="min:0,max:999999,precision:0" class="easyui-numberbox"
+				maxlength="13" /></td>
+			<!--  
+			<th><font color="red">进口标车数：</font></th>
+			<td><input id="iStdcarNum" name="iStdcarNum"
+				data-options="min:0,max:999999999,precision:2" class="easyui-numberbox"
+				maxlength="13" /></td>
+				 -->
+		</tr>
+		<tr>
+			<th><font color="blue">进口预结标志：</font></th>
+			<td><input type="radio" name="iPreKnot" value="Y"
+				class='easyui-radio'>是</input> <input type="radio" name="iPreKnot"
+				value="N" checked="true" class='easyui-radio'>否</input></td>
+			<th><font color="blue">进口结吨标志：</font></th>
+			<td><input type="radio" name="iQuickFlag" value="Y"
+				class='easyui-radio'>是</input> <input type="radio" name="iQuickFlag"
+				value="N" checked="true" class='easyui-radio'>否</input></td>
+		</tr>
+		<tr>
+			<th><font color="blue">进口开工时间：</font></th>
+			<td><input id="inBegTim" name="inBegTim" class="easyui-datetimebox" style="width:120px"/></td>
+			<th><font color="blue">进口完工时间：</font></th>
+			<td><input id="inEndTim" name="inEndTim" class="easyui-datetimebox" style="width:120px"/></td>
+		</tr>
+		<!-- 
+		<tr>
+			<th>出口作业吨数：</th>
+			<td><input id="eWorkWeight" name="eWorkWeight"
+				data-options="min:0,max:99999999,precision:3" class="easyui-numberbox"
+				maxlength="13" /></td>
+			<th>出口作业体积：</th>
+			<td><input id="eWorkVolume" name="eWorkVolume"
+				data-options="min:0,max:99999999,precision:3" class="easyui-numberbox"
+				maxlength="13" /></td>
+		</tr>
+		 -->
+		<tr>
+			<th><font color="blue">出口签证吨数：</font></th>
+			<td><input id="eVisaWeight" name="eVisaWeight"
+				data-options="min:0,max:999999999,precision:3"
+				class="easyui-numberbox" maxlength="13" /></td>
+			<th><font color="blue">出口外签车数：</font></th>
+			<td><input id="eCarNum" name="eCarNum"
+				data-options="min:0,max:999999,precision:0" class="easyui-numberbox"
+				maxlength="13" /></td>
+			<!-- 
+			<th><font color="red">出口签证体积：</font></th>
+			<td><input id="eVisaVolume" name="eVisaVolume"
+				data-options="min:0,max:999999999,precision:3" class="easyui-numberbox"
+				maxlength="13" /></td> -->
+		</tr>
+		<tr>
+			<th><font color="blue">出口预结标志：</font></th>
+			<td><input type="radio" name="ePreKnot" value="Y"
+				class='easyui-radio'>是</input> <input type="radio" name="ePreKnot"
+				value="N" checked="true" class='easyui-radio'>否</input></td>
+			<th><font color="blue">出口结吨标志：</font></th>
+			<td><input type="radio" name="eQuickFlag" value="Y"
+				class='easyui-radio'>是</input> <input type="radio" name="eQuickFlag"
+				value="N" checked="true" class='easyui-radio'>否</input></td>
+		</tr>
+		<tr>
+			<th><font color="blue">出口开工时间：</font></th>
+			<td><input id="outBegTim" name="outBegTim" class="easyui-datetimebox" style="width:120px"/></td>
+			<th><font color="blue">出口完工时间：</font></th>
+			<td><input id="outEndTim" name="outEndTim" class="easyui-datetimebox" style="width:120px"/></td>
+		</tr>
+		<tr>
+			<th>备注：</th>
+			<td colspan="3"><input id="remarks" name="remarks"
+				style="width: 100%;" data-options="required:false"
+				class="easyui-validatebox" maxlength="50" /></td>
+		</tr>
+		<tr>
+
+			<!--
+			<th><font color="red">出口标车数：</font></th>
+			<td><input id="eStdcarNum" name="eStdcarNum"
+				data-options="min:0,max:999999999,precision:2" class="easyui-numberbox"
+				maxlength="13" /></td> -->
+		</tr>
+
+	</table>
+</form>
+</html>

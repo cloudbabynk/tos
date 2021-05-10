@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<input th:id="cyAreaNo+${radi}" th:value='${cyAreaNo}' type="hidden" />
+
+<table th:id="CAreaDatagrid1508123301002+${radi}" style="height: 100%"></table>
+
+<script type="text/javascript" th:inline="javascript">
+	$(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var shipNo;
+	    var dg = $("#CAreaDatagrid1508123301002[(${radi})]");
+	    // buttons
+	    // 刷新。
+	    // 清空。
+	    // 查询
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    var cyAreaNo = $("#cyAreaNo[(${radi})]").val();
+		    onlinquery.add("cyAreaNo", cyAreaNo);
+		    return onlinquery.build();
+	    }
+
+	    $("#CAreaDatagrid1508123301002[(${radi})]").datagrid({
+	        striped : true,
+	        url : "/webresources/login/base/CCyArea/findDcclhz",
+	        queryParams : query(),
+	        method : "post",
+/* 	        pagination : true,
+	        pageSize : 20, */
+	        singleSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        toolbar : "#CAreaToolBar1508123301002" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+	        }, {
+	            field : "CY_AREA_NAM",
+	            title : '堆场名称',
+	            multiSort : true,
+	            halign : "center",
+	            align : "left",
+	            sortable : false
+	        }, {
+	            field : "C_SHIP_NAM",
+	            title : '船名',
+	            multiSort : true,
+	            width : 100,
+	            align : "left",
+	            sortable : false
+	        }, {
+	            field : "VOYAGE",
+	            title : '航次',
+	            multiSort : true,
+	            width : 80,
+	            align : "left",
+	            sortable : false
+	        }, {
+	            field : "IED",
+	            title : '进出口',
+	            multiSort : true,
+	            halign : "center",
+	            align : "left",
+	            editor : {
+	                type : "combobox",
+	                options : HdUtils.code.scode({
+		                fieldCod : 'I_E_ID'
+	                }, {
+		                required : false
+	                })
+	            },
+	            formatter : function(value) {
+		            return HdUtils.code.name('I_E_ID', value);
+	            },
+	            sortable : false
+	        }, {
+	            field : "TID",
+	            title : '内外贸',
+	            multiSort : true,
+	            halign : "center",
+	            align : "left",
+	            editor : {
+	                type : "combobox",
+	                options : HdUtils.code.scode({
+		                fieldCod : 'TRADE_ID'
+	                }, {
+		                required : false
+	                })
+	            },
+	            formatter : function(value) {
+		            return HdUtils.code.name('TRADE_ID', value);
+	            },
+	            sortable : false
+	        }, {
+	            field : "BRAND_NAM",
+	            title : "品牌",
+	            multiSort : true,
+	            width : 60,
+	            align : "left",
+	            sortable : false
+	        }, {
+	            field : "CAR_KIND_NAM",
+	            title : "车类",
+	            multiSort : true,
+	            width : 60,
+	            align : "left",
+	            sortable : false
+	        }, {
+	            field : "CAR_TYP_NAM",
+	            title : "车型",
+	            multiSort : true,
+	            width : 100,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "CNT",
+	            title : "数量",
+	            multiSort : true,
+	            width : 60,
+	            align : "center",
+	            sortable : false
+	        }
+
+	        ] ]
+	    });
+	    $("#CAreaDatagrid1508123301002" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

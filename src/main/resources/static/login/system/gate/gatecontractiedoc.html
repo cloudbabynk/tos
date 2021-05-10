@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="ContractIeDocToolBar15081233020012+${radi}"	style="float: left;">
+	<!-- 查询 -->
+	<div style="float: left;">
+		<input type="radio" name="examflg" value="0" checked="true"><label>板车</label>
+		拖车牌号：<input th:id="truckNo+${radi}"
+			name="truckNo" type="text" data-options="required:false"
+			style="width: 120px">委托号：<input th:id="contractNo+${radi}" name="contractNo"
+			placeholder="请输入委托号" type="text" data-options="required:false"
+			style="width: 120px">
+	</div>
+	<div style="float: left;">
+	<input type="radio" name="examflg" value="1"><label>自开</label>
+		计划车数：<input th:id="planNum+${radi}" name="planNum"
+			placeholder="请输入计划车数" type="text" data-options="required:false"
+			style="width: 150px"> 进门时间：<input th:id="inGatTim+${radi}"
+			class="easyui-datetimebox" name="inGatTim" placeholder="请输入进门时间"
+			data-options="required:false" style="width: 120px"> <a
+			class="easyui-linkbutton" th:id="query+${radi}">确认</a>
+		<shiro:hasPermission name="webresources:login:GateTruck:save">
+			<a class="easyui-linkbutton" th:id='save+${radi}'>进闸</a>
+		</shiro:hasPermission>
+		<a class="easyui-linkbutton" th:id='clear+${radi}'>下一辆</a> 当前闸口：<input
+			th:id="gateNo+${radi}" name="gateNo" type="text"
+			data-options="required:false" style="width: 120px">
+	</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="ContractIeDocDatagrid1508123320012+${radi}" style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#ContractIeDocDatagrid1508123320012[(${radi})]");
+	    var contractNo;
+	    var singleId;
+	    var truckNo;
+	    var planNum;
+	    var inGatTim;
+	    var gateNo;
+	    $('#truckNo[(${radi})]').combobox({
+	        url : '../webresources/login/gate/GateTruckContract/getCTruckDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    $('#gateNo[(${radi})]').combobox({
+	        url : '../webresources/login/gate/GateTruckContract/getCGateDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    // buttons
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+		    contractNo = $("#contractNo[(${radi})]").val();
+		    singleId = $("input[name='examflg']:checked").val();
+		    truckNo = $("#truckNo[(${radi})]").combobox('getValue');
+		    planNum = $("#planNum[(${radi})]").val();
+		    inGatTim = $("#inGatTim[(${radi})]").datebox("getValue");
+		    if (!contractNo) {
+			    HdUtils.messager.info("请输入委托号");
+			    return false;
+		    }
+		    if (!planNum) {
+			    HdUtils.messager.info("请输入计划车数！");
+			    return false;
+		    }
+		    if (!inGatTim) {
+			    HdUtils.messager.info("请输入进门时间！");
+			    return false;
+		    }
+		    if (singleId == 0) {
+			    if (!truckNo) {
+				    HdUtils.messager.info("请选择拖车牌照！");
+				    return false;
+			    }
+			    //判断拖车是否禁提
+			    HdUtils.ajax.post({
+			        url : "../webresources/login/base/CTruck/ifForbid?truckNo=" + truckNo,
+			        success : function(data) {
+				        if (data.code == '-1') {
+					        HdUtils.messager.info(data.message);
+					        return false;
+				        }
+				        findcontractNo(contractNo,planNum);
+			        }
+			    });
+		    } else {
+			    var date = new Date();
+			    truckNo = "自开" + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+			    findcontractNo(contractNo,planNum);
+		    }
+		    
+
+	    });
+
+	    //根据委托号查询
+	    function findcontractNo(contractNo,planNum){
+	    	HdUtils.ajax.post({
+		        url : "../webresources/login/contract/ContractIeDoc/findone?contractNo=" + contractNo,
+		        success : function(data) {
+		        	if(data.carNum<planNum){
+		        		HdUtils.messager.info("拖车计划作业数超出了预约数 ，不能继续进行！");
+		        		return false;
+		        	}
+			        row = {
+			            contractTyp : data.contractTyp,
+			            contractNo : data.contractNo,
+			            carNum : data.carNum,
+			            planNum : planNum,
+			            billNo : data.billNo,
+			            brand : data.brand,
+			            carTyp : data.carTyp,
+			        };
+			        dg.datagrid("hdAdd", row);
+		        }
+		    })
+	    }
+	    // 进闸。
+	    $("#save[(${radi})]").on("click", function() {
+	    	var gateNo = $("#gateNo[(${radi})]").combobox('getValue');
+	    	if(!gateNo){
+	    		HdUtils.messager.info("请先选择闸口！");
+	    		return false;
+	    	}
+	    	dg.datagrid("hdSave",{
+	    		url : "../webresources/login/gate/GateTruckContract/save?contractNo="+contractNo+"&singleId="+singleId
+	    				+"&truckNo="+truckNo+"&planNum="+planNum+"&inGatTim="+inGatTim+"&gateNo="+gateNo
+	    	})
+	    });
+	   // 下一车。
+	    $("#clear[(${radi})]").on("click", function() {
+	    	dg.datagrid('loadData', { total: 0, rows: [] });
+	    	$("#contractNo[(${radi})]").val("");
+	    	$("#truckNo[(${radi})]").combobox('setValue', '');
+	    	$("#planNum[(${radi})]").val("");
+	    	$("#inGatTim[(${radi})]").datebox("setValue", '');
+	    	$("#gateNo[(${radi})]").combobox('setValue', '')
+	    });
+	    
+	    
+
+	    $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid({
+	        striped : true,
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#ContractIeDocToolBar15081233020012" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        onDblClickRow : function(rowIndex, rowData) {
+		        $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid('deleteRow', rowIndex);
+	        },
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+	        }, {
+	            field : "contractTyp",
+	            title : "收/提",
+	            multiSort : true,
+	            align : "center",
+	            width : 100,
+	            sortable : false
+	        }, {
+	            field : "contractNo",
+	            title : '委托号',
+	            multiSort : true,
+	            width : 100,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "carNum",
+	            title : "预约车数",
+	            multiSort : true,
+	            width : 100,
+	            align : "center",
+	            sortable : false
+	        },{
+	            field : "planNum",
+	            title : "计划车数",
+	            multiSort : true,
+	            width : 100,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "billNo",
+	            title : "提单号",
+	            multiSort : true,
+	            width : 100,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "brand",
+	            title : "品牌",
+	            multiSort : true,
+	            width : 100,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "carTyp",
+	            title : "车型",
+	            multiSort : true,
+	            width : 100,
+	            align : "center",
+	            sortable : false
+	        }
+	        ] ]
+	    });
+	    $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

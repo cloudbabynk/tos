@@ -1,0 +1,76 @@
+<meta charset="UTF-8">
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#ShipDispatchLogForm1507959148710");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/ship/ShipDispatchLog/findone?dispatchId=[(${dispatchId})]",
+	        success : function(data) {
+		        $("#ShipDispatchLogForm1507959148710").form("loadData", data);
+	        }
+	    })
+	    $("#jbTim").val(Date.prototype.dateAdd(0, "yyyy-MM-dd  HH:mm"));
+	    $("#dispatchDte").val(Date.prototype.dateAdd(0, "yyyy-MM-dd"));
+	    $('#workRun').combobox({
+	    	url : '../webresources/login/damage/MDeliveryRecord/getClassRunDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 'auto',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+		    var isValss = $("#ShipDispatchLogForm1507959148710").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#ShipDispatchLogForm1507959148710").serializeObject();
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/ship/ShipDispatchLog/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.code == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#DayWorkClassDatagrid1508123307299" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+    });
+</script>
+<form id="ShipDispatchLogForm1507959148710">
+	<table id="ShipExecutionTable1507959148710"style="height: 75%; width: 95%" class="tableform">
+		<tr>
+			<th>日期：</th>
+			<td><input id="dispatchDte" name="dispatchDte" data-options="required:false" class="easyui-datebox"/></td>
+			<th>班次：</th>
+			<td><input id="workRun" name="workRun" data-options="required:false" class="easyui-validatebox"  /></td>
+		</tr>
+		<tr>
+			<th>日志内容：</th>
+			<td colspan="3">
+			<textarea  id="workContent" name="workContent" style="height:200px;width:100%"></textarea>
+			</td>
+		</tr>
+		<tr>
+			<th>交班人：</th>
+			<td><input id="jbNam1" name="jbNam1" data-options="required:false" class="easyui-validatebox" readonly="readonly"/></td>
+			<th>交班时间：</th>
+			<td><input id="jbTim1" name="jbTim1" data-options="required:false" class="easyui-datetimebox" readonly="readonly" style="width:150px;"/></td>
+		</tr>
+		<tr>
+			<th>接班人：</th>
+			<td><input id="jbNam2" name="jbNam2" data-options="required:false" class="easyui-validatebox" readonly="readonly"   /></td>
+			<th>接班时间：</th>
+			<td><input id="jbTim2" name="jbTim2" data-options="required:false" class="easyui-datetimebox" readonly="readonly" style="width:150px;"/></td>
+		</tr>
+			<input id="dispatchId" name="dispatchId" hidden="hidden"/>
+	</table>
+</form>

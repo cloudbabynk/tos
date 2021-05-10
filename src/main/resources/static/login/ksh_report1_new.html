@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>年度概况</title>
+    <script type="text/javascript" src="../js/jquery.min.js"></script>
+<script type="text/javascript" src="../js/echarts/dist/echarts.js"></script>
+    <link rel="stylesheet" type="text/css" href="../css/report1.css"/>
+</head>
+<body style="background:url('../images/indexBg.jpg');width:100%;height:100%;">
+<!-- 2021/4/6 天津那边不满意，然后调整  copy的ksh_report1_new.html 
+	主要调整前台样式和 REPORT_TEU 表相关数据
+-->
+<div class="index_all">
+    <div class="index_top">
+		<div id="times"></div>
+		<div id="weekDay" style="font-size: 20px;"></div>
+    	<div class="index_top_right_text">当日 <span id="teuDay"></span> 辆</div>
+		<div class="index_top_right_text">当月 <span id="teuMonth"></span> 辆</div>
+		<div class="index_top_right_text">年度 <span id="tueYear"></span> 辆</div>
+        <div class="index_top_right_text">安全天数 <span id="saveDays"></span> 辆</div>
+
+    </div>
+
+    <!--    <div class="index2_mid4" style="float: left" id="saveDays_new"></div>-->
+</div>
+
+
+<div style="margin-bottom:50px;">
+    <div class="index2_mid" style="clear:both;">
+        <div class="index2_mid1">
+            <div class="index2_mid1_1">
+                <img id="ksh_report_year1_new" class="index2_mid1_img1 yNumb" src="../images/number_img/red_ban0.png"/>
+            </div>
+            <div class="index2_mid1_1">
+                <img id="ksh_report_year2_new" class="index2_mid1_img1 yNumb" src="../images/number_img/red_ban1.png"/>
+            </div>
+            <div class="index2_mid1_1">
+                <img id="ksh_report_year3_new" class="index2_mid1_img1 yNumb" src="../images/number_img/red_ban0.png"/>
+            </div>
+            <div class="index2_mid1_1">
+                <img id="ksh_report_year4_new" class="index2_mid1_img1 yNumb" src="../images/number_img/red_ban0.png"/>
+            </div>
+            <div class="index2_mid1_2">
+                <a class="index2_mid1_img2 " style="font-style:normal;font-size: 40px;font-weight:bold;color: #ffffff ">年</a>
+            </div>
+        </div>
+        <div class="index2_mid2">
+            <div id="yearCard_new">
+              
+                <div class="index2_mid2_3">
+                    <a class="index2_mid2_img2 "
+                       style="font-style:normal;font-size: 40px;font-weight:bold;color: #ffffff ">辆</a>
+                </div>
+            </div>
+        </div>
+        <div style="clear:both;">
+            <div class="index2_mid3">
+                <div class="index2_mid3_one">
+                    <img id="ksh_report_month1_new" class="index2_mid3_img1 mNumb"
+                         src="../images/number_img/red_ban0.png"/>
+                </div>
+                <div class="index2_mid3_one">
+                    <img id="ksh_report_month2_new" class="index2_mid3_img1 mNumb"
+                         src="../images/number_img/red_ban0.png"/>
+                </div>
+                <div class="index2_mid2_text">
+                    <a class="index2_mid3_img1"
+                       style="font-style:normal;font-size: 40px;font-weight:bold;color: #ffffff ">月</a>
+                </div>
+            </div>
+            <div class="index2_mid4" id="monthCard_new">
+            
+                <div class="index2_mid4_2">
+                    <a class="index2_mid2_img2"
+                       style="font-style:normal;font-size: 30px;font-weight:bold;color: #ffffff ">辆</a>
+                </div>
+            </div>
+            <div class="index2_mid5">
+                <div class="index2_mid3_one">
+                    <img id="ksh_report_day1_new" class="index2_mid3_img1 rNumb"
+                         src="../images/number_img/red_ban0.png"/>
+                </div>
+                <div class="index2_mid3_one">
+                    <img id="ksh_report_day2_new" class="index2_mid3_img1 rNumb"
+                         src="../images/number_img/red_ban0.png"/>
+                </div>
+                <div class="index2_mid2_text">
+                    <a class="index2_mid3_img1"
+                       style="font-style:normal;font-size: 40px;font-weight:bold;color: #ffffff ">日</a>
+                </div>
+            </div>
+            <div class="index2_mid6" id="dayCard_new">
+               
+                <div class="index2_mid4_2">
+                    <a class="index2_mid2_img2"
+                       style="font-style:normal;font-size: 30px;font-weight:bold;color: #ffffff ">辆</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<link rel="stylesheet" type="text/css" href="../../../css/wer.css">
+<div class="index2_bottom">
+    <div class="div-left">
+        <div class="index2_bottom1">
+            <div class="index2_bottom1_text" style="font-size:30px">集疏港计划</div>
+            <div class="index2_bottom1_table" style="width:100%;height:220px;border-width:0px;">
+                <table style="width:100%;border-width:0px;color:#FFC600">
+                    <thead>
+                    <tr>
+                        <th style="border-color:#213566;width: 15%">类型</th>
+                        <th style="border-color:#213566;width: 15%">码头</th>
+                        <th style="border-color:#213566;width: 23%">船名 </th>
+                        <th style="border-color:#213566;width: 22%">品牌</th>
+                        <th style="border-color:#213566;width: 10%">数量</th>
+                        <th style="border-color:#213566;width: 15%">内外贸</th>
+                    </tr>
+                    </thead>
+
+                </table>
+                <table style="width: 100%;border-width:0px;">
+                    <tr style="width: 100%">
+                        <td align="center">
+                            <div id=rolllinkk style="overflow: hidden; width: 100%; height: 300px">
+                                <div id=rolllinkk1>
+                                    <!-- 下面是你要显示的内容 -->
+                                    <table id="report_jsg_table" width="100%" cellpadding="2"	style="border-width:0;color: #ffffff"></table>
+                                    <!-- 显示的内容结束！ -->
+                                </div>
+                                <div id=rolllinkk2>
+                                    <div align=center></div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="div-center">
+        <div class="index2_bottom2">
+            <div class="index2_bottom1_text" style="font-size:30px">年度作业数</div>
+            <div class="index2_bottom1_table" style="width:100%;height:100%;border-width:0px;" id="echarts_l"></div>
+
+        </div>
+    </div>
+    <div class="div-right">
+        <div class="index2_bottom3">
+            <div class="index2_bottom1_text" style="margin-right:40px;font-size:30px">船期预报</div>
+            <div class="index2_bottom1_table" style="width:100%;border-width:0px;">
+                <table style="width:100%;border-width:0px;color:#FFC600">
+                    <tr>
+                        <th style="border-color:#213566;width: 10%"> 序号</th>
+                        <th style="border-color:#213566;width: 20%">船名</th>
+                        <th style="border-color:#213566;width: 15%">内外贸</th>
+                        <th style="border-color:#213566;width: 15%">数量</th>
+                        <th style="border-color:#213566;width: 40%">计划到港时间</th>
+                    </tr>
+                </table>
+                <table style="width: 100%;border-width:0px;">
+                    <tr style="width: 100%">
+                        <td align="center">
+                            <div id=rolllinkk_1 style="overflow: hidden; width: 100%; height: 300px">
+                                <div id=rolllinkk1_1>
+
+                                    <!-- 下面是你要显示的内容 -->
+                                    <table id="report_dashship_table_new" width="100%" cellpadding="2"  style="border-width:0;color: #ffffff">
+                                    </table>
+                                    <!-- 显示的内容结束！ -->
+                                </div>
+                                <div id=rolllinkk2_1>
+                                    <div align=center></div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var rolllinkk = document.getElementById('rolllinkk');
+    var rolllinkk1 = document.getElementById('rolllinkk1');
+    var rolllinkk2 = document.getElementById('rolllinkk2');
+    var rolllinkk_1 = document.getElementById('rolllinkk_1');
+    var rolllinkk1_1 = document.getElementById('rolllinkk1_1');
+    var rolllinkk2_1 = document.getElementById('rolllinkk2_1');
+    var type = 'FD';
+    $(document).ready(function () {
+    	 setInterval("getDate()",1000);
+        $.ajax({
+            url: "../webresources/login/ship/BillSplit/getSaveProduceDays",
+            type: "POST",
+            dataType: "json",
+            success: function (data) {
+				if(data){
+				   $("#saveDays").text( data.SAFE_DAYS);
+				   $("#teuDay").text( data.TEU_DNUM);
+				   $("#teuMonth").text( data.TEU_MNUM);
+				   $("#tueYear").text( data.TEU_YNUM);
+				}
+            }, error: function (data) {
+            }
+        })
+        //getTitle()
+        var nowDate = new Date();//获取系统当前时间
+        var newYear = nowDate.getFullYear();
+        var newMonth = nowDate.getMonth() + 1;
+        var newDay = nowDate.getDate();
+        var year1 = parseInt(newYear / 1000);
+        var year2 = parseInt(newYear / 100) % 10;
+        var year3 = parseInt(newYear / 10) % 10;
+        var year4 = newYear % 10;
+        document.getElementById('ksh_report_year1_new').src = "../images/number_img/red_ban" + year1 + ".png"
+        document.getElementById('ksh_report_year2_new').src = "../images/number_img/red_ban" + year2 + ".png"
+        document.getElementById('ksh_report_year3_new').src = "../images/number_img/red_ban" + year3 + ".png"
+        document.getElementById('ksh_report_year4_new').src = "../images/number_img/red_ban" + year4 + ".png"
+        var month1 = parseInt(newMonth / 10);
+        var month2 = newMonth % 10;
+        document.getElementById('ksh_report_month1_new').src = "../images/number_img/red_ban" + month1 + ".png"
+        document.getElementById('ksh_report_month2_new').src = "../images/number_img/red_ban" + month2 + ".png"
+        var day1 = parseInt(newDay / 10);
+        var day2 = newDay % 10;
+        document.getElementById('ksh_report_day1_new').src = "../images/number_img/red_ban" + day1 + ".png"
+        document.getElementById('ksh_report_day2_new').src = "../images/number_img/red_ban" + day2 + ".png"
+        //大屏展示航次预报
+        getJsgData();
+        var MyMar1 = setInterval(Marquee1, 100);
+        rolllinkk.onmouseover = function () {
+            clearInterval(MyMar1);
+        };
+        rolllinkk.onmouseout = function () {
+            MyMar1 = setInterval(Marquee1, 100);
+        };
+
+        findDashShip();
+        var MyMar2 = setInterval(Marquee2, 100) //
+        rolllinkk_1.onmouseover = function () {
+            clearInterval(MyMar2)
+        }
+        rolllinkk_1.onmouseout = function () {
+            MyMar2 = setInterval(Marquee2, 100)
+        }
+        getYeraTTL(type);
+        getZYS();
+        window.setInterval("getJsgData()", 60 * 60 * 1000);
+        window.setInterval("findDashShip()", 30 * 60 * 1000);
+        window.setInterval("getZYS()", 3 * 60 * 60 * 1000);
+        window.setInterval("getYeraTTL()", 10 * 1000);
+        // getKCData();
+    });
+
+    Date.prototype.format = function (fmt) {
+	    var o = {
+    		 "M+" : this.getMonth()+1,                 //月份   
+    		 "d+" : this.getDate(),                    //日   
+    		 "h+" : this.getHours(),                   //小时   
+    		 "m+" : this.getMinutes(),                 //分   
+    		 "s+" : this.getSeconds(),                 //秒   
+    		 "q+" : Math.floor((this.getMonth()+3)/3), //季度   
+    		 "S"  : this.getMilliseconds()             //毫秒   
+	    };
+	    if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+	    for (var k in o)
+	        if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+	    return fmt;
+	}
+	
+   function getDate(){
+		//格式化为本地时间格式
+		var date1=new Date().format("yyyy年MM月dd日 hh:mm:ss");
+		
+		 var weekDays=new Date().getDay();//获取存储当前日期
+		 var weekday=["星期日","星期一","星期二","星期三","星期四","星期五","星期六"];
+		  
+		 
+		  
+		//获取div
+		var div1 = document.getElementById("times");
+		 var weekDay = document.getElementById("weekDay"); 
+		//将时间写入div
+		div1.innerHTML = date1;
+		weekDay.innerHTML = weekday[weekDays];
+   }
+   
+    function change() {
+        echarts.init(document.getElementById('echarts_l'));
+        if (type == 'FD') {
+            type = 'LH';
+        } else if (type == 'LH') {
+            type = 'FD';
+        }
+        getYeraTTL();
+    }
+
+    function getTitle() {
+        $.ajax({
+            url: "../webresources/login/ship/BillSplit/getSaveProduceDays",
+            type: "POST",
+            dataType: "json",
+            success: function (data) {
+                let title =data.split(" ")[0]
+                let saveDays =data.split(" ")[1];
+                $("#title").text( title);
+                $("#saveDays").text( saveDays);
+             //   document.getElementById("title").innerHTML = title;
+
+            }
+        })
+    };
+
+    function getYeraTTL() {
+        $.ajax({
+            url: "../webresources/login/ship/BillSplit/findWorkDataNew?type=" + type,
+            type: "POST",
+            dataType: "json",
+            success: function (data) {
+                var nowDate = new Date();
+                var yearTTL = data[0].Year + "";
+                var yearNum = 8 - yearTTL.length;
+                var monthTTL = data[0].Month + "";
+                var monthNum = 7 - monthTTL.length;
+                var dayTTL = data[0].Day + "";
+                var dayNum = 6 - dayTTL.length;
+                if (yearTTL.length < 8) {
+                    for (var i = 0; i < yearNum; i++) {
+                        yearTTL = 0 + yearTTL;
+                    }
+                }
+                for (var i = 0; i < yearTTL.length; i++) {
+                    addCard("year", i, yearTTL[i]);
+                }
+                if (monthTTL.length < 7) {
+                    for (var i = 0; i < monthNum; i++) {
+                        monthTTL = 0 + monthTTL;
+                    }
+                }
+                for (var i = 0; i < monthTTL.length; i++) {
+                    addCard("month", i, monthTTL[i]);
+                }
+                if (dayTTL.length < 6) {
+                    for (var i = 0; i < dayNum; i++) {
+                        dayTTL = 0 + dayTTL;
+                    }
+                }
+                for (var i = 0; i < dayTTL.length; i++) {
+                    addCard("day", i, dayTTL[i]);
+                }
+            }, error: function (data) {
+
+            }
+        })
+    }
+
+    function addCard(type, i, number) {
+        if (type == "year") {
+            var id = "#mid2" + i;
+            var html = "<div class='index2_mid2_1' id=mid2" + i + "> <img class='index2_mid2_img1 yDun' src='../images/number_img/black_ban" + number + ".png' /> </div>";
+            if ($(id).size() > 0) {
+                $(id).remove();
+                $("#yearCard_new").append(html);
+            } else {
+                $("#yearCard_new").append(html);
+            }
+        } else if (type == "month") {
+            var id = "#mid4" + i;
+            var html = "<div class='index2_mid4_1' id=mid4" + i + "> <img class='index2_mid4_1_img1 mDun' src='../images/number_img/black_ban" + number + ".png' /> </div>";
+            if ($(id).size() > 0) {
+                $(id).remove();
+                $("#monthCard_new").append(html);
+            } else {
+                $("#monthCard_new").append(html);
+            }
+        } else if (type == "day") {
+            var id = "#mid6" + i;
+            var html = "<div class='index2_mid6_1' id=mid6" + i + "> <img class='index2_mid4_1_img1 rDun' src='../images/number_img/black_ban" + number + ".png' /> </div>";
+            if ($(id).size() > 0) {
+                $(id).remove();
+                $("#dayCard_new").append(html);
+            } else {
+                $("#dayCard_new").append(html);
+            }
+        }
+
+    }
+
+    function getJsgData() {
+        $.ajax({
+            url: "../webresources/login/contract/ContractIeDoc/findContract",
+            type: "POST",
+            dataType: "json",
+            success: function (data) {
+                var div = document.getElementById("report_jsg_table");
+                div.innerHTML = "";
+
+                data.forEach(function (currentValue, index, arr) {
+                    var tr = document.createElement("tr");
+                    var tdworknam = document.createElement("td");
+                    tdworknam.style.width = '15%';
+                    tdworknam.innerText = currentValue.workNam;
+                    tr.appendChild(tdworknam);
+                    var tddocknam = document.createElement("td");
+                    tddocknam.style.width = '15%';
+                    tddocknam.innerText = currentValue.dockNam;
+                    tr.appendChild(tddocknam);
+                    var tdienam = document.createElement("td");
+                    tdienam.style.width = '23%';
+                    tdienam.innerText = currentValue.shipNam == null ? "" : currentValue.shipNam;
+                    tr.appendChild(tdienam);
+                    var tdbrandnam = document.createElement("td");
+                    tdbrandnam.style.width = '22%';
+                    tdbrandnam.innerText = currentValue.brandNam;
+                    tr.appendChild(tdbrandnam);
+                    var tdcarnum = document.createElement("td");
+                    tdcarnum.style.width = '10%';
+                    tdcarnum.innerText = currentValue.carNum;
+                    tr.appendChild(tdcarnum);
+
+                    var tdtradenam = document.createElement("td");
+                    tdtradenam.style.width = '15%';
+                    tdtradenam.innerText = currentValue.tradeNam;
+                    tr.appendChild(tdtradenam);
+                    div.appendChild(tr);
+                });
+                if (data.length > 5)
+                    rolllinkk2.innerHTML = rolllinkk1.innerHTML;
+            }
+        });
+    }
+
+    function getZYS() {
+        $.ajax({
+            url: "../webresources/login/ship/BillSplit/findNdzys",
+            success: function (data) {
+                //年度完成量
+                var monthWorkNum = new Array();
+                var monthWorkName = new Array();
+                var v = 0;
+                for (var key in data[0]) {
+                    monthWorkName[v] = key;
+                    monthWorkNum[v] = data[0][key];
+                    v++;
+                }
+
+                //年度完成量
+                var monthPlanNum = new Array();
+                var monthPlanName = new Array();
+                var z = 0;
+                for (var key in data[1]) {
+                    monthPlanName[z] = key;
+                    monthPlanNum[z] = data[1][key];
+                    z++;
+                }
+
+                var ndzys = echarts.init(document.getElementById('echarts_l'));
+                option = {
+                    tooltip: {
+                        trigger: 'axis',
+                        showDelay: '20',
+                        axisPointer: { // 坐标轴指示器，坐标轴触发有效
+                            type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
+                        }
+                    },
+                    grid: {
+                        borderWidth: 0,
+                        height: '60%',
+                        width: '80%',
+                        x: '80',
+                        y: '60'
+                    },
+                    legend: {
+                        textStyle: {
+                            color: '#6495ED',
+                        },
+                        data: ['计划数', '实际作业数']
+                    },
+                    xAxis: [{
+                        type: 'category',
+                        splitLine: { // 分隔线
+                            show: false, // 默认显示，属性show控制显示与否
+                        },
+                        axisLabel: {
+                            textStyle: {
+                                color: '#6495ED',//坐标值得具体的颜色
+                                fontSize: 18
+                            },
+                        },
+                        data: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
+                    }],
+                    yAxis: [{
+                        type: 'value',
+                        // 	                     name : '实际作业数',
+                        splitLine: { // 分隔线
+                            show: false, // 默认显示，属性show控制显示与否
+                            lineStyle: { // 属性lineStyle（详见lineStyle）控制线条样式
+                                color: ['#ccc'],
+                                width: 1,
+                                type: 'solid'
+                            }
+                        },
+                        axisLabel: {
+                            textStyle: {
+                                color: '#6495ED',//坐标值得具体的颜色
+                                fontSize: 18
+                            }
+                        },
+                        //	                     axisLabel : {
+                        //	                         formatter: '{value} ml'
+                        //	                     }
+                    }, {
+                        type: 'value',
+                        name: '计划数',
+                        show: true,
+                        splitLine: { // 分隔线
+                            show: false, // 默认显示，属性show控制显示与否
+                            lineStyle: { // 属性lineStyle（详见lineStyle）控制线条样式
+                                color: ['#ccc'],
+                                width: 1,
+                                type: 'solid'
+                            }
+                        },
+                        axisLabel: {
+                            textStyle: {
+                                color: '#6495ED',//坐标值得具体的颜色
+                                fontSize: 18
+                            }
+                        },
+                        axisLabel: {
+                            formatter: '{value} °C'
+                        }
+                    }],
+                    series: [{
+                        name: '实际作业数',
+                        type: 'bar',
+                        itemStyle: {
+                            normal: {
+                                color: '#CD6839',
+                                barBorderColor: '#6495ED',
+                                label: {
+                                    show: true
+                                }
+                            }
+                        },
+                        data: monthWorkNum
+                    }, {
+                        name: '计划数',
+                        type: 'line',
+                        itemStyle: {
+                            normal: {
+                                color: '#6495ED',
+                                barBorderColor: '#6495ED',
+                                label: {
+                                    show: false
+                                }
+                            }
+                        },
+                        data: monthPlanNum
+                    }]
+                }
+
+                ndzys.setOption(option);
+
+            }
+        })
+    }
+
+    //船期预报
+    function findDashShip() {
+        $.ajax({
+            url: "../webresources/login/ship/Ship/findDashShipTable",
+            type: "POST",
+            dataType: "json",
+            success: function (data) {
+                var div = document.getElementById("report_dashship_table_new");
+                div.innerHTML = "";
+                data.forEach(function (currentValue, index, arr) {
+                    var tr = document.createElement("tr");
+                    var tdbegCableNo = document.createElement("td");
+                    tdbegCableNo.style.width = '10%';
+                    tdbegCableNo.innerText = currentValue.begCableNo;
+                    tr.appendChild(tdbegCableNo);
+                    var tdcShipNam = document.createElement("td");
+                    tdcShipNam.style.width = '20%';
+                    tdcShipNam.innerText = currentValue.cShipNam;
+                    tr.appendChild(tdcShipNam);
+                    var tdtradeId = document.createElement("td");
+                    tdtradeId.style.width = '15%';
+                    tdtradeId.innerText = currentValue.tradeId;
+                    tr.appendChild(tdtradeId);
+                    var tdwgt = document.createElement("td");
+                    tdwgt.style.width = '15%';
+                    tdwgt.innerText = currentValue.berthCod;
+                    tr.appendChild(tdwgt);
+                    var tdetdArrvTim = document.createElement("td");
+                    tdetdArrvTim.style.width = '40%';
+                    tdetdArrvTim.innerText = currentValue.etdArrvTim == null ? "" : currentValue.etdArrvTim;
+                    tr.appendChild(tdetdArrvTim);
+                    div.appendChild(tr);
+                });
+                if (data.length > 5)
+                    rolllinkk2_1.innerHTML = rolllinkk1_1.innerHTML + rolllinkk1_1.innerHTML;
+            }
+        });
+    }
+
+
+    function Marquee1() {
+        if (rolllinkk2.offsetTop - rolllinkk.scrollTop <= 0)
+            rolllinkk.scrollTop -= rolllinkk1.offsetHeight;
+        else {
+            rolllinkk.scrollTop++;
+        }
+    }
+
+    function Marquee2() {
+        if (rolllinkk2_1.offsetTop - rolllinkk_1.scrollTop <= 0)
+            rolllinkk_1.scrollTop -= rolllinkk1_1.offsetHeight;
+        else {
+            rolllinkk_1.scrollTop++;
+        }
+    }
+
+</script>
+</body>
+</html>

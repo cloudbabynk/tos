@@ -1,0 +1,281 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#ShipForm1507959148645");
+	    var shipNo = HdUtils.dialog.getValue("shipNo");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/ship/Ship/findone?shipNo=" + shipNo,
+	        success : function(data) {
+		        $("#ShipForm1507959148645").form("loadData", data);
+		        if(data.shipCod!=null){
+		        	$("#shipCoddm").val(data.shipCod);
+		        }
+		        if(data.shipCorpCod!=null){
+		        	$("#shipCorpCoddm").val(data.shipCorpCod);
+		        }
+		        if(data.shipAgentCod!=null){
+		        	$("#shipAgentCoddm").val(data.shipAgentCod);
+		        }
+	        }
+	    })
+	    //船状态
+	    $('#shipStat').combobox(HdUtils.code.scode({
+		    fieldCod : 'SHIP_STAT'
+	    }, {
+		    required : true
+	    }));
+	    //船名
+	    $('#shipCod').combobox({
+	        url : '../webresources/login/ship/Ship/getCCShipDataDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        required : true,
+	        onSelect : function(rec) {
+		        return rec.value;
+	        },
+	        onChange : function(n,o) {
+	        	$("#shipCoddm").val(n);
+	        }
+	    });
+	    //船公司
+	    $('#shipCorpCod').combobox({
+	        url : '../webresources/login/ship/CShipData/getshipCorpCodDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        },
+	        onChange : function(n,o) {
+	        	$("#shipCorpCoddm").val(n);
+	        }
+	    });
+	    //船代理
+	    $('#shipAgentCod').combobox({
+	        url : '../webresources/login/ship/CShipData/getshipAgentCodDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        },
+	        onChange : function(n,o) {
+	        	$("#shipAgentCoddm").val(n);
+	        }
+	    });
+	    //船型
+	    $('#shipTyp').combobox(HdUtils.code.scode({
+		    fieldCod : 'SHIP_TYP'
+	    }, {
+		    required : false
+	    }));
+	    //内外贸
+	    $('#tradeId').combobox(HdUtils.code.scode({
+		    fieldCod : 'TRADE_ID'
+	    }, {
+		    required : true
+	    }));
+	    //泊位
+	    $('#berthCod').combobox({
+	        url : '../webresources/login/ship/CShipData/getCBerthDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    //停靠方式
+	    $('#berthWay').combobox(HdUtils.code.scode({
+		    fieldCod : 'BERTH_WAY'
+	    }, {
+		    required : false
+	    }));
+	    //开始揽桩
+	    $('#begCableNo').combobox({
+	        url : '../webresources/login/ship/CShipData/getCCableDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    //结束揽桩
+	    $('#endCableNo').combobox({
+	        url : '../webresources/login/ship/CShipData/getCCableDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	   //作业码头
+	    $('#dockCod').combobox({
+	        url : '../webresources/login/ship/CShipData/getCDockDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        required : true,
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+		    var isValss = $("#ShipForm1507959148645").form('validate');
+		    if (!isValss) {
+		    	alert(1)
+			    return false;
+		    }
+
+		    var formdata = $("#ShipForm1507959148645").serializeObject();
+
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/ship/Ship/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.code == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#DayWorkClassDatagrid1508123307299" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+	    
+    });
+	function getCheck(){
+		var toPortTim = $("#toPortTim").datebox('getValue');
+		var leavPortTim = $("#leavPortTim").datebox('getValue');
+		if(!toPortTim){
+			HdUtils.messager.info("请先完善靠泊时间！");
+			$("#leavPortTim").datebox("setValue", '');
+			return false;
+		}else{
+			if(toPortTim > leavPortTim){
+				HdUtils.messager.info("离港时间不得早于靠泊时间！");
+				$("#leavPortTim").datebox("setValue", '');
+				return false;
+			}
+		}
+		
+	}
+</script>
+<form id="ShipForm1507959148645">
+    <input id="shipCodId" name="shipCodId" hidden="true">
+    <input id="shipNam" name="shipNam" hidden="true">
+	<table id="ShipTable1507959148645" style="height: 75%; width: 80%"
+		class="tableform">
+		<tr>
+			<th>船编号：</th>
+			<td><input id="shipNo" name="shipNo" readOnly="true"
+				data-options="required:true" class="easyui-validatebox" /></td>
+			<th>船舶状态：</th>
+			<td><input id="shipStat" name="shipStat" readOnly="true" /></td>
+			<th>集团船名航次：</th>
+			<td><input id="groupShip" name="groupShip" readOnly="true"
+				data-options="required:false" class="easyui-validatebox" /></td>
+
+		</tr>
+		<tr>
+			<th>船名：</th>
+			<td><input id="shipCod" name="shipCod"  /></td>
+			<th>船代码：</th>
+			<td><input id="shipCoddm" name="shipCoddm" readOnly="true"/></td>
+			<th>进口航次：</th>
+			<td><input id="ivoyage" name="ivoyage"
+				data-options="required:true" class="easyui-validatebox" /></td>
+			<th>出口航次：</th>
+			<td><input id="evoyage" name="evoyage" data-options="required:true" class="easyui-validatebox"/></td>
+		</tr>
+		<tr>
+			<th>船公司：</th>
+			<td><input id="shipCorpCod" name="shipCorpCod"/></td>
+			<th>船公司代码：</th>
+			<td><input id="shipCorpCoddm" name="shipCorpCoddm" readOnly="true"/></td>
+			<th>船代理：</th>
+			<td><input id="shipAgentCod" name="shipAgentCod"/></td>
+			<th>船代理代码：</th>
+			<td><input id="shipAgentCoddm" name="shipAgentCoddm" readOnly="true"
+				data-options="required:false" class="easyui-numberbox" /></td>
+		</tr>
+		<tr>
+			<th>船型：</th>
+			<td><input id="shipTyp" name="shipTyp" /></td>
+			<th>贸易性质：</th>
+			<td><input id="tradeId" name="tradeId" /></td>
+			<th>进口量：</th>
+			<td><input id="iTonNum" name="iTonNum"
+				data-options="required:false" class="easyui-numberbox" /></td>
+			<th>出口量：</th>
+			<td><input id="eTonNum" name="eTonNum" 
+			data-options="required:false" class="easyui-numberbox" /></td>
+		</tr>
+		<tr>
+			<th>泊位代码：</th>
+			<td><input id="berthCod" name="berthCod"/></td>
+			<th>停靠方式：</th>
+			<td><input id="berthWay" name="berthWay"/></td>
+			<th>开始缆桩：</th>
+			<td><input id="begCableNo" name="begCableNo"/></td>
+			<th>结束缆桩：</th>
+			<td><input id="endCableNo" name="endCableNo"/></td>
+		</tr>
+		<tr>
+			<th>预计抵港：</th>
+			<td><input id="etdArrvTim" name="etdArrvTim" class="easyui-datetimebox"/></td>
+			<th>预报离港：</th>
+			<td><input id="etdLeavTim" name="etdLeavTim" class="easyui-datetimebox" /></td>
+			<th>抵锚时间：</th>
+			<td><input id="conArrvTim" name="conArrvTim" class="easyui-datetimebox" /></td>
+			<th>作业码头：</th>
+			<td><input id="dockCod" name="dockCod" /></td>
+		</tr>
+		<tr>
+			<th>靠泊时间：</th>
+			<td><input id="toPortTim" name="toPortTim" class="easyui-datetimebox"/></td>
+			<th>离港时间：</th>
+			<td><input id="leavPortTim" name="leavPortTim" class="easyui-datetimebox" data-options="onSelect:getCheck" /></td>
+		</tr>
+		<tr>
+			<th>进口开工：</th>
+			<td><input id="planDiscBegTim" name="planDiscBegTim" class="easyui-datetimebox"/></td>
+			<th>进口完工：</th>
+			<td><input id="planDiscEndTim" name="planDiscEndTim" class="easyui-datetimebox" /></td>
+			<th>出口开工：</th>
+			<td><input id="planLoadBegTim" name="planLoadBegTim" class="easyui-datetimebox" /></td>
+			<th>出口完工：</th>
+			<td><input id="planLoadEndTim" name="planLoadEndTim" class="easyui-datetimebox"/></td>
+		</tr>
+		<tr>
+			<th>备注：</th>
+			<td colspan="7"><textarea id="remarks" name="remarks"
+					data-options="required:false" rows="2" style="width: 100%"
+					maxlength="255" /></td>
+		</tr>
+	</table>
+</form>

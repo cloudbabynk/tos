@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>天津港环球滚装码头可视化</title>
+<link rel="stylesheet" href="../css/jquery.fullPage.css">
+<script type="text/javascript" src="../js/jquery.min.js"></script>
+<style>
+.section { text-align: center; font: 50px "宋体"; color: #fff;}
+#fp-nav ul li a.active span,.fp-slidesNav ul li a.active span {    background: #ff0000; /*这里设置的是活动导航的颜色*/}
+#fp-nav ul li a span,.fp-slidesNav ul li a span {    border: 1px solid #FF8913;/*这里设置的是非活动导航的颜色*/}
+
+</style>
+<script src="../js/jquery.min.js"></script>
+<script src="../js/jquery.fullPage.js"></script>
+<script>
+$(function(){
+	document.getElementById('index_ksh1').src="http://"+location.host+"/login/ksh_report1_46.html";
+	//document.getElementById('index_ksh2').src="http://"+location.host+"/login/jt_10.html";
+	document.getElementById('index_ksh2').src="http://"+location.host+"/login/largeScreen2.html";
+	$('#dowebok').fullpage({
+		sectionsColor: ['#1bbc9b', '#071A3F', '#7BAABE', '#f90'],
+		navigation: true,
+		navigationColor:'#ff0000',
+		controlArrowColor:'#ff0000'
+	});
+});
+</script>
+</head>
+
+<body>
+
+<div id="dowebok">
+	<div class="section">
+		<iframe id="index_ksh1" height="100%" width="100%"></iframe>
+	</div>
+	<div class="section">
+		<iframe id="index_ksh2" height="100%" width="100%"></iframe>
+	</div>
+	<!--<div class="section">
+		<iframe id="index_ksh3" height="100%" width="100%"></iframe>
+	</div>-->
+</div>
+
+</body>
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	var  index =0;
+	var times=3000;
+	$.ajax({
+        url : "../webresources/login/privilege/SysCode/findAll?fieldCod=CAROUSEL_TIMES",
+        type:"POST",
+		dataType: "json",
+        success : function(data) {
+        	times=data[0].name;
+        	//3秒轮播一次
+       	 	var  timer = setInterval( function (){
+       		index = (index == 1) ? 0 : index + 1;
+       		//某个div显示，其他的隐藏
+       		$( ".section" ).hide().eq(index).show();
+       	}, times); 
+        }
+	});
+	
+}); 
+</script>
+</html>

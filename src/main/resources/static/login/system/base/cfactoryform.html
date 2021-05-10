@@ -1,0 +1,105 @@
+
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#CFactoryForm1507959148645");
+	    var factoryCod = HdUtils.dialog.getValue("factoryCod");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    if (factoryCod) {
+	    	$("#factoryCod").attr("readonly",true);
+	    } else {
+	    	$("#factoryCod").attr("readonly",false);
+	    }
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/base/CFactory/findone?factoryCod=" + factoryCod,
+	        success : function(data) {
+		        $("#CFactoryForm1507959148645").form("loadData", data);
+	        }
+	    })
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+		    var isValss = $("#CFactoryForm1507959148645").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#CFactoryForm1507959148645").serializeObject();
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/base/CFactory/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#CFactoryDatagrid1508123307299" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+    });
+    function findCod() {
+	    var factoryCodValue = $("#factoryCod").val();
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/base/CFactory/findCFactory?factoryCod=" + factoryCodValue,
+	        success : function(data) {
+		        if (data.code == "-1") {
+			        $('#factoryCod').val("");
+			        HdUtils.messager.bottomRight(data.message);
+			        $('#factoryCod').focus();
+			        return false;
+		        }
+	        }
+	    });
+    }
+</script>
+<form id="CFactoryForm1507959148645">
+	<input id="recTim" name="recTim" hidden="true"> <input
+		id="recNam" name="recNam" hidden="true">
+	<table id="CFactoryTable1507959148645" style="height: 75%; width: 80%"
+		class="tableform">
+		<tr>
+			<th>厂家代码：</th>
+			<td><input id="factoryCod" name="factoryCod"
+				onchange="findCod();" data-options="required:true"
+				class="easyui-validatebox" maxlength="10" /></td>
+			<th>厂家名称：</th>
+			<td><input id="factoryNam" name="factoryNam"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="10" /></td>
+		</tr>
+		<tr>
+
+			<th>备注：</th>
+			<td><input id="remarks" name="remarks"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		</tr>
+	</table>
+
+</form>

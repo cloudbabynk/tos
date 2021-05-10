@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div id="cyardToolBar21081027" style="float: left">
+	<div>
+		<!-- 查询 -->
+		<span> 
+			场号：<input id="cyAreaNo" name="cyAreaNo" placeholder="请输入场号" type="text" data-options="required:false" style="width: 100px">
+			<a class="easyui-linkbutton" id="yardQuery">查询</a>
+			<a class="easyui-linkbutton" id='yardClear'>清空</a>
+			<a class="easyui-linkbutton" id='btnDrawYard'>堆场绘制</a>
+			<a class="easyui-linkbutton" id='btnGenBuildYard'>生成子堆场</a>
+		</span>
+	</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table id="cYardDatagrid20181027" style="height:100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var dg = $("#cYardDatagrid20181027");
+	    // buttons
+	    // 刷新。
+	    $("#fresh").on("click", function() {
+		    dg.datagrid("hdReload");
+	    });
+	    // 清空。
+	    $("#yardClear").on("click", function() {
+	       $("#cyAreaNo").val("");
+	     
+	      });
+
+	    // 查询
+	    $("#yardQuery").on("click", function() {
+		    $("#cYardDatagrid20181027").datagrid({
+			    queryParams : query(),
+		    })
+		});
+		
+		// 绘制堆场
+	    $("#btnDrawYard").on("click", function() {
+			var rowData=$("#cYardDatagrid20181027").datagrid("getSelected");
+			if(rowData){
+				drawCallFunc="drawBackThing";
+				beginDraw("Box");
+			}else{
+				alert("请先选择堆场！");
+			}
+		});
+
+		
+		// 生成子堆场
+	    $("#btnGenBuildYard").on("click", function() {
+			$.messager.progress({title:'请稍候',msg:'生成堆场...'});
+			var rowData=$("#cYardDatagrid20181027").datagrid("getSelected");
+			$.ajax({
+				url: "/webresources/login/map/mapFeature/gensubCargo",
+				contentType:"application/json",
+				type: "POST",
+				data: $.toJSON(rowData),
+				dataType: 'json',
+				success: function (data) {
+					$.messager.progress('close');
+					layers.BASE.getSource().updateParams({'ol3_salt': Math.random()});
+				},
+				error: function (data) {
+					$.messager.progress('close');
+					console.log("保存失败！");
+				}
+			});
+	    });
+
+	    function query() {
+	    	var onlinquery=new HdEzuiQueryParamsBuilder();
+	    	var cyAreaNo = $("#cyAreaNo").val();
+	    	onlinquery.setOtherskeyValue("dockCod",companyCod);
+	    	onlinquery.setOtherskeyValue("cyAreaNo",cyAreaNo);
+	    	
+		  /*   var onlinquery = new HdQuery();
+		    var cyAreaNo = $("#cyAreaNo").val();
+		    onlinquery.add("dockCod", companyCod);
+		    onlinquery.add("cyAreaNo", cyAreaNo); */
+		    return onlinquery.build();
+	    }
+
+	    $("#cYardDatagrid20181027").datagrid({
+	        striped : true,
+	        url : "/webresources/login/base/CCyArea/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#cyardToolBar21081027",
+	        fit : true,
+	        onSelect(rowIndex,rowData){
+	           	 HdUtils.dialog.setValue({ 'cyAreaNo' : rowData.cyAreaNo  });
+	           	var cyAreaNo = rowData.cyAreaNo;
+	           	function queryCcyrow(){
+                  	var builder = new HdQuery();
+                    builder.add("cyAreaNo", cyAreaNo);
+                    return builder.build();
+                };
+
+                $('#ctrowDg20181027').datagrid({
+                    queryParams : queryCcyrow(),
+                 });
+		    },
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+
+	        }, {
+
+	            field : "cyAreaNo",
+	            title : '场号',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+
+	            field : "cyAreaNam",
+	            title : '堆场名称',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "rowNum",
+	            title : "行数",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "bayNum",
+	            title : "每行车数",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "dockCod",
+	            title : '所属码头',
+	            multiSort : true,
+	            halign : "center",
+	            width : 120,
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "recNam",
+	            title : '<font color="red">录入员</font>',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "recTim",
+	            title : '<font color="red">录入时间</font>',
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.date,
+	            width : 120,
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "updNam",
+	            title : '<font color="red">修改人</font>',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "updTim",
+	            title : '<font color="red">修改时间</font>',
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.date,
+	            width : 120,
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }
+
+	        ] ]
+	    });
+	    $("#cYardDatagrid20181027").datagrid("hdGetColumnNames");
+	});
+	
+	//堆场绘制
+	function drawBackThing(geomStr,gArea)
+	{
+		$.messager.confirm('提示框','你确定要保存吗?',function(r){
+			if (r){
+				var rowData=$("#cYardDatagrid20181027").datagrid("getSelected");
+				rowData.pos=geomStr.toString();
+				$.ajax({
+					url: "/webresources/login/base/CCyArea/saveone",
+					contentType:"application/json",
+					type: "POST",
+					data: $.toJSON(rowData),
+					dataType: 'json',
+					success: function (data) {
+						var pam=new HdQuery();
+						pam.dockCod=companyCod;
+						pam.cyAreaNo=rowData.cyAreaNo;
+						initYard(pam);
+					},
+					error: function (data) {
+						console.log("保存失败！");
+					}
+				});
+			}
+		});
+		
+	}
+
+
+    /*]]>*/
+</script>
+</html>

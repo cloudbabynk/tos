@@ -1,0 +1,123 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var overshortId = HdUtils.dialog.getValue("overshortId");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    if (overshortId) {
+	    	$("#overshortId").attr("readonly",true);
+	    } else {
+	    	$("#overshortId").attr("readonly",false);
+	    }
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/damage/MOverShortBack/findone?overshortId=" + overshortId,
+	        success : function(data) {
+		        $("#MOverShortBackForm1507959148710").form("loadData", data);
+	        }
+	    })
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+		    var isValss = $("#MOverShortBackForm1507959148710").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#MOverShortBackForm1507959148710").serializeObject();
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/damage/MOverShortBack/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#MOverShortBackDatagrid1508123301002" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+	 
+    });
+</script>
+<form id="MOverShortBackForm1507959148710">
+		<table id="MOverShortBackTable1507959148710" style="height: 75%; width: 80%"
+		class="tableform">
+		<tr>
+			<th>船舶编号：</th>
+			<td><input id="shipNo" name="shipNo" readonly="readonly"
+				data-options="required:false" class="easyui-validatebox" 
+				maxlength="10" />
+			</td>
+			<th>提单号：</th>
+			<td><input id="billNo" name="billNo" readonly="readonly"
+				data-options="required:false" class="easyui-validatebox" 
+				maxlength="10" />
+			</td>
+		</tr>
+		<tr>
+			<th>车辆流水号：</th>
+			<td><input id="portCarNo" name="portCarNo" readonly="readonly"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+			<th>车架号：</th>
+			<td><input id="vinNo" name="vinNo" readonly="readonly"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		</tr>
+		<tr>
+			<th>RFID号：</th>
+			<td><input id="rfidCardNo" name="rfidCardNo" readonly="readonly"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		    <th>品牌：</th>
+			<td><input id="brandCod" name="brandCod" readonly="readonly"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		</tr>
+		<tr>
+		<th>短、溢卸：</th>
+			<td><input type="radio"  name="missId" value="1" 
+					  class='easyui-radio'>短卸</input> 
+			<input type="radio" name="missId" value="2" class='easyui-radio'>溢卸</input></td>
+			<th>进、出口：</th>
+			<td><input type="radio"  name="iEId" value="I" readonly="readonly"
+					  class='easyui-radio'>进口</input> 
+			<input type="radio" name="iEId" value="E" readonly="readonly" class='easyui-radio'>出口</input></td>
+	
+		</tr>
+		<tr>
+		 <th>备注:</th> 
+			<td><input id="remarks" name="remarks" 
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="20" /></td>
+		 <!-- <th>overshortId:</th>  -->
+			<td><input id="overshortId" name="overshortId"  hidden="true"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="20" /></td>
+		</tr>
+	</table>
+</form>

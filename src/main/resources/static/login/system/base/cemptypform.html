@@ -1,0 +1,101 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#CEmpTypForm1507959148645");
+	    var empTypCod = HdUtils.dialog.getValue("empTypCod");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    if (empTypCod) {
+	    	$("#empTypCod").attr("readonly",true);
+	    } else {
+	    	$("#empTypCod").attr("readonly",false);
+	    }
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/base/CEmpTyp/findone?empTypCod=" + empTypCod,
+	        success : function(data) {
+		        $("#CEmpTypForm1507959148645").form("loadData", data);
+	        }
+	    })
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+		    var isValss = $("#CEmpTypForm1507959148645").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#CEmpTypForm1507959148645").serializeObject();
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/base/CEmpTyp/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#DayWorkClassDatagrid1508123307299" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+    });
+	function findCod(){
+    	var empTypCodValue = $("#empTypCod").val();
+    	HdUtils.ajax.post({
+			url : "../webresources/login/base/CEmpTyp/findCEmpTyp?empTypCod=" + empTypCodValue,
+			success : function(data) {
+				if (data.code == "-1") {
+					$('#empTypCod').val("");
+					HdUtils.messager.bottomRight(data.message);
+					$('#empTypCod').focus();
+			        return false;
+				}
+			}
+		});
+    }
+</script>
+<form id="CEmpTypForm1507959148645">
+	<table id="CEmpTypTable1507959148645" style="height: 75%; width: 80%"
+		class="tableform">
+		<tr>
+			<th>工种号：</th>
+			<td><input id="empTypCod" name="empTypCod" onchange="findCod();"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="10" /></td>
+			<th>工种名称：</th>
+			<td><input id="empTypNam" name="empTypNam"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="10" /></td>
+		</tr>
+		<tr>
+
+			<th>备注：</th>
+			<td><input id="remarks" name="remarks"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		</tr>
+	</table>
+</form>

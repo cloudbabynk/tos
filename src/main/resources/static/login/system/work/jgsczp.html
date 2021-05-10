@@ -1,0 +1,81 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#BillCarForm150795914912345");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    var billNos = HdUtils.dialog.getValue("billNos");
+	    var shipNo = HdUtils.dialog.getValue("shipNo");
+	    $('#newBillNo').combobox({
+	        url : '../webresources/login/contract/ContractIeDoc/getShipBillWmckDrop?shipNo=' + shipNo ,
+	        valueField : 'value',
+	        textField : 'label',
+	        panelHeight : 'auto',
+	        panelWidth : '120',
+	        mode : 'remote',
+	        required : 'true',
+	        onHidePanel : function() {
+	        },
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+	    	var newBillNo = $("#newBillNo").combobox('getValue');
+		    if (!shipNo){
+		    	return false;
+		    }
+		    if (!billNos){
+		    	return false;
+		    }
+	    	HdUtils.ajax.post({
+		        url : "../webresources/login/cargo/TruckWork/updateJgsclh?shipNo=" + shipNo +"&billNos=" + billNos + "&newBillNo=" + newBillNo,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#DayWorkClassDatagrid1508123307299" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+    });
+</script>
+<form id="BillCarForm150795914912345">
+	<table id="BillCarTable15079591491234" style="height: 75%; width: 90%"
+		class="tableform">
+		<tr>
+			<th>提单号：</th>
+			<td><input id="newBillNo" name="newBillNo"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="35" /></td>
+		</tr>
+	</table>
+</form>

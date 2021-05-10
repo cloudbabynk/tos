@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<div id="CanvasShow20171225" style="position: relative;">
+</div>
+<script>
+	$(document).ready(function() {
+		 var area11 = HdUtils.dialog.getValue("area");
+		    var flag11 = HdUtils.dialog.getValue("flag");
+		    var canvas = new Canvas("CanvasShow20171225", 480, 550);//定义画布
+		    var canvasLayer1 = new CanvasLayer("CanvasshowDiv1",1);//场图层:
+		    var canvasLayer2 = new CanvasLayer("CanvasshowDiv2",2);//场图层:
+		    canvas.push(canvasLayer1);
+		    canvas.push(canvasLayer2);
+		    
+// 		    preImage("../../../images/yard.jpg",function(){  
+// 		        canvasLayer1.getCanvasLayerContext().drawImage(this,0, 0); 
+// 		    });
+		    drawLockPlacs(area11.x1,area11.y1);
+		    
+		    function drawLockPlacs(x,y){
+		    	canvasLayer2.clearRect();
+		        var fillRecArr=[];
+		        var cyPlac = null;
+		        var color = "red";
+		        var arr=[];
+		        arr.push(new XY(x, y));
+		        arr.push(new XY(x-5, y+10));
+		        arr.push(new XY(x+5, y+10));
+		        fillRecArr.push(new FillPolygon(arr,  color,"1"));
+		        canvasLayer2.draw(fillRecArr);
+		    }
+		    
+		    function preImage(url,callback){  
+		        var img = new Image(); //创建一个Image对象，实现图片的预下载  
+		        img.src = url;  
+		        
+		        if (img.complete) { // 如果图片已经存在于浏览器缓存，直接调用回调函数  
+		           callback.call(img);  
+		           return; // 直接返回，不用再处理onload事件  
+		        }  
+		     
+		        img.onload = function () { //图片下载完毕时异步调用callback函数。  
+		            callback.call(img);//将回调函数的this替换为Image对象  
+		        };  
+		   }
+    })
+</script>
+</html>

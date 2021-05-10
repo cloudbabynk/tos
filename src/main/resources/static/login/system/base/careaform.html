@@ -1,0 +1,103 @@
+<meta charset="UTF-8">
+<style type="text/css">
+.tableform {
+	margin: 16px auto;
+}
+
+.tableform tr {
+	height: 30px;
+}
+
+.tableform th {
+	text-align: right;
+	white-space: nowrap;
+}
+
+.tableform td {
+	text-align: left;
+	width: 80px;
+}
+
+.tableform input {
+	text-align: left;
+}
+</style>
+<script>
+	$(document).ready(function() {
+	    var formObject = $("#CAreaForm1507959148710");
+	    var areaCod = HdUtils.dialog.getValue("areaCod");
+	    var radi = HdUtils.dialog.getValue("radi");
+	    if (areaCod) {
+	    	$("#areaCod").attr("readonly",true);
+	    } else {
+	    	$("#areaCod").attr("readonly",false);
+	    }
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/base/CArea/findone?areaCod=" + areaCod,
+	        success : function(data) {
+		        $("#CAreaForm1507959148710").form("loadData", data);
+	        }
+	    })
+	    HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+		    var isValss = $("#CAreaForm1507959148710").form('validate');
+		    if (!isValss) {
+			    return false;
+		    }
+		    var formdata = $("#CAreaForm1507959148710").serializeObject();
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/base/CArea/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#CAreaDatagrid1508123301002" + radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+    });
+    function findCod() {
+	    var areaCodValue = $("#areaCod").val();
+	    HdUtils.ajax.post({
+	        url : "../webresources/login/base/CArea/findCArea?areaCod=" + areaCodValue,
+	        success : function(data) {
+		        if (data.code == "-1") {
+			        $('#areaCod').val("");
+			        HdUtils.messager.bottomRight(data.message);
+			        $('#areaCod').focus();
+			        return false;
+		        }
+	        }
+	    });
+    }
+</script>
+<form id="CAreaForm1507959148710">
+	<input id="recTim" name="recTim" hidden="true"> <input
+		id="recNam" name="recNam" hidden="true">
+	<table id="CAreaTable1507959148710" style="height: 75%; width: 80%"
+		class="tableform">
+		<tr>
+			<th>区域代码：</th>
+			<td><input id="areaCod" name="areaCod" onchange="findCod();"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="10" /></td>
+			<th>区域名称：</th>
+			<td><input id="areaNam" name="areaNam"
+				data-options="required:true" class="easyui-validatebox"
+				maxlength="10" /></td>
+		</tr>
+		<tr>
+
+			<th>备注：</th>
+			<td><input id="remarks" name="remarks"
+				data-options="required:false" class="easyui-validatebox"
+				maxlength="255" /></td>
+		</tr>
+	</table>
+</form>

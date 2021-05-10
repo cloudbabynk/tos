@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<div class="easyui-layout" style="width: 100%; height: 100%;"
+	data-options="fit:true" id="shipdynamic311">
+	<div data-options="region:'center'">
+		<div class="easyui-layout" data-options="fit:true">
+			<div id="ccyrowhtml" data-options="region:'center',fit:true,title:'堆场-行'"
+				style="width: 100%; height: 100%;">
+				<!-- 工具栏 结束 -->
+				<!-- Datagrid -->
+				<table id="CAreaDatagrid1508123301003"
+					style="height: 100%;"></table>
+			</div>
+			<div id="ccyareahtml" data-options="region:'west',split:true,title:'堆场-场'"
+				style="width: 550px; height: 400px;">
+				<div th:id="CAreaToolBar1508123301002" style="float: left">
+					<div>
+						 场号：<input th:id="cyAreaNo+${radi}" name="cyAreaNo"
+							placeholder="请输入场号" type="text" data-options="required:false"
+							style="width: 120px">堆场类型：<input th:id="cyTyp+${radi}"
+							name="cyTyp" placeholder="请输入堆场类型" type="text"
+							data-options="required:false" style="width: 120px"> <a
+							class="easyui-linkbutton" th:id="query+${radi}">查询</a> <a
+							class="easyui-linkbutton" th:id='clear+${radi}'>清空</a>
+					</div>
+				</div>
+				<div style="width:100%;height: 360px;">
+					<table id="CAreaDatagrid1508123301002"></table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+$(document).ready(function() {
+	  var planGroupNo = HdUtils.dialog.getValue('data').planGroupNo;
+	  var radi= HdUtils.dialog.getValue('radi');
+	  var vinNo= HdUtils.dialog.getValue('data').vinNo;
+	  $("input[name='planGroupNo']").val(planGroupNo); 
+	  $("input[name='vinNo']").val(vinNo); 
+	  
+	  HdUtils.ajax.post({
+	        url : "../webresources/login/plan/PlanPlacVin/removeAll?vinNo=" + vinNo,
+	        success : function(data) {
+		     //   HdUtils.messager.bottomRight(data.message);
+	        }
+	    });
+    var dg = $("#CAreaDatagrid1508123301002");
+    var dg2 = $("#CAreaDatagrid1508123301003");
+	 HdUtils.dialog.setValue({
+		    saveHandler : saveHandler
+	    });
+	    function saveHandler() {
+	    	var cyAreaNo=dg.datagrid('getSelected').cyAreaNo;
+	    	var cyRowNo=dg2.datagrid('getSelected').cyRowNo;
+	    	 $("input[name='cyAreaNo']").val(cyAreaNo);
+	    	 $("input[name='cyRowNo']").val(cyRowNo);
+		    var formdata = $("#PlanPlacVinForm1507959149305").serializeObject();
+		    HdUtils.ajax.post({
+		        url : "../webresources/login/plan/PlanPlacVin/saveone",
+		        data : formdata,
+		        success : function(data) {
+			        if (data.key == '-1') {
+				        HdUtils.messager.info(data.message);
+				        return false;
+			        }
+			        HdUtils.dialog.close();
+			        HdUtils.messager.bottomRight('保存成功', '保存操作');
+			        $("#PlanPlacVinDatagrid1508123301002"+radi).datagrid("hdReload");
+		        }
+		    })
+	    }
+    // buttons
+    // 刷新。
+    $("#fresh").on("click", function() {
+	    dg.datagrid("hdReload");
+    });
+    // 清空。
+    $("#clear").on("click", function() {
+       $("#cyAreaNo").val("");
+       $("#cyTyp").val("");
+      });
+
+    // 查询
+    $("#query").on("click", function() {
+	    $("#CAreaDatagrid1508123301002").datagrid({
+		    queryParams : query(),
+	    })
+    });
+
+    function query() {
+	    var onlinquery = new HdQuery();
+	    var cyAreaNo = $("#cyAreaNo").val();
+	    var cyTyp = $("#cyTyp").val();
+	    onlinquery.add("cyAreaNo", cyAreaNo);
+	    onlinquery.add("cyTyp", cyTyp);
+	    return onlinquery.build();
+    }
+
+    $("#CAreaDatagrid1508123301002").datagrid({
+        striped : true,
+        url : "../webresources/login/base/CCyArea/findcdch",
+        queryParams : query(),
+        method : "post",
+        pagination : true,
+        singleSelect : true,
+        selectOnCheck : true,
+        checkOnSelect : true,
+        rownumbers : true,
+        pageSize : 20,
+        toolbar : "#CAreaToolBar1508123301002",
+        fit : true,
+        onSelect(rowIndex,rowData){
+           	 HdUtils.dialog.setValue({
+           		 'cyAreaNo' : rowData.cyAreaNo
+        	    });
+           	var cyAreaNo = rowData.cyAreaNo;
+           	function queryCcyrow(){
+              	var builder = new HdQuery();
+                builder.add("cyAreaNo", cyAreaNo);
+                return builder.build();
+            };
+            $('#CAreaDatagrid1508123301003').datagrid({
+                	 queryParams : queryCcyrow(),
+               });
+	    }, 
+        fitColumns : false,
+        columns : [ [ {
+            field : "ck",
+            checkbox : true,
+            sortable : false,
+
+        }, {
+
+            field : "cyAreaNo",
+            title : '场号',
+            multiSort : true,
+            halign : "center",
+            editor : {
+                type : "validatebox",
+                options : {
+	                required : false
+                }
+            },
+            sortable : false
+        }, {
+            field : "rowNum",
+            title : "行数",
+            multiSort : true,
+            halign : "center",
+            editor : {
+                type : "validatebox",
+                options : {
+	                required : false
+                }
+            },
+            sortable : false
+        }, {
+
+            field : "bayNum",
+            title : "每行车数",
+            multiSort : true,
+            halign : "center",
+            editor : {
+                type : "validatebox",
+                options : {
+	                required : false
+                }
+            },
+            sortable : false
+        },
+         {
+
+            field : "unlockNum",
+            title : '空车位',
+            multiSort : true,
+            halign : "center",
+            width : 120,
+            editor : {
+                type : "validatebox",
+                options : {
+	                required : true
+                }
+            },
+            sortable : false
+        }, {
+
+            field : "cyTyp",
+            title : '堆场类型',
+            multiSort : true,
+            halign : "center",
+            editor : {
+                type : "validatebox",
+                options : {
+	                required : true
+                }
+            },
+            sortable : false
+        }, {
+
+            field : "dockNam",
+            title : '所属码头',
+            multiSort : true,
+            halign : "center",
+            width : 120,
+            editor : {
+                type : "validatebox",
+                options : {
+	                required : true
+                }
+            },
+            sortable : false
+        }
+        ] ]
+    });
+    $("#CAreaDatagrid1508123301002").datagrid("hdGetColumnNames");
+    
+    var cyAreaNo = HdUtils.dialog.getValue('cyAreaNo');
+    function query2() {
+	    var onlinquery = new HdQuery();
+	    if(cyAreaNo)
+	    onlinquery.add("cyAreaNo", cyAreaNo);
+	    return onlinquery.build();
+    }
+
+    $("#CAreaDatagrid1508123301003").datagrid({
+        striped : true,
+        url : "../webresources/login/base/CCyRow/findcdch",
+        queryParams : query2(),
+        method : "post",
+        pagination : true,
+        singleSelect : true,
+        selectOnCheck : true,
+        checkOnSelect : true,
+        rownumbers : true,
+        pageSize : 20,
+        fit : true,
+        fitColumns : false,
+        columns : [ [ {
+            field : "ck",
+            checkbox : true,
+            sortable : false,
+
+        }, {
+
+            field : "cyRowNo",
+            title : '车道号',
+            multiSort : true,
+            halign : "center",
+            editor : {
+                type : "validatebox",
+                options : {
+	                required : false
+                }
+            },
+            sortable : false
+        },{
+
+            field : "unlockNum",
+            title : "空车位",
+            multiSort : true,
+            halign : "center",
+            editor : {
+                type : "validatebox",
+                options : {
+	                required : false
+                }
+            },
+            sortable : false
+        }, {
+            field : "maxBayNum",
+            title : "最大车数",
+            multiSort : true,
+            halign : "center",
+            editor : {
+                type : "validatebox",
+                options : {
+	                required : false
+                }
+            },
+            sortable : false
+        }
+
+        ] ]
+    });
+    $("#CAreaDatagrid1508123301003").datagrid("hdGetColumnNames");
+});
+</script>
+<form id="PlanPlacVinForm1507959149305" hidden="true">
+	计划号：<input th:id="planGroupNo" name="planGroupNo" placeholder="计划号"
+		class='easyui-validatebox' data-options="required:false"
+		style="width: 80px"> 场号：<input th:id="cyAreaNo"
+		name="cyAreaNo" placeholder="场号" class='easyui-validatebox'
+		data-options="required:false" style="width: 80px"> 车道号：<input
+		th:id="cyRowNo" name="cyRowNo" placeholder="车道"
+		class='easyui-validatebox' data-options="required:false"
+		style="width: 80px">
+		 车道号：<input
+		th:id="vinNo" name="vinNo" placeholder="车架号"
+		class='easyui-validatebox' data-options="required:false"
+		style="width: 80px">
+</form>
+</html>

@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="ContractIeDocToolBar15081233020012+${radi}"style="float: left">
+  <div>
+		<!-- 查询 -->
+       委托号：<input th:id="contractNo+${radi}" name="contractNo"placeholder="委托号" type="text" data-options="required:false" style="width: 100px">
+	委托类型：<input th:id="contractTyp+${radi}" name="contractTyp" placeholder="委托类型" type="text" data-options="required:false" style="width: 100px">
+	提单号：<input th:id="billNo+${radi}" name="billNo" placeholder="请输入提单号" type="text" data-options="required:false" style="width: 100px">
+<!-- 			场号：<input th:id="planArea+${radi}" -->
+<!-- 			name="planArea" placeholder="场号" type="text" -->
+<!-- 			data-options="required:false" style="width: 60px"> -->
+<!-- 	委托日期：<input th:id="contractDte+${radi}" name="contractDte" class="easyui-datebox" style="width: 120px" />  -->
+	有效日期：<input th:id="validatDte+${radi}" name="validatDte"class="easyui-datebox" style="width: 120px" />	
+<!-- 	<input th:id="validatDte2+${radi}" name="validatDte"class="easyui-datebox" style="width: 120px" /> -->
+   </div>
+   <div>	
+	场号：<input th:id="planArea+${radi}" name="planArea" placeholder="场号" type="text" data-options="required:false" style="width: 60px">		
+       船名：<input th:id="shipNam+${radi}" name="shipNam" type="text" data-options="required:false" style="width: 105px" />
+       航次：<input th:id="voyage+${radi}" name="voyage" type="text" data-options="required:false" style="width: 105px" />
+	货代：<input th:id="consignCod+${radi}" name="consignCod" type="text" data-options="required:false" style="width: 105px">	
+	贸易性质：<input th:id="tradeId+${radi}" name="tradeId" type="text" data-options="required:false" style="width: 100px"> 
+	<a class="easyui-linkbutton" th:id="query+${radi}">查询</a> 
+   </div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="ContractIeDocDatagrid1508123320012+${radi}"
+	style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    $.parser.parse($('#ContractIeDocToolBar15081233020012[(${radi})]'));
+	    $('#contractTyp[(${radi})]').combobox(HdUtils.code.scode({
+		    fieldCod : 'CONTRACT_TYP'
+	    }, {
+		    required : false
+	    }));
+	    $('#tradeId[(${radi})]').combobox(HdUtils.code.scode({
+		    fieldCod : 'TRADE_ID'
+	    }, {
+		    required : false
+	    }));
+
+	    $('#consignCod[(${radi})]').combobox({
+	        url : '../webresources/login/contract/ContractIeDoc/getCClientCodDrop',
+	        valueField : 'value',
+	        textField : 'label',
+	        mode : 'remote',
+	        panelHeight:380,
+	        panelWidth:240,
+	        onSelect : function(rec) {
+		        return rec.value;
+	        }
+	    });
+	    
+	    var dg = $("#ContractIeDocDatagrid1508123320012[(${radi})]");
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+	    	var queryTimLimit = query()
+			queryTimLimit.add("timeLimit","")
+		    $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid({
+		    	queryParams : queryTimLimit.build(),
+		    })
+	    });
+	    $("#chooseShip").bind("click", function() {
+            HdUtils.selShip(callback);
+        });
+	    function callback(data){
+        	$("#cShipNam[(${radi})]").val(data.cShipNam);
+        	$("#voyage[(${radi})]").val(data.ivoyage+'/'+data.evoyage);
+        	$("#tradeId[(${radi})]").val(data.tradeId);
+        	$("#shipNo[(${radi})]").val(data.shipNo);
+        	$("#dockCod[(${radi})]").val(data.dockCod);
+        }
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    var contractNo = $("#contractNo[(${radi})]").val();
+		    var contractTyp = $("#contractTyp[(${radi})]").combobox('getValue');
+		    var billNo = $("#billNo[(${radi})]").val();
+ 		    var planArea = $("#planArea[(${radi})]").val();
+ 		    var validatDte = $("#validatDte[(${radi})]").datebox("getValue");
+			var consignCod = $("#consignCod[(${radi})]").combobox('getValue');
+			var shipNam = $("#shipNam[(${radi})]").val();
+		    var voyage = $("#voyage[(${radi})]").val();
+		    var tradeId = $("#tradeId[(${radi})]").combobox('getValue');
+		    onlinquery.add("contractNo", contractNo);
+		    onlinquery.add("contractTyp", contractTyp);
+		    onlinquery.add("billNo", billNo);
+ 		    onlinquery.add("planArea", planArea);		    
+		    onlinquery.add("shipNam",shipNam);
+		    onlinquery.add("voyage",voyage);
+		    onlinquery.add("consignCod",consignCod);
+		    onlinquery.add("tradeId", tradeId);
+			onlinquery.add("validatDte", validatDte);
+			onlinquery.add("timeLimit", "1");
+
+		    return onlinquery;
+	    }
+	    $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/contract/ContractIeDoc/find",
+	        queryParams : query().build(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#ContractIeDocToolBar15081233020012" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+
+	        },
+	        {
+
+	            field : "dockNam",
+	            title : "作业码头",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, 
+	        {
+
+	            field : "flow",
+	            title : "流向",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, 
+	        {
+	            field : "shipNam",
+	            title : "船名",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }
+	        , {
+	            field : "voyage",
+	            title : "航次",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, 
+	         {
+
+	            field : "tradeId",
+	            title : "内外贸",
+	            multiSort : true,
+	            halign : "center",
+	            formatter:function(value){
+	            	if(value=='2'){
+	            		value="外贸";
+	            		return value;
+	            	}else if(value=='1'){
+	            		value="内贸";
+	            		return value;
+	            	}
+	            },
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        },
+	        {
+
+	            field : "iEId",
+	            title : "进出口",
+	            multiSort : true,
+	            halign : "center",
+	            formatter:function(value){
+	            	if(value=='I'){
+	            		value="进口";
+	            		return value;
+	            	}else if(value=='E'){
+	            		value="出口";
+	            		return value;
+	            	}
+	            },
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        },
+	        {
+
+	            field : "billNo",
+	            title : "提单号",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        },
+	        {
+
+	            field : "brandNam",
+	            title : "品牌",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "carKindNam",
+	            title : "车类",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "carTypNam",
+	            title : "车型",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "carNum",
+	            title : "计划数量",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        } ,{
+
+	            field : "resultNum",
+	            title : "完成数量",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        } ,{
+
+	            field : "consignNam",
+	            title : "货代",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "workWay",
+	            title : "作业方式",
+	            multiSort : true,
+	            halign : "center",
+	            formatter : function(value) {
+					if (value != null && value != undefined) {
+						if (value == 1) {
+							value = "集港";
+							return value;
+						} else if(value==2){
+							value = "提货";
+							return value;
+							 }
+					} else {
+						value="转栈";
+							return value;
+						}
+				},
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        },{
+
+	            field : "planArea",
+	            title : "场地",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        },{
+
+	            field : "contractDte",
+	            title : "受理日期",
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.date,
+	            editor : {
+	                type : "datebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },
+	         {
+
+	            field : "validatDte",
+	            title : "预约有效期",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        },
+	        {
+	            field : "outMac",
+	            title : '外方机力',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "outPerson",
+	            title : "外方人力",
+	            multiSort : true,
+	            halign : "center",
+	            hidden : "true",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },
+	        {
+	            field : "portMac",
+	            title : '港方机力',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "activeId",
+	            title : "激活标志",
+	            multiSort : true,
+	            halign : "center",
+	            formatter : function(value) {
+					if (value != null && value != undefined) {
+						if (value == 0) {
+							value = "×";
+							return value;
+						} else {
+							value = "√";
+							return value;
+							 }
+					} else {
+							return value;
+						}
+				},
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "remarks",
+	            title : "备注",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        } ] ]
+	    });
+	    $("#ContractIeDocDatagrid1508123320012[(${radi})]").datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

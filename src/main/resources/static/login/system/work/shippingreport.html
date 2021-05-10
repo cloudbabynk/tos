@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<div th:id="shippingdiv+${radi}" class="easyui-layout"
+	style="width: 100%; height: 100%;">
+	<div
+		data-options="region:'west',split:true,tools:reload5439,title:'船期状态'"
+		style="width: 240px; padding: 10px;">
+		<input class="easyui-searchbox"
+			data-options="searcher:searchShip,prompt:'搜索船舶'"
+			th:id="searchText+${radi}" style="width: 200px; height: 20px;"
+			name="search"></input>
+		<ul th:id="ShipStatusTree123+${radi}"></ul>
+	</div>
+	<div data-options="region:'center'" style="height: 100%; width: 100%">
+		<div>
+			<!-- 			品牌：<input th:id="brandCod+${radi}" name="brandCod" type="text" -->
+			<!-- 				data-options="required:false" style="width: 120px"> -->
+			<!-- 				<shiro:hasPermission name="webresources:login:ShipTrend:exportExcel"> -->
+			<!-- 				<a class="easyui-linkbutton" th:id="query+${radi}">查询</a>  -->
+			<!-- 				</shiro:hasPermission> -->
+			<!-- 				<a class="easyui-linkbutton" th:id='clear+${radi}'>重置</a> -->
+			<shiro:hasPermission name="webresources:login:ShipTrend:exportExcel">
+				<a class="easyui-linkbutton" th:id='genExcel+${radi}'>生成海运报告</a>
+			</shiro:hasPermission>
+
+		</div>
+		<!-- Datagrid -->
+		<table th:id="ShippingReportDatagrid1508123301002+${radi}"
+			style="height: 100%"></table>
+	</div>
+</div>
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    var reload5439 = [ {
+        iconCls : 'icon-reload',
+        handler : function() {
+	        $('#ShipStatusTree123[(${radi})]').tree('reload');
+        }
+    } ];
+    var searchShip = function() {
+	    var parentNode = $('#ShipStatusTree123[(${radi})]').tree('getRoots'); //得到tree顶级node  
+	    var searchCon = $("input[name='search']").val();
+	    var children;
+	    for (var i = 0; i < parentNode.length; i++) { //循环顶级 node   
+		    children = $('#ShipStatusTree123[(${radi})]').tree('getChildren', parentNode[i].target);//获取顶级node下所有子节点   
+		    if (children) { //如果有子节点   
+			    for (var j = 0; j < children.length; j++) { //循环所有子节点   
+				    //if($('#ul_tree_dept').tree('isLeaf',children[j].target)){ //判断子级是否为叶子节点,即不是父节点   
+				    if (children[j].text.indexOf(searchCon) >= 0 || children[j].id.indexOf(searchCon) >= 0) { //判断节点text是否包含搜索文本                       
+					    selectNode(children[j]); //设置此节点为选择状态   
+					    expandParent(children[j]); //设置此节点所有父级展开   
+					    return;
+				    }
+				    //}   
+			    }
+		    } else {
+			    if (parentNode[i].text.indexOf(searchCon) || children[j].id.indexOf(searchCon) >= 0 >= 0) {
+				    selectNode(parentNode[i]);
+				    expandParent(parentNode[i]);
+				    return;
+			    }
+		    }
+	    }
+    }
+    function selectNode(node) {
+	    $('#ShipStatusTree123[(${radi})]').tree('select', node.target);
+	    $('#ShipStatusTree123[(${radi})]').tree('scrollTo', node.target);
+    };
+
+    function expandParent(node) {
+	    var parent = node;
+	    var t = true;
+	    do {
+		    parent = $('#ShipStatusTree123[(${radi})]').tree('getParent', parent.target); //获取此节点父节点   
+		    if (parent) { //如果存在   
+			    t = true;
+			    $('#ShipStatusTree123[(${radi})]').tree('expand', parent.target);
+		    } else {
+			    t = false;
+		    }
+	    } while (t);
+    };
+    $(document).ready(
+            function() {
+	            var shipNo;
+	            var voyage;
+	            var dockCod;
+	            $('#ShipStatusTree123[(${radi})]').tree({
+	                method : "get",
+	                url : "../webresources/login/ship/ShipBill/gentreerep",
+	                onClick : treeclick
+	            });
+	            function treeclick(node) {
+		            shipNo = node.id;
+		            shipNam = node.type;
+		            dockCod = node.obj.dockCod;
+		            $("#ShippingReportDatagrid1508123301002[(${radi})]").datagrid({
+			            queryParams : query(),
+		            })
+	            }
+
+	            $('#brandCod[(${radi})]').combobox({
+	                url : '../webresources/login/contract/ContractIeDoc/getCBrandDrop',
+	                valueField : 'value',
+	                textField : 'label',
+	                panelHeight : 100,
+	                required : false,
+	                onSelect : function(rec) {
+		                return rec.value;
+	                }
+	            });
+	            // 	    // 查询
+	            // 	    $("#query[(${radi})]").on("click", function() {
+	            // 		    $("#ShippingReportDatagrid1508123301002[(${radi})]").datagrid({
+	            // 			    queryParams : query(),
+	            // 		    })
+	            // 	    });
+	            // 	    // 清空。
+	            // 	    $("#clear[(${radi})]").on("click", function() {
+	            // 	       $("#brandCod[(${radi})]").val("");
+	            // 	       $("#ShippingReportDatagrid1508123301002[(${radi})]").datagrid({
+	            // 			    queryParams : query(),
+	            // 		    })
+	            // 	      });
+	            // 生成海运报告
+	            $("#genExcel[(${radi})]").on(
+	                    "click",
+	                    function() {
+		                    var selRow = $("#ShippingReportDatagrid1508123301002[(${radi})]").datagrid("getChecked");
+		                    var queueIds = '';
+		                    $.messager.confirm("导出Excel", "确认导出所选数据吗?", function(r) {
+			                    if (r) {
+				                    for (var i = 0; i < selRow.length; i++) {
+					                    queueIds += selRow[i].queueId + ",";
+				                    }
+				                    queueIds = queueIds.substring(0, queueIds.length - 1);
+				                    var url =
+				                            "../webresources/login/ship/WorkCommand/exportExcel?queueIds=" + queueIds + "&filename=" + '海运报告-'
+				                                    + new Date().format("yyyyMMddhhmmss");
+				                    window.location.href = url;
+			                    }
+		                    });
+	                    });
+// 	            $("#genExcel[(${radi})]").on("click", function() {
+// 	           	 dg.datagrid("hdExportExcel", {
+// 	                    url :"../webresources/login/contract/ContractIeDoc/exportExcel2",
+// 	                    exportFileName : "集疏港计划-" + new Date().format("yyyyMMddhhmmss")
+// 	                });
+	            function query() {
+		            var onlinquery = new HdQuery();
+		            // 		    var brandCod = $("#brandCod[(${radi})]").combobox('getValue');
+		            // 		    onlinquery.add("brandCod", brandCod);
+		            onlinquery.add("shipNo", shipNo);
+		            return onlinquery.build();
+	            }
+	            $("#ShippingReportDatagrid1508123301002[(${radi})]").datagrid({
+	                striped : true,
+	                url : "../webresources/login/work/WorkCommand/findShipingReport",
+	                queryParams : query(),
+	                method : "post",
+	                pagination : true,
+	                singleSelect : true,
+	                selectOnCheck : false,
+	                checkOnSelect : true,
+	                rownumbers : true,
+	                pageSize : 20,
+	                fit : true,
+	                fitColumns : false,
+	                columns : [ [ {
+	                    field : "ck",
+	                    checkbox : true,
+	                    sortable : false,
+
+	                }, {
+
+	                    field : "queueId",
+	                    title : '主键',
+	                    multiSort : true,
+	                    halign : "center",
+	                    hidden : "true",
+	                    editor : {
+	                        type : "validatebox",
+	                        options : {
+		                        required : false
+	                        }
+	                    },
+	                    sortable : false
+	                }, {
+	                    field : "inCyTim",
+	                    title : "集港日期",
+	                    multiSort : true,
+	                    halign : "center",
+	                    editor : {
+	                        type : "validatebox",
+	                        options : {
+		                        required : false
+	                        }
+	                    },
+	                    sortable : false
+	                }, {
+
+	                    field : "brandCod",
+	                    title : '品牌',
+	                    multiSort : true,
+	                    halign : "center",
+	                    hidden:true,
+	                    editor : {
+	                        type : "validatebox",
+	                        options : {
+		                        required : false
+	                        }
+	                    },
+	                    sortable : false
+	                }, {
+
+	                    field : "brandNam",
+	                    title : '品牌',
+	                    multiSort : true,
+	                    halign : "center",
+	                    editor : {
+	                        type : "validatebox",
+	                        options : {
+		                        required : false
+	                        }
+	                    },
+	                    sortable : false
+	                }, {
+
+	                    field : "carTyp",
+	                    title : '车型',
+	                    multiSort : true,
+	                    halign : "center",
+	                    hidden:true,
+	                    editor : {
+	                        type : "validatebox",
+	                        options : {
+		                        required : false
+	                        }
+	                    },
+	                    sortable : false
+	                }, {
+
+	                    field : "carTypNam",
+	                    title : '车型',
+	                    multiSort : true,
+	                    halign : "center",
+	                    editor : {
+	                        type : "validatebox",
+	                        options : {
+		                        required : false
+	                        }
+	                    },
+	                    sortable : false
+	                }, {
+
+	                    field : "cksl",
+	                    title : '数量',
+	                    multiSort : true,
+	                    halign : "center",
+	                    editor : {
+	                        type : "validatebox",
+	                        options : {
+		                        required : false
+	                        }
+	                    },
+	                    sortable : false
+	                }
+
+	                ] ]
+	            });
+            })
+
+    /*]]>*/
+</script>
+</html>

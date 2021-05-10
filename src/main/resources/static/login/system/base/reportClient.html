@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="DayWorkClassToolBar1508123307299+${radi}"
+     style="float: left; position: relative;">
+    <div>
+        <!-- 查询 -->
+      <!--  日期：<input th:id="dispatchDte+${radi}" name="dispatchDte" class="easyui-datebox"style="width: 120px" data-options="required:false" />-->
+
+        年份：<input th:id="yearClient+${radi}" name="yearClient" style="width: 120px" data-options="required:false" />
+        周数：<input th:id="weekClient+${radi}" name="weekClient" style="width: 120px" data-options="required:false" />
+        <!-- 班次：<input th:id="workRun+${radi}" name="workRun" class="easyui-validatebox" style="width: 60px" data-options="required:false" />-->
+        <a class="easyui-linkbutton" th:id="query+${radi}">查询</a>
+
+        <a class="easyui-linkbutton" th:id='add+${radi}' iconCls="icon-add" plain="false">新增</a>
+
+        <a class="easyui-linkbutton" th:id='edit+${radi}'>编辑</a>
+
+        <a class="easyui-linkbutton" th:id='delete+${radi}'>删除</a>
+
+       <!-- <a class="easyui-linkbutton" th:id='jb+${radi}'>接班</a>-->
+
+        <!--
+        <shiro:hasPermission name="webresources:login:ShipDispatchLog:save">
+            <a class="easyui-linkbutton" th:id='save+${radi}'>保存</a>
+        </shiro:hasPermission>-->
+        <a class="easyui-linkbutton" th:id='save+${radi}'>保存</a>
+        <a class="easyui-linkbutton" th:id='fresh+${radi}'>刷新</a>
+    </div>
+</div>
+<table th:id="DayWorkClassDatagrid1508123307299+${radi}"
+       style="height: 100%"></table>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+    $(document).ready(function() {
+       // $("#dispatchDte[(${radi})]").val(Date.prototype.dateAdd(0, "yyyy-MM-dd"));
+        $('#workRun[(${radi})]').combobox({
+            url : '../webresources/login/damage/MDeliveryRecord/getClassRunDrop',
+            valueField : 'value',
+            textField : 'label',
+            panelHeight : 'auto',
+            onSelect : function(rec) {
+                return rec.value;
+            }
+        });
+      //  $.parser.parse($('#DayWorkClassToolBar1508123307299[(${radi})]'));
+        var radi = /*[[${radi}]]*/'';
+        var dg = $("#DayWorkClassDatagrid1508123307299[(${radi})]");
+
+
+        // 增加。
+        $("#add[(${radi})]").on("click", function() {
+            var node = dg.datagrid('getSelected');
+            dg.datagrid("hdAdd");
+
+        });
+        // 编辑。
+        $("#edit[(${radi})]").on("click", function() {
+            dg.datagrid("hdEdit");
+        });
+        // 删除。
+        $("#delete[(${radi})]").on("click", function() {
+            var selRow = dg.datagrid("getChecked");
+            if (selRow.length == 0) {
+                HdUtils.messager.info('请至少选择一条数据！');
+                return false;
+            }
+            var ids = '';
+            $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+                if (r) {
+                    for (var i = 0; i < selRow.length; i++) {
+                        ids += selRow[i].clientId + ",";
+                    }
+                    HdUtils.ajax.post({
+                        url : "../webresources/login/base/ReportClient/removeAll?clientIds=" + ids,
+                        success : function(data) {
+                            HdUtils.messager.bottomRight(data.message);
+                            dg.datagrid("hdReload");
+                        }
+                    });
+                }
+            });
+        });
+
+        // 保存。
+        $("#save[(${radi})]").on("click", function() {
+            dg.datagrid("hdSave", {
+                url : "../webresources/login/base/ReportClient/saveAll"
+            });
+        });
+
+        // 刷新。
+        $("#fresh[(${radi})]").on("click", function() {
+            dg.datagrid("hdReload");
+        });
+        // 查询
+        $("#query[(${radi})]").on("click", function() {
+            $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+                queryParams : query(),
+            })
+        });
+
+        function query() {
+            var onlinquery = new HdQuery();
+            var startTim = $("#yearClient[(${radi})]").val()
+            var weekNum = $("#weekClient[(${radi})]").val()
+           // var dispatchDte = $("#dispatchDte[(${radi})]").datebox("getValue");
+          //  onlinquery.add("dispatchDte", dispatchDte);
+            // var workRun = $("#workRun[(${radi})]").datebox("getValue");
+            // onlinquery.add("workRun", workRun);
+            onlinquery.add("startTim", startTim);
+            onlinquery.add("weekNum", weekNum);
+            return onlinquery.build();
+        }
+
+        $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+            striped : true,
+            url : "../webresources/login/base/ReportClient/find",
+            queryParams : query(),
+            method : "post",
+            pagination : true,
+            singleSelect : true,
+            selectOnCheck : false,
+            checkOnSelect : true,
+            rownumbers : true,
+            pageSize : 20,
+            toolbar : "#DayWorkClassToolBar1508123307299" + /*[[${radi}]]*/'',
+            fit : true,
+            fitColumns : false,
+            columns : [ [ {
+                field : "ck",
+                checkbox : true,
+                sortable : false,
+
+            }, {
+
+                field : "clientId",
+                title : 'id',
+                multiSort : true,
+                hidden : "true",
+                sortable : false
+            }, {
+
+                    field : "clientName",
+                    title : '客户品牌',
+                    multiSort : true,
+                 //   hidden : "true",
+                    sortable : false,
+                editor : {
+                    type : "validatebox",
+                    options : {
+                        required : false
+                    }
+                },
+                },
+
+                {
+                field : "startTim",
+                title : '年份',
+                width : 120,
+                multiSort : true,
+                align : "center",
+                editor : {
+                    type : "validatebox",
+                    options : {
+                        required : true
+                    }
+                },
+                sortable : false
+            },  {
+                field : "weekNum",
+                title : '周数',
+                multiSort : true,
+                halign : "center",
+               // formatter : $.hd.ezui.formatter.datetime,
+                width : 120,
+                sortable : false,
+                    editor : {
+                        type : "validatebox",
+                        options : {
+                            required : true
+                        }
+                    },
+            }, {
+                field : "teuNum",
+                title : '作业量',
+                width : 100,
+                multiSort : true,
+                align : "center",
+                editor : {
+                    type : "validatebox",
+                    options : {
+                        required : true
+                    }
+                },
+                sortable : false
+            },{
+
+                field : "updNam",
+                title : '更新',
+                width : 100,
+                multiSort : true,
+                halign : "center",
+                sortable : false
+            }, {
+
+                field : "updTim",
+                title : '更新时间',
+                multiSort : true,
+                halign : "center",
+                formatter : $.hd.ezui.formatter.datetime,
+                width : 120,
+                sortable : false
+            }
+
+            ] ],
+            onDblClickRow : function(rowIndex, rowData) {
+                formEdit(rowData.dispatchId)
+            }
+        });
+        $("#DayWorkClassDatagrid1508123307299" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+</script>
+</html>

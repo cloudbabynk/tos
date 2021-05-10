@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<!-- 工具栏 -->
+<div th:id="DayWorkClassToolBar1508123307299+${radi}"
+	style="float: left">
+	<div>
+		<!-- 查询 -->
+		<span> 
+<!-- 		         船名：<input th:id="cShipNam+${radi}" name="cShipNam" -->
+<!-- 			placeholder="请输入船名" type="text" data-options="required:false" -->
+<!-- 			style="width: 120px">航次：<input th:id="ivoyage+${radi}" -->
+<!-- 			name="ivoyage" placeholder="请输入航次" type="text" -->
+<!-- 			data-options="required:false" style="width: 120px">品牌：<input -->
+<!-- 			th:id="brandCod+${radi}" name="brandCod" type="text" -->
+<!-- 			data-options="required:false" style="width: 120px"><a -->
+<!-- 			class="easyui-linkbutton" th:id="chooseShip+${radi}">选船</a> <a -->
+<!-- 			class="easyui-linkbutton" th:id='clear+${radi}'>重置</a> -->
+<!-- 			<a class="easyui-linkbutton" th:id="query+${radi}">查询</a> -->
+			<shiro:hasPermission name="webresources:login:TruckWork:saveSglh">
+				<a class="easyui-linkbutton" th:id="sglh+${radi}">疏港理货</a>
+			</shiro:hasPermission>
+			<shiro:hasPermission name="webresources:login:TruckWork:upload">
+				<a class="easyui-linkbutton" th:id='upload+${radi}'>上传excel</a>
+			</shiro:hasPermission>
+			<input th:id="shipNo+${radi}" name="shipNo" type="hidden"> <input
+			th:id="Type+${radi}" th:value='${Type}' type="hidden" />
+		</span>
+	</div>
+	
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="DayWorkClassDatagrid1508123307299+${radi}"
+	style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    var dg = $("#DayWorkClassDatagrid1508123307299[(${radi})]");
+	    var type = $("#Type[(${radi})]").val();
+	    var cargoradi = HdUtils.dialog.getValue("cargoradi");
+	    var shipNo = HdUtils.dialog.getValue("shipNo");
+	    var billNo = HdUtils.dialog.getValue("billNo");
+	    var contractNo = HdUtils.dialog.getValue("contractNo");
+	    var ingateId = HdUtils.dialog.getValue("ingateId");
+	    var brandCod = HdUtils.dialog.getValue("brandCod");
+	    var factoryCod = HdUtils.dialog.getValue("factoryCod");
+	    var recId;
+        $.get('/login/PrivilegeController/getLoginAccount?t=11&s='+Math.random(), function(data) {
+	  		recId = data.account; 
+	  	  })
+	    var url;
+    	// 重置。
+	    $("#clear[(${radi})]").on("click", function() {
+	    	$("#cShipNam[(${radi})]").val("");
+	    	$("#ivoyage[(${radi})]").val("");
+	    	$("#shipNo[(${radi})]").val("");
+	    	$("#brandCod[(${radi})]").val("");
+	    	$("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+	    // 选船
+	    $("#chooseShip[(${radi})]").on("click", function() {
+	    	HdUtils.selTypShip(callback,type);
+	    });
+	    // 理货
+	    $("#sglh[(${radi})]").on("click", function() {
+	    	var data = dg.datagrid("getSelected");
+	    	if (data == null || data == undefined) {
+			    HdUtils.messager.info('请选择一条数据进行疏港理货！');
+			    return;
+		    }
+	    	var rksl = data.rksl;
+	    	var shipNo = data.shipNo;
+	    	var cyAreaNo = data.cyAreaNo;
+	    	var carTyp = data.carTyp;
+	    	HdUtils.dialog.setValue({
+			    'shipNo' : shipNo,
+			    'rksl' : rksl,
+			    'cyAreaNo' : cyAreaNo,
+			    'carTyp' : carTyp,
+			    'radi' : radi,
+			    'cargoradi' : cargoradi,
+			    'ingateId' : ingateId,
+			    'billNo' : billNo,
+			    'contractNo' : contractNo,
+			    'recId' : recId
+		    });
+	    	HdUtils.dialog.show({
+		        width : 600,
+		        height : 200,
+		        title : '理货信息',
+		        href : "../login/system/cargo/nmsglh.html",
+		        isSaveHandler : true
+		    });
+	    });
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+	    	$("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+	    var recId;
+	    var empNo;
+	    $.get('/login/PrivilegeController/getLoginAccount?t=11&s='+Math.random(), function(data) {
+	  		recId = data.account; 
+	  		HdUtils.ajax.post({
+        		url : "../webresources/login/base/CEmployee/findCemployee?sysUserNam="+ recId,
+        		success : function(data1) {
+    		        if (!data1) {
+    			        return false;
+    		        }
+    		        empNo = data1.empNo;
+        		}
+        	})
+	  	  }) 
+	    // 上传。
+	    $("#upload[(${radi})]").on("click", function() {
+	    	HdUtils.nmsgupload({
+	    		mutiple : false,
+	            isReadOnly : false,
+	            ingateId : ingateId,
+	            contractNo : contractNo,
+	            inCyNam : empNo,
+	        });
+	    });
+	    function callback(data){
+        	$("#cShipNam[(${radi})]").val(data.cShipNam);
+        	$("#ivoyage[(${radi})]").val(data.ivoyage);
+        	$("#shipNo[(${radi})]").val(data.shipNo);
+        }
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    var shipNo = $("#shipNo[(${radi})]").val();
+		    if(!shipNo){
+		    	shipNo = HdUtils.dialog.getValue("shipNo");
+		    }
+		    if(brandCod){
+		    	onlinquery.add("brandCod", brandCod);
+		    }
+		    if(factoryCod){
+		    	onlinquery.add("factoryCod", factoryCod);
+		    }
+		    onlinquery.add("shipNo", shipNo);
+		    onlinquery.add("type", type);
+		    return onlinquery.build();
+	    }
+
+	    $("#DayWorkClassDatagrid1508123307299[(${radi})]").datagrid({
+	        striped : true,
+	        url : '../webresources/login/base/CCyArea/findSglh',
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#DayWorkClassToolBar1508123307299" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+	        }, {
+	            field : "cyArea",
+	            title : '堆场名称',
+	            multiSort : true,
+	            halign : "center",
+	            sortable : false
+	        }, {
+	            field : "cShipNam",
+	            title : '船名',
+	            multiSort : true,
+	            width : 100,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "voyage",
+	            title : '航次',
+	            multiSort : true,
+	            width : 80,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "iEId",
+	            title : '进出口',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "combobox",
+	                options : HdUtils.code.scode({
+		                fieldCod : 'I_E_ID'
+	                }, {
+		                required : false
+	                })
+	            },
+	            formatter : function(value) {
+		            return HdUtils.code.name('I_E_ID', value);
+	            },
+	            sortable : false
+	        }, {
+	            field : "tradeId",
+	            title : '内外贸',
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "combobox",
+	                options : HdUtils.code.scode({
+		                fieldCod : 'TRADE_ID'
+	                }, {
+		                required : false
+	                })
+	            },
+	            formatter : function(value) {
+		            return HdUtils.code.name('TRADE_ID', value);
+	            },
+	            sortable : false
+	        }, {
+	            field : "brandNam",
+	            title : "品牌",
+	            multiSort : true,
+	            width : 60,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "carKindNam",
+	            title : "车类",
+	            multiSort : true,
+	            width : 60,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "carTypNam",
+	            title : "车型",
+	            multiSort : true,
+	            width : 100,
+	            align : "center",
+	            sortable : false
+	        }, {
+	            field : "rksl",
+	            title : "数量",
+	            multiSort : true,
+	            width : 60,
+	            align : "center",
+	            sortable : false
+	        }
+
+	        ] ] 	 	
+	    });
+	    $("#DayWorkClassDatagrid1508123307299" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

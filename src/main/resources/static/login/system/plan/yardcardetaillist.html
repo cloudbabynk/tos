@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<table id="PortCarDatagrid1507620296653" style="height:100%;fit:true"></table>
+<script>
+	$(document).ready(function() {
+		var x0=40,y0=40;
+	    var baywidth11=110;
+	    var rowheight11=110;
+	    var canvasWidth11=950; //整个画布的宽度
+	    var canvasHeight11=450;//整个画布的高度
+	    var cyAreaNo = HdUtils.dialog.getValue("area");
+
+// 	    var builder1507620296653 = new HdEzuiQueryParamsBuilder();
+// 	    builder1507620296653.setAndClause("cyAreaNo", area11.cyAreaNo, "=", "and");
+        function query() {
+		    var onlinquery = new HdQuery();
+		    onlinquery.add("cyAreaNo", cyAreaNo);
+		    return onlinquery.build();
+	    }
+	    $("#PortCarDatagrid1507620296653").datagrid({
+	        striped:true,
+	        url:"../webresources/login/cargo/PortCar/find",
+	        queryParams: query(),
+	        method:"post",
+	        pagination:false,
+	        singleSelect:true,
+	        rownumbers:true,
+	        pageSize:20,
+	        fit:true,
+	        fitColumns:false,
+	        columns:[[
+	        {
+	    
+			    field:"vinNo",
+			    title:"车辆编号",
+			    multiSort:true,
+			    halign:"center",
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"shipid",
+			    title:"船名",
+			    multiSort:true,
+			    halign:"center",
+			    formatter: function (value, row, index) {
+			        return row.shipNam;
+			    },
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"shipNo",
+			    title:"航次编号",
+			    multiSort:true,
+			    halign:"center",
+			    editor:{type:"validatebox",options:{required:false},validType:'length[1,14]'},
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"billNo",
+			    title:"提单号",
+			    multiSort:true,
+			    halign:"center",
+			    editor:{type:"validatebox",options:{required:false},validType:'length[1,24]'},
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"ieid",
+			    title:"进出口",
+			    multiSort:true,
+			    halign:"center",
+			    formatter: function (value) {
+			        if (value === null || value === '')
+			            return;
+			        var list = HdUtils.global.scode.query({fieldCod: 'I_E_ID', code: value});
+			        return list.length > 0 ? list[0].name : "";
+			    },  
+			    /* formatter: function (value) {
+			        if ('I'===value) {
+			            return '进口';
+			        }if ('E'===value) {
+			            return '出口';
+			        }
+			    }, */  
+			   sortable:true
+			}
+			,
+			{
+			    
+			    field:"tradeId",
+			    title:"内外贸",
+			    multiSort:true,
+			    halign:"center",
+			    formatter: function (value) {
+			        if ('1'===value) {
+			            return '内贸';
+			        }if ('2'===value) {
+			            return '外贸';
+			        }
+			    },
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"consignCod",
+			    title:"货主",
+			    multiSort:true,
+			    halign:"center",
+			    editor:{type:"validatebox",options:{required:false},validType:'length[1,10]'},
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"brandCod",
+			    title:"车辆品牌",
+			    multiSort:true,
+			    halign:"center",
+			    formatter: function (value, row, index) {
+			        return row.brandNam;
+			    },
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"carTyp",
+			    title:"车型",
+			    multiSort:true,
+			    halign:"center",
+			    formatter: function (value, row, index) {
+			        return row.carTypNam;
+			    },
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"carKind",
+			    title:"车属类别",
+			    multiSort:true,
+			    halign:"center",
+			    formatter: function (value, row, index) {
+			        return row.carKindNam;
+			    },
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"engineNo",
+			    title:"发动机号",
+			    multiSort:true,
+			    halign:"center",
+			    editor:{type:"validatebox",options:{required:false},validType:'length[1,30]'},
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"marks",
+			    title:"唛头",
+			    multiSort:true,
+			    halign:"center",
+			    editor:{type:"validatebox",options:{required:false},validType:'length[1,20]'},
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"sweptVolume",
+			    title:"排量",
+			    multiSort:true,
+			    halign:"center",
+			    formatter:function(value) {
+			      return HdUtils.formatter.precisionCommon(value,3);  
+			    },
+			    //要限制输入的最大数，请修改max
+			    editor:{type:"numberbox",options:{required:false,precision: 3, max: "9999999999.999",groupSeparator:','}},
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"colorCod",
+			    title:"颜色",
+			    multiSort:true,
+			    halign:"center",
+			    editor:{type:"validatebox",options:{required:false},validType:'length[1,10]'},
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"weights",
+			    title:"车净重",
+			    multiSort:true,
+			    halign:"center",
+			    formatter:function(value) {
+			      return HdUtils.formatter.precisionCommon(value,3);  
+			    },
+			    //要限制输入的最大数，请修改max
+			    editor:{type:"numberbox",options:{required:false,precision: 3, max: "9999999999.999",groupSeparator:','}},
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"volumes",
+			    title:"体积",
+			    multiSort:true,
+			    halign:"center",
+			    formatter:function(value) {
+			      return HdUtils.formatter.precisionCommon(value,3);  
+			    },
+			    //要限制输入的最大数，请修改max
+			    editor:{type:"numberbox",options:{required:false,precision: 3, max: "9999999999.999",groupSeparator:','}},
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"length",
+			    title:"长",
+			    multiSort:true,
+			    halign:"center",
+			    formatter:function(value) {
+			      return HdUtils.formatter.precisionCommon(value,0);  
+			    },
+			    //要限制输入的最大数，请修改max
+			    editor:{type:"numberbox",options:{required:false,precision: 0, max: "9999999999.999",groupSeparator:','}},
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"width",
+			    title:"宽",
+			    multiSort:true,
+			    halign:"center",
+			    formatter:function(value) {
+			      return HdUtils.formatter.precisionCommon(value,0);  
+			    },
+			    //要限制输入的最大数，请修改max
+			    editor:{type:"numberbox",options:{required:false,precision: 0, max: "9999999999.999",groupSeparator:','}},
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"height",
+			    title:"高",
+			    multiSort:true,
+			    halign:"center",
+			    formatter:function(value) {
+			      return HdUtils.formatter.precisionCommon(value,0);  
+			    },
+			    //要限制输入的最大数，请修改max
+			    editor:{type:"numberbox",options:{required:false,precision: 0, max: "9999999999.999",groupSeparator:','}},
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"currentStat",
+			    title:"当前状态",
+			    multiSort:true,
+			    halign:"center",
+			    formatter: function (value) {
+			        if('0'===value){
+			            return "离港";
+			        }if('1'===value){
+			            return "预报";
+			        }if('2'===value){
+			            return "在场";
+			        }if('3'===value){
+			            return "离场";
+			        }if('5'===value){
+			            return "在船";
+			        } 
+			      
+			    }, 
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"cyPlac",
+			    title:"车位",
+			    multiSort:true,
+			    halign:"center",
+			    editor:{type:"validatebox",options:{required:false},validType:'length[1,12]'},
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"cyAreaNo",
+			    title:"堆场区号",
+			    multiSort:true,
+			    halign:"center",
+			    editor:{type:"validatebox",options:{required:false},validType:'length[1,5]'},
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"cyRowNo",
+			    title:"堆场行号",
+			    multiSort:true,
+			    halign:"center",
+			    editor:{type:"validatebox",options:{required:false},validType:'length[1,3]'},
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"cyBayNo",
+			    title:"堆场车位号",
+			    multiSort:true,
+			    halign:"center",
+			    editor:{type:"validatebox",options:{required:false},validType:'length[1,3]'},
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"exitCustomId",
+			    title:"退关标志",
+			    multiSort:true,
+			    halign:"center",
+			    align:"center",
+			    editor: $.hd.ezui.editor.checkbox,
+			    formatter: $.hd.ezui.formatter.checkbox2,
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"specId",
+			    title:"特种车标志",
+			    multiSort:true,
+			    halign:"center",
+			    align:"center",
+			    editor: $.hd.ezui.editor.checkbox,
+			    formatter: $.hd.ezui.formatter.checkbox2,
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"customId",
+			    title:"海关放行标志",
+			    multiSort:true,
+			    halign:"center",
+			    align:"center",
+			    editor: $.hd.ezui.editor.checkbox,
+			    formatter: $.hd.ezui.formatter.checkbox2,
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"inspectionId",
+			    title:"商检放行标志",
+			    multiSort:true,
+			    halign:"center",
+			    align:"center",
+			    editor: $.hd.ezui.editor.checkbox,
+			    formatter: $.hd.ezui.formatter.checkbox2,
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"inspOkId",
+			    title:"商检合格标志",
+			    multiSort:true,
+			    halign:"center",
+			    align:"center",
+			    editor: $.hd.ezui.editor.checkbox,
+			    formatter: $.hd.ezui.formatter.checkbox2,
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"lockId",
+			    title:"扣车标志",
+			    multiSort:true,
+			    halign:"center",
+			    align:"center",
+			    editor: $.hd.ezui.editor.checkbox,
+			    formatter: $.hd.ezui.formatter.checkbox2,
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"damId",
+			    title:"残损标志",
+			    multiSort:true,
+			    halign:"center",
+			    align:"center",
+			    editor: $.hd.ezui.editor.checkbox,
+			    formatter: $.hd.ezui.formatter.checkbox2,
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"damCod",
+			    title:"残损类型",
+			    multiSort:true,
+			    halign:"center",
+			    editor:{type:"validatebox",options:{required:false},validType:'length[1,5]'},
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"damLevel",
+			    title:"残损等级",
+			    multiSort:true,
+			    halign:"center",
+			    editor:{type:"validatebox",options:{required:false},validType:'length[1,5]'},
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"damArea",
+			    title:"残损区域",
+			    multiSort:true,
+			    halign:"center",
+			    editor:{type:"validatebox",options:{required:false},validType:'length[1,5]'},
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"discPortCod",
+			    title:"目的港代码",
+			    multiSort:true,
+			    halign:"center",
+			    editor:{type:"validatebox",options:{required:false},validType:'length[1,5]'},
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"loadPortCod",
+			    title:"装货港",
+			    multiSort:true,
+			    halign:"center",
+			    editor:{type:"validatebox",options:{required:false},validType:'length[1,5]'},
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"tranPortCod",
+			    title:"卸货港代码",
+			    multiSort:true,
+			    halign:"center",
+			    editor:{type:"validatebox",options:{required:false},validType:'length[1,5]'},
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"inToolNo",
+			    title:"入港工具号",
+			    multiSort:true,
+			    halign:"center",
+			    editor:{type:"validatebox",options:{required:false},validType:'length[1,10]'},
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"inPortNo",
+			    title:"入港号",
+			    multiSort:true,
+			    halign:"center",
+			    editor:{type:"validatebox",options:{required:false},validType:'length[1,14]'},
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"toPortTim",
+			    title:"到港时间",
+			    multiSort:true,
+			    halign:"center",
+			    align:"center",
+			    formatter: $.hd.ezui.formatter.datetime,
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"discShipTim",
+			    title:"卸船时间",
+			    multiSort:true,
+			    halign:"center",
+			    align:"center",
+			    formatter: $.hd.ezui.formatter.datetime,
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"inCyTim",
+			    title:"进场时间",
+			    multiSort:true,
+			    halign:"center",
+			    align:"center",
+			    formatter: $.hd.ezui.formatter.datetime,
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"outToolNo",
+			    title:"出港工具号",
+			    multiSort:true,
+			    halign:"center",
+			    editor:{type:"validatebox",options:{required:false},validType:'length[1,10]'},
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"outPortNo",
+			    title:"出港号",
+			    multiSort:true,
+			    halign:"center",
+			    editor:{type:"validatebox",options:{required:false},validType:'length[1,14]'},
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"outCyTim",
+			    title:"出场时间",
+			    multiSort:true,
+			    halign:"center",
+			    align:"center",
+			    formatter: $.hd.ezui.formatter.datetime,
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"loadShipTim",
+			    title:"装船时间",
+			    multiSort:true,
+			    halign:"center",
+			    align:"center",
+			    formatter: $.hd.ezui.formatter.datetime,
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"customBillNo",
+			    title:"报关单号",
+			    multiSort:true,
+			    halign:"center",
+			    editor:{type:"validatebox",options:{required:false},validType:'length[1,24]'},
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"leavPortTim",
+			    title:"离港时间",
+			    multiSort:true,
+			    halign:"center",
+			    align:"center",
+			    formatter: $.hd.ezui.formatter.datetime,
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"contractNo",
+			    title:"委托号",
+			    multiSort:true,
+			    halign:"center",
+			    editor:{type:"validatebox",options:{required:false},validType:'length[1,10]'},
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"seqNo",
+			    title:"序号",
+			    multiSort:true,
+			    halign:"center",
+			    formatter:function(value) {
+			      return HdUtils.formatter.precisionCommon(value,0);  
+			    },
+			    //要限制输入的最大数，请修改max
+			    editor:{type:"numberbox",options:{required:false,precision: 0, max: "9999999999.999",groupSeparator:','}},
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"transId",
+			    title:"中转标记",
+			    multiSort:true,
+			    halign:"center",
+			    align:"center",
+			    editor: $.hd.ezui.editor.checkbox,
+			    formatter: $.hd.ezui.formatter.checkbox2,
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"remarkTxt",
+			    title:"备注",
+			    multiSort:true,
+			    halign:"center",
+			    editor:{type:"validatebox",options:{required:false},validType:'length[1,255]'},
+			    sortable:true
+			}
+			,
+			
+			{
+			    
+			    field:"pileFeeId",
+			    title:"堆存费计费标志",
+			    multiSort:true,
+			    halign:"center",
+			    editor:{type:"validatebox",options:{required:false},validType:'length[1,1]'},
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"rfidCardNo",
+			    title:"RFID卡号",
+			    multiSort:true,
+			    halign:"center",
+			    editor:{type:"validatebox",options:{required:false},validType:'length[1,30]'},
+			    sortable:true
+			}
+			,
+			
+			{
+			    
+			    field:"recNam",
+			    title:"操作员",
+			    multiSort:true,
+			    halign:"center",
+			    editor:{type:"validatebox",options:{required:false},validType:'length[1,10]'},
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"recTim",
+			    title:"操作时间",
+			    multiSort:true,
+			    halign:"center",
+			    align:"center",
+			    formatter: $.hd.ezui.formatter.datetime,
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"updNam",
+			    title:"修改员",
+			    multiSort:true,
+			    halign:"center",
+			    editor:{type:"validatebox",options:{required:false},validType:'length[1,10]'},
+			    sortable:true
+			}
+			,
+			{
+			    
+			    field:"updTim",
+			    title:"修改时间",
+			    multiSort:true,
+			    halign:"center",
+			    align:"center",
+			    formatter: $.hd.ezui.formatter.datetime,
+			    sortable:true
+			}
+	        
+	        ]]});
+
+    })
+</script>
+</html>

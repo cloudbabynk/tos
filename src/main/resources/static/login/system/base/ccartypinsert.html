@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<style type="text/css">
+	.subtotal {
+		font-weight: bold;
+	} /*合计单元格样式*/
+</style>
+<body  >
+<div th:id="cc+${radi}" class="easyui-layout" style="width: 100%; height: 100%;">
+	<div data-options="region:'center',split:true" style="width:450px;">
+		<div th:id="cc5+${radi}" class="easyui-layout" data-options="fit:true">
+			<div data-options="region:'north'" style="height:76px">
+				船舶名：<input	th:id="cShipNam+${radi}" name="cShipNam" placeholder="船名" type="text"	readonly="readonly" data-options="required:false" style="width: 80px">
+				航次：<input th:id="voyage+${radi}" readonly="readonly" name="voyage" placeholder="航次" type="text" data-options="required:false" style="width: 80px">
+				<a class="easyui-linkbutton" th:id="chooseShip+${radi}">选船</a>
+				堆场：<input	th:id="cyAreaNo+${radi}" name="cyAreaNo" type="text" data-options="required:false" style="width: 80px">
+				</br>
+				提单号：<input th:id="billNo+${radi}" name="billNo" type="text"   class="easyui-validatebox" data-options="required:true" style="width:140px">&nbsp;&nbsp;
+				车架号： <input th:id="vinNo+${radi}" name="vinNo" type="text" data-options="required:false" style="width: 150px">
+				</br>
+				所 有：  <input type="checkbox" id="isAll" name="isAll" style="width: 15px" >
+				品牌名：<input 	th:id="brandCod+${radi}" name="brandCod" type="text" data-options="required:false" style="width: 150px">
+				<input th:id="shipNo+${radi}"	name="shipNo" type="text" hidden="true" data-options="required:false">
+				<shiro:hasPermission name="webresources:login:CCarVin:update">
+					<a class="easyui-linkbutton" th:id="insert+${radi}" iconCls="icon-save"
+					   plain="false">更新</a>
+				</shiro:hasPermission>
+				<a class="easyui-linkbutton" th:id="portQuery+${radi}">查询</a>
+				<a class="easyui-linkbutton" th:id='portClear+${radi}'>重置</a>
+			</div>
+			<div data-options="region:'center'" style="background:#eee;">
+				<table th:id="PortCarDatagrid+${radi}" style="height: 100%"></table>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript" th:inline="javascript">
+	function resizeLayoutCenter (ctWidth,ctHeight){
+		if(typeof setSubHeight==="function"){
+			if(ctHeight){
+				setSubHeight(ctHeight,$('#sbillhtml[(${radi})]'));
+			}
+
+		}
+
+	};
+	$(document).ready(function() {
+		//右侧工具栏
+		var dgPortCar = $("#PortCarDatagrid[(${radi})]");
+		$("#chooseShip[(${radi})]").bind("click", function() {
+			HdUtils.dialog.setValue({
+				/*'tradeId':'2',
+				'iEId':'E',*/
+				'type':''
+			});
+			HdUtils.selShip(callback);
+		});
+		$('#cyAreaNo[(${radi})]').combobox({
+			url : '../webresources/login/base/CCyArea/getCCyAreaDrop',
+			valueField : 'value',
+			textField : 'label',
+			panelHeight : '200',
+			onSelect : function(rec) {
+				return rec.value;
+			}
+		});
+		function callback(data) {
+			$("#cShipNam[(${radi})]").val(data.cShipNam);
+			$("#voyage[(${radi})]").val(data.ivoyage + '/' + data.evoyage);
+			$("#tradeId[(${radi})]").val(data.tradeId);
+			$("#shipNo[(${radi})]").val(data.shipNo);
+			$("#dockCod[(${radi})]").val(data.dockCod);
+		}
+		$('#brandCod[(${radi})]').combobox({
+			url : '../webresources/login/cargo/PortCar/getCBrandDrop',
+			valueField : 'value',
+			textField : 'label',
+			panelHeight : 150,
+			//required : 'true',
+			onSelect : function(rec) {
+				return rec.value;
+			}
+		});
+
+		dgPortCar.datagrid({
+			striped : true,
+			url : "/webresources/login/cargo/PortCar/findNull",
+			queryParams : queryPortCar(),
+			method : "post",
+			autoLoad:false,
+			//   pagination : true,
+			singleSelect : false,
+			selectOnCheck : true,
+			checkOnSelect : true,
+			rownumbers : true,
+			pageSize : 100,
+			showFooter:true,
+			//toolbar : "#PortCarToolBar" + /*[[${radi}]]*/'',
+			fit : true,
+			fitColumns : false,
+			onLoadSuccess:function(){
+				let selectRows = dgPortCar.datagrid('getRows');
+				let piecesTotal = selectRows.length;
+				dgPortCar.datagrid('reloadFooter', [
+					{ vinNo:`<span class="subtotal">合计</span>`,
+						voyage: `<span class="subtotal">${piecesTotal} 辆</span>`
+					}
+				]);
+			},
+			columns : [ [ {
+				field : "ck",
+				checkbox : true,
+				sortable : false
+			}, {
+				field : "vinNo",
+				title : '车架号',
+				multiSort : true,
+				halign : "center",
+				align : "left",
+				sortable : true
+			},   {
+				field : "cShipNam",
+				title : "船名",
+				multiSort : true,
+				halign : "center",
+				align : "left",
+				sortable : true
+			}, {
+				field : "voyage",
+				title : "航次",
+				multiSort : true,
+				halign : "center",
+				align : "left",
+				sortable : true
+			}, {
+				field : "billNo",
+				title : "提单号",
+				multiSort : true,
+				halign : "center",
+				align : "left",
+				sortable : true
+			}, {
+				field : "brandNam",
+				title : "品牌",
+				multiSort : true,
+				halign : "center",
+				align : "left",
+				sortable : true
+			}, {
+				field : "carTypNam",
+				title : "车型",
+				multiSort : true,
+				halign : "center",
+				sortable : true,
+				align : "left"
+			},{
+				field : "cyAreaNo",
+				title : "场号",
+				multiSort : true,
+				halign : "center",
+				align : "left",
+				sortable : true
+			}, {
+				field : "cyRowNo",
+				title : "行号",
+				multiSort : true,
+				halign : "center",
+				align : "left",
+				sortable : true
+			}, {
+				field : "cyBayNo",
+				title : "车位号",
+				multiSort : true,
+				halign : "center",
+				align : "left",
+				sortable : true
+			}, {
+				field : "exitCustomId",
+				title : "退关",
+				multiSort : true,
+				halign : "center",
+				align : "left",
+				formatter : function(value) {
+					if (value == '1') {
+						value = "是";
+					} else{
+						value = "否";
+					}
+					return value;
+				},
+				sortable : true
+			}, {
+				field : "currentStatNam",
+				title : "状态",
+				multiSort : true,
+				halign : "center",
+				align : "left",
+				sortable : false
+			}
+			]]
+		});
+		function queryPortCar() {
+			var onlinquery = new HdQuery();
+			var vinNo = $("#vinNo[(${radi})]").val();
+			var billNo = $("#billNo[(${radi})]").val();
+			var brandCod = $("#brandCod[(${radi})]").combobox("getValue");
+			/*var iEId = "E";
+			var tradeId="2"*/
+			//var isAll= $("#isAll[(${radi})]").val();
+			var shipNo = $("#shipNo[(${radi})]").val();
+			var cyAreaNo = $("#cyAreaNo[(${radi})]").combobox("getValue");
+			if($('#isAll').is(':checked')) {
+				onlinquery.add("isAll", "0");
+			}else {
+				onlinquery.add("isAll", "1");
+			}
+			onlinquery.add("cyAreaNo", cyAreaNo);
+			onlinquery.add("vinNo", vinNo);
+			onlinquery.add("billNo", billNo);
+			onlinquery.add("brandCod", brandCod);
+			onlinquery.add("shipNo", shipNo);
+			/*onlinquery.add("iEId", iEId);
+			onlinquery.add("tradeId", tradeId);*/
+			onlinquery.add("currentStat", "2");
+			onlinquery.add("rfidNo", "");
+			return onlinquery.build();
+
+		}
+		// 查询
+		$("#portQuery[(${radi})]").on("click", function() {
+			let bill= $("#billNo[(${radi})]").val();
+			let shipNam =$("#cShipNam[(${radi})]").val();
+			if(bill||shipNam)
+			{
+				dgPortCar.datagrid({
+					queryParams : queryPortCar(),
+
+				})
+			}else {
+				HdUtils.messager.info("先填提单号或选船！")
+				return;
+			}
+
+		});
+		// 清空。
+		$("#portClear[(${radi})]").on("click", function() {
+			$("#vinNo[(${radi})]").val("");
+			$("#billNo[(${radi})]").val("");
+			$("#brandCod[(${radi})]").combobox("setValue", "");
+			$("#cyAreaNo[(${radi})]").combobox("setValue", "");
+
+			$("#cShipNam[(${radi})]").val("");
+			$("#voyage[(${radi})]").val("");
+			$("#tradeId[(${radi})]").val("");
+			$("#shipNo[(${radi})]").val("");
+			$("#dockCod[(${radi})]").val("");
+		});
+
+		// 更新
+		$("#insert[(${radi})]").on("click", function() {
+			var isAll;
+			if($('#isAll').is(':checked')) {
+				isAll='0';
+			}else {
+				isAll='1';
+			}
+			var checkRow=$("#PortCarDatagrid[(${radi})]").treegrid('getChecked');
+			if(checkRow.length<1){
+				HdUtils.messager.info('请选择至少选择一条数据！');
+				return false;
+			}else{
+				for (var i = 0; i < checkRow.length; i++){
+					var vimNo = checkRow[i].vinNo.substring(0,8);
+					$.ajax({
+						url : '/webresources/login/cargo/PortCar/updateInfo?vimNo=' + vimNo+'&isAll='+isAll,
+						method : 'POST',
+						dataType : 'json',
+						contentType : "application/json",
+						success : function(data) {
+							if(data.code=="0"){
+								HdUtils.messager.bottomRight("挂起成功！");
+							}else  if (data.code == "-1") {
+								HdUtils.messager.bottomRight("前八位车架号未找到对应车型！");
+							}else  if (data.code == "1") {
+								HdUtils.messager.bottomRight("没有需要挂起的车辆！");
+							}
+						}
+					});
+				}
+			}
+		});
+
+	});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8">
+<script type="text/javascript" src="../js/jedate/jquery.jedate.js">
+	<script type="text/javascript" src="../js/jedate/skin/jedate-test.js">
+</script>
+<link type="text/css" rel="stylesheet"
+	href="../js/jedate/skin/jedate.css">
+<link type="text/css" rel="stylesheet"
+	href="../js/jedate/test/jeDate-test.css">
+</script>
+<!-- 工具栏 -->
+<div th:id="ConstructionPlanToolBar1508123301002+${radi}"
+	style="float: left">
+	<div>
+		<!-- 查询 -->
+		<span> 施工日期：<input th:id="days+${radi}" name="days"
+			class="easyui-datebox" style="width: 120px" /><a
+			class="easyui-linkbutton" th:id="query+${radi}">查询</a> <a
+			class="easyui-linkbutton" th:id='clear+${radi}'>重置</a> <shiro:hasPermission
+				name="webresources:login:ConstructionPlan:add">
+				<a class="easyui-linkbutton" th:id='add+${radi}' iconCls="icon-add"
+					plain="false">新增</a>
+			</shiro:hasPermission> <shiro:hasPermission
+				name="webresources:login:ConstructionPlan:update">
+				<a class="easyui-linkbutton" th:id='edit+${radi}'>编辑</a>
+			</shiro:hasPermission> <shiro:hasPermission
+				name="webresources:login:ConstructionPlan:delete">
+				<a class="easyui-linkbutton" th:id='delete+${radi}'>删除</a>
+			</shiro:hasPermission> 
+			<!-- <shiro:hasPermission
+				name="webresources:login:ConstructionPlan:export">
+				<a class="easyui-linkbutton" iconCls="icon-export" plain="false"
+					th:id="export+${radi}">导出Excel</a>
+			</shiro:hasPermission>  -->
+			<shiro:hasPermission
+				name="webresources:login:ConstructionPlan:importExc">
+				<a class="easyui-linkbutton" th:id='importExc+${radi}'>导入Excel</a>
+			</shiro:hasPermission> <a class="easyui-linkbutton" th:id='fresh+${radi}'>刷新</a>
+
+		</span>
+	</div>
+</div>
+<!-- 工具栏 结束 -->
+<!-- Datagrid -->
+<table th:id="ConstructionPlanDatagrid1508123301002+${radi}"
+	style="height: 100%"></table>
+
+<!-- 脚本控制 -->
+<script type="text/javascript" th:inline="javascript">
+	/*<![CDATA[*/
+    $(document).ready(function() {
+	    var radi = /*[[${radi}]]*/'';
+	    $("#days[(${radi})]").val(Date.prototype.dateAdd(0, "yyyy-MM-dd"));
+	    $.parser.parse($('#ConstructionPlanToolBar1508123301002[(${radi})]'));
+	    var dg = $("#ConstructionPlanDatagrid1508123301002[(${radi})]");
+	    // buttons
+	    // 增加。
+	    $("#add[(${radi})]").on("click", function() {
+		    addoredit("");
+	    });
+	    // 编辑。
+	    $("#edit[(${radi})]").on("click", function() {
+		    var data = dg.datagrid("getSelected");
+		    if (data == null || data == undefined) {
+			    HdUtils.messager.info('请选择一条数据进行编辑！');
+			    return;
+		    }
+		    var planId = data.planId;
+		    addoredit(planId);
+	    });
+	    function addoredit(planId) {
+		    HdUtils.dialog.setValue({
+			    'planId' : planId
+		    });
+		    HdUtils.dialog.setValue({
+			    'radi' : radi
+		    });
+		    HdUtils.dialog.show({
+		        width : 800,
+		        height : 280,
+		        title : '作业计划',
+		        href : "../login/system/plan/constructionplanform.html",
+		        isSaveHandler : true
+		    });
+	    }
+	    // 删除。
+	    $("#delete[(${radi})]").on("click", function() {
+		    var selRow = $("#ConstructionPlanDatagrid1508123301002[(${radi})]").datagrid("getChecked");
+		    if (selRow.length == 0) {
+			    HdUtils.messager.info('请至少选择一条数据！');
+			    return false;
+		    }
+		    var ids = '';
+		    $.messager.confirm(Resources.WB_CONFIRM, Resources.WB_REMOVE_CONFIRM, function(r) {
+			    if (r) {
+				    for (var i = 0; i < selRow.length; i++) {
+					    ids += selRow[i].planId + ",";
+				    }
+				    HdUtils.ajax.post({
+				        url : "../webresources/login/plan/ConstructionPlan/removeAll?planIds=" + ids,
+				        success : function(data) {
+					        HdUtils.messager.bottomRight(data.message);
+					        $("#ConstructionPlanDatagrid1508123301002[(${radi})]").datagrid("hdReload");
+				        }
+				    });
+			    }
+		    });
+	    });
+	    // 刷新。
+	    $("#fresh[(${radi})]").on("click", function() {
+		    dg.datagrid("hdReload");
+	    });
+
+	    // 查询
+	    $("#query[(${radi})]").on("click", function() {
+		    $("#ConstructionPlanDatagrid1508123301002[(${radi})]").datagrid({
+			    queryParams : query(),
+		    })
+	    });
+	    // 导入EXCEL
+	    $("#importExc[(${radi})]").on("click", function() {
+	    	HdUtils.constructionupload({
+	    		entityName : 'ConstructionPlan',
+	    		mutiple : false,
+	            isReadOnly : false
+	        });
+	    });
+	    //导出Excel
+	   /*   $("#export[(${radi})]").on("click", function() {
+          dg.datagrid("hdExportExcel", {
+	      url :"../webresources/login/plan/ConstructionPlan/exportExcel",
+	      exportFileName : "施工计划-" + new Date().format("yyyyMMddhhmmss")
+	      });
+	    });  */
+	    function query() {
+		    var onlinquery = new HdQuery();
+		    var days = $("#days[(${radi})]").datebox('getValue');
+		    onlinquery.add("days", days);
+		    return onlinquery.build();
+	    }
+	    $("#ConstructionPlanDatagrid1508123301002[(${radi})]").datagrid({
+	        striped : true,
+	        url : "../webresources/login/plan/ConstructionPlan/find",
+	        queryParams : query(),
+	        method : "post",
+	        pagination : true,
+	        singleSelect : true,
+	        selectOnCheck : true,
+	        checkOnSelect : true,
+	        rownumbers : true,
+	        pageSize : 20,
+	        toolbar : "#ConstructionPlanToolBar1508123301002" + /*[[${radi}]]*/'',
+	        fit : true,
+	        fitColumns : false,
+	        columns : [ [ {
+	            field : "ck",
+	            checkbox : true,
+	            sortable : false,
+
+	        }, {
+
+	            field : "planId",
+	            title : '主键',
+	            multiSort : true,
+	            hidden : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+	       ,{
+
+	            field : "days",
+	            title : "施工时间",
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.date,
+	            editor : {
+	                type : "datebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+
+	            field : "workItem",
+	            title : "作业项目",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        },{
+
+	            field : "workArea",
+	            title : "作业区域",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "startTim",
+	            title : '开工时间',
+	            multiSort : true,
+	            halign : "center",
+	            width : 120,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "endTim",
+	            title : '完工时间',
+	            multiSort : true,
+	            halign : "center",
+	            width : 120,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        },{
+
+	            field : "isAffect",
+	            title : "作业影响",
+	            multiSort : true,
+	            halign : "center",
+	            formatter : function(value) {
+		            if (value != null && value != undefined) {
+			            if (value == 0) {
+				            value = "×";
+				            return value;
+			            } else {
+				            value = "√";
+				            return value;
+			            }
+		            } else {
+			            return value;
+		            }
+	            },
+
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "consCorpNam",
+	            title : "相关方单位",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+	            field : "consCorpCod",
+	            title : "相关方单位代码",
+	            multiSort : true,
+	            hidden:true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "relationNam",
+	            title : "主管工程师",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "responseMan",
+	            title : "负责人",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }   , {
+
+	            field : "relationTele",
+	            title : "联系电话",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }  , {
+
+	            field : "outPerson",
+	            title : "外来人员情况",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "outMach",
+	            title : "外来机械情况",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "outMachNum",
+	            title : "外来机械数量",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "danWorkItems",
+	            title : "危险作业项目",
+	            multiSort : true,
+	            hidden:false,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "recTele",
+	            title : "录入人电话",
+	            multiSort : true,
+	            hidden:false,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+	        , {
+
+	            field : "remarks",
+	            title : "备注",
+	            multiSort : true,
+	            halign : "center",
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : false
+	                }
+	            },
+	            sortable : false
+	        }
+	        , {
+
+	            field : "recNam",
+	            title : '<font color="red">录入员</font>',
+	            multiSort : true,
+	            halign : "center",
+	            hidden:true,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "recTim",
+	            title : '<font color="red">录入时间</font>',
+	            multiSort : true,
+	            halign : "center",
+	            formatter : $.hd.ezui.formatter.date,
+	            width : 120,
+	            hidden:true,
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "updNam",
+	            title : '<font color="red">修改人</font>',
+	            multiSort : true,
+	            halign : "center",
+	            hidden:true,
+	            editor : {
+	                type : "validatebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }, {
+
+	            field : "updTim",
+	            title : '<font color="red">修改时间</font>',
+	            multiSort : true,
+	            halign : "center",
+	            hidden:true,
+	            formatter : $.hd.ezui.formatter.date,
+	            width : 120,
+	            editor : {
+	                type : "datetimebox",
+	                options : {
+		                required : true
+	                }
+	            },
+	            sortable : false
+	        }
+
+	        ] ]
+	    });
+	    $("#ConstructionPlanDatagrid1508123301002" + /*[[${radi}]]*/'').datagrid("hdGetColumnNames");
+    });
+    /*]]>*/
+</script>
+</html>

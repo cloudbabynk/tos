@@ -1,0 +1,966 @@
+
+<style type="text/css">
+.chartsHomeCss {
+	margin: 0 auto;
+	padding: 10px;
+	padding-top: 5px;
+	width: 98%;
+}
+.topDiv{
+	width:100%;
+	padding-top: 5px;
+}
+.tablecss {
+	width: 98.2%;
+	height: 100%;
+	border-collapse: separate;
+	margin-left:1%;
+	margin-right:1%;
+}
+
+.tablecss td {
+	width:25%;
+	-webkit-box-shadow: 0 0 11px #AAAAAA;
+	-moz-box-shadow: 0 0 11px #AAAAAA;
+	box-shadow: 0 0 11px #AAAAAA;
+}
+.chartsHomeCss{
+	margin-left:1%;
+	margin-right:1%;
+}
+.colorDiv {
+	width: 13.2%;
+	float: left;
+	margin-right: 1%;
+	-webkit-box-shadow: 0 0 11px #AAAAAA;
+	-moz-box-shadow: 0 0 11px #AAAAAA;
+	box-shadow: 0 0 11px #AAAAAA;
+}
+.card {
+	width: 40%;
+	float: left;
+	height: 80px;
+}
+
+.cardTitle {
+	width: 60%;
+	float: left;
+	height: 39px;
+	line-height: 40px;
+	text-align: center;
+	border-bottom: 1px solid #ccc;
+	font-weight: bold;
+}
+
+.cardCon {
+	width: 60%;
+	float: left;
+	height: 40px;
+	line-height: 40px;
+	text-align: center;
+	font-weight: bold;
+}
+
+.pieCard{
+	width: 100%;
+	float: left;
+	height: 100px;
+}
+.card-action1 {
+	background: #F79709;
+}
+
+.card-action2 {
+	background: #c11c46;
+}
+
+.card-action3 {
+	background: #029e00;
+}
+
+.card-action4 {
+	background: #E61A42;
+}
+
+.card-action5 {
+	background: #065fcb;
+}
+
+.card-action6 {
+	background: #61A0A8;
+}
+
+.card-action7 {
+	background: #2F4554;
+}
+.centerDiv{
+	text-align:center;
+}
+.mainHome{
+	text-align:center;
+}
+.value{
+	text-align:center;
+	line-height: 80px;
+	font-weight: bold;
+	font-size:14px;
+}
+.valuepie{
+	text-align:center;
+	font-size:10px;
+	font-weight:bold;
+	line-height: 80px;
+    margin:auto;
+}
+.popclasshome {
+	position: absolute; 
+	display: none; 
+	border: 0px solid rgb(51, 51, 51); 
+	white-space: nowrap; 
+	z-index: 9999999; 
+	transition: left 0.4s cubic-bezier(0.23, 1, 0.32, 1), top 0.4s cubic-bezier(0.23, 1, 0.32, 1); 
+	-webkit-transition: left 0.4s cubic-bezier(0.23, 1, 0.32, 1), top 0.4s cubic-bezier(0.23, 1, 0.32, 1); 
+	background-color: rgba(50, 50, 50, 0.701961); 
+	border-top-left-radius: 4px; 
+	border-top-right-radius: 4px; 
+	border-bottom-right-radius: 4px; 
+	border-bottom-left-radius: 4px; 
+	text-align:"center";
+	color: rgb(255, 255, 255); 
+	font-style: normal; 
+	font-variant: normal; 
+	font-weight: normal; 
+	font-size: 10px; 
+	line-height: 15px; 
+	font-family: 'Microsoft YaHei'; 
+	padding: 5px;
+}
+</style>
+<div id="mainHome" class="mainHome" style="width:100%;height:100%;">
+    <div id="topDiv" style="width:100%;height:200px;">
+    	<table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0">
+    		<tr>
+    		<td align="center" valign="middle">
+    			<table cellspacing="7" cellpadding="0">
+    				<div class="chartsHomeCss">
+			    		<div class="topDiv">
+							<div class="colorDiv">
+								<div class=" card card-action1" style="width: 35%;">
+								<!-- <div class="valuepie"><i class='fa fa-pie-chart fa-3x'></i></div> 图标-->
+								<div class="valuepie" id="dateHome"></div>
+								</div>
+								<div class=" cardTitle" style="width: 65%;" id="groupDay"></div>
+								<div class=" cardCon" style="width: 65%;">集团</div>
+							</div>
+							<div class="colorDiv">
+								<div class=" card card-action7"><div id="hpValue" class="value"></div></div>
+								<div class=" cardTitle" id="hpDay"></div>
+								<div class=" cardCon">黄埔</div>
+							</div>
+							<div class="colorDiv">
+								<div class=" card card-action3"><div id="gctValue" class="value"></div></div>
+								<div class=" cardTitle" id="gctDay"></div>
+								<div class=" cardCon">集装箱</div>
+							</div>
+							<div class="colorDiv">
+								<div class=" card card-action6"><div id="xsValue" class="value"></div></div>
+								<div class=" cardTitle" id="xsDay"></div>
+								<div class=" cardCon">新沙</div>
+							</div>
+							<div class="colorDiv">
+								<div class=" card card-action2"><div id="ns1Value" class="value"></div></div>
+								<div class=" cardTitle" id="ns1Day"></div>
+								<div class=" cardCon">南沙一期</div>
+							</div>
+							<div class="colorDiv">
+								<div class=" card card-action5"><div id="ns2Value" class="value"></div></div>
+								<div class=" cardTitle" id="ns2Day"></div>
+								<div class=" cardCon">南沙二期</div>
+							</div>
+							<div class="colorDiv">
+								<div class=" card card-action4"><div id="ns3Value" class="value"></div></div>
+								<div class=" cardTitle" id="ns3Day"></div>
+								<div class=" cardCon">南沙三期</div>
+							</div>
+						</div>
+						<div class="topDiv">
+							<div class="colorDiv">
+								<div class="pieCard" id="group"></div>
+							</div>
+							<div class="colorDiv">
+								<div class="pieCard" id="hp"></div>
+							</div>
+							<div class="colorDiv">
+								<div class="pieCard" id="gct"></div>
+							</div>
+							<div class="colorDiv">
+								<div class="pieCard" id="xs"></div>
+							</div>
+							<div class="colorDiv">
+								<div class="pieCard" id="ns1"></div>
+							</div>
+							<div class="colorDiv">
+								<div class="pieCard" id="ns2"></div>
+							</div>
+							<div class="colorDiv">
+								<div class="pieCard" id="ns3"></div>
+							</div>
+						</div>
+					</div>
+    			</table>
+    		</td>
+    		</tr>
+    	</table>
+    </div>
+    <div id="centerDiv" class="centerDiv">
+    	<table border="0" cellpadding="0" cellspacing="10" class="tablecss">
+		<tr>
+			<td colspan="4">
+				<div id="main111" style="height:300px;"></div>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<div id="tradeIdDiv" style="height:200px;"></div>
+			</td>
+			<td>
+				<div id="efMarkDiv" style="height:200px;"></div>
+			</td>
+			<td>
+				<div id="ieIdDiv" style="height:200px;"></div>
+			</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+	</table>
+    </div>
+</div>
+<div id ="pophome" class="popclasshome" style="display: none" > </div>
+<script>
+$(function(){
+	var groupPlan="";
+	var groupFact="";
+	//日计划
+	var gpgdayTeu="";
+	var gpgmonthplan="";
+	var gpgmonthTeu="";
+	var gpgnotmonth="";
+	var hpdayTeu="";
+	var hpmonthplan="";
+	var hpmonthTeu="";
+	var hpnotmonth="";
+	var xsdayTeu="";
+	var xsmonthplan="";
+	var xsmonthTeu="";
+	var xsnotmonth="";
+	var gctdayTeu="";
+	var gctmonthplan="";
+	var gctmonthTeu="";
+	var gctnotmonth="";
+	var ns1dayTeu="";
+	var ns1monthplan="";
+	var ns1monthTeu="";
+	var ns1notmonth="";
+	var ns2dayTeu="";
+	var ns2monthplan="";
+	var ns2monthTeu="";
+	var ns2notmonth="";
+	var ns3dayTeu="";
+	var ns3monthplan="";
+	var ns3monthTeu="";
+	var ns3notmonth="";
+	
+	var gpgFT="";
+	var gpgDT="";
+	var gpgTOT="";
+	var xsFT="";
+	var xsDT="";
+	var xsTOT="";
+	var hpFT="";
+	var hpDT="";
+	var hpTOT="";
+	var gctFT="";
+	var gctDT="";
+	var gctTOT="";
+	var ns1FT="";
+	var ns1DT="";
+	var ns1TOT="";
+	var ns2FT="";
+	var ns2DT="";
+	var ns2TOT="";
+	var ns3FT="";
+	var ns3DT="";
+	var ns3TOT="";
+	var epTeu="";
+	var flTeu="";
+	var lcTeu="";
+	var tsTeu="";
+	var monthData=[];
+	var dtData=[];
+	var ftData=[];
+	var totData=[];
+	$.ajax({
+	    type: "POST",
+	    url: "/webresources/login/homeData/findHomeData",
+	    contentType: "application/json",
+	    dataType: "json",
+	    //data: $.toJSON("ceshi"),
+	    async:false,
+	    success: function (data) {
+	    	var dayArray=data.day;
+	    	for(var i=0;i<dayArray.length;i++){
+	    		if(dayArray[i].COMPANY_COD=="GPG"){
+	    			gpgdayTeu=dayArray[i].DAY_TEU;
+	    			gpgmonthplan=dayArray[i].MON_PLAN;
+	    			gpgmonthTeu=dayArray[i].MON_TEU;
+	    			gpgnotmonth=gpgmonthplan-gpgmonthTeu;
+	    		}
+	    		if(dayArray[i].COMPANY_COD=="XSCT"){
+	    			xsdayTeu=dayArray[i].DAY_TEU;
+	    			xsmonthplan=dayArray[i].MON_PLAN;
+	    			xsmonthTeu=dayArray[i].MON_TEU;
+	    			xsnotmonth=xsmonthplan-xsmonthTeu;
+	    		}
+	    		if(dayArray[i].COMPANY_COD=="HPCT"){
+	    			hpdayTeu=dayArray[i].DAY_TEU;
+	    			hpmonthplan=dayArray[i].MON_PLAN;
+	    			hpmonthTeu=dayArray[i].MON_TEU;
+	    			hpnotmonth=hpmonthplan-hpmonthTeu;
+	    		}
+	    		if(dayArray[i].COMPANY_COD=="GCT"){
+	    			gctdayTeu=dayArray[i].DAY_TEU;
+	    			gctmonthplan=dayArray[i].MON_PLAN;
+	    			gctmonthTeu=dayArray[i].MON_TEU;
+	    			gctnotmonth=gctmonthplan-gctmonthTeu;
+	    		}
+	    		if(dayArray[i].COMPANY_COD=="NCT"){
+	    			ns1dayTeu=dayArray[i].DAY_TEU;
+	    			ns1monthplan=dayArray[i].MON_PLAN;
+	    			ns1monthTeu=dayArray[i].MON_TEU;
+	    			ns1notmonth=ns1monthplan-ns1monthTeu;
+	    		}
+	    		if(dayArray[i].COMPANY_COD=="GOCT"){
+	    			ns2dayTeu=dayArray[i].DAY_TEU;
+	    			ns2monthplan=dayArray[i].MON_PLAN;
+	    			ns2monthTeu=dayArray[i].MON_TEU;
+	    			ns2notmonth=ns2monthplan-ns2monthTeu;
+	    		}
+	    		if(dayArray[i].COMPANY_COD=="NICT"){
+	    			ns3dayTeu=dayArray[i].DAY_TEU;
+	    			ns3monthplan=dayArray[i].MON_PLAN;
+	    			ns3monthTeu=dayArray[i].MON_TEU;
+	    			ns3notmonth=ns3monthplan-ns3monthTeu;
+	    		}
+	    	}
+	   	 	var monthArray=data.month;
+	   	 	for(var i=0;i<monthArray.length;i++){
+	    		if(monthArray[i].COMPANY_COD=="GPG"){
+	    			gpgDT=monthArray[i].DT_TEU;
+	    			gpgFT=monthArray[i].FT_TEU;
+	    			gpgTOT=monthArray[i].TOT_TEU;
+	    		}
+	    		if(monthArray[i].COMPANY_COD=="XSCT"){
+	    			xsDT=monthArray[i].DT_TEU;
+	    			xsFT=monthArray[i].FT_TEU;
+	    			xsTOT=monthArray[i].TOT_TEU;
+	    		}
+	    		if(monthArray[i].COMPANY_COD=="HPCT"){
+	    			hpDT=monthArray[i].DT_TEU;
+	    			hpFT=monthArray[i].FT_TEU;
+	    			hpTOT=monthArray[i].TOT_TEU;
+	    		}
+	    		if(monthArray[i].COMPANY_COD=="GCT"){
+	    			gctDT=monthArray[i].DT_TEU;
+	    			gctFT=monthArray[i].FT_TEU;
+	    			gctTOT=monthArray[i].TOT_TEU;
+	    		}
+	    		if(monthArray[i].COMPANY_COD=="NCT"){
+	    			ns1DT=monthArray[i].DT_TEU;
+	    			ns1FT=monthArray[i].FT_TEU;
+	    			ns1TOT=monthArray[i].TOT_TEU;
+	    		}
+	    		if(monthArray[i].COMPANY_COD=="GOCT"){
+	    			ns2DT=monthArray[i].DT_TEU;
+	    			ns2FT=monthArray[i].FT_TEU;
+	    			ns2TOT=monthArray[i].TOT_TEU;
+	    		}
+	    		if(monthArray[i].COMPANY_COD=="NICT"){
+	    			ns3DT=monthArray[i].DT_TEU;
+	    			ns3FT=monthArray[i].FT_TEU;
+	    			ns3TOT=monthArray[i].TOT_TEU;
+	    		}
+	    	}
+	   	 	var efArray=data.ef;
+	   	 	epTeu=efArray[0].EP_TEU;
+	   		flTeu=efArray[0].FL_TEU;
+	   		lcTeu=efArray[0].LC_TEU;
+	   		tsTeu=efArray[0].TS_TEU;
+	   		var dfArray=data.df;
+	   		for(var i=0;i<dfArray.length;i++){
+	   			monthData[i]=dfArray[i].PROC_MON;
+	   			dtData[i]=dfArray[i].DT_TEU/10000;
+	   			ftData[i]=dfArray[i].FT_TEU/10000;
+	   			totData[i]=dfArray[i].TOT_TEU/10000;
+	   		}
+	   		
+	    }
+	});
+	
+	$("#hpDay").html(hpdayTeu);
+	$("#xsDay").html(xsdayTeu);
+	$("#gctDay").html(gctdayTeu);
+	$("#ns1Day").html(ns1dayTeu);
+	$("#ns2Day").html(ns2dayTeu);
+	$("#ns3Day").html(ns3dayTeu);
+	$("#groupDay").html(gpgdayTeu);
+	var month=new Date().format("MM");
+ 	var day=new Date().format("dd");
+ 	$("#dateHome").html(month+"月"+day+"日</div>");
+	var hpValue=((hpdayTeu/gpgdayTeu)*100).toFixed(2)+"%";
+	$("#hpValue").html(hpValue);
+	var xsValue=((xsdayTeu/gpgdayTeu)*100).toFixed(2)+"%";
+	$("#xsValue").html(xsValue);
+	var gctValue=((gctdayTeu/gpgdayTeu)*100).toFixed(2)+"%";
+	$("#gctValue").html(gctValue);
+	var ns1Value=((ns1dayTeu/gpgdayTeu)*100).toFixed(2)+"%";
+	$("#ns1Value").html(ns1Value);
+	var ns2Value=((ns2dayTeu/gpgdayTeu)*100).toFixed(2)+"%";
+	$("#ns2Value").html(ns2Value);
+	var ns3Value=((ns3dayTeu/gpgdayTeu)*100).toFixed(2)+"%";
+	$("#ns3Value").html(ns3Value);
+	
+		
+var groupCharts=echarts.init(document.getElementById("group"));
+var ns1Charts=echarts.init(document.getElementById("ns1"));
+var ns2Charts=echarts.init(document.getElementById("ns2"));
+var ns3Charts=echarts.init(document.getElementById("ns3"));
+var xsCharts=echarts.init(document.getElementById("xs"));
+var hpCharts=echarts.init(document.getElementById("hp"));
+var gctCharts=echarts.init(document.getElementById("gct"));
+var labelBottom = {
+	    normal : {
+	        //color: '#ccc',
+	        label : {
+	            show : true,
+	            position : 'center'
+	        },
+	        labelLine : {
+	            show : true
+	        }
+	    },
+	    emphasis: {
+	        //color: 'rgba(0,0,0,0)'
+	    }
+	};
+var labelTop= {
+	    normal : {
+	        label : {
+	            show : false,
+	        },
+	        labelLine : {
+	            show : false
+	        }
+	    },
+};
+var labelFromatter = {
+	    normal : {
+	        label : {
+	            formatter : "{d}",
+	            textStyle: {
+	                baseline : 'top'
+	            }
+	        },
+	        labelLine : {
+	            show : false
+	        }
+	    },
+	};
+groupOption={
+		tooltip: {
+	        trigger: 'item',
+	        formatter: "{a} <br/>{b}: {c} ({d}%)",
+	        textStyle:{
+                fontSize:10,
+            }
+	    },
+	    color:["#F79709","#CCCCCC"],
+	    legend: {
+	    	show:false,
+	        data:['','其他']
+	    },
+	    series: [
+	        {
+	            name:'月度吞吐量(TEU)',
+	            type:'pie',
+	            radius: ['40%', '70%'],
+	            itemStyle : labelFromatter,
+	            data:[
+	                {value:gpgmonthTeu, name:'实际吞吐量',itemStyle : labelBottom},
+	                {value:gpgnotmonth, name:'未完成计划吞吐量',itemStyle : labelTop},
+	            ]
+	        }
+	    ]
+	};
+ns1Option = {
+	    tooltip: {
+	        trigger: 'item',
+	        formatter: "{a} <br/>{b}: {c} ({d}%)",
+	        textStyle:{
+                fontSize:10,
+            }
+	    },
+	    color:["#c11c46","#CCCCCC"],
+	    legend: {
+	    	show:false,
+	        data:['南沙一期','其他']
+	    },
+	    series: [
+	        {
+	            name:'月度吞吐量(TEU)',
+	            type:'pie',
+	            radius: ['40%', '70%'],
+	            itemStyle : labelFromatter,
+	            data:[
+	                {value:ns1monthTeu, name:'实际吞吐量',itemStyle : labelBottom},
+	                {value:ns1notmonth, name:'未完成计划吞吐量',itemStyle : labelTop},
+	            ]
+	        }
+	    ]
+	};
+ns2Option = {
+	    tooltip: {
+	        trigger: 'item',
+	        formatter: "{a} <br/>{b}: {c} ({d}%)",
+	        textStyle:{
+                fontSize:10,
+            }
+	    },
+	    color:["#065fcb","#CCCCCC"],
+	    legend: {
+	    	show:false,
+	        data:['南沙二期','其他']
+	    },
+	    series: [
+	        {
+	        	name:'月度吞吐量(TEU)',
+	            type:'pie',
+	            radius: ['40%', '70%'],
+	            itemStyle : labelFromatter,
+	            data:[
+	                {value:ns2monthTeu, name:'实际吞吐量',itemStyle : labelBottom},
+	                {value:ns2notmonth, name:'未完成计划吞吐量',itemStyle : labelTop},
+	            ]
+	        }
+	    ]
+	};
+ns3Option = {
+	    tooltip: {
+	        trigger: 'item',
+	        formatter: "{a} <br/>{b}: {c} ({d}%)",
+	        textStyle:{
+                fontSize:10,
+            }
+	    },
+	    color:["#E61A42","#CCCCCC"],
+	    legend: {
+	    	show:false,
+	        data:['南沙三期','其他']
+	    },
+	    series: [
+	        {
+	        	name:'月度吞吐量(TEU)',
+	            type:'pie',
+	            radius: ['40%', '70%'],
+	            itemStyle : labelFromatter,
+	            data:[
+	                {value:ns3monthTeu,name:'实际吞吐量',itemStyle : labelBottom},
+	                {value:ns3notmonth, name:'未完成计划吞吐量',itemStyle : labelTop}
+	            ]
+	        }
+	    ]
+	};
+xsOption = {
+	    tooltip: {
+	        trigger: 'item',
+	        formatter: "{a} <br/>{b}: {c} ({d}%)",
+	        textStyle:{
+                fontSize:10,
+            }
+	    },
+	    color:["#61A0A8","#CCCCCC"],
+	    legend: {
+	        show:false,
+	        data:['新沙公司','其他']
+	    },
+	    series: [
+	        {
+	        	name:'月度吞吐量(TEU)',
+	            type:'pie',
+	            radius: ['40%', '70%'],
+	            itemStyle : labelFromatter,
+	            data:[
+	                {value:xsmonthTeu,name:'实际吞吐量',itemStyle : labelBottom},
+	                {value:xsnotmonth, name:'未完成计划吞吐量',itemStyle : labelTop}
+	            ]
+	        }
+	    ]
+	};
+hpOption = {
+	    tooltip: {
+	        trigger: 'item',
+	        formatter: "{a} <br/>{b}: {c} ({d}%)",
+	        textStyle:{
+                fontSize:10,
+            }
+	    },
+	    color:["#2F4554","#CCCCCC"],
+	    legend: {
+	        show:false,
+	        data:['黄埔公司','其他']
+	    },
+	    series: [
+	        {
+	        	name:'月度吞吐量(TEU)',
+	            type:'pie',
+	            radius: ['40%', '70%'],
+	            itemStyle : labelFromatter,
+	            data:[
+	                {value:hpmonthTeu,name:'实际吞吐量',itemStyle : labelBottom},
+	                {value:hpnotmonth, name:'未完成计划吞吐量',itemStyle : labelTop}
+	            ]
+	        }
+	    ]
+	};
+gctOption = {
+	    tooltip: {
+	        trigger: 'item',
+	        formatter: "{a} <br/>{b}: {c} ({d}%)",
+	        textStyle:{
+                fontSize:10,
+            }
+	    },
+	    color:["#029e00","#CCCCCC"],
+	    legend: {
+	        show:false,
+	        data:['集装箱公司']
+	    },
+	    series: [
+	        {
+	        	name:'月度吞吐量(TEU)',
+	            type:'pie',
+	            radius: ['40%', '70%'],
+	            itemStyle : labelFromatter,
+	            data:[
+	                {value:gctmonthTeu,name:'实际吞吐量',itemStyle : labelBottom},
+	                {value:gctnotmonth, name:'未完成计划吞吐量',itemStyle : labelTop}
+	            ]
+	        }
+	    ]
+	};
+groupCharts.setOption(groupOption);
+ns1Charts.setOption(ns1Option);
+ns2Charts.setOption(ns2Option);
+ns3Charts.setOption(ns3Option);
+xsCharts.setOption(xsOption);
+hpCharts.setOption(hpOption);
+gctCharts.setOption(gctOption);
+
+//end
+
+
+	var myChart = echarts.init(document.getElementById('main111'));
+	var tradeIdChart = echarts.init(document.getElementById('tradeIdDiv'));
+	var efMarkChart = echarts.init(document.getElementById('efMarkDiv'));
+	var ieIdChart=echarts.init(document.getElementById('ieIdDiv'));
+	//var colors = [ '#5793f3', '#d14a61', '#675bba' ];
+	efMarkOption = {
+		title : {
+			text : '空重箱所占比例(%)',
+			x : 'center',
+			textStyle : {
+				fontSize : 14,
+			},
+		},
+		tooltip : {
+			trigger : 'item',
+			formatter : "{a} <br/>{b} : {c} ({d}%)"
+		},
+		legend : {
+			orient : 'vertical',
+			x : 'right',
+			y : 'top',
+			data : [ '空箱', '重箱', ]
+		},
+		series : [ {
+			name : '空重箱数',
+			type : 'pie',
+			radius : '55%',
+			center : [ '50%', '60%' ],
+			data : [ {
+				value : epTeu,
+				name : '空箱'
+			}, {
+				value : flTeu,
+				name : '重箱'
+			},
+
+			]
+		} ]
+	};
+	ieIdOption={
+			title : {
+				text : '本地中转所占比例(%)',
+				x : 'center',
+				textStyle : {
+					fontSize : 14,
+				},
+			},
+			tooltip : {
+				trigger : 'item',
+				formatter : "{a} <br/>{b} : {c} ({d}%)"
+			},
+			legend : {
+				orient : 'vertical',
+				x : 'right',
+				y : 'top',
+				data : [ '本地', '中转']
+			},
+			series : [ {
+				name : '本地中转',
+				type : 'pie',
+				radius : '55%',
+				center : [ '50%', '60%' ],
+				data : [ {
+					value : lcTeu,
+					name : '本地'
+				}, {
+					value : tsTeu,
+					name : '中转'
+				},
+
+				]
+			} ]
+	};
+	tradeIdOption = {
+
+		title : {
+			text : '年度内外贸吞吐量(万TEU)',
+			textStyle : {
+				fontSize : 14,
+			},
+		},
+		tooltip : {
+			trigger : 'axis'
+		},
+		legend : {
+			data : [ '内贸', '外贸', '合计' ]
+		},
+		calculable : true,
+		xAxis : [ {
+			type : 'category',
+			boundaryGap : false,
+			data : monthData
+		} ],
+		yAxis : [ {
+			type : 'value'
+		} ],
+		series : [
+				{
+					name : '内贸',
+					type : 'line',
+					stack : '总量',
+					data : dtData
+				},
+				{
+					name : '外贸',
+					type : 'line',
+					stack : '总量',
+					data : ftData
+				},
+				{
+					name : '合计',
+					type : 'line',
+					stack : '总量',
+					data : totData
+				},
+
+		]
+	};
+// 	console.info(dtData);
+//     console.info(ftData);
+//     console.info(totData);
+//     console.info(monthData);
+	
+	
+	option = {
+		//color:colors,
+		title : {
+			text : '集装箱月度吞吐量(TEU)',
+			textStyle : {
+				fontSize : 14,
+			},
+		},
+		tooltip : {
+			trigger : 'axis'//鼠标移上
+		},
+
+		legend : {
+// 			orient : 'vertical',
+// 			x : 'center',
+// 			y : 'top',
+			data : [ '内贸', '外贸', '合计' ]
+		},
+		 calculable : true,
+// 		 grid: {
+// 		        /*  top:70,
+// 		         left:100, */
+// 		         bottom: 40
+// 		     }, 
+		calculable : true,
+		xAxis : [ {
+			type : 'category',
+			data : [ '集团', '南沙一期', '南沙二期', '南沙三期', '黄埔', '新沙', '集装箱' ],
+		} ],
+		yAxis : [ {
+			type : 'value'
+		} ],
+		series : [ {
+			name : '内贸',
+			type : 'bar',
+			data : [ gpgDT, ns1DT, ns2DT, ns3DT, hpDT, xsDT, gctDT ],
+			markPoint : {
+				data : [ {
+					type : 'max',
+					name : '最大值',
+					label:{
+                        normal:{
+                            show:true,
+                            textStyle:{
+                                color: '#F79709',
+                            }
+                        }
+                    }
+				}, {
+					type : 'min',
+					name : '最小值',
+					label:{
+                        normal:{
+                            show:true,
+                            textStyle:{
+                                color: '#F79709',
+                            }
+                        }
+                    }
+				} ]
+			},
+		}, {
+			name : '外贸',
+			type : 'bar',
+			data : [ gpgFT, ns1FT, ns2FT, ns3FT, hpFT, xsFT, gctFT ],
+			markPoint : {
+				data : [ {
+					type : 'max',
+					name : '最大值',
+					label:{
+                        normal:{
+                            show:true,
+                            textStyle:{
+                                color: '#F79709',
+                            }
+                        }
+                    }
+				}, {
+					type : 'min',
+					name : '最小值',
+					label:{
+                        normal:{
+                            show:true,
+                            textStyle:{
+                                color: '#F79709',
+                            }
+                        }
+                    }
+				} ]
+			},
+		}, {
+			name : '合计',
+			type : 'bar',
+			data : [ gpgTOT, ns1TOT, ns2TOT, ns3TOT, hpTOT, xsTOT, gctTOT ],
+			markPoint : {
+				data : [ {
+					type : 'max',
+					name : '最大值',
+					label:{
+                        normal:{
+                            show:true,
+                            textStyle:{
+                                color: '#F79709',
+                            }
+                        }
+                    }
+				}, {
+					type : 'min',
+					name : '最小值',
+					label:{
+                        normal:{
+                            show:true,
+                            textStyle:{
+                                color: '#F79709',
+                            }
+                        }
+                    }
+				} ]
+			},
+		} ]
+	};
+	// 使用刚指定的配置项和数据显示图表。
+	myChart.setOption(option);
+	tradeIdChart.setOption(tradeIdOption);
+	efMarkChart.setOption(efMarkOption);
+	ieIdChart.setOption(ieIdOption);
+	//鼠标移上显示
+		$(".value").mouseout(function(){
+			$("#pophome").hide();
+		});	
+		//移上
+		$(".value").mouseover(function(){
+			var id=$(this).attr("id");
+			var value="";
+			if(id=="hpValue"){
+				value=hpValue;
+			}else if(id=="xsValue"){
+				value=xsValue;
+			}else if(id=="gctValue"){
+				value=gctValue;
+			}else if(id=="ns1Value"){
+				value=ns1Value;
+			}else if(id=="ns2Value"){
+				value=ns2Value;
+			}else if(id=="ns3Value"){
+				value=ns3Value;
+			}
+			//var value=$(this).val();
+			//当日吞吐量
+			//占集团比重：100%
+			var e = event || window.event;
+			//alert(e.clientX+"sss"+e.clientY);
+	     	var X;
+	     	if(e.clientY>=550) {
+	     	    X = e.clientY -550;
+	     	} else {
+	     		X = e.clientY/10+80;
+	     	}
+	     	var Y=e.clientX-200; 
+	     	var pop=document.getElementById("pophome");
+	        pop.style.top=X+"px";
+	        pop.style.left=Y+'px';
+	     	var detail="<div align='center'>当日吞吐量<div><div>占集团比重:"+value+"</div>";
+	    	$("#pophome").html(detail); 
+	    	$("#pophome").show();
+		});
+	 }); 
+</script>
